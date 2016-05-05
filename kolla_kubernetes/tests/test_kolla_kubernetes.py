@@ -19,10 +19,10 @@ test_kolla-kubernetes
 Tests for `kolla-kubernetes` module.
 """
 
-from kolla-kubernetes.tests import base
+from kolla_kubernetes.tests import base
 
 
-class TestKolla-kubernetes(base.TestCase):
+class TestKollaKubernetes(base.TestCase):
 
     def test_something(self):
         pass
