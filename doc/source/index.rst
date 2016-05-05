@@ -15,6 +15,7 @@ Contents:
    installation
    usage
    contributing
+   kubernetes-all-in-one
 
 Indices and tables
 ==================
@@ -22,4 +23,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
