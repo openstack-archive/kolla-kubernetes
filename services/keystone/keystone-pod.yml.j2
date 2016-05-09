@@ -3,15 +3,14 @@ kind: Pod
 spec:
   hostNetwork: True
   containers:
-    #TODO: Use a jinja2 template for image
-    - image: kollaglue/centos-binary-keystone:2.0.0
+    - image: "{{ keystone_image_full }}"
       name: keystone
       volumeMounts:
-        - mountPath: "/var/lib/kolla/config_files"
+        - mountPath: {{ container_config_directory }}
           name: keystone-config
       env:
         - name: KOLLA_CONFIG_STRATEGY
-          value: COPY_ALWAYS
+          value: {{ config_strategy }}
   volumes:
     - name: keystone-config
       hostPath:
