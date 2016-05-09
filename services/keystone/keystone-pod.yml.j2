@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    #TODO: Use a jinja2 template for image
+    - image: "{{ keystone_image_full }}"
+      name: keystone
+      volumeMounts:
+        - mountPath: "/var/lib/kolla/config_files"
+          name: keystone-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: COPY_ALWAYS
+  volumes:
+    - name: keystone-config
+      hostPath:
+        path: "/etc/kolla/keystone"
+metadata:
+   name: keystone
