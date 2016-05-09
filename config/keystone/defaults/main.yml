@@ -1,0 +1,27 @@
+---
+project_name: "keystone"
+
+####################
+# Database
+####################
+keystone_database_name: "keystone"
+keystone_database_user: "keystone"
+keystone_database_address: "{{ kolla_internal_fqdn }}"
+
+
+####################
+# Docker
+####################
+keystone_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-keystone"
+keystone_tag: "{{ openstack_release }}"
+keystone_image_full: "{{ keystone_image }}:{{ keystone_tag }}"
+
+
+####################
+# OpenStack
+####################
+keystone_admin_url: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}/v3"
+keystone_internal_url: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}/v3"
+keystone_public_url: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ keystone_public_port }}/v3"
+
+keystone_logging_debug: "{{ openstack_logging_debug }}"
