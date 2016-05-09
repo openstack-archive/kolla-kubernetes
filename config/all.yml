@@ -1,0 +1,269 @@
+---
+# The options in this file can be overridden in 'globals.yml'
+
+# The "temp" files that are created before merge need to stay persistent due
+# to the fact that ansible will register a "change" if it has to create them
+# again. Persistent files allow for idempotency
+container_config_directory: "/var/lib/kolla/config_files"
+
+# The directory to store the config files on the destination node
+node_config_directory: "/etc/kolla"
+
+
+###################
+# Kolla options
+###################
+# Valid options are [ COPY_ONCE, COPY_ALWAYS ]
+config_strategy: "COPY_ALWAYS"
+
+# Valid options are [ centos, fedora, oraclelinux, ubuntu ]
+kolla_base_distro: "centos"
+# Valid options are [ binary, source ]
+kolla_install_type: "binary"
+
+kolla_internal_vip_address: "{{ kolla_internal_address }}"
+kolla_internal_fqdn: "{{ kolla_internal_vip_address }}"
+kolla_external_vip_address: "{{ kolla_internal_vip_address }}"
+kolla_external_fqdn: "{{ kolla_internal_fqdn if kolla_external_vip_address == kolla_internal_vip_address else kolla_external_vip_address }}"
+
+kolla_enable_sanity_checks: "no"
+
+kolla_enable_sanity_keystone: "{{ kolla_enable_sanity_checks }}"
+kolla_enable_sanity_glance: "{{ kolla_enable_sanity_checks }}"
+kolla_enable_sanity_cinder: "{{ kolla_enable_sanity_checks }}"
+kolla_enable_sanity_swift: "{{ kolla_enable_sanity_checks }}"
+
+####################
+# Database options
+####################
+database_address: "{{ kolla_internal_fqdn }}"
+database_user: "root"
+
+
+####################
+# Docker options
+####################
+docker_registry_email:
+docker_registry:
+docker_namespace: "kollaglue"
+docker_registry_username:
+
+# Valid options are [ never, on-failure, always ]
+docker_restart_policy: "always"
+
+# '0' means unlimited retries
+docker_restart_policy_retry: "10"
+
+# Common options used throughout docker
+docker_common_options:
+    auth_email: "{{ docker_registry_email }}"
+    auth_password: "{{ docker_registry_password }}"
+    auth_registry: "{{ docker_registry }}"
+    auth_username: "{{ docker_registry_username }}"
+    environment:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    restart_policy: "{{ docker_restart_policy }}"
+    restart_retries: "{{ docker_restart_policy_retry }}"
+
+
+####################
+# keepalived options
+####################
+# Arbitary unique number from 0..255
+keepalived_virtual_router_id: "51"
+
+
+####################
+# Networking options
+####################
+kolla_external_vip_interface: "{{ network_interface }}"
+api_interface: "{{ network_interface }}"
+storage_interface: "{{ network_interface }}"
+tunnel_interface: "{{ network_interface }}"
+
+# Valid options are [ openvswitch, linuxbridge ]
+neutron_plugin_agent: "openvswitch"
+
+# The default ports used by each service.
+iscsi_port: "3260"
+
+mariadb_port: "3306"
+mariadb_wsrep_port: "4567"
+mariadb_ist_port: "4568"
+mariadb_sst_port: "4444"
+
+rabbitmq_port: "5672"
+rabbitmq_management_port: "15672"
+rabbitmq_cluster_port: "25672"
+rabbitmq_epmd_port: "4369"
+
+mongodb_port: "27017"
+mongodb_web_port: "28017"
+
+haproxy_stats_port: "1984"
+
+keystone_public_port: "5000"
+keystone_admin_port: "35357"
+
+glance_api_port: "9292"
+glance_registry_port: "9191"
+
+nova_api_port: "8774"
+nova_api_ec2_port: "8773"
+nova_metadata_port: "8775"
+nova_novncproxy_port: "6080"
+nova_spicehtml5proxy_port: "6082"
+
+neutron_server_port: "9696"
+
+cinder_api_port: "8776"
+
+memcached_port: "11211"
+
+swift_proxy_server_port: "8080"
+swift_object_server_port: "6000"
+swift_account_server_port: "6001"
+swift_container_server_port: "6002"
+swift_rsync_port: "10873"
+
+heat_api_port: "8004"
+heat_api_cfn_port: "8000"
+
+murano_api_port: "8082"
+
+ironic_api_port: "6385"
+
+magnum_api_port: "9511"
+
+rgw_port: "6780"
+
+mistral_api_port: "8989"
+
+kibana_server_port: "5601"
+
+elasticsearch_port: "9200"
+
+manila_api_port: "8786"
+
+public_protocol: "{{ 'https' if kolla_enable_tls_external | bool else 'http' }}"
+internal_protocol: "http"
+admin_protocol: "http"
+
+####################
+# OpenStack options
+####################
+openstack_release: "2.0.0"
+openstack_logging_debug: "False"
+
+openstack_region_name: "RegionOne"
+
+# Optionally allow Kolla to set sysctl values
+set_sysctl: "yes"
+
+# Valid options are [ novnc, spice ]
+nova_console: "novnc"
+
+# OpenStack authentication string. You should only need to override these if you
+# are changing the admin tenant/project or user.
+openstack_auth:
+    auth_url: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}"
+    username: "admin"
+    password: "{{ keystone_admin_password }}"
+    project_name: "admin"
+
+# These roles are required for Kolla to be operation, however a savvy deployer
+# could disable some of these required roles and run their own services.
+enable_glance: "yes"
+enable_haproxy: "yes"
+enable_keystone: "yes"
+enable_mariadb: "yes"
+enable_memcached: "yes"
+enable_neutron: "yes"
+enable_nova: "yes"
+enable_rabbitmq: "yes"
+
+# Additional optional OpenStack services are specified here
+enable_central_logging: "no"
+enable_ceph: "no"
+enable_ceph_rgw: "no"
+enable_cinder: "no"
+enable_heat: "yes"
+enable_horizon: "yes"
+enable_ironic: "no"
+enable_iscsi: "no"
+enable_magnum: "no"
+enable_manila: "no"
+enable_mistral: "no"
+enable_mongodb: "no"
+enable_murano: "no"
+enable_swift: "no"
+
+ironic_keystone_user: "ironic"
+neutron_keystone_user: "neutron"
+nova_keystone_user: "nova"
+
+# Nova fake driver and the number of fake driver per compute node
+enable_nova_fake: "no"
+num_nova_fake_per_node: 5
+
+####################
+# RabbitMQ options
+####################
+rabbitmq_user: "openstack"
+
+
+####################
+# HAProxy options
+####################
+haproxy_user: "openstack"
+haproxy_enable_external_vip: "{{ 'no' if kolla_external_vip_address == kolla_internal_vip_address else 'yes' }}"
+kolla_enable_tls_external: "no"
+kolla_external_fqdn_cert: "{{ node_config_directory }}/certificates/haproxy.pem"
+
+
+####################
+# Kibana options
+####################
+kibana_user: "kibana"
+
+
+#################################
+# Cinder - Block Storage options
+#################################
+cinder_volume_driver: "{{ 'ceph' if enable_ceph | bool else 'lvm' }}"
+
+
+###################
+# Ceph options
+###################
+# Ceph can be setup with a caching to improve performance. To use the cache you
+# must provide separate disks than those for the OSDs
+ceph_enable_cache: "no"
+# Valid options are [ forward, none, writeback ]
+ceph_cache_mode: "writeback"
+
+# Valid options are [ ext4, btrfs, xfs ]
+ceph_osd_filesystem: "xfs"
+
+# These are /etc/fstab options. Comma seperated, no spaces (see fstab(8))
+ceph_osd_mount_options: "defaults,noatime"
+
+# A requirement for using the erasure-coded pools is you must setup a cache tier
+# Valid options are [ erasure, replicated ]
+ceph_pool_type: "replicated"
+
+ceph_cinder_pool_name: "volumes"
+ceph_cinder_backup_pool_name: "backups"
+ceph_glance_pool_name: "images"
+ceph_nova_pool_name: "vms"
+
+ceph_erasure_profile: "k=4 m=2 ruleset-failure-domain=host"
+ceph_rule: "default host {{ 'indep' if ceph_pool_type == 'erasure' else 'firstn' }}"
+ceph_cache_rule: "cache host firstn"
+
+
+#######################################
+# Manila - Shared File Systems Options
+#######################################
+manila_enable_dhss: "yes"
+manila_dhss: "{{ 'True' if manila_enable_dhss | bool else 'False' }}"
