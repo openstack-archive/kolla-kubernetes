@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ memcached_image_full }}"
+      name: memcached
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: memcached-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: memcached-config
+      configMap:
+        name: memcached-configmap
+metadata:
+   name: memcached
