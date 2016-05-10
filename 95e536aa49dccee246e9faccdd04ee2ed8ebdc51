@@ -1,0 +1,11 @@
+Code-Review+2: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Code-Review+2: Martin André <m.andre@redhat.com>
+Code-Review+1: Egor Guz <guz_egor@yahoo.com>
+Code-Review+1: Md Nadeem <md.nadeem@nectechnologies.in>
+Workflow+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 10 May 2016 14:02:52 +0000
+Reviewed-on: https://review.openstack.org/313137
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
