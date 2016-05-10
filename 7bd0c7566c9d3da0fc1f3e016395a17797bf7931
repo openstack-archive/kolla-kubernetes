@@ -1,0 +1,10 @@
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+1: Md Nadeem <md.nadeem@nectechnologies.in>
+Code-Review+2: Michal Rostecki <michal.rostecki@gmail.com>
+Workflow+1: Michal Rostecki <michal.rostecki@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 10 May 2016 18:42:50 +0000
+Reviewed-on: https://review.openstack.org/313958
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
