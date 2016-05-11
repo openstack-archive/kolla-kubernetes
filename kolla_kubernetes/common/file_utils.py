@@ -38,6 +38,13 @@ def mkdir_p(path):
             raise
 
 
+def get_service_config_files(service):
+    directory = os.path.join('/etc/kolla/', service)
+    for dirpath, _, filenames in os.walk(directory):
+        for f in filenames:
+            yield os.path.abspath(os.path.join(dirpath, f))
+
+
 def get_services_dir(base_dir):
     if os.path.exists(os.path.join(base_dir, 'services')):
         return os.path.join(base_dir, 'services')
@@ -87,7 +94,7 @@ def find_base_dir():
 
 
 def find_config_file(filename):
-    filepath = os.path.join('/etc/kolla-kubernetes', filename)
+    filepath = os.path.join('/etc/kolla', filename)
     if os.access(filepath, os.R_OK):
         config_file = filepath
     else:
@@ -96,7 +103,7 @@ def find_config_file(filename):
     return config_file
 
 
-POSSIBLE_PATHS = {'/usr/share/kolla-kubernetes',
+POSSIBLE_PATHS = {'/usr/share/kolla',
                   get_src_dir(),
                   find_base_dir()}
 
