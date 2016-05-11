@@ -13,7 +13,7 @@ spec:
           value: {{ config_strategy }}
   volumes:
     - name: keystone-config
-      hostPath:
-        path: "/etc/kolla/keystone"
+      configMap:
+        name: keystone-configmap
 metadata:
    name: keystone
