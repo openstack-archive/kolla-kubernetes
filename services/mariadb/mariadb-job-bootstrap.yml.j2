@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: mariadb-generate
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ mariadb_image_full }}"
+          name: mariadb
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: mariadb-config
+            - mountPath: /var/lib/mysql
+              name: mariadb-persistent-storage
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: mariadb-config
+          configMap:
+            name: mariadb-configmap
+        - name: mariadb-persistent-storage
+          hostPath:
+            path: /var/lib/kolla/mariadb
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: mariadb-bootstrap
