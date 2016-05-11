@@ -53,9 +53,15 @@ def find_service_files(service_name, service_dir):
         raise exception.KollaNotFoundException(service_dir,
                                                entity='service directory')
 
-    short_name = service_name.split('/')[-1].replace('_ansible_tasks', '-init')
+    short_name = service_name.split('/')[-1]
     files = []
     for root, dirs, names in os.walk(service_dir):
+        for name in names:
+            if short_name in name:
+                files.append(os.path.join(root, name))
+
+    bootstrap_dir = os.path.join(service_dir, '../bootstrap/')
+    for root, dirs, names in os.walk(bootstrap_dir):
         for name in names:
             if short_name in name:
                 files.append(os.path.join(root, name))
