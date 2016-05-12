@@ -15,7 +15,6 @@ from oslo_config import cfg
 from oslo_log import log
 
 
-from kolla_kubernetes.common import file_utils
 from kolla_kubernetes import service
 
 CONF = cfg.CONF
@@ -31,8 +30,7 @@ class Run(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        service.run_service(parsed_args.service,
-                            file_utils.get_services_dir(CONF.service_dir))
+        service.run_service(parsed_args.service)
 
 
 class Kill(command.Command):
@@ -44,5 +42,4 @@ class Kill(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        service.kill_service(parsed_args.service,
-                             file_utils.get_services_dir(CONF.service_dir))
+        service.kill_service(parsed_args.service)

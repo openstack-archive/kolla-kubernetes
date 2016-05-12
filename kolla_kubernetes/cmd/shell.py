@@ -11,7 +11,6 @@
 # limitations under the License.
 
 
-import os.path
 import shlex
 import sys
 
@@ -21,7 +20,6 @@ from cliff import interactive
 from oslo_config import cfg
 from oslo_log import log
 
-from kolla_kubernetes.common import file_utils
 from kolla_kubernetes.common import utils
 
 PROJECT = 'kolla_kubernetes'
@@ -37,10 +35,8 @@ log.set_defaults(
 
 cli_opts = [
     cfg.StrOpt('service-dir',
-               default=utils.env(
-                   'KM_SERVICE_DIR', default=os.path.join(
-                       file_utils.find_base_dir(), 'services')),
-               help='Directory with services, (Env: KM_SERVICE_DIR)'),
+               default=utils.env('K8S_SERVICE_DIR'),
+               help='Directory with services, (Env: K8S_SERVICE_DIR)'),
 ]
 CONF.register_cli_opts(cli_opts)
 
@@ -73,9 +69,6 @@ class KollaKubernetesShell(app.App):
 
     def configure_logging(self):
         return
-
-    def initialize_app(self, argv):
-        self.options.service_dir = CONF.service_dir
 
     def print_help(self):
         outputs = []
