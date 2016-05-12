@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ rabbitmq_port }}
+  selector:
+    name: rabbitmq
+metadata:
+   name: rabbitmq
