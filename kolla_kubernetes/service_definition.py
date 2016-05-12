@@ -33,32 +33,38 @@ def get_services_directory():
             os.path.join(file_utils.find_base_dir(), 'services'))
 
 
-def find_service_files(service_name):
-    service_dir = get_services_directory()
-    LOG.debug('Looking for services files in %s', service_dir)
-    if not os.path.exists(service_dir):
-        raise exception.KollaNotFoundException(service_dir,
-                                               entity='service directory')
+def get_bootstrap_directory():
+    return (CONF.bootstrap_dir or
+            os.path.join(file_utils.find_base_dir(), 'bootstrap'))
 
-    bootstrap_dir = os.path.join(service_dir, '../bootstrap/')
-    LOG.debug('Looking for bootstrap files in %s', service_dir)
-    if not os.path.exists(bootstrap_dir):
-        raise exception.KollaNotFoundException(bootstrap_dir,
+
+def find_service_files(service_name, task):
+
+    if task == 'service':
+        working_dir = get_services_directory()
+        LOG.debug('Looking for services files in %s', working_dir)
+    elif task == 'bootstrap':
+        working_dir = get_bootstrap_directory()
+        LOG.debug('Looking for bootstrap files in %s', working_dir)
+
+    if not os.path.exists(working_dir) and task == 'service':
+        raise exception.KollaNotFoundException(working_dir,
+                                               entity='service directory')
+    elif not os.path.exists(working_dir) and task == 'bootstrap':
+        raise exception.KollaNotFoundException(working_dir,
                                                entity='bootstrap directory')
 
     short_name = service_name.split('/')[-1]
     files = []
-    for root, dirs, names in os.walk(service_dir):
+    for root, dirs, names in os.walk(working_dir):
         for name in names:
             if short_name in name:
                 files.append(os.path.join(root, name))
 
-    for root, dirs, names in os.walk(bootstrap_dir):
-        for name in names:
-            if short_name in name:
-                files.append(os.path.join(root, name))
-
-    if not files:
-        raise exception.KollaNotFoundException(service_dir,
+    if not files and task == 'service':
+        raise exception.KollaNotFoundException(working_dir,
                                                entity='service definition')
+    elif not files and task == 'bootstrap':
+        raise exception.KollaNotFoundException(working_dir,
+                                               entity='bootstrap definition')
     return files

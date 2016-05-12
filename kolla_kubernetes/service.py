@@ -78,8 +78,8 @@ def _load_variables_from_file(project_name):
     return jvars
 
 
-def _build_runner(working_dir, service_name, variables=None):
-    for filename in service_definition.find_service_files(service_name):
+def _build_runner(working_dir, service_name, task, variables=None):
+    for filename in service_definition.find_service_files(service_name, task):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
         proj_name = filename.split('/')[-2]
         LOG.debug(
@@ -95,15 +95,21 @@ def _build_runner(working_dir, service_name, variables=None):
             f.write(yaml.dump(content, default_flow_style=False))
 
 
+def bootstrap_service(service_name, variables=None):
+    working_dir = _create_working_directory()
+    _build_runner(working_dir, service_name, 'bootstrap', variables=variables)
+    _deploy_instance(working_dir, service_name)
+
+
 def run_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
+    _build_runner(working_dir, service_name, 'service', variables=variables)
     _deploy_instance(working_dir, service_name)
 
 
 def kill_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
+    _build_runner(working_dir, service_name, 'serivce', variables=variables)
     _delete_instance(working_dir, service_name)
 
 

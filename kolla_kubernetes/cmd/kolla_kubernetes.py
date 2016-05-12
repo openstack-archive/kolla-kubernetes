@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +12,7 @@
 # limitations under the License.
 
 
+import os
 import shlex
 import sys
 
@@ -19,6 +21,12 @@ from cliff import commandmanager
 from cliff import interactive
 from oslo_config import cfg
 from oslo_log import log
+
+PROJECT_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '../..'))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from kolla_kubernetes.common import utils
 
@@ -76,6 +84,8 @@ class KollaKubernetesShell(app.App):
         self.stdout.write('\nCommands :\n')
 
         for name, ep in sorted(self.command_manager):
+            print name
+            print ep
             factory = ep.load()
             cmd = factory(self, None)
             one_liner = cmd.get_description().split('\n')[0]
@@ -131,6 +141,8 @@ def _config_opts_map():
 def main(argv=sys.argv[1:]):
     config_args, command_args = _separate_args(argv)
 
+#    print config_args
+#    print command_args
     need_help = (['help'] == command_args or '-h' in config_args or
                  '--help' in config_args)
     if need_help:
@@ -146,6 +158,7 @@ def main(argv=sys.argv[1:]):
         CONF.log_opt_values(
             log.getLogger(PROJECT), log.INFO)
 
+#    print command_args
     return KollaKubernetesShell().run(command_args)
 
 
