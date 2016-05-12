@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ glance_registry_port }}
+  selector:
+    name: glance-registry
+metadata:
+   name: glance-registry
