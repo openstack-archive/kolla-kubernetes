@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: glance-generate
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ glance_api_image_full }}"
+          name: glance
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-config
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: glance-config
+          configMap:
+            name: glance-configmap
+        - name: glance-persistent-storage
+          hostPath:
+            path: /var/lib/kolla/glance
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: glance-bootstrap

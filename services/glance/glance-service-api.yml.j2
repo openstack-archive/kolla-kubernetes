@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ glance_api_port }}
+  selector:
+    name: glance-api
+metadata:
+   name: glance-api
