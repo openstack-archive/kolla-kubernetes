@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: rabbitmq-generate
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ rabbitmq_image_full }}"
+          name: rabbitmq
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: rabbitmq-config
+            - mountPath: /var/lib/rabbitmq/
+              name: rabbitmq-persistent-storage
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: rabbitmq-config
+          configMap:
+            name: rabbitmq-configmap
+        - name: rabbitmq-persistent-storage
+          hostPath:
+            path: /var/lib/kolla/rabbitmq
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: rabbitmq-bootstrap
