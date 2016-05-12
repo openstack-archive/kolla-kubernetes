@@ -12,6 +12,7 @@
 
 import logging
 import os
+import sys
 
 from oslo_utils import importutils
 
@@ -43,7 +44,14 @@ def get_src_dir():
 
 
 def get_shared_directory():
-    if os.path.exists('/usr/local/share/kolla'):
+    script_path = os.path.abspath(os.path.join(os.path.dirname(
+        os.path.realpath(sys.argv[0])), '../..'))
+    base_script_path = os.path.basename(script_path)
+
+    print script_path
+    if base_script_path == 'kolla-kubernetes':
+        return script_path
+    elif os.path.exists('/usr/local/share/kolla'):
         return '/usr/local/share/kolla'
     elif os.path.exists('/usr/share/kolla'):
         return '/usr/share/kolla'

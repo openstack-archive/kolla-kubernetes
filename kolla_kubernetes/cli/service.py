@@ -21,6 +21,18 @@ CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
 
+class Bootstrap(command.Command):
+    """Bootstrap a service."""
+
+    def get_parser(self, prog_name):
+        parser = super(Bootstrap, self).get_parser(prog_name)
+        parser.add_argument('bootstrap')
+        return parser
+
+    def take_action(self, parsed_args):
+        service.bootstrap_service(parsed_args.bootstrap)
+
+
 class Run(command.Command):
     """Run a service."""
 

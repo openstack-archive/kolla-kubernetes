@@ -47,7 +47,10 @@ CONF.register_opts(kolla_opts, kolla_opt_group)
 
 kubernetes_opts = [
     cfg.StrOpt('host', default='http://localhost:8080'),
-    cfg.StrOpt('kubectl_path', default='kubectl')
+    cfg.StrOpt('kubectl_path', default='kubectl'),
+    cfg.BoolOpt('bootstrap',
+                default=False,
+                help='Bootstrap a service'),
 ]
 kubernetes_opt_group = cfg.OptGroup(name='kolla_kubernetes')
 CONF.register_group(kubernetes_opt_group)
