@@ -30,6 +30,9 @@ CONF = cfg.CONF
 CONF.import_group('kolla', 'kolla_kubernetes.config')
 CONF.import_group('kolla_kubernetes', 'kolla_kubernetes.config')
 
+PROJECT_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '../..'))
+
 
 def _create_working_directory():
     ts = time.time()
@@ -63,18 +66,27 @@ def _load_variables_from_file(project_name):
 
     dir = file_utils.get_shared_directory()
     all_yml = os.path.join(dir, 'ansible/group_vars/all.yml')
+    local_dir = os.path.join(PROJECT_ROOT, 'kolla/ansible/')
+
     if dir and os.path.exists(all_yml):
-        all_yml_name = os.path.join(dir, all_yml)
-        jinja_utils.yaml_jinja_render(all_yml_name, jvars)
+        jinja_utils.yaml_jinja_render(all_yml, jvars)
+    elif dir and os.path.exists(local_dir):
+        local_group_vars = os.path.join(local_dir, 'group_vars/all.yml')
+        jinja_utils.yaml_jinja_render(local_group_vars, jvars)
     else:
         LOG.warning('Unable to load %s', all_yml)
 
-    proj_yml_name = os.path.join(dir, 'ansible/roles',
-                                 project_name, 'defaults', 'main.yml')
-    if dir and os.path.exists(proj_yml_name):
-        jinja_utils.yaml_jinja_render(proj_yml_name, jvars)
+    proj_ansible_roles = os.path.join(dir, 'ansible/roles', project_name,
+                                      'defaults', 'main.yml')
+    local_ansible_roles = os.path.join(local_dir, 'roles', project_name,
+                                       'defaults', 'main.yml')
+
+    if dir and os.path.exists(proj_ansible_roles):
+        jinja_utils.yaml_jinja_render(proj_ansible_roles, jvars)
+    elif dir and os.path.exists(local_ansible_roles):
+        jinja_utils.yaml_jinja_render(local_ansible_roles, jvars)
     else:
-        LOG.warning('Unable to load %s', proj_yml_name)
+        LOG.warning('Unable to load %s', proj_ansible_roles)
     return jvars
 
 
