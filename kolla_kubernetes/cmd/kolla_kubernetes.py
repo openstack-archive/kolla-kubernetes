@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +12,7 @@
 # limitations under the License.
 
 
+import os
 import shlex
 import sys
 
@@ -19,6 +21,12 @@ from cliff import commandmanager
 from cliff import interactive
 from oslo_config import cfg
 from oslo_log import log
+
+PROJECT_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '../..'))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from kolla_kubernetes.common import utils
 
