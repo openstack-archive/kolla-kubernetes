@@ -109,6 +109,14 @@ def kill_service(service_name, variables=None):
 
 def _deploy_instance(directory, service_name):
     server = "--server=" + CONF.kolla_kubernetes.host
+
+    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "configmap",
+           '%s-configmap' % service_name]
+    cmd = cmd + ['--from-file=%s' % f
+                 for f in file_utils.get_service_config_files(service_name)]
+    LOG.info('Command : %r' % cmd)
+    subprocess.call(cmd)
+
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
            directory]
     LOG.info('Command : %r' % cmd)
@@ -117,6 +125,12 @@ def _deploy_instance(directory, service_name):
 
 def _delete_instance(directory, service_name):
     server = "--server=" + CONF.kolla_kubernetes.host
+
+    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "configmap",
+           '%s-configmap' % service_name]
+    LOG.info('Command : %r' % cmd)
+    subprocess.call(cmd)
+
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "-f",
            directory]
     LOG.info('Command : %r' % cmd)
