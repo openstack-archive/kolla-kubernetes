@@ -1,8 +1,10 @@
 apiVersion: v1
 kind: Service
 spec:
+  type: NodePort
   ports:
     - port: {{ keystone_public_port }}
+      targetPort: {{ keystone_public_port }}
   selector:
     name: keystone-public
 metadata:
