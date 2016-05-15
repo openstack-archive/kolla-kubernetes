@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - name: horizon
+      image: "{{ horizon_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: horizon-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: horizon-config
+      configMap:
+        name: horizon-config
+metadata:
+   name: horizon
