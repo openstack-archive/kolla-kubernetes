@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - name: nova-compute
+      image: "{{ nova_compute_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-compute-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: nova-libvirt
+      image: "{{ nova_libvirt_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-libvirt-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: nova-compute-config
+      configMap:
+        name: nova-compute-config
+    - name: nova-libvirt-config
+      configMap:
+        name: nova-libvirt-config
+metadata:
+   name: nova-compute

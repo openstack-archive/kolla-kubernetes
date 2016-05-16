@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - name: nova-api
+      image: "{{ nova_api_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-api-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: nova-conductor
+      image: "{{ nova_conductor_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-conductor-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: nova-scheduler
+      image: "{{ nova_scheduler_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-scheduler-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: nova-api-config
+      configMap:
+        name: nova-api-config
+    - name: nova-conductor-config
+      configMap:
+        name: nova-conductor-config
+    - name: nova-scheduler-config
+      configMap:
+        name: nova-scheduler-config
+metadata:
+   name: nova-control
