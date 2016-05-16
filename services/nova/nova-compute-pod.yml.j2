@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  hostPID: True
+  containers:
+    - name: nova-compute
+      image: "{{ nova_compute_image_full }}"
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-compute-config
+        - mountPath: /var/lib/nova
+          name: nova-compute-persistent-storage
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /run
+          name: run
+        - mountPath: /dev
+          name: dev
+        - mountPath: /sys/fs/cgroup
+          name: sys-fs-cgroup
+        - mountPath: /var/log/kolla
+          name: kolla-logs
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: nova-libvirt
+      image: "{{ nova_libvirt_image_full }}"
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: nova-libvirt-config
+        - mountPath: /var/lib/libvirt
+          name: nova-libvirt-persistent-storage
+        - mountPath: /var/lib/nova
+          name: nova-compute-persistent-storage
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /run
+          name: run
+        - mountPath: /dev
+          name: dev
+        - mountPath: /sys/fs/cgroup
+          name: sys-fs-cgroup
+        - mountPath: /var/log/kolla
+          name: kolla-logs
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: nova-compute-config
+      configMap:
+        name: nova-compute-configmap
+    - name: nova-libvirt-config
+      configMap:
+        name: nova-libvirt-configmap
+    - name: nova-compute-persistent-storage
+      hostPath:
+        path: /var/lib/nova
+    - name: nova-libvirt-persistent-storage
+      hostPath:
+        path: /var/lib/libvirt
+    - name: etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: lib-modules
+      hostPath:
+        path: /lib/modules
+    - name: run
+      hostPath:
+        path: /run
+    - name: dev
+      hostPath:
+        path: /dev
+    - name: sys-fs-cgroup
+      hostPath:
+        path: /sys/fs/cgroup
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: nova-compute

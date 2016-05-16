@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: nova-compute-generate
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ nova_api_image_full }}"
+          name: nova-api
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-api-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+        - image: "{{ nova_conductor_image_full }}"
+          name: nova-conductor
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-conductor-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+        - image: "{{ nova_scheduler_image_full }}"
+          name: nova-scheduler
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-scheduler-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: nova-api-config
+          configMap:
+            name: nova-api-configmap
+        - name: nova-conductor-config
+          configMap:
+            name: nova-conductor-configmap
+        - name: nova-scheduler-config
+          configMap:
+            name: nova-scheduler-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: nova-control-bootstrap
