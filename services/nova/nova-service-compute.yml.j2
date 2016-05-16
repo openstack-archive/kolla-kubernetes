@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ nova_compute_port }}
+  selector:
+    name: nova-compute
+metadata:
+   name: nova-compute

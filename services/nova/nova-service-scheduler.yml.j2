@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ nova_scheduler_port }}
+  selector:
+    name: nova-scheduler
+metadata:
+   name: nova-scheduler
