@@ -1,0 +1,9 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Workflow+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 16 May 2016 12:54:31 +0000
+Reviewed-on: https://review.openstack.org/315667
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
