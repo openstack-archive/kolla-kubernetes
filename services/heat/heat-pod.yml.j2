@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - name: heat-api
+      image: "{{ heat_api_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: heat-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: heat-api-cfn
+      image: "{{ heat_api_cfn_image_full }}"
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: heat-config
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+    - name: heat-engine
+      image: "{{ heat_engine_image_full }}"
+      volumeMounts:
+      - mountPath: {{ container_config_directory }}
+        name: heat-config
+  volumes:
+    - name: heat-config
+      configMap:
+        name: heat-config
+metadata:
+   name: heat

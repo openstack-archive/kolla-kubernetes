@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ heat_api_port }}
+  selector:
+    name: heat-api
+metadata:
+   name: heat-api
