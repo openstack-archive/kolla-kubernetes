@@ -1,1 +1,1 @@
-../kolla_kubernetes/cmd/kolla_kubernetes.py
+../kolla_kubernetes/cmd/shell.py
