@@ -21,6 +21,8 @@ spec:
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+            - name: DB_ROOT_PASSWORD
+              value: {{ database_password }}
       volumes:
         - name: mariadb-config
           configMap:
