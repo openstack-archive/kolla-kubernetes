@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: neutron-bootstrap
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+        #- image: kolla_toolbox
+          name: creating-database
+          command:
+            - /usr/bin/ansible
+            - localhost
+            - -m mysql_db
+            - -a "login_host='{{ database_address }}'
+                  login_user='{{ database_user }}'
+                  login_password='{{ database_password }}'
+                  name='{{ neutron_database_name }}'"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+        #- image: kolla_toolbox
+          name: creating-user-permissions
+          command:
+            - /usr/bin/ansible
+            - localhost
+            - -m mysql_user
+            - -a "login_host='{{ database_address }}'
+                  login_user='{{ database_user }}'
+                  login_password='{{ database_password }}'
+                  name='{{ neutron_database_name }}'
+                  password='{{ neutron_database_password }}'
+                  host='%'
+                  priv='{{ neutron_database_name }}.*:ALL'
+                  append_privs='yes'"
+
+        - image: "{{ neutron_server_image_full }}"
+          name: neutron-server
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: neutron-server-config
+              readOnly: true
+      volumes:
+        - name: neutron-server-config
+          configMap:
+            name: neutron-server-configmap
+      restartPolicy: OnFailure
+metadata:
+  name: neutron-bootstrap

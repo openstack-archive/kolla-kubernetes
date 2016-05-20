@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ neutron_server_image_full }}"
+      name: neutron-server
+      ports:
+      - containerPort: {{ neutron_server_port }}
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: neutron-server-config
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+  volumes:
+    - name: neutron-server-config
+      configMap:
+        name: neutron-server-configmap
+    - name: host-etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: neutron-control
