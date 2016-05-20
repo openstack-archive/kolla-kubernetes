@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ neutron_dhcp_agent_image_full }}"
+      name: neutron-dhcp-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}/neutron-dhcp-agent/
+          name: neutron-dhcp-agent-config
+          readOnly: true
+        - mountPath: /var/lib/neutron/kolla/
+          name: neutron-metadata-socket
+        - mountPath: /run
+          name: host-run
+        - mountPath: /run/netns/
+          name: host-run-netns
+          # shared: true # This seems not support in K8s yet :(
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+    - image: "{{ neutron_l3_agent_image_full }}"
+      name: neutron-l3-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}/neutron-l3-agent/
+          name: neutron-l3-agent-config
+        - mountPath: /var/lib/neutron/kolla/
+          name: neutron-metadata-socket
+        - mountPath: /run
+          name: host-run
+        - mountPath: /run/netns/
+          name: host-run-netns
+          # shared: true # This seems not support in K8s yet :(
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+    - image: "{{ neutron_metadata_agent_image_full }}"
+      name: neutron-metadata-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}/neutron-metadata-agent
+          name: neutron-metadata-agent-config
+          readOnly: true
+        - mountPath: /var/lib/neutron/kolla/
+          name: neutron-metadata-socket
+        - mountPath: /run/netns/
+          name: host-run-netns
+          # shared: true # This seems not support in K8s yet :(
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+  volumes:
+    - name: neutron-metadata-agent-config
+      configMap:
+        name: neutron-metadata-agent-configmap
+    - name: neutron-l3-agent-config
+      configMap:
+        name: neutron-l3-agent-configmap
+    - name: neutron-dhcp-agent-config
+      configMap:
+        name: neutron-dhcp-agent-configmap
+    - name: host-run-netns
+      hostPath:
+        path: /run/netns
+    - name: host-run
+      hostPath:
+        path: /run
+    - name: host-etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: neutron-metadata-socket
+      hostPath:
+        path: /var/lib/neutron/kolla/metadata_proxy
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: neutron-network

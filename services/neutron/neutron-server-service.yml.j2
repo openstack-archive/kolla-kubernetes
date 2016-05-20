@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ neutron_server_port }}
+      protocol: TCP
+      targetPort: {{ neutron_server_port }}
+  selector:
+    name: neutron-server
+metadata:
+  name: neutron-server
