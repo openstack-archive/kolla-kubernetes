@@ -21,6 +21,8 @@ spec:
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+            - name: RABBITMQ_CLUSTER_COOKIE
+              value: {{ rabbitmq_cluster_cookie }}
       volumes:
         - name: rabbitmq-config
           configMap:
