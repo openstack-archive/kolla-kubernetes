@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ openvswitch_db_image_full }}"
+      name: openvswitch-db-server
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: openvswitch-db-config
+          readOnly: true
+        - mountPath: /var/lib/openvswitch
+          name: openvswitch-db
+        - mountPath: /run
+          name: host-run
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+
+    - image: "{{ openvswitch_vswitchd_image_full }}"
+      name: openvswitch-vswitchd
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: openvswitch-vswitchd-config
+          readOnly: true
+        - mountPath: /run
+          name: host-run
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /lib/modules
+          name: host-lib-modules
+          readOnly: true
+
+    # TODO: create containers for fake nova-compute.
+    - image: "{{ neutron_openvswitch_agent_image_full }}"
+      name: neutron-openvswitch-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: neutron-openvswitch-agent-config
+          readOnly: true
+        - mountPath: /run
+          name: host-run
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /lib/modules
+          name: host-lib-modules
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+    - image: "{{ neutron_linuxbridge_agent_image_full }}"
+      name: neutron-linuxbridge-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}/neutron-linuxbridge-agent/
+          name: neutron-linuxbridge-agent-config
+          readOnly: true
+        - mountPath: /run
+          name: host-run
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /lib/modules
+          name: host-lib-modules
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+        - name: NEUTRON_BRIDGE
+          value: "br-ex"
+        - name: NEUTRON_INTERFACE
+          value: {{ neutron_external_interface }}
+
+  volumes:
+    - name: openvswitch-db-config
+      configMap:
+        name: openvswitch-db-server-configmap
+    - name: openvswitch-vswitchd-config
+      configMap:
+        name: openvswitch-vswitchd-configmap
+    - name: neutron-openvswitch-agent-config
+      configMap:
+        name: neutron-openvswitch-agent-configmap
+    - name: neutron-linuxbridge-agent-config
+      configMap:
+        name: neutron-linuxbridge-agent-configmap
+    - name: openvswitch-db
+      hostPath:
+        path: /var/lib/kolla/openvswitch
+    - name: host-run
+      hostPath:
+        path: /run
+    - name: host-etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: host-lib-modules
+      hostPath:
+        path: /lib/modules
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: neutron-compute
