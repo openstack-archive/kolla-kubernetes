@@ -90,44 +90,55 @@ def _load_variables_from_file(project_name):
     return jvars
 
 
-def _build_runner(working_dir, service_name, variables=None):
-    for filename in service_definition.find_service_files(service_name):
-        proj_filename = filename.split('/')[-1].replace('.j2', '')
-        proj_name = filename.split('/')[-2]
-        LOG.debug(
-            'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
+def _build_runner(working_dir, service_name, container_list, variables=None):
+    for container in container_list:
+        service_list = service_definition.get_container_definition(container)
+        for filename in service_definition.find_service_files(service_name):
 
-        variables = _load_variables_from_file(proj_name)
+            proj_filename = filename.split('/')[-1].replace('.j2', '')
+            proj_name = filename.split('/')[-2]
+            LOG.debug(
+                'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
 
-        content = yaml.load(
-            jinja_utils.jinja_render(filename, variables))
-        with open(os.path.join(working_dir, proj_filename), 'w') as f:
-            LOG.debug('_build_runner : service file : %s' %
-                      os.path.join(working_dir, proj_filename))
-            f.write(yaml.dump(content, default_flow_style=False))
+            variables = _load_variables_from_file(proj_name)
+
+            content = yaml.load(
+                jinja_utils.jinja_render(filename, variables))
+            with open(os.path.join(working_dir, proj_filename), 'w') as f:
+                LOG.debug('_build_runner : service file : %s' %
+                          os.path.join(working_dir, proj_filename))
+                f.write(yaml.dump(content, default_flow_style=False))
 
 
 def run_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
-    _deploy_instance(working_dir, service_name)
+    container_list = service_definition.get_pod_definition(service_name)
+    _build_runner(working_dir, service_name, container_list, variables=variables)
+    _deploy_instance(working_dir, service_name, container_list)
 
 
 def kill_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
-    _delete_instance(working_dir, service_name)
+    container_list = service_definition.get_pod_definition(service_name)
+    _build_runner(working_dir, service_name, container_list, variables=variables)
+    _delete_instance(working_dir, service_name, container_list)
 
 
-def _deploy_instance(directory, service_name):
+def _deploy_instance(directory, service_name, container_list):
     server = "--server=" + CONF.kolla_kubernetes.host
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "configmap",
-           '%s-configmap' % service_name]
-    cmd = cmd + ['--from-file=%s' % f
-                 for f in file_utils.get_service_config_files(service_name)]
-    LOG.info('Command : %r' % cmd)
-    subprocess.call(cmd)
+    for container in container_list:
+        service_list = service_definition.get_container_definition(container)
+        for service in service_list:
+            print service
+            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
+                   "configmap", '%s-configmap' % service]
+            cmd = cmd + ['--from-file=%s' % f
+                         for f in file_utils.get_service_config_files(
+                                 service)]
+
+            LOG.info('Command : %r' % cmd)
+            subprocess.call(cmd)
 
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
            directory]
@@ -135,13 +146,18 @@ def _deploy_instance(directory, service_name):
     subprocess.call(cmd)
 
 
-def _delete_instance(directory, service_name):
+def _delete_instance(directory, service_name, container_list):
     server = "--server=" + CONF.kolla_kubernetes.host
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "configmap",
-           '%s-configmap' % service_name]
-    LOG.info('Command : %r' % cmd)
-    subprocess.call(cmd)
+    for container in container_list:
+        service_list = service_definition.get_container_definition(container)
+        for service in service_list:
+            print service
+            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete",
+                   "configmap", '%s-configmap' % service]
+
+            LOG.info('Command : %r' % cmd)
+            subprocess.call(cmd)
 
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "-f",
            directory]

@@ -22,6 +22,7 @@ from kolla_kubernetes import exception
 LOG = logging.getLogger(__name__)
 
 
+
 def find_config_file(filename):
     filepath = os.path.join('/etc/kolla', filename)
     if os.access(filepath, os.R_OK):
@@ -30,9 +31,8 @@ def find_config_file(filename):
         'Unable to detect kolla-kubernetes directory'
     )
 
-
-def get_service_config_files(service):
-    directory = os.path.join('/etc/kolla/', service)
+def get_service_config_files(service_name):
+    directory = os.path.join('/etc/kolla/', service_name)
     for dirpath, _, filenames in os.walk(directory):
         for f in filenames:
             yield os.path.abspath(os.path.join(dirpath, f))
