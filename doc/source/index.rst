@@ -11,11 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   readme
-   installation
-   usage
    contributing
+   installation
    kubernetes-all-in-one
+   quickstart
+   readme
+   usage
 
 Indices and tables
 ==================
