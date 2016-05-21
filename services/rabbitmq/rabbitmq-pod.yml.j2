@@ -10,7 +10,7 @@ spec:
           name: rabbitmq-config
         - mountPath: /var/lib/rabbitmq
           name: rabbitmq-persistent-storage
-        - mountPath: /var/log/kolla/
+        - mountPath: /var/log/kolla
           name: kolla-logs
       env:
         - name: KOLLA_CONFIG_STRATEGY
@@ -21,7 +21,7 @@ spec:
         name: rabbitmq-configmap
     - name: rabbitmq-persistent-storage
       hostPath:
-        path: /var/lib/kolla/rabbitmq
+        path: /var/lib/rabbitmq
     - name: kolla-logs
       emptyDir: {}
 metadata:
