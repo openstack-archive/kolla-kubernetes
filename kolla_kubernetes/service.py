@@ -90,7 +90,7 @@ def _load_variables_from_file(project_name):
     return jvars
 
 
-def _build_runner(working_dir, service_name, variables=None):
+def _build_runner(working_dir, service_name, pod_list, variables=None):
     for filename in service_definition.find_service_files(service_name):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
         proj_name = filename.split('/')[-2]
@@ -109,25 +109,32 @@ def _build_runner(working_dir, service_name, variables=None):
 
 def run_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
-    _deploy_instance(working_dir, service_name)
+    pod_list = service_definition.get_pod_definition(service_name)
+    _build_runner(working_dir, service_name, pod_list, variables=variables)
+    _deploy_instance(working_dir, service_name, pod_list)
 
 
 def kill_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    _build_runner(working_dir, service_name, variables=variables)
-    _delete_instance(working_dir, service_name)
+    pod_list = service_definition.get_pod_definition(service_name)
+    _build_runner(working_dir, service_name, pod_list, variables=variables)
+    _delete_instance(working_dir, service_name, pod_list)
 
 
-def _deploy_instance(directory, service_name):
+def _deploy_instance(directory, service_name, pod_list):
     server = "--server=" + CONF.kolla_kubernetes.host
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "configmap",
-           '%s-configmap' % service_name]
-    cmd = cmd + ['--from-file=%s' % f
-                 for f in file_utils.get_service_config_files(service_name)]
-    LOG.info('Command : %r' % cmd)
-    subprocess.call(cmd)
+    for pod in pod_list:
+        container_list = service_definition.get_container_definition(pod)
+        for container in container_list:
+            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
+                   "configmap", '%s-configmap' % container]
+            cmd = cmd + ['--from-file=%s' % f
+                         for f in
+                         file_utils.get_service_config_files(container)]
+
+            LOG.info('Command : %r' % cmd)
+            subprocess.call(cmd)
 
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
            directory]
@@ -135,13 +142,17 @@ def _deploy_instance(directory, service_name):
     subprocess.call(cmd)
 
 
-def _delete_instance(directory, service_name):
+def _delete_instance(directory, service_name, pod_list):
     server = "--server=" + CONF.kolla_kubernetes.host
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "configmap",
-           '%s-configmap' % service_name]
-    LOG.info('Command : %r' % cmd)
-    subprocess.call(cmd)
+    for pod in pod_list:
+        container_list = service_definition.get_container_definition(pod)
+        for container in container_list:
+            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete",
+                   "configmap", '%s-configmap' % container]
+
+            LOG.info('Command : %r' % cmd)
+            subprocess.call(cmd)
 
     cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "-f",
            directory]
