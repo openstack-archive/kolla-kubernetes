@@ -8,13 +8,13 @@ spec:
       hostNetwork: True
       containers:
         - image: "{{ mariadb_image_full }}"
-          name: mariadb
+          name: mariadb-bootstrap
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
-            - mountPath: /var/log/kolla/
+            - mountPath: /var/log/kolla
               name: kolla-logs
           env:
             - name: KOLLA_BOOTSTRAP
@@ -29,7 +29,7 @@ spec:
             name: mariadb-configmap
         - name: mariadb-persistent-storage
           hostPath:
-            path: /var/lib/kolla/mariadb
+            path: /var/lib/mysql
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure
