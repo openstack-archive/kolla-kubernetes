@@ -3,26 +3,45 @@ kind: Job
 spec:
   template:
     metadata:
-      name: glance-generate
+      name: glance-bootstrap
     spec:
       hostNetwork: True
       containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-database
+          command: 
+            - /usr/bin/ansible localhost
+            - -m mysql_db
+            - -a "login_host='{{ database_address }}'
+            - login_user='{{ database_user }}'
+            - login_password='{{ database_password }}'
+            - name='{{ glance_database_name }}'"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-user-and-permissions
+          command: 
+            - /usr/bin/ansible localhost
+            - -m mysql_user
+            - -a "login_host='{{ database_address }}'
+            - login_user='{{ database_user }}'
+            - login_password='{{ database_password }}'
+            - name='{{ glance_database_name }}'
+            - password='{{ glance_database_password }}'
+            - host='%'
+            - priv='{{ glance_database_name }}.*:ALL'
+            - append_privs='yes'"
+
         - image: "{{ glance_api_image_full }}"
-          name: glance-bootstrap
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: glance-api-config
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: etc-localtime
+          name: glance-api-config
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-api-config
+              readOnly: true
       volumes:
         - name: glance-api-config
           configMap:
