@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ swift_account_server_port }}
+  selector:
+    name: swift-account-server
+metadata:
+   name: swift-account-server
