@@ -1,40 +1,89 @@
 apiVersion: batch/v1
 kind: Job
+metadata:
+  name: glance-bootstrap
 spec:
   template:
     metadata:
-      name: glance-generate
+      name: glance-bootstrap
     spec:
+      restartPolicy: OnFailure
       hostNetwork: True
       containers:
-        - image: "{{ glance_api_image_full }}"
-          name: glance-bootstrap
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-database
+          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
+          command: ["usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_db",
+                    "-a", "login_host='10.0.0.236'
+                    login_user='{{ database_user }}'
+                    login_password='{{ database_password }}'
+                    name='{{ glance_database_name }}'"]
           volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: glance-api-config
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
-            - mountPath: /var/log/kolla/
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
               name: kolla-logs
-            - mountPath: /etc/localtime
-              name: etc-localtime
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-user-and-permissions
+          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
+          command: ["/usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_user",
+                     "-a", "login_host='10.0.0.236'
+                     login_user='{{ database_user }}'
+                     login_password='{{ database_password }}'
+                     name='{{ glance_database_name }}'
+                     password='{{ glance_database_password }}'
+                     host='%'
+                     priv='{{ glance_database_name }}.*:ALL'
+                     append_privs='yes'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ glance_api_image_full }}"
+          name: glance-api-config
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-api-config
+              readOnly: true
+            - mountPath: /var/log/kolla
+              name: kolla-logs
       volumes:
         - name: glance-api-config
           configMap:
             name: glance-api-configmap
         - name: glance-persistent-storage
           hostPath:
-            path: /var/lib/kolla/glance
+            path: /var/lib/glance
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
-      restartPolicy: OnFailure
-metadata:
-  name: glance-bootstrap
