@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ swift_rsyncd_image_full }}"
+      name: swift-rsyncd
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}/
+          name: swift-rsyncd-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+    - image: "{{ swift_container_image_full }}"
+      name: swift-container-server
+      volumeMounts:
+        - mountPath: /var/lib/kolla/swift/
+          name: swift-config
+          readOnly: true
+        - mountPath: {{ container_config_directory }}/
+          name: swift-container-server-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+    - image: "{{ swift_container_image_full }}"
+      name: swift-container-auditor
+      volumeMounts:
+        - mountPath: /var/lib/kolla/swift/
+          name: swift-config
+          readOnly: true
+        - mountPath: {{ container_config_directory }}/
+          name: swift-container-auditor-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+    - image: "{{ swift_container_image_full }}"
+      name: swift-container-replicator
+      volumeMounts:
+        - mountPath: /var/lib/kolla/swift/
+          name: swift-config
+          readOnly: true
+        - mountPath: {{ container_config_directory }}/
+          name: swift-container-replicator-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+    - image: "{{ swift_container_image_full }}"
+      name: swift-container-updater
+      volumeMounts:
+        - mountPath: /var/lib/kolla/swift/
+          name: swift-config
+          readOnly: true
+        - mountPath: {{ container_config_directory }}/
+          name: swift-container-updater-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+
+  volumes:
+    - name: swift-rsyncd-config
+      configMap:
+        name: swift-rsyncd-configmap
+    - name: swift-container-server-config
+      configMap:
+        name: swift-container-server-configmap
+    - name: swift-container-auditor-config
+      configMap:
+        name: swift-container-auditor-configmap
+    - name: swift-container-replicator-config
+      configMap:
+        name: swift-container-replicator-configmap
+    - name: swift-container-updater-config
+      configMap:
+        name: swift-container-updater-configmap
+    - name: swift-config
+      hostPath:
+        path: {{ node_config_directory }}/swift/
+    - name: swift-devices
+      hostPath:
+        path: {{ swift_devices_mount_point }}
+    - name: etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: swift-container

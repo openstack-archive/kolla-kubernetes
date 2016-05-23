@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ swift_object_server_port }}
+  selector:
+    name: swift-object-server
+metadata:
+   name: swift-object-server
