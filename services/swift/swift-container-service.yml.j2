@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ swift_container_server_port }}
+  selector:
+    name: swift-container-server
+metadata:
+   name: swift-container-server
