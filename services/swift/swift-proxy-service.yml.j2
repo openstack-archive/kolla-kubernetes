@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ swift_proxy_server_port }}
+  selector:
+    name: swift-proxy-server
+metadata:
+   name: swift-proxy-server
