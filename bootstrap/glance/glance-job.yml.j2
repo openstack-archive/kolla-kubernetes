@@ -8,26 +8,31 @@ spec:
       hostNetwork: True
       containers:
         - image: "{{ glance_api_image_full }}"
-          name: glance
+          name: glance-bootstrap
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: glance-config
+              name: glance-api-config
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
             - mountPath: /var/log/kolla/
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
       volumes:
-        - name: glance-config
+        - name: glance-api-config
           configMap:
-            name: glance-configmap
+            name: glance-api-configmap
         - name: glance-persistent-storage
           hostPath:
             path: /var/lib/kolla/glance
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure

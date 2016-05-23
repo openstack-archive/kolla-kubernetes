@@ -7,7 +7,13 @@ spec:
       image: "{{ glance_api_image_full }}"
       volumeMounts:
         - mountPath: {{ container_config_directory }}
-          name: glance-config
+          name: glance-api-config
+        - mountPath: /var/lib/glance/
+          name: glance-persistent-storage
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+        - mountPath: /etc/localtime
+          name: etc-localtime
       env:
         - name: KOLLA_CONFIG_STRATEGY
           value: {{ config_strategy }}
@@ -15,13 +21,26 @@ spec:
       image: "{{ glance_registry_image_full }}"
       volumeMounts:
         - mountPath: {{ container_config_directory }}
-          name: glance-config
+          name: glance-registry-config
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
       env:
         - name: KOLLA_CONFIG_STRATEGY
           value: {{ config_strategy }}
   volumes:
-    - name: glance-config
+    - name: glance-api-config
       configMap:
-        name: glance-config
+        name: glance-api-configmap
+    - name: glance-registry-config
+      configMap:
+        name: glance-registry-configmap
+    - name: glance-persistent-storage
+      hostPath:
+        path: /var/lib/kolla/glance
+    - name: etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: kolla-logs
+      emptyDir: {}
 metadata:
    name: glance
