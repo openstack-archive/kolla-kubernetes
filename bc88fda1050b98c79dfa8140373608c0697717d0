@@ -1,0 +1,10 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: Victor Howard <victor.r.howard@gmail.com>
+Code-Review+2: Davanum Srinivas (dims) <davanum@gmail.com>
+Workflow+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 23 May 2016 15:24:53 +0000
+Reviewed-on: https://review.openstack.org/319557
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
