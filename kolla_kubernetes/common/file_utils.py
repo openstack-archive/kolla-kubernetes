@@ -31,8 +31,8 @@ def find_config_file(filename):
     )
 
 
-def get_service_config_files(service):
-    directory = os.path.join('/etc/kolla/', service)
+def get_service_config_files(service_name):
+    directory = os.path.join('/etc/kolla/', service_name)
     for dirpath, _, filenames in os.walk(directory):
         for f in filenames:
             yield os.path.abspath(os.path.join(dirpath, f))

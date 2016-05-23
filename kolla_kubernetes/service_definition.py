@@ -27,6 +27,34 @@ DEP_FIELDS = ('path', 'scope')
 SCOPE_OPTS = ('global', 'local')
 LOG = log.getLogger()
 
+# TODO(rhallisey): make pod definitions dynamic
+# The pods associated with a service
+POD_DEFINITIONS = {'mariadb': ['mariadb'],
+                   'memcached': ['memcached'],
+                   'rabbitmq': ['rabbitmq'],
+                   'keystone': ['keystone'],
+                   'glance': ['glance'],
+                   'nova': ['nova-compute', 'nova-control']}
+
+# TODO(rhallisey): make container definitions dynamic
+# The containers in a pod
+CONTAINER_DEFINITIONS = {'mariadb': ['mariadb'],
+                         'memcached': ['memcached'],
+                         'rabbitmq': ['rabbitmq'],
+                         'keystone': ['keystone'],
+                         'glance': ['glance-api', 'glance-registry'],
+                         'nova-compute': ['nova-compute', 'nova-libvirt'],
+                         'nova-control': ['nova-api', 'nova-scheduler',
+                                          'nova-conductor']}
+
+
+def get_pod_definition(service):
+    return POD_DEFINITIONS[service]
+
+
+def get_container_definition(container):
+    return CONTAINER_DEFINITIONS[container]
+
 
 def get_services_directory():
     return (CONF.service_dir or
@@ -36,6 +64,7 @@ def get_services_directory():
 def find_service_files(service_name):
     service_dir = get_services_directory()
     LOG.debug('Looking for services files in %s', service_dir)
+
     if not os.path.exists(service_dir):
         raise exception.KollaNotFoundException(service_dir,
                                                entity='service directory')
