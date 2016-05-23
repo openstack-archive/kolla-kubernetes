@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ nova_api_port }}
+      name: nova-api-port
+    - port: {{ nova_api_ec2_port }}
+      name: nova-api-ec2-port
+    - port: {{ nova_metadata_port }}
+      name: nova-metadata-port
+  selector:
+    name: nova-compute
+metadata:
+   name: nova-compute
