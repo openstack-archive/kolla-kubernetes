@@ -71,6 +71,22 @@ def get_services_directory():
             os.path.join(file_utils.find_base_dir(), 'services'))
 
 
+def find_bootstrap_files(service_name):
+    bootstrap_dir = os.path.join(get_services_directory(), '../bootstrap/')
+    LOG.debug('Looking for bootstrap files in %s', bootstrap_dir)
+    if not os.path.exists(bootstrap_dir):
+        LOG.info('No bootstrap job for service %s', service_name)
+        return []
+
+    short_name = service_name.split('/')[-1]
+    files = []
+    for root, dirs, names in os.walk(bootstrap_dir):
+        for name in names:
+            if short_name in name:
+                files.append(os.path.join(root, name))
+    return files
+
+
 def find_service_files(service_name):
     service_dir = get_services_directory()
     LOG.debug('Looking for services files in %s', service_dir)
@@ -79,20 +95,9 @@ def find_service_files(service_name):
         raise exception.KollaNotFoundException(service_dir,
                                                entity='service directory')
 
-    bootstrap_dir = os.path.join(service_dir, '../bootstrap/')
-    LOG.debug('Looking for bootstrap files in %s', service_dir)
-    if not os.path.exists(bootstrap_dir):
-        raise exception.KollaNotFoundException(bootstrap_dir,
-                                               entity='bootstrap directory')
-
     short_name = service_name.split('/')[-1]
     files = []
     for root, dirs, names in os.walk(service_dir):
-        for name in names:
-            if short_name in name:
-                files.append(os.path.join(root, name))
-
-    for root, dirs, names in os.walk(bootstrap_dir):
         for name in names:
             if short_name in name:
                 files.append(os.path.join(root, name))
