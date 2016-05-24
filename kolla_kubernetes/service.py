@@ -87,6 +87,18 @@ def _load_variables_from_file(project_name):
         jinja_utils.yaml_jinja_render(local_ansible_roles, jvars)
     else:
         LOG.warning('Unable to load %s', proj_ansible_roles)
+
+    common_ansible_roles = os.path.join(dir, 'ansible/roles', 'common',
+                                        'defaults', 'main.yml')
+    common_local_ansible_roles = os.path.join(local_dir, 'roles', 'common',
+                                              'defaults', 'main.yml')
+
+    if dir and os.path.exists(common_ansible_roles):
+        jinja_utils.yaml_jinja_render(common_ansible_roles, jvars)
+    elif dir and os.path.exists(common_local_ansible_roles):
+        jinja_utils.yaml_jinja_render(common_local_ansible_roles, jvars)
+    else:
+        LOG.warning('Unable to load %s', common_ansible_roles)
     return jvars
 
 
