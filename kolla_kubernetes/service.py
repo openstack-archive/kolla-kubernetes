@@ -34,11 +34,12 @@ PROJECT_ROOT = os.path.abspath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '../..'))
 
 
-def _create_working_directory():
+def _create_working_directory(target='services'):
     ts = time.time()
     ts = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H-%M-%S_')
     temp_dir = tempfile.mkdtemp(prefix='kolla-' + ts)
     working_dir = os.path.join(temp_dir, 'kubernetes')
+    working_dir = os.path.join(working_dir, target)
     os.makedirs(working_dir)
     return working_dir
 
@@ -108,6 +109,23 @@ def _load_variables_from_file(project_name):
     return jvars
 
 
+def _build_bootstrap(working_dir, service_name, variables=None):
+    for filename in service_definition.find_bootstrap_files(service_name):
+        proj_filename = filename.split('/')[-1].replace('.j2', '')
+        proj_name = filename.split('/')[-2]
+        LOG.debug(
+            'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
+
+        variables = _load_variables_from_file(proj_name)
+
+        content = yaml.load(
+            jinja_utils.jinja_render(filename, variables))
+        with open(os.path.join(working_dir, proj_filename), 'w') as f:
+            LOG.debug('_build_bootstrap : file : %s' %
+                      os.path.join(working_dir, proj_filename))
+            f.write(yaml.dump(content, default_flow_style=False))
+
+
 def _build_runner(working_dir, service_name, pod_list, variables=None):
     for filename in service_definition.find_service_files(service_name):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
@@ -125,6 +143,12 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
             f.write(yaml.dump(content, default_flow_style=False))
 
 
+def bootstrap_service(service_name, variables=None):
+    working_dir = _create_working_directory('bootstrap')
+    _build_bootstrap(working_dir, service_name, variables=variables)
+    _bootstrap_instance(working_dir, service_name)
+
+
 def run_service(service_name, variables=None):
     working_dir = _create_working_directory()
     pod_list = service_definition.get_pod_definition(service_name)
@@ -136,12 +160,13 @@ def kill_service(service_name, variables=None):
     working_dir = _create_working_directory()
     pod_list = service_definition.get_pod_definition(service_name)
     _build_runner(working_dir, service_name, pod_list, variables=variables)
+    _build_bootstrap(working_dir, service_name, variables=variables)
     _delete_instance(working_dir, service_name, pod_list)
 
 
-def _deploy_instance(directory, service_name, pod_list):
+def _bootstrap_instance(directory, service_name):
     server = "--server=" + CONF.kolla_kubernetes.host
-
+    pod_list = service_definition.get_pod_definition(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
@@ -151,6 +176,31 @@ def _deploy_instance(directory, service_name, pod_list):
                          for f in
                          file_utils.get_service_config_files(container)]
 
+            #TODO(rhallisey): improve error handling to check if configmap
+            # already exists
+            LOG.info('Command : %r' % cmd)
+            subprocess.call(cmd)
+
+    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
+           directory]
+    LOG.info('Command : %r' % cmd)
+    subprocess.call(cmd)
+
+
+def _deploy_instance(directory, service_name, pod_list):
+    server = "--server=" + CONF.kolla_kubernetes.host
+    pod_list = service_definition.get_pod_definition(service_name)
+    for pod in pod_list:
+        container_list = service_definition.get_container_definition(pod)
+        for container in container_list:
+            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
+                   "configmap", '%s-configmap' % container]
+            cmd = cmd + ['--from-file=%s' % f
+                         for f in
+                         file_utils.get_service_config_files(container)]
+
+            #TODO(rhallisey): improve error handling to check if configmap
+            # already exists
             LOG.info('Command : %r' % cmd)
             subprocess.call(cmd)
 
