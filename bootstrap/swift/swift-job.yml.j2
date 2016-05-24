@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    metadata:
+      name: swift-bootstrap
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+        #- image: kolla_toolbox
+          name: register-endpoints
+          command:
+            - /usr/bin/ansible
+            - localhost
+            - -m kolla_keystone_service
+            - -a "service_name=swift
+                  service_type=object-store
+                  description='Openstack Object Storage'
+                  endpoint_region={{ openstack_region_name }}
+                  url='{{ item.url }}'
+                  interface='{{ item.interface }}'
+                  region_name={{ openstack_region_name }}
+                  auth={{ '{{ openstack_swift_auth }}' }}"
+            - -e "{'openstack_swift_auth':{{ openstack_swift_auth }}}"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+        #- image: kolla_toolbox
+          name: setup-user-database
+          command:
+            - /usr/bin/ansible
+            - localhost
+            - -m kolla_keystone_user
+            - -a "project=service
+                  user={{ swift_keystone_user }}
+                  password={{ swift_keystone_password }}
+                  role={{ swift_admin_tenant_name }}
+                  region_name={{ openstack_region_name }}
+                  auth={{ '{{ openstack_swift_auth }}' }}"
+            - -e "{'openstack_swift_auth':{{ openstack_swift_auth }}}"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+        #- image: kolla_toolbox
+          name: disk-lookup
+          command:
+            - /usr/bin/ansible
+            - localhost
+            - -m find_disks
+            - -a "name={{ swift_devices_name }}
+                  match_mode={{ swift_devices_match_mode }}"
+      restartPolicy: OnFailure
+metadata:
+  name: swift-bootstrap
