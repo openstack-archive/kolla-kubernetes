@@ -1,5 +1,7 @@
 apiVersion: v1
 kind: Pod
+metadata:
+   name: keystone
 spec:
   hostNetwork: True
   containers:
@@ -8,12 +10,19 @@ spec:
       volumeMounts:
         - mountPath: {{ container_config_directory }}
           name: keystone-config
+        - mountPath: /var/log/kolla
+          name: kolla-logs
       env:
         - name: KOLLA_CONFIG_STRATEGY
           value: {{ config_strategy }}
+        #TODO: Replace with templated values
+        - name: ETCD_HOST
+          value: "127.0.0.1"
+        - name: ETCD_PORT
+          value: "4001"
   volumes:
     - name: keystone-config
       configMap:
         name: keystone-configmap
-metadata:
-   name: keystone
+    - name: kolla-logs
+      emptyDir: {}

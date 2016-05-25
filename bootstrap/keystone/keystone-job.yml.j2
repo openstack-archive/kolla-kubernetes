@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-bootstrap
+spec:
+  template:
+    metadata:
+      name: keystone-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      hostNetwork: True
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-keystone-database
+          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
+          command: ["usr/bin/ansible", "localhost", "-m", "mysql_db",
+                    "-a", "login_host='10.18.57.43'
+                    login_port='{{ mariadb_port }}'
+                    login_user='{{ database_user }}'
+                    login_password='{{ database_password }}'
+                    name='{{ keystone_database_name }}'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-keystone-user-and-permissions
+          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
+          command: ["/usr/bin/ansible", "localhost", "-m", "mysql_user",
+                    "-a", "login_host='10.18.57.43'
+                    login_port='{{ mariadb_port }}'
+                    login_user='{{ database_user }}'
+                    login_password='{{ database_password }}'
+                    name='{{ keystone_database_name }}'
+                    password='{{ keystone_database_password }}'
+                    host='%'
+                    priv='{{ keystone_database_name }}.*:ALL'
+                    append_privs='yes'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ keystone_image_full }}"
+          name: keystone-config
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: keystone-config
+              readOnly: true
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_KUBERNETES_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+            #TODO: Replace with templated values
+            - name: ETCD_HOST
+              value: "127.0.0.1"
+            - name: ETCD_PORT
+              value: "4001"
+      volumes:
+        - name: keystone-config
+          configMap:
+            name: keystone-configmap
+        - name: keystone-persistent-storage
+          hostPath:
+            path: /var/lib/keystone
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
