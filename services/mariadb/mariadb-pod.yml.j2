@@ -15,6 +15,12 @@ spec:
       env:
         - name: KOLLA_CONFIG_STRATEGY
           value: {{ config_strategy }}
+        - name: BOOTSTRAP_ARGS
+          value: "--wsrep-new-cluster"
+        - name: ETCD_HOST
+          value: "127.0.0.1"
+        - name: ETCD_PORT
+          value: "4001"
   volumes:
     - name: mariadb-config
       configMap:
