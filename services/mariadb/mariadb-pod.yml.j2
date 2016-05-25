@@ -15,13 +15,17 @@ spec:
       env:
         - name: KOLLA_CONFIG_STRATEGY
           value: {{ config_strategy }}
+        - name: ETCD_HOST
+          value: "127.0.0.1"
+        - name: ETCD_PORT
+          value: "4001"
   volumes:
     - name: mariadb-config
       configMap:
         name: mariadb-configmap
     - name: mariadb-persistent-storage
       hostPath:
-        path: /var/lib/kolla/mariadb
+        path: /var/lib/mysql
     - name: kolla-logs
       emptyDir: {}
 metadata:
