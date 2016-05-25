@@ -34,7 +34,9 @@ POD_DEFINITIONS = {'mariadb': ['mariadb'],
                    'rabbitmq': ['rabbitmq'],
                    'keystone': ['keystone'],
                    'glance': ['glance'],
-                   'nova': ['nova-compute', 'nova-control']}
+                   'nova': ['nova-compute', 'nova-control'],
+                   'neutron': ['neutron-compute', 'neutron-control',
+                               'neutron-network']}
 
 # TODO(rhallisey): make container definitions dynamic
 # The containers in a pod
@@ -45,7 +47,15 @@ CONTAINER_DEFINITIONS = {'mariadb': ['mariadb'],
                          'glance': ['glance-api', 'glance-registry'],
                          'nova-compute': ['nova-compute', 'nova-libvirt'],
                          'nova-control': ['nova-api', 'nova-scheduler',
-                                          'nova-conductor']}
+                                          'nova-conductor'],
+                         'neutron-compute': ['openvswitch-db-server',
+                                             'openvswitch-vswitchd',
+                                             'neutron-openvswitch-agent',
+                                             'neutron-linuxbridge-agent'],
+                         'neutron-network': ['neutron-l3-agent',
+                                             'neutron-dhcp-agent',
+                                             'neutron-medadata-agent'],
+                         'neutron-control': ['neutron-server']}
 
 
 def get_pod_definition(service):
