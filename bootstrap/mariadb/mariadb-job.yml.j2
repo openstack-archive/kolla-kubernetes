@@ -1,9 +1,16 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mariadb-bootstrap
 spec:
+  replicas: 1
+  selector:
+    app: mariadb
   template:
     metadata:
-      name: mariadb-generate
+      name: mariadb-bootstrap
+      labels:
+        app: mariadb
     spec:
       hostNetwork: True
       containers:
@@ -17,10 +24,15 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
-            - name: KOLLA_BOOTSTRAP
+            - name: KOLLA_KUBERNETES_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+            #TODO: Replace with templated values
+            - name: ETCD_HOST
+              value: "127.0.0.1"
+            - name: ETCD_PORT
+              value: "4001"
             - name: DB_ROOT_PASSWORD
               value: {{ database_password }}
       volumes:
@@ -32,6 +44,3 @@ spec:
             path: /var/lib/mysql
         - name: kolla-logs
           emptyDir: {}
-      restartPolicy: OnFailure
-metadata:
-  name: mariadb-bootstrap
