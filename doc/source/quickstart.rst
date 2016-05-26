@@ -23,8 +23,9 @@ targets, the kolla-kubernetes community recommends installing the official
 Docker, Inc. packaged version of Docker for maximum stability and compatibility.
 
 .. NOTE:: Docker 1.11.0 is not compatible with Kubernetes due to some issues in
-Docker. The below command will install the latest docker and revert back to
-1.10.3.
+  Docker. The below command will install the latest docker and revert back to
+  1.10.3.  For different Debian or Ubuntu distributions, you may need to use 
+  ``apt-cache madison docker-engine`` to get the correct version.
 
 ::
 
@@ -42,11 +43,19 @@ in 'thin' containers.  Change MountFlags from slave to shared and restart
 Docker.
 
 ::
+
    # Edit /usr/lib/system/systemd/docker.service
    MountFlags=shared
 
    systemctl daemon-reload
    systemctl start docker
+
+For Ubuntu 12.04/14.04 and other distributions that use upstart instead of
+systemd, run the following:
+
+::
+
+    mount --make-shared /
 
 HyperCube
 =========
@@ -54,5 +63,5 @@ HyperCube
 HyperKube is series of containers that will run all the needed Kubernetes
 services locally.
 
-If you prefer to run Kubernetes in containers follow the :doc:`kubernetes-all
--in-one`.
+If you prefer to run Kubernetes in containers follow the :doc:`kubernetes-all-in-one`.
+
