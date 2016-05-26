@@ -45,6 +45,12 @@ def _create_working_directory():
 
 def _load_variables_from_file(project_name):
     jvars = utils.JvarsDict()
+    f = file_utils.find_config_file('kolla-kubernetes.yml')
+    if os.path.exists(f):
+        with open(f, 'r') as gf:
+            jvars.set_global_vars(yaml.load(gf))
+    else:
+        LOG.warning('Unable to load %s', f)
     f = file_utils.find_config_file('globals.yml')
     if os.path.exists(f):
         with open(f, 'r') as gf:

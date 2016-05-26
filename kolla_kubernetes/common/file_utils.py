@@ -26,6 +26,11 @@ def find_config_file(filename):
     filepath = os.path.join('/etc/kolla', filename)
     if os.access(filepath, os.R_OK):
         return filepath
+
+    filepath = os.path.join('/etc/kolla-kubernetes', filename)
+    if os.access(filepath, os.R_OK):
+        return filepath
+
     raise exception.KollaDirNotFoundException(
         'Unable to detect kolla-kubernetes directory'
     )

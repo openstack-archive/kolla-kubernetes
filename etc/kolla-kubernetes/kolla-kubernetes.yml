@@ -1,0 +1,16 @@
+---
+# Any config options specified here will overwrite anything in globals.yml
+# at run time.
+
+##############################
+# Kolla Kubernetes options
+##############################
+# For now, set kolla_internal_vip_address in /etc/kolla/globals.yml to use as
+# the ip address for all the services.
+# kolla_internal_vip_address: "10.10.10.254"
+
+########################
+# Kubernetes Cluster
+########################
+etcd_ip_address: "127.0.0.1"
+etcd_port: "4001"

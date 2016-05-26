@@ -14,12 +14,11 @@ spec:
           name: kolla-logs
       env:
         - name: KOLLA_CONFIG_STRATEGY
-          value: {{ config_strategy }}
-        #TODO: Replace with templated values
+          value: "{{ config_strategy }}"
         - name: ETCD_HOST
-          value: "127.0.0.1"
+          value: "{{ etcd_ip_address }}"
         - name: ETCD_PORT
-          value: "4001"
+          value: "{{ etcd_port }}"
   volumes:
     - name: keystone-config
       configMap:
