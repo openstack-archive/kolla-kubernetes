@@ -76,13 +76,41 @@ spec:
               value: "127.0.0.1"
             - name: ETCD_PORT
               value: "4001"
+
+        - image: "{{ keystone_image_full }}"
+          name: keystone-endpoints
+          # TODO: figure out why openstack_auth.* is not readered properly
+          #{{ openstack_auth.username }}
+          #{{ openstack_auth.password }}
+          #{{ openstack_auth.project_name }}
+          command: ["sh", "-c", "sudo -E kolla_set_configs;
+                    kolla_keystone_bootstrap admin
+                    {{ keystone_admin_password }}
+                    admin
+                    admin
+                    {{ keystone_admin_url }}
+                    {{ keystone_internal_url }}
+                    {{ keystone_public_url }}
+                    {{ openstack_region_name }}"]
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: keystone-config
+              readOnly: true
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+            #TODO: Replace with templated values
+            - name: ETCD_HOST
+              value: "127.0.0.1"
+            - name: ETCD_PORT
+              value: "4001"
+
       volumes:
         - name: keystone-config
           configMap:
             name: keystone-configmap
-        - name: keystone-persistent-storage
-          hostPath:
-            path: /var/lib/keystone
         - name: dev
           hostPath:
             path: /dev
