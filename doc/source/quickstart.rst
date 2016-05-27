@@ -57,11 +57,46 @@ systemd, run the following:
 
     mount --make-shared /
 
-HyperCube
-=========
+Kubernetes Setup with HyperKube
+===============================
 
 HyperKube is series of containers that will run all the needed Kubernetes
-services locally.
+services locally.  Follow the :doc:`kubernetes-all-in-one` documentation.
 
-If you prefer to run Kubernetes in containers follow the :doc:`kubernetes-all-in-one`.
+`The Kubernetes documentation explains setting up a larger cluster
+<http://kubernetes.io/docs/getting-started-guides/>`_.
+
+Installing Kolla
+================
+
+:::
+    git clone https://git.openstack.org/openstack/kolla
+    sudo pip install kolla/
+    cd kolla
+    sudo cp -r etc/kolla /etc/
+
+The configuration files still live inside of the Kolla repo.  
+Kolla-kubernetes should find them at the default install
+location of ``/usr/local/share/kolla``
+
+Installing Kolla-Kubernetes
+===========================
+
+:::
+    pip install kolla-kubernetes
+
+The extra configuration files that Kolla-kubernetes requires aren't where 
+the kolla-kubernetes CLI expects them to be located, therefore we need to
+use an environment variable, ``K8S_SERVICE_DIR``.
+
+:::
+    export K8S_SERVICE_DIR=/usr/local/share/kolla-kubernetes/services/
+    kolla-kubernetes run mariadb
+    kolla-kubernetes run rabbitmq
+    kolla-kubernetes run memcached
+    kolla-kubernetes run keystone
+    kolla-kubernetes run horizon
+    kolla-kubernetes run neutron
+    kolla-kubernetes run glance
+    kolla-kubernetes run nova
 
