@@ -1,0 +1,9 @@
+Code-Review+2: Liyi Meng <liyi.meng@ericsson.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 27 May 2016 12:59:28 +0000
+Reviewed-on: https://review.openstack.org/322141
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
