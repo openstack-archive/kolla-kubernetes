@@ -83,7 +83,10 @@ Kolla can be used to generate config files.  The config files will be populated 
 
 ::
 
+    ./tools/kolla-genpwd
     ./tools/kolla-ansible genconfig
+
+``kolla-genpwd`` will generate passwords and encryption keys and populate the passwords.yml file.  ``kolla-ansible genconfig`` will generate the config files.
 
 Installing Kolla-Kubernetes
 ===========================
