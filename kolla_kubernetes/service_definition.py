@@ -36,7 +36,9 @@ POD_DEFINITIONS = {'mariadb': ['mariadb'],
                    'glance': ['glance'],
                    'nova': ['nova-compute', 'nova-control'],
                    'neutron': ['neutron-compute', 'neutron-control',
-                               'neutron-network']}
+                               'neutron-network'],
+                   'swift': ['swift-account', 'swift-container',
+                             'swift-object', 'swift-proxy']}
 
 # TODO(rhallisey): make container definitions dynamic
 # The containers in a pod
@@ -55,7 +57,24 @@ CONTAINER_DEFINITIONS = {'mariadb': ['mariadb'],
                          'neutron-network': ['neutron-l3-agent',
                                              'neutron-dhcp-agent',
                                              'neutron-medadata-agent'],
-                         'neutron-control': ['neutron-server']}
+                         'neutron-control': ['neutron-server'],
+                         'swift-account': ['swift-rsyncd',
+                                           'swift-account-server',
+                                           'swift-account-auditor',
+                                           'swift-account-replicator',
+                                           'swift-account-reaper'],
+                         'swift-container': ['swift-rsyncd',
+                                             'swift-container-server',
+                                             'swift-container-auditor',
+                                             'swift-container-replicator',
+                                             'swift-container-updater'],
+                         'swift-object': ['swift-rsyncd',
+                                          'swift-object-server',
+                                          'swift-object-auditor',
+                                          'swift-object-replicator',
+                                          'swift-object-updater',
+                                          'swift-object-expirer'],
+                         'swift-proxy': ['swift-proxy-server']}
 
 
 def get_pod_definition(service):

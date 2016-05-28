@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ swift_proxy_server_image_full }}"
+      name: swift-proxy-server
+      volumeMounts:
+        - mountPath: /var/lib/kolla/swift/
+          name: swift-config
+          readOnly: true
+        - mountPath: {{ container_config_directory }}/
+          name: swift-proxy-server-config
+          readOnly: true
+        - mountPath: {{ swift_devices_mount_point }}
+          name: swift-devices
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+
+  volumes:
+    - name: swift-proxy-server-config
+      configMap:
+        name: swift-proxy-server-configmap
+    - name: swift-config
+      hostPath:
+        path: {{ node_config_directory }}/swift/
+    - name: swift-devices
+      hostPath:
+        path: {{ swift_devices_mount_point }}
+    - name: etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: swift-proxy
