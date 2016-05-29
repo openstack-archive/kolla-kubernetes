@@ -1,0 +1,9 @@
+Code-Review+2: Davanum Srinivas (dims) <davanum@gmail.com>
+Code-Review+2: Liyi Meng <liyi.meng@ericsson.com>
+Workflow+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sun, 29 May 2016 01:08:21 +0000
+Reviewed-on: https://review.openstack.org/321846
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
