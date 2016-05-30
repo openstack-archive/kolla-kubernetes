@@ -1,0 +1,9 @@
+Code-Review+2: Davanum Srinivas (dims) <davanum@gmail.com>
+Code-Review+2: Michal Rostecki <michal.rostecki@gmail.com>
+Workflow+1: Michal Rostecki <michal.rostecki@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 30 May 2016 18:20:14 +0000
+Reviewed-on: https://review.openstack.org/322447
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
