@@ -27,6 +27,12 @@ Download kubectl::
    chmod 755 kubectl
    PATH=$PATH:`pwd`
 
+Create a Kubernetes cluster configuration::
+
+  kubectl config set-cluster kolla --server=http://localhost:8080
+  kubectl config set-context kolla --cluster=kolla
+  kubectl config use-context kolla
+
 Try it out::
 
    kubectl get nodes
