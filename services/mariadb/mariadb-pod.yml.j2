@@ -19,7 +19,7 @@ spec:
         - name: ETCD_HOST
           value: {{ etcd_ip_address }}
         - name: ETCD_PORT
-          value: {{ etcd_port }}
+          value: "{{ etcd_port }}"
   volumes:
     - name: mariadb-config
       configMap:
