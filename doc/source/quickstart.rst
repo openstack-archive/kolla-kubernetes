@@ -88,6 +88,17 @@ Kolla can be used to generate config files.  The config files will be populated 
 
 ``kolla-genpwd`` will generate passwords and encryption keys and populate the passwords.yml file.  ``kolla-ansible genconfig`` will generate the config files.
 
+Building Kolla Containers
+=========================
+
+Kolla-kubernetes doesn't work against any released version of Kolla presently.
+Furthermore, until `patch 320744 <https://review.openstack.org/#/c/320744/>`_ and
+`patch 321529 <https://review.openstack.org/#/c/321529/>`_ are merged, it won't work
+against mainline.
+
+The Kolla documentation engine has a detailed `overview of building the
+containers <http://docs.openstack.org/developer/kolla/image-building.html>`_.
+
 Installing Kolla-Kubernetes
 ===========================
 
