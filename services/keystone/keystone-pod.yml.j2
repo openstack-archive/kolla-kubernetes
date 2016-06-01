@@ -1,27 +1,33 @@
 apiVersion: v1
-kind: Pod
-metadata:
-   name: keystone
+kind: ReplicationController
 spec:
-  hostNetwork: True
-  containers:
-    - image: "{{ keystone_image_full }}"
-      name: keystone
-      volumeMounts:
-        - mountPath: {{ container_config_directory }}
-          name: keystone-config
-        - mountPath: /var/log/kolla
-          name: kolla-logs
-      env:
-        - name: KOLLA_CONFIG_STRATEGY
-          value: "{{ config_strategy }}"
-        - name: ETCD_HOST
-          value: "{{ etcd_ip_address }}"
-        - name: ETCD_PORT
-          value: "{{ etcd_port }}"
-  volumes:
-    - name: keystone-config
-      configMap:
-        name: keystone-configmap
-    - name: kolla-logs
-      emptyDir: {}
+  replicas: 1
+  selector:
+      service: keystone
+  template:
+    metadata:
+      labels:
+        service: keystone
+    spec:
+      hostNetwork: True
+      containers:
+        - image: "{{ keystone_image_full }}"
+          name: keystone
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: keystone-config
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+            - name: ETCD_HOST
+              value: "{{ etcd_ip_address }}"
+            - name: ETCD_PORT
+              value: "{{ etcd_port }}"
+      volumes:
+        - name: keystone-config
+          configMap:
+            name: keystone-configmap
+        - name: kolla-logs
+          emptyDir: {}
