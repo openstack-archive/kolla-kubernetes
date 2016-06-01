@@ -17,6 +17,7 @@ Contents:
    quickstart
    readme
    usage
+   labels
 
 Kolla-Kubernetes Services
 =========================
