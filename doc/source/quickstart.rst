@@ -88,17 +88,25 @@ Kolla can be used to generate config files.  The config files will be populated 
 Installing Kolla-Kubernetes
 ===========================
 
-::
-
-    pip install kolla-kubernetes
-
 The extra configuration files that Kolla-kubernetes requires aren't where
 the kolla-kubernetes CLI expects them to be located, therefore we need to
 use an environment variable, ``K8S_SERVICE_DIR``.
 
-To install any service supported by Kolla-Kubernetes, say mariadb:
-
 ::
 
+    pip install kolla-kubernetes
     export K8S_SERVICE_DIR=/usr/local/share/kolla-kubernetes/services/
+
+Optionally, an operator can access the CLI from ``tools/kolla-kubernetes.py``.
+
+Running Kolla-Kubernetes
+========================
+
+Before running a service, the operator must run the bootstrap task.
+For example, to bootstrap mariadb run::
+
+   kolla-kubernetes bootstrap maraidb
+
+To run a service supported by Kolla-Kubernetes do the following::
+
     kolla-kubernetes run mariadb
