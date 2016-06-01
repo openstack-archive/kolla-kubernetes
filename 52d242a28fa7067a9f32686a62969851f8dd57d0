@@ -1,0 +1,10 @@
+Code-Review+1: Md Nadeem <md.nadeem@nectechnologies.in>
+Code-Review+2: Davanum Srinivas (dims) <davanum@gmail.com>
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Workflow+1: Ryan Hallisey <rhallise@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 01 Jun 2016 21:59:02 +0000
+Reviewed-on: https://review.openstack.org/322362
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
