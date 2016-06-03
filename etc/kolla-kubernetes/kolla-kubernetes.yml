@@ -12,5 +12,5 @@
 ########################
 # Kubernetes Cluster
 ########################
-etcd_ip_address: "127.0.0.1"
-etcd_port: "4001"
+kubernetes_ip_address: "127.0.0.1"
+kubernetes_controller_port: "8080"
