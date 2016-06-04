@@ -8,7 +8,6 @@ spec:
       name: mariadb-bootstrap
     spec:
       restartPolicy: OnFailure
-      hostNetwork: True
       containers:
         - image: "{{ mariadb_image_full }}"
           name: mariadb-bootstrap
