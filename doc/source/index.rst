@@ -18,6 +18,15 @@ Contents:
    readme
    usage
 
+Kolla-Kubernetes Services
+=========================
+
+.. toctree::
+   :maxdepth: 1
+
+   mariadb-guide
+
+
 Indices and tables
 ==================
 
