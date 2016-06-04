@@ -9,7 +9,6 @@ spec:
       labels:
         service: mariadb
     spec:
-      hostNetwork: True
       containers:
         - image: "{{ mariadb_image_full }}"
           name: mariadb
@@ -28,6 +27,9 @@ spec:
               value: {{ etcd_ip_address }}
             - name: ETCD_PORT
               value: "{{ etcd_port }}"
+          ports:
+            - containerPort: {{ mariadb_port }}
+              name: mariadb
       volumes:
         - name: mariadb-config
           configMap:
