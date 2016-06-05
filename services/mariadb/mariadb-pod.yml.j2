@@ -21,6 +21,8 @@ spec:
             - mountPath: /var/log/kolla/
               name: kolla-logs
           env:
+            - name: KOLLA_KUBERNETES
+              value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
       volumes:
