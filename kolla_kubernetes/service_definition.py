@@ -77,6 +77,10 @@ CONTAINER_DEFINITIONS = {'mariadb': ['mariadb'],
                          'swift-proxy': ['swift-proxy-server']}
 
 
+def get_service_dict():
+    return POD_DEFINITIONS
+
+
 def get_pod_definition(service):
     return POD_DEFINITIONS[service]
 
