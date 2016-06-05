@@ -63,6 +63,8 @@ spec:
             - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
+            - name: KOLLA_KUBERNETES
+              value: ""
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
@@ -90,6 +92,8 @@ spec:
             - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
+            - name: KOLLA_KUBERNETES
+              value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
       volumes:
