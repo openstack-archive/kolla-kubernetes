@@ -16,15 +16,11 @@ spec:
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: keystone-config
-            - mountPath: /var/log/kolla
+            - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
-            - name: ETCD_HOST
-              value: "{{ etcd_ip_address }}"
-            - name: ETCD_PORT
-              value: "{{ etcd_port }}"
       volumes:
         - name: keystone-config
           configMap:

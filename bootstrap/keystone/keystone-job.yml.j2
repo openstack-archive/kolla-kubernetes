@@ -24,8 +24,6 @@ spec:
               name: dev
             - mountPath: /run
               name: run
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -50,13 +48,25 @@ spec:
               name: dev
             - mountPath: /run
               name: run
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
             - name: ANSIBLE_LIBRARY
               value: "/usr/share/ansible"
+
+        - image: "{{ keystone_image_full }}"
+          name: keystone-bootstrap
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: keystone-config
+              readOnly: true
+            - mountPath: /var/log/kolla/keystone
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
 
         - image: "{{ keystone_image_full }}"
           name: keystone-endpoints
@@ -77,17 +87,11 @@ spec:
             - mountPath: {{ container_config_directory }}
               name: keystone-config
               readOnly: true
-            - mountPath: /var/log/kolla
+            - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
-            - name: KOLLA_KUBERNETES_BOOTSTRAP
-              value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
-            - name: ETCD_HOST
-              value: "{{ etcd_ip_address }}"
-            - name: ETCD_PORT
-              value: "{{ etcd_port }}"
       volumes:
         - name: keystone-config
           configMap:
