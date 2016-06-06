@@ -14,3 +14,7 @@
 ########################
 etcd_ip_address: "127.0.0.1"
 etcd_port: "4001"
+
+keystone_replicas: "1"
+memcached_replicas: "1"
+rabbitmq_replicas: "1"
