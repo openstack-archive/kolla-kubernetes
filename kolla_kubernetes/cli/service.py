@@ -30,7 +30,10 @@ class Bootstrap(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        service.bootstrap_service(parsed_args.service)
+        if parsed_args.service == 'all':
+            service.all_services('bootstrap')
+        else:
+            service.bootstrap_service(parsed_args.service)
 
 
 class Run(command.Command):
@@ -42,7 +45,10 @@ class Run(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        service.run_service(parsed_args.service)
+        if parsed_args.service == 'all':
+            service.all_services('run')
+        else:
+            service.run_service(parsed_args.service)
 
 
 class Kill(command.Command):
@@ -54,4 +60,7 @@ class Kill(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        service.kill_service(parsed_args.service)
+        if parsed_args.service == 'all':
+            service.all_services('kill')
+        else:
+            service.kill_service(parsed_args.service)

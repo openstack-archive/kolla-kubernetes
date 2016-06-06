@@ -143,6 +143,17 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
             f.write(yaml.dump(content, default_flow_style=False))
 
 
+def all_services(action):
+    service_list = service_definition.get_service_dict()
+    for service in service_list:
+        if action == 'bootstrap':
+            bootstrap_service(service)
+        elif action == 'run':
+            run_service(service)
+        elif action == 'kill':
+            kill_service(service)
+
+
 def bootstrap_service(service_name, variables=None):
     working_dir = _create_working_directory('bootstrap')
     _build_bootstrap(working_dir, service_name, variables=variables)
