@@ -1,0 +1,9 @@
+Code-Review+2: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Code-Review+2: Davanum Srinivas (dims) <davanum@gmail.com>
+Workflow+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 06 Jun 2016 22:28:41 +0000
+Reviewed-on: https://review.openstack.org/325681
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
