@@ -10,13 +10,16 @@ Dependencies
 =====================   ===========  ===========  =========================
 Component               Min Version  Max Version  Comment
 =====================   ===========  ===========  =========================
-Ansible                 1.9.4        < 2.0.0      On deployment host
+Ansible                 2.00         < 2.1.0      On deployment host
 Docker                  1.10.0       < 1.11.0     On target nodes
 Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.8.0        none         On deployment host
 Kubernetes              1.2.4        none         On all hosts
 =====================   ===========  ===========  =========================
 
+.. NOTE:: Kolla (which provides the templating) is *very* sensitive about the
+  Ansible version.  Mainline currently requires 2.0.x.  Newer versions (2.1 or
+  higher) will fail to work, as will pre 2.0 versions.
 
 Since Docker is required to build images as well as be present on all deployed
 targets, the kolla-kubernetes community recommends installing the official
@@ -24,7 +27,7 @@ Docker, Inc. packaged version of Docker for maximum stability and compatibility.
 
 .. NOTE:: Docker 1.11.0 is not compatible with Kubernetes due to some issues in
   Docker. The below command will install the latest docker and revert back to
-  1.10.3.  For different Debian or Ubuntu distributions, you may need to use 
+  1.10.3.  For different Debian or Ubuntu distributions, you may need to use
   ``apt-cache madison docker-engine`` to get the correct version.
 
 ::
