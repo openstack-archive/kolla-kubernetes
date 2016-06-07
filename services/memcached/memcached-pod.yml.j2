@@ -7,9 +7,8 @@ spec:
   template:
     metadata:
       labels:
-        service: memcached      
+        service: memcached
     spec:
-      hostNetwork: True
       containers:
         - image: "{{ memcached_image_full }}"
           name: memcached
@@ -19,6 +18,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+          ports:
+            - containerPort: {{ memcached_port }}
+              name: memcached
       volumes:
         - name: memcached-config
           configMap:
