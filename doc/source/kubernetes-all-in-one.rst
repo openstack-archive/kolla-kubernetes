@@ -11,9 +11,9 @@ http://kubernetes.io/docs/getting-started-guides/docker/
 
 The hyperkube container runs the following services:
   - kube-apiserver (The master)
-  - kublet (Starts/Stops pods and containers also syncs config)
+  - kubelet (Starts/Stops pods and containers also syncs config)
   - kube-scheduler (Resource manager)
-  - kube-controller-manger (Manages desired state by monitoring the RC)
+  - kube-controller-manager (Manages desired state by monitoring the RC)
   - kube-proxy (Exposes the services on each node)
   - etcd (Distributed key-value store)
 
