@@ -104,6 +104,13 @@ services locally.  Follow the :doc:`kubernetes-all-in-one` documentation.
 Installing Kolla and Kolla-Kubernetes
 =====================================
 
+Kolla and Kolla-Kubernetes have different models for how services bind to listen
+ports.  Add the following line to ``/etc/kolla/globals.yml``:
+
+::
+
+    api_interface_address: "0.0.0.0"
+
 Follow the instructions for a **full install** if you are not a developer.
 Choose a **development install** if you will frequently pull or contribute
 patches.  A development install allows you to ```git pull``` within the
@@ -148,6 +155,10 @@ Full Install
 
 Development Install
 -------------------
+Kolla can be used to generate config files.  The config files will be populated
+based on what's in globals.yml and passwords.yml then placed in ``/etc/kolla``.
+
+Then, from inside the kolla directory use the following command.
 
 ::
 
