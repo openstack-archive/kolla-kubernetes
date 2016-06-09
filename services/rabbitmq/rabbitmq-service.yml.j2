@@ -3,7 +3,10 @@ kind: Service
 spec:
   ports:
     - port: {{ rabbitmq_port }}
+      name: rabbitmq
+    - port: {{ rabbitmq_management_port }}
+      name: management
   selector:
-    name: rabbitmq
+    service: rabbitmq
 metadata:
    name: rabbitmq

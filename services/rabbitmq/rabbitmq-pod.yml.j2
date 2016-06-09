@@ -9,7 +9,6 @@ spec:
       labels:
         service: rabbitmq
     spec:
-      hostNetwork: True
       containers:
         - image: "{{ rabbitmq_image_full }}"
           name: rabbitmq
@@ -23,6 +22,11 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+          ports:
+            - containerPort: {{ rabbitmq_port }}
+              name: rabbitmq
+            - containerPort: {{ rabbitmq_management_port }}
+              name: management
       volumes:
         - name: rabbitmq-config
           configMap:
