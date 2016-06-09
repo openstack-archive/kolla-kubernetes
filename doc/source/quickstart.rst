@@ -82,7 +82,14 @@ Installing Kolla
 Generating Configuration Files
 ==============================
 
-Kolla can be used to generate config files.  The config files will be populated based on what's in globals.yml and passwords.yml then placed in ``/etc/kolla``.  From inside the kolla directory use the following command.
+Kolla can be used to generate config files.  The config files will be populated based on what's in globals.yml and passwords.yml then placed in ``/etc/kolla``.
+
+Kolla and Kolla-Kubernetes have different models for how services bind to listen ports.  Add the following line to ``/etc/kolla/globals.yml``:
+
+::
+    api_interface_address: "0.0.0.0"
+
+Then, from inside the kolla directory use the following command.
 
 ::
 
