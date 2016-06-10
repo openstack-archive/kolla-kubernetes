@@ -9,7 +9,6 @@ spec:
       labels:
         service: keystone
     spec:
-      hostNetwork: True
       containers:
         - image: "{{ keystone_image_full }}"
           name: keystone
@@ -23,6 +22,11 @@ spec:
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
+          ports:
+            - containerPort: {{ keystone_admin_port }}
+              name: keystone-admin
+            - containerPort: {{ keystone_public_port }}
+              name: keystone-public
       volumes:
         - name: keystone-config
           configMap:

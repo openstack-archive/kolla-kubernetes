@@ -3,7 +3,8 @@ kind: Service
 spec:
   ports:
     - port: {{ keystone_admin_port }}
+      name: keystone-admin
   selector:
-    name: keystone-admin
+    service: keystone
 metadata:
    name: keystone-admin
