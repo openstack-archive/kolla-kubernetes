@@ -3,6 +3,7 @@ kind: Service
 spec:
   ports:
     - port: {{ keystone_public_port }}
+      name: keystone-public
   selector:
     name: keystone-public
 metadata:

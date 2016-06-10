@@ -8,17 +8,17 @@ spec:
       name: keystone-bootstrap
     spec:
       restartPolicy: OnFailure
-      hostNetwork: True
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-keystone-database
-          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
-          command: ["usr/bin/ansible", "localhost", "-m", "mysql_db",
-                    "-a", "login_host='{{ kolla_internal_vip_address }}'
-                    login_port='{{ mariadb_port }}'
-                    login_user='{{ database_user }}'
-                    login_password='{{ database_password }}'
-                    name='{{ keystone_database_name }}'"]
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_db -a
+              "login_host=${MARIADB_SERVICE_HOST}
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='{{ database_password }}'
+               name='{{ keystone_database_name }}'"
           volumeMounts:
             - mountPath: /dev
               name: dev
@@ -32,17 +32,18 @@ spec:
 
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-keystone-user-and-permissions
-          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
-          command: ["/usr/bin/ansible", "localhost", "-m", "mysql_user",
-                    "-a", "login_host='{{ kolla_internal_vip_address }}'
-                    login_port='{{ mariadb_port }}'
-                    login_user='{{ database_user }}'
-                    login_password='{{ database_password }}'
-                    name='{{ keystone_database_name }}'
-                    password='{{ keystone_database_password }}'
-                    host='%'
-                    priv='{{ keystone_database_name }}.*:ALL'
-                    append_privs='yes'"]
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_user -a
+              "login_host=${MARIADB_SERVICE_HOST}
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='{{ database_password }}'
+               name='{{ keystone_database_name }}'
+               password='{{ keystone_database_password }}'
+               host='%'
+               priv='{{ keystone_database_name }}.*:ALL'
+               append_privs='yes'"
           volumeMounts:
             - mountPath: /dev
               name: dev
