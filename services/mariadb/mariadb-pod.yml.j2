@@ -22,11 +22,6 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-            #TODO: Replace with templated values
-            - name: ETCD_HOST
-              value: {{ etcd_ip_address }}
-            - name: ETCD_PORT
-              value: "{{ etcd_port }}"
           ports:
             - containerPort: {{ mariadb_port }}
               name: mariadb
