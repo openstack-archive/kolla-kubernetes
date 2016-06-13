@@ -55,7 +55,7 @@ def get_shared_directory():
         os.path.realpath(sys.argv[0])), '../..'))
     base_script_path = os.path.basename(script_path)
 
-    if base_script_path == 'kolla-kubernetes':
+    if base_script_path == 'kolla':
         return script_path
     elif os.path.exists('/usr/local/share/kolla'):
         return '/usr/local/share/kolla'
