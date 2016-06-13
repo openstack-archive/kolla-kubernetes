@@ -1,0 +1,9 @@
+Code-Review+2: Liyi Meng <liyi.meng@ericsson.com>
+Code-Review+2: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Workflow+1: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 13 Jun 2016 20:18:19 +0000
+Reviewed-on: https://review.openstack.org/328761
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
