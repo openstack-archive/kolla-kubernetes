@@ -38,7 +38,8 @@ POD_DEFINITIONS = {'mariadb': ['mariadb'],
                    'neutron': ['neutron-compute', 'neutron-control',
                                'neutron-network'],
                    'swift': ['swift-account', 'swift-container',
-                             'swift-object', 'swift-proxy']}
+                             'swift-object', 'swift-proxy'],
+                   'horizon': ['horizon']}
 
 # TODO(rhallisey): make container definitions dynamic
 # The containers in a pod
@@ -74,7 +75,8 @@ CONTAINER_DEFINITIONS = {'mariadb': ['mariadb'],
                                           'swift-object-replicator',
                                           'swift-object-updater',
                                           'swift-object-expirer'],
-                         'swift-proxy': ['swift-proxy-server']}
+                         'swift-proxy': ['swift-proxy-server'],
+                         'horizon': ['horizon']}
 
 
 def get_service_dict():
