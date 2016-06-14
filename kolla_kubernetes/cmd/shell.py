@@ -44,7 +44,10 @@ log.set_defaults(
 cli_opts = [
     cfg.StrOpt('service-dir',
                default=utils.env('K8S_SERVICE_DIR'),
-               help='Directory with services, (Env: K8S_SERVICE_DIR)'),
+               help='kolla-kubernetes services dir (Env: K8S_SERVICE_DIR)'),
+    cfg.StrOpt('bootstrap-dir',
+               default=utils.env('K8S_BOOTSTRAP_DIR'),
+               help='kolla-kubernetes bootstrap dir (Env: K8S_BOOTSTRAP_DIR)'),
 ]
 CONF.register_cli_opts(cli_opts)
 

@@ -20,7 +20,8 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import yaml
 
-from kolla_kubernetes.common import file_utils
+from kolla_kubernetes.common.pathfinder import PathFinder
+
 from kolla_kubernetes.common import jinja_utils
 from kolla_kubernetes.common import utils
 from kolla_kubernetes import service_definition
@@ -46,24 +47,22 @@ def _create_working_directory(target='services'):
 
 def _load_variables_from_file(project_name):
     jvars = utils.JvarsDict()
-    f = file_utils.find_config_file('kolla-kubernetes.yml')
-    if os.path.exists(f):
-        with open(f, 'r') as gf:
-            jvars.set_global_vars(yaml.load(gf))
-    else:
-        LOG.warning('Unable to load %s', f)
-    f = file_utils.find_config_file('globals.yml')
-    if os.path.exists(f):
-        with open(f, 'r') as gf:
-            jvars.set_global_vars(yaml.load(gf))
-    else:
-        LOG.warning('Unable to load %s', f)
-    f = file_utils.find_config_file('passwords.yml')
+
+    for file_ in ['kolla-kubernetes.yml', 'globals.yml']:
+        f = PathFinder.find_config_file(file_)
+        if os.path.exists(f):
+            with open(f, 'r') as gf:
+                jvars.set_global_vars(yaml.load(gf))
+        else:
+            LOG.warning('Unable to load %s', f)
+
+    f = PathFinder.find_config_file('passwords.yml')
     if os.path.exists(f):
         with open(f, 'r') as gf:
             jvars.update(yaml.load(gf))
     else:
         LOG.warning('Unable to load %s', f)
+
     # Apply the basic variables that aren't defined in any config file.
     jvars.update({
         'deployment_id': CONF.kolla.deployment_id,
@@ -71,7 +70,7 @@ def _load_variables_from_file(project_name):
         'timestamp': str(time.time())
     })
 
-    dir = file_utils.get_shared_directory()
+    dir = PathFinder.find_kolla_dir()
     all_yml = os.path.join(dir, 'ansible/group_vars/all.yml')
     local_dir = os.path.join(PROJECT_ROOT, 'kolla/ansible/')
 
@@ -188,7 +187,7 @@ def _bootstrap_instance(directory, service_name):
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
                    "configmap", '%s-configmap' % container]
-            for f in file_utils.get_service_config_files(container):
+            for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
 
@@ -211,7 +210,7 @@ def _deploy_instance(directory, service_name, pod_list):
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
                    "configmap", '%s-configmap' % container]
-            for f in file_utils.get_service_config_files(container):
+            for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
 
