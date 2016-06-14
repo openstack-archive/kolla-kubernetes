@@ -22,9 +22,9 @@ from cliff import interactive
 from oslo_config import cfg
 from oslo_log import log
 
-PROJECT_ROOT = os.path.abspath(os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '../..'))
+from kolla_kubernetes.common.pathfinder import PathFinder
 
+PROJECT_ROOT = PathFinder.find_project_root()
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -44,7 +44,10 @@ log.set_defaults(
 cli_opts = [
     cfg.StrOpt('service-dir',
                default=utils.env('K8S_SERVICE_DIR'),
-               help='Directory with services, (Env: K8S_SERVICE_DIR)'),
+               help='kolla-kubernetes services directory, (Env: K8S_SERVICE_DIR)'),
+    cfg.StrOpt('bootstrap-dir',
+               default=utils.env('K8S_BOOTSTRAP_DIR'),
+               help='kolla-kubernetes bootstrap directory, (Env: K8S_BOOTSTRAP_DIR)'),
 ]
 CONF.register_cli_opts(cli_opts)
 
