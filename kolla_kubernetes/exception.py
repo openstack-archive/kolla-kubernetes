@@ -19,6 +19,10 @@ class KollaDirNotFoundException(KollaException):
     pass
 
 
+class KollaFileNotFoundException(KollaException):
+    pass
+
+
 class KollaNotFoundException(KollaException):
     def __init__(self, message, entity='file'):
         super(KollaNotFoundException, self).__init__(
