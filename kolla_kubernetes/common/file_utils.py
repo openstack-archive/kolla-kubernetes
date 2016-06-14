@@ -67,9 +67,9 @@ def get_shared_directory():
 
 
 def find_base_dir():
-    if os.path.exists('/usr/local/share/kolla'):
-        return '/usr/local/share/kolla'
-    elif os.path.exists('/usr/share/kolla'):
-        return '/usr/share/kolla'
+    if os.path.exists('/usr/local/share/kolla-kubernetes'):
+        return '/usr/local/share/kolla-kubernetes'
+    elif os.path.exists('/usr/share/kolla-kubernetes'):
+        return '/usr/share/kolla-kubernetes'
     else:
         return get_src_dir()
