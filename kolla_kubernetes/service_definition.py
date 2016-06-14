@@ -16,7 +16,7 @@ import os.path
 from oslo_config import cfg
 from oslo_log import log
 
-from kolla_kubernetes.common import file_utils
+from kolla_kubernetes.common.pathfinder import PathFinder
 from kolla_kubernetes import exception
 
 CONF = cfg.CONF
@@ -89,13 +89,8 @@ def get_container_definition(container):
     return CONTAINER_DEFINITIONS[container]
 
 
-def get_services_directory():
-    return (CONF.service_dir or
-            os.path.join(file_utils.find_base_dir(), 'services'))
-
-
 def find_bootstrap_files(service_name):
-    bootstrap_dir = os.path.join(get_services_directory(), '../bootstrap/')
+    bootstrap_dir = os.path.join(PathFinder.find_bootstrap_dir(), service_name)
     LOG.debug('Looking for bootstrap files in %s', bootstrap_dir)
     if not os.path.exists(bootstrap_dir):
         LOG.info('No bootstrap job for service %s', service_name)
@@ -111,7 +106,7 @@ def find_bootstrap_files(service_name):
 
 
 def find_service_files(service_name):
-    service_dir = get_services_directory()
+    service_dir = os.path.join(PathFinder.find_service_dir(), service_name)
     LOG.debug('Looking for services files in %s', service_dir)
 
     if not os.path.exists(service_dir):

@@ -10,12 +10,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kolla_kubernetes.common import file_utils
+from kolla_kubernetes.common.pathfinder import PathFinder
 from kolla_kubernetes.tests import base
 
 
 class FindBaseDirTest(base.BaseTestCase):
 
-    def test_when_is_a_test(self):
-        tdir = file_utils.find_base_dir()
-        self.assertIsNotNone(tdir)
+    def test_find_project_root(self):
+        root_dir = PathFinder.find_project_root()
+
+        # check for non-null
+        self.assertIsNotNone(root_dir)
+
+        # check that project_root is not empty
+        self.assertTrue(len(root_dir) > 0)
