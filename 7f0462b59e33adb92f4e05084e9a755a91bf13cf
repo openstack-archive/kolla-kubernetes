@@ -1,0 +1,9 @@
+Code-Review+2: David Wang <dcwangmit01@gmail.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 14 Jun 2016 20:28:03 +0000
+Reviewed-on: https://review.openstack.org/324116
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
