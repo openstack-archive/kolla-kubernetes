@@ -17,9 +17,17 @@ The hyperkube container runs the following services:
   - kube-proxy (Exposes the services on each node)
   - etcd (Distributed key-value store)
 
+You should change the address in ``--cluster-dns=`` from the provided IP to
+your system's local IP address. (Use ``hostname -i`` to check).
+
 ::
 
-   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-dns=10.0.0.10 --cluster-domain=openstack --allow-privileged=true --v=2
+   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-dns=10.0.2.15 --cluster-domain=openstack --allow-privileged=true --v=2
+
+Set up SkyDNS::
+
+    docker run -d --net=host --restart=always gcr.io/google_containers/kube2sky:1.12 -v=10 -logtostderr=true -domain=openstack.local -etcd-server="http://127.0.0.1:4001"
+    docker run -d --net=host --restart=always -e ETCD_MACHINES="http://127.0.0.1:4001" -e SKYDNS_DOMAIN="openstack.local" -e SKYDNS_ADDR="0.0.0.0:53" -e SKYDNS_NAMESERVERS="8.8.8.8:53,8.8.4.4:53" gcr.io/google_containers/skydns:2015-10-13-8c72f8c
 
 Download kubectl::
 
