@@ -24,7 +24,7 @@ need to set your system's IP address to.  (e.g. ``--cluster-dns=192.0.2.0``)
 
 ::
 
-   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=openstack --allow-privileged=true --v=2 --cluster-dns=
+   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=openstack.local --allow-privileged=true --v=2 --cluster-dns=
 
 Set up SkyDNS::
 
@@ -50,3 +50,46 @@ Create a Kubernetes cluster configuration::
 Try it out::
 
    kubectl get nodes
+
+
+Debugging
+=========
+
+kube2sky
+--------
+
+kube2sky queries Kubernetes and builds out the necessary etcd records for 
+SkyDNS to use.
+
+To check to see if the Kubernetes service has been copied over from Kubernetes
+to SkyDNS, you can check the etcd::
+
+    curl http://127.0.0.1:4001/v2/keys/skydns/local/openstack/svc/default/kubernetes
+
+You should see something like this::
+
+    {"action":"get","node":{"key":"/skydns/local/openstack/svc/default/kubernetes","dir":true,"nodes":[{"key":"/skydns/local/openstack/svc/default/kubernetes/c88f1059","value":"{\"host\":\"10.0.0.1\",\"priority\":10,\"weight\":10,\"ttl\":30,\"targetstrip\":0}","modifiedIndex":137,"createdIndex":137}],"modifiedIndex":92,"createdIndex":92}}
+
+That is the DNS record for the Kubernetes service.
+
+SkyDNS
+------
+
+SkyDNS is a DNS server that serves up data stored in etcd.
+
+After you have verified that kube2sky is creating the necessary records in 
+etcd, you can check to see if the SkyDNS server is responding::
+
+    nslookup kubernetes.default.svc.openstack.local 127.0.0.1
+
+You should see something like this::
+
+    Server:   127.0.0.1
+    Address:  127.0.0.1#53
+
+    Name: kubernetes.default.svc.openstack.local
+    Address: 10.0.0.1
+
+From inside a Kubernetes pod, you can use::
+
+    nslookup kubernetes
