@@ -51,6 +51,3 @@ Debug an Instance
 MariaDB is configured to store it's database on the host at
 ``/var/lib/mysql``.  If there's contents from previous runs located there, the
 bootstrap will fail.
-
-Until `patch 320744 <https://review.openstack.org/#/c/320744/>`_ is merged,
-you will need to build your own MariaDB container.
