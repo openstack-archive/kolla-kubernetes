@@ -62,7 +62,7 @@ spec:
               name: keystone-config
               readOnly: true
             - mountPath: /var/log/kolla/keystone
-              name: kolla-logs
+              name: kolla-logs-bootstrap
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -111,4 +111,6 @@ spec:
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
+          emptyDir: {}
+        - name: kolla-logs-bootstrap
           emptyDir: {}
