@@ -10,16 +10,15 @@ Dependencies
 =====================   ===========  ===========  =========================
 Component               Min Version  Max Version  Comment
 =====================   ===========  ===========  =========================
-Ansible                 2.00         < 2.1.0      On deployment host
+Ansible                 2.00         none         On deployment host
 Docker                  1.10.0       < 1.11.0     On target nodes
 Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.8.0        none         On deployment host
 Kubernetes              1.2.4        none         On all hosts
 =====================   ===========  ===========  =========================
 
-.. NOTE:: Kolla (which provides the templating) is *very* sensitive about the
-  Ansible version.  Mainline currently requires 2.0.x.  Newer versions (2.1 or
-  higher) will fail to work, as will pre 2.0 versions.
+.. NOTE:: Kolla (which provides the templating) is sensitive about the
+  Ansible version.  Mainline currently requires 2.0.x or above.
 
 Since Docker is required to build images as well as be present on all deployed
 targets, the kolla-kubernetes community recommends installing the official
@@ -94,10 +93,8 @@ Kolla can be used to generate config files.  The config files will be populated 
 Building Kolla Containers
 =========================
 
-Kolla-kubernetes doesn't work against any released version of Kolla presently.
-Furthermore, until `patch 320744 <https://review.openstack.org/#/c/320744/>`_ and
-`patch 321529 <https://review.openstack.org/#/c/321529/>`_ are merged, it won't work
-against mainline.
+Kolla-kubernetes works against Kolla mainline's containers but you need to
+build them.
 
 The Kolla documentation engine has a detailed `overview of building the
 containers <http://docs.openstack.org/developer/kolla/image-building.html>`_.
