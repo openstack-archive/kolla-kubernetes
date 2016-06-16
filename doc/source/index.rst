@@ -26,6 +26,7 @@ Kolla-Kubernetes Services
    :maxdepth: 1
 
    mariadb-guide
+   memcached-guide
 
 
 Indices and tables
