@@ -143,8 +143,13 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
             f.write(yaml.dump(content, default_flow_style=False))
 
 
-def all_services(action):
-    service_list = service_definition.get_service_dict()
+def execute_action(service_name, action):
+    service_list = None
+    if service_name == 'all':
+        service_list = service_definition.get_service_dict()
+    else:
+        service_list = [service_name]
+
     for service in service_list:
         if action == 'bootstrap':
             bootstrap_service(service)

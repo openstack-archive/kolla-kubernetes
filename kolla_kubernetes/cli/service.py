@@ -14,53 +14,37 @@ from cliff import command
 from oslo_config import cfg
 from oslo_log import log
 
-
 from kolla_kubernetes import service
 
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
 
-class Bootstrap(command.Command):
-    """Rolling out configurations and bootstrap a service."""
+class _ServiceCommand(command.Command):
+
+    _action = None  # must be set in derived classes
 
     def get_parser(self, prog_name):
-        parser = super(Bootstrap, self).get_parser(prog_name)
+        parser = super(_ServiceCommand, self).get_parser(prog_name)
         parser.add_argument('service')
         return parser
 
     def take_action(self, parsed_args):
-        if parsed_args.service == 'all':
-            service.all_services('bootstrap')
-        else:
-            service.bootstrap_service(parsed_args.service)
+        assert self._action is not None, (
+            "code error: derived classes must set _action")
+        service.execute_action(parsed_args.service, self._action)
 
 
-class Run(command.Command):
+class Bootstrap(_ServiceCommand):
+    """Roll out configurations and bootstrap a service."""
+    _action = 'bootstrap'
+
+
+class Run(_ServiceCommand):
     """Run a service."""
-
-    def get_parser(self, prog_name):
-        parser = super(Run, self).get_parser(prog_name)
-        parser.add_argument('service')
-        return parser
-
-    def take_action(self, parsed_args):
-        if parsed_args.service == 'all':
-            service.all_services('run')
-        else:
-            service.run_service(parsed_args.service)
+    _action = 'run'
 
 
-class Kill(command.Command):
+class Kill(_ServiceCommand):
     """Kill a service."""
-
-    def get_parser(self, prog_name):
-        parser = super(Kill, self).get_parser(prog_name)
-        parser.add_argument('service')
-        return parser
-
-    def take_action(self, parsed_args):
-        if parsed_args.service == 'all':
-            service.all_services('kill')
-        else:
-            service.kill_service(parsed_args.service)
+    _action = 'kill'
