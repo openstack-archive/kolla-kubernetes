@@ -26,7 +26,7 @@ Kolla-Kubernetes Services
    :maxdepth: 1
 
    mariadb-guide
-
+   keystone-guide
 
 Indices and tables
 ==================
