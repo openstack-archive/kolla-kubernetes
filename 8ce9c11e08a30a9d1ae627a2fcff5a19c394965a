@@ -1,0 +1,9 @@
+Code-Review+2: David Wang <dcwangmit01@gmail.com>
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Workflow+1: Ryan Hallisey <rhallise@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 17 Jun 2016 13:50:47 +0000
+Reviewed-on: https://review.openstack.org/330272
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
