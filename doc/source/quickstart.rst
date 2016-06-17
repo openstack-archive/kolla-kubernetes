@@ -39,7 +39,7 @@ Docker, Inc. packaged version of Docker for maximum stability and compatibility.
 
     # Ubuntu
     sudo apt-get remove docker-engine
-    sudo apt-get install docker-engine=1.10.3-1
+    sudo apt-get install docker-engine=1.10.3-0
 
 Docker needs to run with MountFlags=shared in order for Neutron to function
 in 'thin' containers.  Change MountFlags from slave to shared and restart
