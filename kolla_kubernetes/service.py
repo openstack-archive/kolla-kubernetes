@@ -188,9 +188,9 @@ def _bootstrap_instance(directory, service_name):
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
                    "configmap", '%s-configmap' % container]
-            cmd = cmd + ['--from-file=%s' % f
-                         for f in
-                         file_utils.get_service_config_files(container)]
+            for f in file_utils.get_service_config_files(container):
+                cmd = cmd + ['--from-file=%s=%s' % (
+                    os.path.basename(f).replace("_", "-"), f)]
 
             # TODO(rhallisey): improve error handling to check if configmap
             # already exists
@@ -211,9 +211,9 @@ def _deploy_instance(directory, service_name, pod_list):
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
                    "configmap", '%s-configmap' % container]
-            cmd = cmd + ['--from-file=%s' % f
-                         for f in
-                         file_utils.get_service_config_files(container)]
+            for f in file_utils.get_service_config_files(container):
+                cmd = cmd + ['--from-file=%s=%s' % (
+                    os.path.basename(f).replace("_", "-"), f)]
 
             # TODO(rhallisey): improve error handling to check if configmap
             # already exists
