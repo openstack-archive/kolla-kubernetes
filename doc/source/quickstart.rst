@@ -37,9 +37,9 @@ Docker, Inc. packaged version of Docker for maximum stability and compatibility.
     # CentOS
     sudo yum downgrade -y docker-engine-1.10.3-1.el7.centos
 
-    # Ubuntu
+    # Ubuntu (Assuming "Trusty Tahr" 14.04 LTS)
     sudo apt-get remove docker-engine
-    sudo apt-get install docker-engine=1.10.3-1
+    sudo apt-get install docker-engine=1.10.3-0~trusty
 
 Docker needs to run with MountFlags=shared in order for Neutron to function
 in 'thin' containers.  Change MountFlags from slave to shared and restart
