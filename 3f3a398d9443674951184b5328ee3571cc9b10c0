@@ -1,0 +1,9 @@
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Code-Review+2: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Workflow+1: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 21 Jun 2016 09:35:40 +0000
+Reviewed-on: https://review.openstack.org/331337
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
