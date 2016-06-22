@@ -3,7 +3,9 @@ kind: Service
 spec:
   ports:
     - port: {{ glance_registry_port }}
+      name: glance-registry
   selector:
-    name: glance-registry
+    service: glance
+    type: registry
 metadata:
    name: glance-registry
