@@ -3,7 +3,8 @@ kind: Service
 spec:
   ports:
     - port: {{ glance_api_port }}
+      name: glance-api
   selector:
-    name: glance-api
+    service: glance
 metadata:
    name: glance-api
