@@ -8,13 +8,12 @@ spec:
       name: glance-bootstrap
     spec:
       restartPolicy: OnFailure
-      hostNetwork: True
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-glance-database
           #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
           command: ["usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_db",
-                    "-a", "login_host='{{ kolla_internal_vip_address }}'
+                    "-a", "login_host='mariadb'
                     login_user='{{ database_user }}'
                     login_password='{{ database_password }}'
                     name='{{ glance_database_name }}'"]
@@ -35,7 +34,7 @@ spec:
           name: creating-glance-user-and-permissions
           #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
           command: ["/usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_user",
-                     "-a", "login_host='{{ kolla_internal_vip_address }}'
+                     "-a", "login_host='mariadb'
                      login_user='{{ database_user }}'
                      login_password='{{ database_password }}'
                      name='{{ glance_database_name }}'
