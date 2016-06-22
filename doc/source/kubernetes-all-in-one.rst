@@ -17,23 +17,27 @@ The hyperkube container runs the following services:
   - kube-proxy (Exposes the services on each node)
   - etcd (Distributed key-value store)
 
-You will need to know your machine's IP address in order to set up DNS
-properly.  You can use ``hostname -i`` to check.  At the end of the docker run
-command for hyperkube, there's a blank ``--cluster-dns=`` paramater that you
-need to set your system's IP address to.  (e.g. ``--cluster-dns=192.0.2.0``)
+Execute the following commands to create an all-in-one Kubernetes setup with DNS.
 
 ::
 
-   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=openstack.local --allow-privileged=true --v=2 --cluster-dns=
+   # Get the IP addr of the local host’s docker0 bridge, (use for Hyperkube DNS)
+   export DNS_SERVER_IP=`ip addr show dev docker0 | grep inet | awk '{print $2}'| cut -d'/' -f1`
+   export CLUSTER_DOMAIN="openstack.local"
 
-Set up SkyDNS::
+   # Start Hyperkube
+   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=${CLUSTER_DOMAIN} --allow-privileged=true --v=2 --cluster-dns=${DNS_SERVER_IP}
 
-    docker run -d --net=host --restart=always gcr.io/google_containers/kube2sky:1.12 -v=10 -logtostderr=true -domain=openstack.local -etcd-server="http://127.0.0.1:4001"
-    docker run -d --net=host --restart=always -e ETCD_MACHINES="http://127.0.0.1:4001" -e SKYDNS_DOMAIN="openstack.local" -e SKYDNS_ADDR="0.0.0.0:53" -e SKYDNS_NAMESERVERS="8.8.8.8:53,8.8.4.4:53" gcr.io/google_containers/skydns:2015-10-13-8c72f8c
+   # Start Kube2Sky on localhost (must start before skydns)
+   docker run -d --net=host --restart=always gcr.io/google_containers/kube2sky:1.12 -v=10 -logtostderr=true -domain=${CLUSTER_DOMAIN} -etcd-server="http://127.0.0.1:4001"
 
-The second line defaults to pass through any external DNS requests to the
-Google DNS servers that should work under most circumstances.  You can always
-change 8.8.8.8 and 8.8.4.4 to custom DNS providers if necessary.
+   # Start SkyDNS on localhost (must start after kube2sky)
+   docker run -d --net=host --restart=always -e ETCD_MACHINES="http://127.0.0.1:4001" -e SKYDNS_DOMAIN="${CLUSTER_DOMAIN}." -e SKYDNS_ADDR="0.0.0.0:53" -e SKYDNS_NAMESERVERS="8.8.8.8:53,8.8.4.4:53" gcr.io/google_containers/skydns:2015-10-13-8c72f8c
+
+
+SkyDNS as configured above will any external DNS requests through to the Google
+DNS servers, which should work under most circumstances.  You may change the
+DNS servers 8.8.8.8 and 8.8.4.4 to custom DNS providers if necessary.
 
 Download kubectl::
 
