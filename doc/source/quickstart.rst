@@ -20,6 +20,9 @@ Kubernetes              1.2.4        none         On all hosts
 .. NOTE:: Kolla (which provides the templating) is sensitive about the
   Ansible version.  Mainline currently requires 2.0.x or above.
 
+Installing Docker
+=================
+
 Since Docker is required to build images as well as be present on all deployed
 targets, the kolla-kubernetes community recommends installing the official
 Docker, Inc. packaged version of Docker for maximum stability and compatibility.
@@ -31,33 +34,62 @@ Docker, Inc. packaged version of Docker for maximum stability and compatibility.
 
 ::
 
+    # Install Docker
     curl -sSL https://get.docker.io | bash
 
     # CentOS
     sudo yum downgrade -y docker-engine-1.10.3-1.el7.centos
 
     # Ubuntu (Assuming "Trusty Tahr" 14.04 LTS)
-    sudo apt-get remove docker-engine
-    sudo apt-get install docker-engine=1.10.3-0~trusty
+    sudo apt-get -y remove docker-engine
+    sudo apt-get -y install docker-engine=1.10.3-0~trusty
 
 Docker needs to run with MountFlags=shared in order for Neutron to function
-in 'thin' containers.  Change MountFlags from slave to shared and restart
-Docker.
+in 'thin' containers.  This is necessary for Hyperkube to run correctly.
+
+For CentOS, change MountFlags from "slave" to "shared" and restart Docker.
 
 ::
 
-   # Edit /usr/lib/system/systemd/docker.service
+   # CentOS
+   # Edit /usr/lib/system/systemd/docker.service to set:
    MountFlags=shared
 
+   # Restart the Docker daemon
    systemctl daemon-reload
    systemctl start docker
 
-For Ubuntu 12.04/14.04 and other distributions that use upstart instead of
-systemd, run the following:
+For Ubuntu 14.04 LTS, add a command to /etc/rc.local to mark the root
+filesystem as shared upon startup.
 
 ::
 
-    mount --make-shared /
+   # Ubuntu
+   # Edit /etc/rc.local to add:
+   mount --make-shared /
+
+   # Ensure the mount is shared
+   sudo sh /etc/rc.local
+
+
+For Ubuntu 14.04 LTS, configure the Docker daemon to use the DeviceMapper
+`Storage Backend <http://www.projectatomic.io/docs/filesystems>`_ instead of
+AUFS due to `this bug
+<https://github.com/docker/docker/issues/8966#issuecomment-94210446>`_.
+Without this modification, it would not be possible to run the Kolla-built
+CentOS docker images since they are created with an older version of AUFS.
+Therefore, use a different Storage Backend than AUFS.
+
+::
+
+   # Ubuntu
+   # Edit /etc/default/docker to add:
+   DOCKER_OPTS="-s devicemapper"
+
+   # Restart the Docker daemon
+   sudo service docker stop
+   sudo service docker start
+
 
 Kubernetes Setup with HyperKube
 ===============================
