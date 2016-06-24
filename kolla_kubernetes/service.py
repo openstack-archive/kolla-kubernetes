@@ -179,14 +179,23 @@ def kill_service(service_name, variables=None):
     _delete_instance(working_dir, service_name, pod_list)
 
 
+def _generate_configmap_version_postfix(service_name):
+    versioned = ('horizon')
+    if service_name in versioned:
+        variables = _load_variables_from_file(service_name)
+        return "-%s" % variables.get('%s_version' % service_name, "1")
+    return "-configmap"
+
+
 def _bootstrap_instance(directory, service_name):
     server = "--server=" + CONF.kolla_kubernetes.host
+    postfix = _generate_configmap_version_postfix(service_name)
     pod_list = service_definition.get_pod_definition(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
-                   "configmap", '%s-configmap' % container]
+                   "configmap", '%s%s' % (container, postfix)]
             for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
@@ -204,12 +213,13 @@ def _bootstrap_instance(directory, service_name):
 
 def _deploy_instance(directory, service_name, pod_list):
     server = "--server=" + CONF.kolla_kubernetes.host
+    postfix = _generate_configmap_version_postfix(service_name)
     pod_list = service_definition.get_pod_definition(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
-                   "configmap", '%s-configmap' % container]
+                   "configmap", '%s%s' % (container, postfix)]
             for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
@@ -228,11 +238,12 @@ def _deploy_instance(directory, service_name, pod_list):
 def _delete_instance(directory, service_name, pod_list):
     server = "--server=" + CONF.kolla_kubernetes.host
 
+    postfix = _generate_configmap_version_postfix(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete",
-                   "configmap", '%s-configmap' % container]
+                   "configmap", '%s%s' % (container, postfix)]
 
             LOG.info('Command : %r' % cmd)
             subprocess.call(cmd)
