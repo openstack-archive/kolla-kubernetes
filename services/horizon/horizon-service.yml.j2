@@ -7,6 +7,6 @@ spec:
     - name: https
       port: 443
   selector:
-    service: horizon
+    service: horizon-{{ horizon_version }}
 metadata:
-   name: horizon
+   name: horizon-{{ horizon_version }}

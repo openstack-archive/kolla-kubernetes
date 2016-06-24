@@ -3,14 +3,14 @@ kind: ReplicationController
 spec:
   replicas: {{ horizon_replicas }}
   selector:
-      service: horizon
+      service: horizon-{{ horizon_version }}
   template:
     metadata:
       labels:
-        service: horizon
+        service: horizon-{{ horizon_version }}
     spec:
       containers:
-        - name: horizon
+        - name: horizon-{{ horizon_version }}
           image: "{{ horizon_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}
@@ -35,4 +35,4 @@ spec:
             - key: local-settings
               path: local_settings
 metadata:
-   name: horizon
+   name: horizon-{{ horizon_version }}
