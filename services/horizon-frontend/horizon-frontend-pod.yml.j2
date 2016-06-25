@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ReplicationController
+spec:
+  replicas: 1
+  selector:
+      service: horizon-frontend
+  template:
+    metadata:
+      labels:
+        service: horizon-frontend
+    spec:
+      containers:
+        - name: horizon-frontend
+          image: "{{ horizon_frontend_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: horizon-frontend-configmap
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 443
+              name: https
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - killall -s SIGUSR1 haproxy
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+      volumes:
+        - name: horizon-frontend-configmap
+          configMap:
+            name: horizon-frontend-configmap
+            items:
+            - key: config.json
+              path: config.json
+            - key: haproxy.cfg
+              path: haproxy.cfg
+metadata:
+   name: horizon-frontend
