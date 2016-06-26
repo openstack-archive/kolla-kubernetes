@@ -1,0 +1,10 @@
+---
+- name: Starting MariaDB replication controller
+  command: kolla-kubernetes run mariadb
+
+- name: Checking if MariaDB service is running
+  command: kubectl get petsets mariadb-bootstrap -o json
+  register: result
+  until: "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
