@@ -1,7 +1,4 @@
 ---
-# Any config options specified here will overwrite anything in globals.yml
-# at run time.
-
 ##############################
 # Kolla Kubernetes options
 ##############################

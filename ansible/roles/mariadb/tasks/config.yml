@@ -1,0 +1,14 @@
+---
+- name: Checking if MariaDB config directory exists
+  stat: path=/etc/kolla/mariadb
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating MariaDB configmap
+  command: kolla-kubernetes resource create configmap mariadb
+
+#- name: Creating MariaDB pv
+#  command: kolla-kubernetes resource create pv mariadb
+
+#- name: Creating MariaDB pvc
+#  command: kolla-kubernetes resource create pvc mariadb
