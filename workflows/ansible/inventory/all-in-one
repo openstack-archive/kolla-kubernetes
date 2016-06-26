@@ -1,0 +1,5 @@
+[control]
+localhost       ansible_connection=local
+
+[mariadb:children]
+control

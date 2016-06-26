@@ -68,6 +68,7 @@ class KollaKubernetesResources(object):
             PathFinder.find_config_file('kolla-kubernetes.yml'),
             PathFinder.find_config_file('globals.yml'),
             PathFinder.find_config_file('passwords.yml'),
+            PathFinder.find_config_file('all.yml'),
             os.path.join(kolla_dir, 'ansible/group_vars/all.yml')]
         if service_name is not None:
             service_ansible_file = os.path.join(
