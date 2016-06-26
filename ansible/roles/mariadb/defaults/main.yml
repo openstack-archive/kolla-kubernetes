@@ -1,0 +1,6 @@
+---
+#TODO(rhallisey): Render templates to a secure location (/etc/kolla-kubernetes/templates)
+mariadb_configmap_template: "{{ role_path }}/templates/mariadb-configmap.yml"
+mariadb_bootstrap_template: "{{ role_path }}/templates/mariadb-job.yml"
+mariadb_rc_template: "{{ role_path }}/templates/mariadb-pod.yml"
+mariadb_service_template: "{{ role_path }}/templates/mariadb-service.yml"

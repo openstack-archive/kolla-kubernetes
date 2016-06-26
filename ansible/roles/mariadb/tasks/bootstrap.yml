@@ -1,0 +1,38 @@
+---
+- name: Making sure the templates dir exists
+  file:
+    path: "{{ playbook_dir }}/roles/mariadb/templates"
+    state: directory
+
+- template:
+    src="{{ playbook_dir }}/../configmaps/mariadb/mariadb-configmap.yml.j2"
+    dest="{{ mariadb_configmap_template }}"
+
+- name: Create MariaDB configmap
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_configmap_template }}"
+    state: present
+
+- template:
+    src="{{ playbook_dir }}/../bootstrap/mariadb/mariadb-job.yml.j2"
+    dest="{{ mariadb_bootstrap_template }}"
+
+- name: Bootstrapping MariaDB
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_bootstrap_template }}"
+    state: present
+
+- name: Checking MariaDB bootstrap completed
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_bootstrap_template }}"
+    state: debug
+  register: result
+  until: result.api_response.0.status.phase == "Succeeded"
+  retries: 10
+  delay: 4

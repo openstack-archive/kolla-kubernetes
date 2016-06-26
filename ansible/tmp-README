@@ -1,0 +1,9 @@
+# TODO(rhallisey): remove before merging
+
+Generate the config files by using kolla.
+ `kolla-ansible genconfig`
+
+Patch the kubernetes ansible module by grabbing these 4 patches: https://github.com/ansible/ansible-modules-extras/pull/2466
+
+Deploy:
+ansible-playbook -i ansible/inventory/kubernetes -e @/etc/kolla/globals.yml -e @../kolla/ansible/roles/mariadb/defaults/main.yml -e @../kolla/ansible/group_vars/all.yml -e @/etc/kolla/passwords.yml ansible/site.yml -vvvvvvvvv
