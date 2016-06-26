@@ -1,0 +1,41 @@
+---
+# The options in this file can be overridden in 'globals.yml'
+
+# The "temp" files that are created before merge need to stay persistent due
+# to the fact that ansible will register a "change" if it has to create them
+# again. Persistent files allow for idempotency
+container_config_directory: "/var/lib/kolla/config_files"
+
+
+###################
+# kolla-kubernetes
+###################
+# Valid options are [ COPY_ONCE, COPY_ALWAYS ]
+config_strategy: "COPY_ALWAYS"
+
+# Valid options are [ centos, fedora, oraclelinux, ubuntu ]
+kolla_base_distro: "centos"
+# Valid options are [ binary, source ]
+kolla_install_type: "binary"
+
+# Set to '--all-in-one' for AIO deploy
+deploy_mode: "--all-in-one"
+
+
+####################
+# OpenStack options
+####################
+openstack_release: "3.0.0"
+
+####################
+# Docker options
+####################
+docker_registry_email:
+docker_registry:
+docker_namespace: "kolla"
+docker_registry_username:
+
+###########
+# Services
+###########
+enable_mariadb: yes

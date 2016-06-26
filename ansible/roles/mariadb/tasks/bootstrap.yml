@@ -1,0 +1,10 @@
+---
+- name: Bootstrapping MariaDB
+  command: kolla-kubernetes bootstrap mariadb
+
+- name: Bootstrapping MariaDB
+  command: kolla-kubernetes resource status pod mariadb
+  register: result
+  until: result.results.status == "Succeeded"
+  retries: 10
+  delay: 4

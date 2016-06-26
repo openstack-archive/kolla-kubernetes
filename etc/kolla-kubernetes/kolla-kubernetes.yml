@@ -2,6 +2,7 @@
 # Any config options specified here will overwrite anything in globals.yml
 # at run time.
 
+container_config_directory: "/var/lib/kolla/config_files"
 ##############################
 # Kolla Kubernetes options
 ##############################

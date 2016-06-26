@@ -33,7 +33,12 @@ spec:
           configMap:
             name: mariadb-configmap
         - name: mariadb-persistent-storage
+        {%- if deploy_mode == "--all-in-one" %}
+          hostPath:
+            path: "/var/lib/mysql"
+        {%- else %}
           persistentVolumeClaim:
             claimName: {{ resourceName }}
+        {%- endif %}
         - name: kolla-logs
           emptyDir: {}
