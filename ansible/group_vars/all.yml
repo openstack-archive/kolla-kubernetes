@@ -1,0 +1,5 @@
+---
+enable_kubernetes: yes
+
+# TODO: Give the option to use the secure port (6443)
+kubernetes_endpoint: "127.0.0.1:8080"

@@ -1,0 +1,24 @@
+---
+# TODO: Configmap creation needs to be split apart in the CLI
+#- name: Create MariaDB configmap
+#  kubernetes:
+#    api_endpoint: "{{ kubernetes_endpoint }}"
+#    insecure: true
+#    file_reference: "{{ mariadb_configmap_template }}"
+#    state: present
+
+- name: Bootstrapping MariaDB
+  command: kolla-kubernetes bootstrap mariadb
+
+# TODO: Should we query the endpoint in the CLI or just use the module?
+#       The CLI needs to render the template and save it for this to be used
+- name: Checking if MariaDB bootstrap completed
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_bootstrap_template }}"
+    state: debug
+  register: result
+  until: result.api_response.0.status.phase == "Succeeded"
+  retries: 10
+  delay: 4

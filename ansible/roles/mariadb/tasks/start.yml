@@ -1,0 +1,22 @@
+---
+# TODO: Not available in CLI yet
+#- name: Starting MariaDB service
+#  kubernetes:
+#    api_endpoint: "{{ kubernetes_endpoint }}"
+#    insecure: true
+#    file_reference: "{{ mariadb_service_template }}"
+#    state: present
+
+- name: Starting MariaDB replication controller
+  command: kolla-kubernetes run mariadb
+
+- name: Checking if MariaDB service is running
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_service_template }}"
+    state: debug
+  register: result
+  until: result.api_response.0.status.phase == "Succeeded"
+  retries: 10
+  delay: 4
