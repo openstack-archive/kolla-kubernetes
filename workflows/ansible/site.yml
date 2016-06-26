@@ -1,0 +1,5 @@
+---
+- hosts: mariadb
+  roles:
+    - { role: mariadb,
+        when: enable_mariadb | bool }
