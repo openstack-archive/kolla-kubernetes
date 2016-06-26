@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-configmap
+data:
+  config.json: /etc/kolla/mariadb/config.json
+  galera.cnf: /etc/kolla/mariadb/galera.cnf
+  wsrep-notify.sh: /etc/kolla/mariadb/wsrep-notify.sh

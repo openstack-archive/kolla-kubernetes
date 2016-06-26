@@ -1,0 +1,5 @@
+---
+- hosts: kubernetes
+  roles:
+    - { role: mariadb,
+        when: enable_kubernetes | bool }

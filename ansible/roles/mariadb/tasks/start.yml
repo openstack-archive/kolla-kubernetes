@@ -1,0 +1,22 @@
+---
+- template:
+    src="{{ playbook_dir }}/../services/mariadb/mariadb-service.yml.j2"
+    dest="{{ mariadb_service_template }}"
+
+- name: Starting MariaDB service
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_service_template }}"
+    state: present
+
+- template:
+    src="{{ playbook_dir }}/../services/mariadb/mariadb-pod.yml.j2"
+    dest="{{ mariadb_rc_template }}"
+
+- name: Starting MariaDB replication controller
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ mariadb_rc_template }}"
+    state: present
