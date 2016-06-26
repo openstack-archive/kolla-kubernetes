@@ -1,0 +1,5 @@
+---
+# Default OpenStack services
+enable_mariadb: "yes"
+
+# Additional optional OpenStack features and services are specified here
