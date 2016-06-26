@@ -1,0 +1,13 @@
+---
+- name: Starting MariaDB replication controller
+  command: kollakube resource create pod mariadb
+
+- name: Checking if MariaDB service is running
+  command: kubectl get pods mariadb-0 -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.phase == 'Running' }}"
+  retries: 10
+  delay: 4
+
+- fail: msg="Mariadb failed to start."
+  when: "{{ (result.stdout | from_json).status.phase != 'Running' }}"

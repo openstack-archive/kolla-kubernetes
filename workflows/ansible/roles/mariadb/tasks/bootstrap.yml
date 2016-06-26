@@ -1,0 +1,17 @@
+---
+- name: Bootstrapping MariaDB
+  command: kollakube bootstrap mariadb
+
+- name: Waiting for the MariaDB bootstrap to complete
+  command: kubectl get jobs mariadb-bootstrap -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 4
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Mariadb failed to bootstrap."
+  when: "{{ (result.stdout | from_json).status.succeeded }} != 1"
+
+- name: Cleanup MariaDB Bootstrap pod
+  command: kollakube resource delete bootstrap mariadb-bootstrap

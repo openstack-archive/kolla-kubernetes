@@ -102,6 +102,8 @@ CONFIG_SEARCH_PATHS = [
     # Search installation paths first
     '/etc/kolla',
     '/etc/kolla-kubernetes',
+    os.path.abspath(os.path.join(PathFinder.find_development_root(),
+                                 'workflows/ansible/group_vars')),
     # Then development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla/etc/kolla')),
