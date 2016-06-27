@@ -68,27 +68,111 @@ services locally.  Follow the :doc:`kubernetes-all-in-one` documentation.
 `The Kubernetes documentation explains setting up a larger cluster
 <http://kubernetes.io/docs/getting-started-guides/>`_.
 
-Installing Kolla
-================
+Installing Kolla and Kolla-Kubernetes
+=====================================
+
+Follow the instructions for a **full install** if you are not a developer.
+Choose a **development install** if you will frequently pull or contribute
+patches.  A development install allows you to ```git pull``` within the
+repository in order to use the latest code without having to re-install.  It
+also removes the need to copy files to system directories such as /etc/kolla,
+and allows you to use ```git diff``` to see all code or resource file changes
+that you or the system has made.
+
+Kolla-kubernetes depends on configuration files (and images) that are generated
+from kolla.  When fully installed, kolla default configuration files
+(globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
+configuration files are placed in the same directory.  Kolla's
+``generate_passwords.py`` creates a passwords.yml file which contains passwords
+and encryption keys.  Kolla's ``kolla-ansible genconfig`` will generate the
+config files for each kolla service container based on the contents of
+globals.yml and passwords.yml
+
+
+Full Install
+------------
 
 ::
 
+    # Clone Kolla
     git clone https://git.openstack.org/openstack/kolla
-    sudo pip install kolla/
-    cd kolla
-    sudo cp -r etc/kolla /etc/
 
-Generating Configuration Files
-==============================
+    # Install Kolla
+    pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
 
-Kolla can be used to generate config files.  The config files will be populated based on what's in globals.yml and passwords.yml then placed in ``/etc/kolla``.  From inside the kolla directory use the following command.
+    # Clone Kolla-Kubernetes
+    git clone https://git.openstack.org/openstack/kolla-kubernetes
+
+    # Install Kolla-Kubernetes
+    pushd kolla-kubernetes
+    sudo pip install .
+    sudo cp -r ./etc/kolla-kubernetes /etc
+    popd
+
+
+Development Install
+-------------------
 
 ::
 
-    ./tools/kolla-genpwd
-    ./tools/kolla-ansible genconfig
+    # Clone Kolla
+    git clone https://git.openstack.org/openstack/kolla
 
-``kolla-genpwd`` will generate passwords and encryption keys and populate the passwords.yml file.  ``kolla-ansible genconfig`` will generate the config files.
+    # Install Kolla
+    pushd kolla
+    sudo pip install --editable .
+    sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla path
+    popd
+
+    # Clone Kolla-Kubernetes
+    git clone https://git.openstack.org/openstack/kolla-kubernetes
+
+    # Install Kolla-Kubernetes
+    pushd kolla-kubernetes
+    sudo pip install --editable .
+    popd
+
+
+.. NOTE::
+  - Ansible commands (e.g. kolla-ansible) targeting the local machine require
+    sudo because ansible creates ```/etc/.ansible_*``` and
+    ```/etc/kolla/<service>``` files which require root permissions.
+  - Executing local versions of kolla tools ```./tools/kolla-ansible``` instead
+    of from the system path, will locate resource files from relative locations
+    instead of system locations.
+  - The development install will also work with Python virtual environments.
+
+
+Configure Kolla-Kubernetes
+==========================
+
+Edit the file ```/etc/kolla/globals.yml``` to add these settings which
+are specific to kolla-kubernetes:
+
+::
+
+    # Kolla-kubernetes custom configuration
+    api_interface_address: "0.0.0.0"
+    memcached_servers: "memcached"
+    keystone_database_address: "mariadb"
+    keystone_admin_url: "http://keystone-admin:35357/v3"
+    keystone_internal_url: "http://keystone-public:5000/v3"
+    keystone_public_url: "http://keystone-public:5000/v3"
+
+
+Then, generate the Kolla configuration files:
+
+::
+
+    # Generate Kolla Configuration Files
+    pushd kolla
+    sudo ./tools/generate_passwords.py
+    sudo ./tools/kolla-ansible genconfig
+    popd
+
 
 Building Kolla Containers
 =========================
@@ -99,28 +183,23 @@ expected behavior that you build them locally.
 The Kolla documentation engine has a detailed `overview of building the
 containers <http://docs.openstack.org/developer/kolla/image-building.html>`_.
 
-Installing Kolla-Kubernetes
-===========================
+The brief summary for horizon kolla dependencies is as follows::
 
-The extra configuration files that Kolla-kubernetes requires aren't where
-the kolla-kubernetes CLI expects them to be located, therefore we need to
-use an environment variable, ``K8S_SERVICE_DIR``.
+    kolla-build mariadb memcached kolla-toolbox keystone horizon
 
-::
-
-    pip install kolla-kubernetes
-    export K8S_SERVICE_DIR=/usr/local/share/kolla-kubernetes/services/
-
-Optionally, an operator can access the CLI from ``tools/kolla-kubernetes.py``.
 
 Running Kolla-Kubernetes
 ========================
 
-Before running a service, the operator must run the bootstrap task.
-For example, to bootstrap mariadb run::
+The following commands will allow you to bootstrap a running Horizon instance,
+including all of its ordered dependencies.  Some kolla containers require
+bootstrapping, while others do not.::
 
-   kolla-kubernetes bootstrap mariadb
-
-To run a service supported by Kolla-Kubernetes do the following::
-
+    kolla-kubernetes bootstrap mariadb
     kolla-kubernetes run mariadb
+    kolla-kubernetes run memcached
+    kolla-kubernetes bootstrap keystone
+    kolla-kubernetes run keystone
+    kolla-kubernetes run horizon
+
+A similar pattern may be followed for Openstack services beyond horizon.
