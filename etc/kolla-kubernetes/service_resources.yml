@@ -22,8 +22,11 @@ kolla-kubernetes:
       - name: mariadb
     resources:
       disk:
+      - bootstrap/mariadb/mariadb-disk.sh.j2
       pv:
+      - bootstrap/mariadb/mariadb-pv.yml.j2
       pvc:
+      - bootstrap/mariadb/mariadb-pvc.yml.j2
       svc:
       - services/mariadb/mariadb-service.yml.j2
       bootstrap:
