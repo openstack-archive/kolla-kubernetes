@@ -1,3 +1,4 @@
+{%- set resourceName = "mariadb" -%}
 apiVersion: v1
 kind: ReplicationController
 spec:
@@ -32,8 +33,13 @@ spec:
           configMap:
             name: mariadb-configmap
         - name: mariadb-persistent-storage
+{%- if storage_provider == "host" %}
           hostPath:
             path: /var/lib/mysql
+{%- else %}
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
+{%- endif %}
         - name: kolla-logs
           emptyDir: {}
 metadata:

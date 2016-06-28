@@ -1,0 +1,21 @@
+{%- set resourceName = "mariadb" %}
+{%- set size = '10' %}
+
+{%- if storage_provider == "host" %}
+  echo '# NO-OP for storage_provider=="host", which uses hostdir volume mounts'
+
+{%- elif storage_provider == "ceph" %}
+  ssh {{ storage_ceph.ssh_user -}} @ {{- storage_ceph.monitors[0] }} rbd create {{ storage_ceph.pool -}}/{{- resourceName }} --size "{{ size }}G" --image-feature layering
+
+{%- elif storage_provider == "gce" %}
+  {%- set type = 'pd-standard' %}
+  gcloud compute disks create "{{ resourceName }}" --size "{{ size }}" --type "{{ type }}"
+
+{%- elif storage_provider == "aws" %}
+  echo "# NO-OP for AWS, which supports Experimental Persistent Volume Provisioning"
+  echo "# https://github.com/kubernetes/kubernetes/blob/release-1.2/examples/experimental/persistent-volume-provisioning/README.md"
+
+{%- else %}
+  raise 'Unknown provider: check "kubectl config current-context"'
+
+{%- endif %}
