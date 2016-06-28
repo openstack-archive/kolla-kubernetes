@@ -16,10 +16,14 @@ from cliff import command
 from oslo_config import cfg
 from oslo_log import log
 
+from kolla_kubernetes.common.utils import ExecUtils
 from kolla_kubernetes.common.utils import FileUtils
 from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes.common.utils import YamlUtils
+
+from kolla_kubernetes.common.pathfinder import PathFinder
 from kolla_kubernetes import service
+from kolla_kubernetes import service_definition
 
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
@@ -105,3 +109,30 @@ class JinjaVars(command.Command):
         variables = service._load_variables_from_file(
             args.service_name, args.debug_key_re)
         print(YamlUtils.yaml_dict_to_string(variables))
+
+
+class CreateConfigMaps(command.Command):
+    """CreateConfigMaps for a service"""
+
+    def get_parser(self, prog_name):
+        parser = super(CreateConfigMaps, self).get_parser(prog_name)
+        parser.add_argument(
+            "service_name",
+            metavar="<service_name>",
+            help=("Kolla-kubernetes service_name (e.g. mariadb)"
+                  "  for which to generate the jinja dict")
+        )
+        return parser
+
+    def take_action(self, args):
+        pod_list = service_definition.get_pod_definition(args.service_name)
+        for pod in pod_list:
+            container_list = service_definition.get_container_definition(pod)
+            for container in container_list:
+                cmd = ["kubectl", "create",
+                       "configmap", '%s-configmap' % container]
+                for f in PathFinder.find_kolla_service_config_files(container):
+                    cmd = cmd + ['--from-file=%s=%s' % (
+                        os.path.basename(f).replace("_", "-"), f)]
+                LOG.info('Command : %r' % cmd)
+                ExecUtils.exec_command(" ".join(cmd))

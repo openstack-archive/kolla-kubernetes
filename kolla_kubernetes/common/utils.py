@@ -10,10 +10,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import copy
 import jinja2
+import json
 import os
 import re
+import subprocess
+import sys
 import yaml
 
 from oslo_log import log as logging
@@ -147,3 +152,20 @@ class JinjaUtils(object):
             if rendered_template.strip() == template.strip():
                 return d
         raise Exception("Unable to fully render jinja variables")
+
+
+class ExecUtils(object):
+
+    @staticmethod
+    def exec_command(cmd):
+
+        print("executing cmd[{}]".format(cmd), file=sys.stderr)
+
+        res = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+        try:  # pretty print json if the output happens to be
+            res = json.dumps(json.loads(res), indent=2, sort_keys=True)
+            print("executing cmd[{}] returned[{}]".format(cmd, res),
+                  file=sys.stderr)
+        except Exception:
+            pass
+        return res
