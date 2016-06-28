@@ -121,8 +121,16 @@ class JinjaUtils(object):
         name = 'jvars'
         j2env = jinja2.Environment(
             loader=jinja2.DictLoader({name: template_str}))
+
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = type_utils.str_to_bool
+
+        # Add a "raise" keyword for raising exceptions from within jinja
+        def jinja_raise(message):
+            raise Exception(message)
+        j2env.globals['raise'] = jinja_raise
+
+        # Render the template
         rendered_template = j2env.get_template(name).render(dict_)
         return rendered_template + "\n"
 

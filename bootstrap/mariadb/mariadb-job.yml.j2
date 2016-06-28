@@ -1,3 +1,4 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -32,7 +33,7 @@ spec:
           configMap:
             name: mariadb-configmap
         - name: mariadb-persistent-storage
-          hostPath:
-            path: /var/lib/mysql
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
         - name: kolla-logs
           emptyDir: {}

@@ -15,6 +15,7 @@ Contents:
    installation
    kubernetes-all-in-one
    quickstart
+   multi-node
    readme
    usage
    labels

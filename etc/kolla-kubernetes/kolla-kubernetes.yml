@@ -18,3 +18,17 @@ rabbitmq_replicas: "1"
 horizon_replicas: "1"
 glance_api_replicas: "1"
 glance_registry_replicas: "1"
+
+########################
+# Persistent Storage
+########################
+storage_provider: "host"  # host, ceph, gce, aws
+storage_ceph:
+  keyring: /etc/ceph/ceph.client.admin.keyring
+  monitors:
+  - x.x.x.x
+  - y.y.y.y
+  pool: rbd
+  secretName: pkt-ceph-secret
+  ssh_user: root
+  user: admin
