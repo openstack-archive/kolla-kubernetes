@@ -1,0 +1,2 @@
+kubernetes_domain_name: "openstack.local"
+kubernetes_dns_enable: "true"

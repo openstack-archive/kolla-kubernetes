@@ -1,0 +1,5 @@
+---
+- hosts: kubernetes
+  roles:
+    - { role: skydns,
+        when: kubernetes_dns_enable | bool }
