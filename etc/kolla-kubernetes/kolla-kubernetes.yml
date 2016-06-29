@@ -25,6 +25,9 @@ glance_registry_replicas: "1"
 dns_replicas: "1"
 #dns_server_ip: ""
 dns_domain_name: "openstack.kolla"
+# Can be disabled if the cluster has already been enabled
+# with dynamic dns functionality. Default value is enabled.
+kubernetes_dns_enable: "true"
 
 ########################
 # Persistent Storage
