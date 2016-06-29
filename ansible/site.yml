@@ -1,0 +1,7 @@
+---
+- hosts: kubernetes
+  gather_facts: no
+  tasks:
+  roles:
+    - { role: skydns,
+        when: kubernetes_dns_enable | bool }
