@@ -1,0 +1,22 @@
+---
+- template:
+    src="{{ playbook_dir }}/../services/skydns/skydns-service.yml.j2"
+    dest="{{ skydns_service_template }}"
+
+- name: Starting skydns service
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ skydns_service_template }}"
+    state: present
+
+- template:
+    src="{{ playbook_dir }}/../services/skydns/skydns-rc.yml.j2"
+    dest="{{ skydns_rc_template }}"
+
+- name: Starting skydns replication controller
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ skydns_rc_template }}"
+    state: present
