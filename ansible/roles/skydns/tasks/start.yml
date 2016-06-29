@@ -1,0 +1,20 @@
+---
+- name: Creating skydns service
+  command: kolla-kubernetes resource create svc skydns
+
+- name: "Check status of skydns service"
+  command: kolla-kubernetes resource status svc skydns
+  register: result
+  until: (result.stdout|from_yaml)['status'] == 'ok'
+  retries: 10
+  delay: 4
+
+- name: Creating skydns Replication Controller
+  command: kolla-kubernetes resource create pod skydns
+
+- name: "Check status of skydns service"
+  command: kolla-kubernetes resource status pod skydns
+  register: result
+  until: (result.stdout|from_yaml)['status'] == 'ok'
+  retries: 10
+  delay: 4
