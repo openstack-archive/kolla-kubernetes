@@ -43,7 +43,7 @@ Download kubectl::
 
 Create a Kubernetes cluster configuration::
 
-  kubectl config set-cluster kolla --server=http://localhost:8080
+  kubectl config set-cluster kolla
   kubectl config set-context kolla --cluster=kolla
   kubectl config use-context kolla
 
