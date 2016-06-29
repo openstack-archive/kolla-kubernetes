@@ -1,0 +1,2 @@
+skydns_pod_template: "{{ role_path }}/templates/skydns-pod.yml"
+skydns_service_template: "{{ role_path }}/templates/skydns-service.yml"

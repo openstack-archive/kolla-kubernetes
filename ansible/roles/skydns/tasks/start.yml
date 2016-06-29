@@ -1,0 +1,28 @@
+---
+- name: Creating skydns service
+  command: kolla-kubernetes resource create svc skydns
+
+- name: Checking if skydns service has been created
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ skydns_service_template }}"
+    state: debug
+  register: result
+  until: result.api_response.0.status.phase == "Succeeded"
+  retries: 10
+  delay: 4
+
+- name: Creating skydns Replication Controller
+  command: kolla-kubernetes resource create pod skydns
+
+- name: Checking if skydns replication controller has been created
+  kubernetes:
+    api_endpoint: "{{ kubernetes_endpoint }}"
+    insecure: true
+    file_reference: "{{ skydns_pod_template }}"
+    state: debug
+  register: result
+  until: result.api_response.0.status.phase == "Succeeded"
+  retries: 10
+  delay: 4
