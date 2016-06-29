@@ -180,12 +180,11 @@ def kill_service(service_name, variables=None):
 
 
 def _bootstrap_instance(directory, service_name):
-    server = "--server=" + CONF.kolla_kubernetes.host
     pod_list = service_definition.get_pod_definition(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
-            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
+            cmd = [CONF.kolla_kubernetes.kubectl_path, "create",
                    "configmap", '%s-configmap' % container]
             for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
@@ -196,19 +195,18 @@ def _bootstrap_instance(directory, service_name):
             LOG.info('Command : %r' % cmd)
             subprocess.call(cmd)
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
+    cmd = [CONF.kolla_kubernetes.kubectl_path, "create", "-f",
            directory]
     LOG.info('Command : %r' % cmd)
     subprocess.call(cmd)
 
 
 def _deploy_instance(directory, service_name, pod_list):
-    server = "--server=" + CONF.kolla_kubernetes.host
     pod_list = service_definition.get_pod_definition(service_name)
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
-            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create",
+            cmd = [CONF.kolla_kubernetes.kubectl_path, "create",
                    "configmap", '%s-configmap' % container]
             for f in PathFinder.find_kolla_service_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
@@ -219,25 +217,23 @@ def _deploy_instance(directory, service_name, pod_list):
             LOG.info('Command : %r' % cmd)
             subprocess.call(cmd)
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "create", "-f",
+    cmd = [CONF.kolla_kubernetes.kubectl_path, "create", "-f",
            directory]
     LOG.info('Command : %r' % cmd)
     subprocess.call(cmd)
 
 
 def _delete_instance(directory, service_name, pod_list):
-    server = "--server=" + CONF.kolla_kubernetes.host
-
     for pod in pod_list:
         container_list = service_definition.get_container_definition(pod)
         for container in container_list:
-            cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete",
+            cmd = [CONF.kolla_kubernetes.kubectl_path, "delete",
                    "configmap", '%s-configmap' % container]
 
             LOG.info('Command : %r' % cmd)
             subprocess.call(cmd)
 
-    cmd = [CONF.kolla_kubernetes.kubectl_path, server, "delete", "-f",
+    cmd = [CONF.kolla_kubernetes.kubectl_path, "delete", "-f",
            directory]
     LOG.info('Command : %r' % cmd)
     subprocess.call(cmd)
