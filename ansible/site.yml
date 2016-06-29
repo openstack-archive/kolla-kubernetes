@@ -3,3 +3,5 @@
   roles:
     - { role: mariadb,
         when: enable_kubernetes | bool }
+    - { role: skydns,
+        when: kubernetes_dns_enable | bool }

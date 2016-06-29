@@ -1,2 +1,5 @@
 [kubernetes]
 localhost       ansible_connection=local
+
+[deployment]
+localhost       ansible_connection=local
