@@ -12,9 +12,15 @@
 ########################
 # Kubernetes Cluster
 ########################
+kubernetes_endpoint: "10.57.120.254:8080"
 keystone_replicas: "1"
 memcached_replicas: "1"
 rabbitmq_replicas: "1"
 horizon_replicas: "1"
 glance_api_replicas: "1"
 glance_registry_replicas: "1"
+
+########################
+# Kubernetes DNS
+########################
+kubernetes_dns_server: "10.57.0.2"
