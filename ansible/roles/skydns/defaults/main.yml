@@ -1,0 +1,2 @@
+skydns_rc_template: "{{ role_path }}/templates/skydns-rc.yml"
+skydns_service_template: "{{ role_path }}/templates/skydns-service.yml"
