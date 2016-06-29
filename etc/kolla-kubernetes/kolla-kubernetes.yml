@@ -25,6 +25,7 @@ glance_registry_replicas: "1"
 dns_replicas: "1"
 #dns_server_ip: ""
 dns_domain_name: "openstack.kolla"
+enable_kubernetes_dns: "true"
 
 ########################
 # Persistent Storage
