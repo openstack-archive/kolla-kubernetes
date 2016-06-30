@@ -1,0 +1,9 @@
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Code-Review+2: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Workflow+1: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 30 Jun 2016 17:15:37 +0000
+Reviewed-on: https://review.openstack.org/336103
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
