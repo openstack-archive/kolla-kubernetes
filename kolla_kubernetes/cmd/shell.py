@@ -29,9 +29,10 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from kolla_kubernetes.common import utils
+from kolla_kubernetes.version import version_info
 
 PROJECT = 'kolla_kubernetes'
-VERSION = '1.0'
+VERSION = version_info.version_string_with_vcs()
 
 CONF = cfg.CONF
 CONF.import_group('kolla', 'kolla_kubernetes.config')
