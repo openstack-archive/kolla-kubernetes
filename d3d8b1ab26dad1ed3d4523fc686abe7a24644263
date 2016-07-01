@@ -1,0 +1,9 @@
+Code-Review+2: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Code-Review+2: Michal Rostecki <michal.rostecki@gmail.com>
+Workflow+1: Michal Rostecki <michal.rostecki@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 01 Jul 2016 09:40:11 +0000
+Reviewed-on: https://review.openstack.org/332937
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
