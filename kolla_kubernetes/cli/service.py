@@ -10,10 +10,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from cliff import command
 from oslo_config import cfg
 from oslo_log import log
 
+from kolla_kubernetes.common.utils import FileUtils
+from kolla_kubernetes.common.utils import JinjaUtils
+from kolla_kubernetes.common.utils import YamlUtils
 from kolla_kubernetes import service
 
 CONF = cfg.CONF
@@ -48,3 +53,44 @@ class Run(_ServiceCommand):
 class Kill(_ServiceCommand):
     """Kill a service."""
     _action = 'kill'
+
+
+class JinjaTemplate(command.Command):
+    """Jinja process a service template file to stdout"""
+
+    def get_parser(self, prog_name):
+        parser = super(JinjaTemplate, self).get_parser(prog_name)
+        parser.add_argument(
+            "file_path",
+            metavar="<file_path>",
+            help=("Full file path to the jinja template file")
+        )
+        return parser
+
+    def take_action(self, args):
+        proj_name = os.path.abspath(args.file_path).split('/')[-2]
+        variables = service._load_variables_from_file(proj_name)
+
+        # process the template
+        print(JinjaUtils.render_jinja(
+            variables,
+            FileUtils.read_string_from_file(args.file_path)))
+
+
+class JinjaVars(command.Command):
+    """Print jinja dict to stdout"""
+
+    def get_parser(self, prog_name):
+        parser = super(JinjaVars, self).get_parser(prog_name)
+        parser.add_argument(
+            "service_name",
+            metavar="<service_name>",
+            help=("Kolla-kubernetes service_name (e.g. mariadb)"
+                  + "for which to generate the jinja dict")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        variables = service._load_variables_from_file(
+            parsed_args.service_name)
+        print(YamlUtils.yaml_dict_to_string(variables))
