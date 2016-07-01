@@ -18,21 +18,16 @@ import time
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import yaml
 
 from kolla_kubernetes.common.pathfinder import PathFinder
-
-from kolla_kubernetes.common import jinja_utils
-from kolla_kubernetes.common import utils
+from kolla_kubernetes.common.utils import FileUtils
+from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes import service_definition
 
 LOG = logging.getLogger()
 CONF = cfg.CONF
 CONF.import_group('kolla', 'kolla_kubernetes.config')
 CONF.import_group('kolla_kubernetes', 'kolla_kubernetes.config')
-
-PROJECT_ROOT = os.path.abspath(os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '../..'))
 
 
 def _create_working_directory(target='services'):
@@ -45,67 +40,34 @@ def _create_working_directory(target='services'):
     return working_dir
 
 
-def _load_variables_from_file(project_name):
-    jvars = utils.JvarsDict()
+def _load_variables_from_file(service_name=None, debug_regex=None):
+    # Apply basic variables that aren't defined in any config file
+    jvars = {'deployment_id': CONF.kolla.deployment_id,
+             'node_config_directory': '',
+             'timestamp': str(time.time())}
 
-    for file_ in ['kolla-kubernetes.yml', 'globals.yml']:
-        f = PathFinder.find_config_file(file_)
-        if os.path.exists(f):
-            with open(f, 'r') as gf:
-                jvars.set_global_vars(yaml.load(gf))
-        else:
-            LOG.warning('Unable to load %s', f)
+    # Create the prioritized list of config files that need to be
+    # merged.  Search method for config files: locks onto the first
+    # path where the file exists.  Search method for template files:
+    # locks onto the first path that exists, and then expects the file
+    # to be there.
+    kolla_dir = PathFinder.find_kolla_dir()
+    files = [
+        PathFinder.find_config_file('kolla-kubernetes.yml'),
+        PathFinder.find_config_file('globals.yml'),
+        PathFinder.find_config_file('passwords.yml'),
+        os.path.join(kolla_dir, 'ansible/group_vars/all.yml')]
+    if service_name is not None:
+        files.append(os.path.join(kolla_dir, 'ansible/roles',
+                                  service_name, 'defaults/main.yml'))
+    files.append(os.path.join(kolla_dir,
+                              'ansible/roles/common/defaults/main.yml'))
 
-    f = PathFinder.find_config_file('passwords.yml')
-    if os.path.exists(f):
-        with open(f, 'r') as gf:
-            jvars.update(yaml.load(gf))
-    else:
-        LOG.warning('Unable to load %s', f)
+    # Create the config dict
+    x = JinjaUtils.merge_configs_to_dict(reversed(files), jvars, debug_regex)
 
-    # Apply the basic variables that aren't defined in any config file.
-    jvars.update({
-        'deployment_id': CONF.kolla.deployment_id,
-        'node_config_directory': '',
-        'timestamp': str(time.time())
-    })
-
-    dir = PathFinder.find_kolla_dir()
-    all_yml = os.path.join(dir, 'ansible/group_vars/all.yml')
-    local_dir = os.path.join(PROJECT_ROOT, 'kolla/ansible/')
-
-    if dir and os.path.exists(all_yml):
-        jinja_utils.yaml_jinja_render(all_yml, jvars)
-    elif dir and os.path.exists(local_dir):
-        local_group_vars = os.path.join(local_dir, 'group_vars/all.yml')
-        jinja_utils.yaml_jinja_render(local_group_vars, jvars)
-    else:
-        LOG.warning('Unable to load %s', all_yml)
-
-    proj_ansible_roles = os.path.join(dir, 'ansible/roles', project_name,
-                                      'defaults', 'main.yml')
-    local_ansible_roles = os.path.join(local_dir, 'roles', project_name,
-                                       'defaults', 'main.yml')
-
-    if dir and os.path.exists(proj_ansible_roles):
-        jinja_utils.yaml_jinja_render(proj_ansible_roles, jvars)
-    elif dir and os.path.exists(local_ansible_roles):
-        jinja_utils.yaml_jinja_render(local_ansible_roles, jvars)
-    else:
-        LOG.warning('Unable to load %s', proj_ansible_roles)
-
-    common_ansible_roles = os.path.join(dir, 'ansible/roles', 'common',
-                                        'defaults', 'main.yml')
-    common_local_ansible_roles = os.path.join(local_dir, 'roles', 'common',
-                                              'defaults', 'main.yml')
-
-    if dir and os.path.exists(common_ansible_roles):
-        jinja_utils.yaml_jinja_render(common_ansible_roles, jvars)
-    elif dir and os.path.exists(common_local_ansible_roles):
-        jinja_utils.yaml_jinja_render(common_local_ansible_roles, jvars)
-    else:
-        LOG.warning('Unable to load %s', common_ansible_roles)
-    return jvars
+    # Render values containing nested jinja variables
+    return JinjaUtils.dict_self_render(x)
 
 
 def _build_bootstrap(working_dir, service_name, variables=None):
@@ -116,13 +78,13 @@ def _build_bootstrap(working_dir, service_name, variables=None):
             'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
 
         variables = _load_variables_from_file(proj_name)
+        content = JinjaUtils.render_jinja(
+            variables,
+            FileUtils.read_string_from_file(filename))
 
-        content = yaml.load(
-            jinja_utils.jinja_render(filename, variables))
-        with open(os.path.join(working_dir, proj_filename), 'w') as f:
-            LOG.debug('_build_bootstrap : file : %s' %
-                      os.path.join(working_dir, proj_filename))
-            f.write(yaml.dump(content, default_flow_style=False))
+        filename = os.path.join(working_dir, proj_filename)
+        LOG.debug('_build_bootstrap : file : %s' % filename)
+        FileUtils.write_string_to_file(content, filename)
 
 
 def _build_runner(working_dir, service_name, pod_list, variables=None):
@@ -133,13 +95,13 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
             'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
 
         variables = _load_variables_from_file(proj_name)
+        content = JinjaUtils.render_jinja(
+            variables,
+            FileUtils.read_string_from_file(filename))
 
-        content = yaml.load(
-            jinja_utils.jinja_render(filename, variables))
-        with open(os.path.join(working_dir, proj_filename), 'w') as f:
-            LOG.debug('_build_runner : service file : %s' %
-                      os.path.join(working_dir, proj_filename))
-            f.write(yaml.dump(content, default_flow_style=False))
+        filename = os.path.join(working_dir, proj_filename)
+        LOG.debug('_build_runner : service file : %s' % filename)
+        FileUtils.write_string_to_file(content, filename)
 
 
 def execute_action(service_name, action):
