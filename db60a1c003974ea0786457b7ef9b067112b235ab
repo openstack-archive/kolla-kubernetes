@@ -1,0 +1,10 @@
+Code-Review+1: Takashi Sogabe <tasogabe@yahoo-corp.jp>
+Code-Review+2: David Wang <dcwangmit01@gmail.com>
+Code-Review+2: Michal Rostecki <michal.rostecki@gmail.com>
+Workflow+1: Michal Rostecki <michal.rostecki@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 01 Jul 2016 09:40:00 +0000
+Reviewed-on: https://review.openstack.org/330788
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
