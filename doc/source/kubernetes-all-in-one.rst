@@ -26,7 +26,7 @@ Execute the following commands to create an all-in-one Kubernetes setup with DNS
    export CLUSTER_DOMAIN="openstack.local"
 
    # Start Hyperkube
-   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.2.4 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=${CLUSTER_DOMAIN} --allow-privileged=true --v=2 --cluster-dns=${DNS_SERVER_IP}
+   docker run --volume=/:/rootfs:ro --volume=/sys:/sys:rw --volume=/var/lib/docker/:/var/lib/docker:rw --volume=/var/lib/kubelet/:/var/lib/kubelet:rw,shared --volume=/var/run:/var/run:rw --net=host --pid=host --privileged=true --name=kubelet -d gcr.io/google_containers/hyperkube-amd64:v1.3.0 /hyperkube kubelet --resolv-conf="" --containerized --hostname-override="127.0.0.1" --address="0.0.0.0" --api-servers=http://localhost:8080 --config=/etc/kubernetes/manifests --cluster-domain=${CLUSTER_DOMAIN} --allow-privileged=true --v=2 --cluster-dns=${DNS_SERVER_IP}
 
    # Start Kube2Sky on localhost (must start before skydns)
    docker run -d --net=host --restart=always gcr.io/google_containers/kube2sky:1.12 -v=10 -logtostderr=true -domain=${CLUSTER_DOMAIN} -etcd-server="http://127.0.0.1:4001"
