@@ -1,0 +1,10 @@
+Code-Review+1: Kevin Fox <kevin@efox.cc>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+2: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Workflow+1: Ken Wronkiewicz <wh-openstack@wirewd.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 05 Jul 2016 17:50:53 +0000
+Reviewed-on: https://review.openstack.org/335627
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
