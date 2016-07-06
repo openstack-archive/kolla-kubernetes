@@ -22,5 +22,27 @@ under ./doc/build/html.
     # Preview the locally-generated HTML pages within a web browser
     open ./doc/build/html/index.html
 
+    # create an appropriately named branch
+    git checkout -b bp/documentation-initialization
+    # subsequent independent changes should be named
+    #   bp/documentation-initialization-X
+    #   where X is monotomically increasing
+
+    # verify the scope of your changes
+    git status
+
+    # ensure that the commit message references the blueprint
+    # by adding this line:
+    # Partially-implements: blueprint documentation-initialization
+    #
+
+    git commit -a
+
+    # check it in
+    # git review
+
+    # go back to the master branch
+    git checkout master
+
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
 
