@@ -1,5 +1,5 @@
 ===============================
-kolla-kubernetes
+Kolla-Kubernetes
 ===============================
 
 Kubernetes deployment of the Kolla containers.

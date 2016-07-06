@@ -20,6 +20,9 @@ Kubernetes              1.2.4        none         On all hosts
 .. NOTE:: Kolla (which provides the templating) is sensitive about the
   Ansible version.  Mainline currently requires 2.0.x or above.
 
+.. NOTE:: Kubernetes 1.3 was just released and is recommended for development
+
+
 Installing Docker
 =================
 
@@ -92,8 +95,8 @@ Therefore, use a different Storage Backend than AUFS.
    sudo service docker start
 
 
-Kubernetes Setup with HyperKube
-===============================
+Kubernetes Setup with HyperKube (for Developers)
+================================================
 
 HyperKube is series of containers that will run all the needed Kubernetes
 services locally.  Follow the :doc:`kubernetes-all-in-one` documentation.
@@ -120,30 +123,6 @@ configuration files are placed in the same directory.  Kolla's
 and encryption keys.  Kolla's ``kolla-ansible genconfig`` will generate the
 config files for each kolla service container based on the contents of
 globals.yml and passwords.yml
-
-
-Full Install
-------------
-
-::
-
-    # Clone Kolla
-    git clone https://git.openstack.org/openstack/kolla
-
-    # Install Kolla
-    pushd kolla
-    sudo pip install .
-    sudo cp -r ./etc/kolla /etc
-    popd
-
-    # Clone Kolla-Kubernetes
-    git clone https://git.openstack.org/openstack/kolla-kubernetes
-
-    # Install Kolla-Kubernetes
-    pushd kolla-kubernetes
-    sudo pip install .
-    sudo cp -r ./etc/kolla-kubernetes /etc
-    popd
 
 
 Development Install
@@ -177,6 +156,30 @@ Development Install
     of from the system path, will locate resource files from relative locations
     instead of system locations.
   - The development install will also work with Python virtual environments.
+
+
+Full Install
+------------
+
+::
+
+    # Clone Kolla
+    git clone https://git.openstack.org/openstack/kolla
+
+    # Install Kolla
+    pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla-Kubernetes
+    git clone https://git.openstack.org/openstack/kolla-kubernetes
+
+    # Install Kolla-Kubernetes
+    pushd kolla-kubernetes
+    sudo pip install .
+    sudo cp -r ./etc/kolla-kubernetes /etc
+    popd
 
 
 Configure Kolla-Kubernetes

@@ -11,13 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   contributing
-   installation
-   kubernetes-all-in-one
-   quickstart
    readme
+   installation
+   quickstart
+   kubernetes-all-in-one
    usage
    labels
+   contributing
 
 Kolla-Kubernetes Services
 =========================
