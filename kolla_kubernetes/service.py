@@ -22,12 +22,16 @@ from oslo_log import log as logging
 from kolla_kubernetes.common.pathfinder import PathFinder
 from kolla_kubernetes.common.utils import FileUtils
 from kolla_kubernetes.common.utils import JinjaUtils
-from kolla_kubernetes import service_definition
+from kolla_kubernetes.service_resources import KollaKubernetesResources
 
 LOG = logging.getLogger()
 CONF = cfg.CONF
 CONF.import_group('kolla', 'kolla_kubernetes.config')
 CONF.import_group('kolla_kubernetes', 'kolla_kubernetes.config')
+
+# Set to global for now, until we can refactor later
+KKR = KollaKubernetesResources(
+    PathFinder.find_config_file('service_resources.yml'))
 
 
 def _create_working_directory(target='services'):
@@ -71,7 +75,7 @@ def _load_variables_from_file(service_name=None, debug_regex=None):
 
 
 def _build_bootstrap(working_dir, service_name, variables=None):
-    for filename in service_definition.find_bootstrap_files(service_name):
+    for filename in PathFinder.find_bootstrap_files(service_name):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
         proj_name = filename.split('/')[-2]
         LOG.debug(
@@ -88,7 +92,7 @@ def _build_bootstrap(working_dir, service_name, variables=None):
 
 
 def _build_runner(working_dir, service_name, pod_list, variables=None):
-    for filename in service_definition.find_service_files(service_name):
+    for filename in PathFinder.find_service_files(service_name):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
         proj_name = filename.split('/')[-2]
         LOG.debug(
@@ -107,7 +111,7 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
 def execute_action(service_name, action):
     service_list = None
     if service_name == 'all':
-        service_list = service_definition.get_service_dict()
+        service_list = KKR.getServices().keys()
     else:
         service_list = [service_name]
 
@@ -128,27 +132,32 @@ def bootstrap_service(service_name, variables=None):
 
 def run_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    pod_list = service_definition.get_pod_definition(service_name)
+    pod_list = KKR.getServiceByName(service_name).getPods().keys()
     _build_runner(working_dir, service_name, pod_list, variables=variables)
     _deploy_instance(working_dir, service_name, pod_list)
 
 
 def kill_service(service_name, variables=None):
     working_dir = _create_working_directory()
-    pod_list = service_definition.get_pod_definition(service_name)
+    pod_list = KKR.getServiceByName(service_name).getPods().keys()
     _build_runner(working_dir, service_name, pod_list, variables=variables)
     _build_bootstrap(working_dir, service_name, variables=variables)
     _delete_instance(working_dir, service_name, pod_list)
 
 
 def _bootstrap_instance(directory, service_name):
-    pod_list = service_definition.get_pod_definition(service_name)
+    pod_list = KKR.getServiceByName(service_name).getPods().keys()
     for pod in pod_list:
-        container_list = service_definition.get_container_definition(pod)
+        container_list = KKR.getServiceByName(
+            service_name).getPodByName(pod).getContainers().keys()
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, "create",
                    "configmap", '%s-configmap' % container]
-            for f in PathFinder.find_kolla_service_config_files(container):
+
+            # TODO(VerifyLogic) Should not be container, but service.
+            # Probably works because most of our services have a
+            # container of the same name
+            for f in PathFinder.find_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
 
@@ -164,13 +173,14 @@ def _bootstrap_instance(directory, service_name):
 
 
 def _deploy_instance(directory, service_name, pod_list):
-    pod_list = service_definition.get_pod_definition(service_name)
+    pod_list = KKR.getServiceByName(service_name).getPods().keys()
     for pod in pod_list:
-        container_list = service_definition.get_container_definition(pod)
+        container_list = KKR.getServiceByName(
+            service_name).getPodByName(pod).getContainers().keys()
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, "create",
                    "configmap", '%s-configmap' % container]
-            for f in PathFinder.find_kolla_service_config_files(container):
+            for f in PathFinder.find_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
 
@@ -186,8 +196,10 @@ def _deploy_instance(directory, service_name, pod_list):
 
 
 def _delete_instance(directory, service_name, pod_list):
+    pod_list = KKR.getServiceByName(service_name).getPods().keys()
     for pod in pod_list:
-        container_list = service_definition.get_container_definition(pod)
+        container_list = KKR.getServiceByName(
+            service_name).getPodByName(pod).getContainers().keys()
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, "delete",
                    "configmap", '%s-configmap' % container]

@@ -50,31 +50,6 @@ class FileUtils(object):
         return data
 
 
-class YamlUtils(object):
-
-    @staticmethod
-    def yaml_dict_to_string(dict_):
-        # Use width=1000000 to prevent wrapping
-        # Use double-quote style to prevent escaping of ' to ''
-        return yaml.safe_dump(dict_, default_flow_style=False,
-                              width=1000000, default_style='"')
-
-    @staticmethod
-    def yaml_dict_from_string(string_):
-        # Use BaseLoader to keep "True|False" strings as strings
-        return yaml.load(string_, Loader=yaml.loader.BaseLoader)
-
-    @staticmethod
-    def yaml_dict_to_file(dict_, file_):
-        s = YamlUtils.yaml_dict_to_string(dict_)
-        return FileUtils.write_string_to_file(s, file_)
-
-    @staticmethod
-    def yaml_dict_from_file(file):
-        s = FileUtils.read_string_from_file(file)
-        return YamlUtils.yaml_dict_from_string(s)
-
-
 class JinjaUtils(object):
 
     @staticmethod
@@ -147,3 +122,35 @@ class JinjaUtils(object):
             if rendered_template.strip() == template.strip():
                 return d
         raise Exception("Unable to fully render jinja variables")
+
+
+class StringUtils(object):
+
+    @staticmethod
+    def pad_str(pad, num, s):
+        return re.sub("^", (pad * num), s, 0, re.MULTILINE)
+
+
+class YamlUtils(object):
+
+    @staticmethod
+    def yaml_dict_to_string(dict_):
+        # Use width=1000000 to prevent wrapping
+        # Use double-quote style to prevent escaping of ' to ''
+        return yaml.safe_dump(dict_, default_flow_style=False,
+                              width=1000000, default_style='"')
+
+    @staticmethod
+    def yaml_dict_from_string(string_):
+        # Use BaseLoader to keep "True|False" strings as strings
+        return yaml.load(string_, Loader=yaml.loader.BaseLoader)
+
+    @staticmethod
+    def yaml_dict_to_file(dict_, file_):
+        s = YamlUtils.yaml_dict_to_string(dict_)
+        return FileUtils.write_string_to_file(s, file_)
+
+    @staticmethod
+    def yaml_dict_from_file(file):
+        s = FileUtils.read_string_from_file(file)
+        return YamlUtils.yaml_dict_from_string(s)
