@@ -4,8 +4,6 @@ spec:
   ports:
     - port: {{ rabbitmq_port }}
       name: rabbitmq
-    - port: {{ rabbitmq_management_port }}
-      name: management
   selector:
     service: rabbitmq
 metadata:
