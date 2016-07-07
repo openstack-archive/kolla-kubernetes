@@ -1,0 +1,10 @@
+Code-Review+1: Kevin Fox <kevin@efox.cc>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+2: David Wang <dcwangmit01@gmail.com>
+Workflow+1: David Wang <dcwangmit01@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 07 Jul 2016 23:52:15 +0000
+Reviewed-on: https://review.openstack.org/339273
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
