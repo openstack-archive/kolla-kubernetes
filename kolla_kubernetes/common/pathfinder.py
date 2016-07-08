@@ -23,6 +23,8 @@ LOG = logging.getLogger(__name__)
 
 class PathFinder(object):
 
+    _find_dir_cache = {}
+
     @staticmethod
     def find_installed_root():
         # Full installs use this root path to locate ./share/kolla
@@ -44,11 +46,6 @@ class PathFinder(object):
         return PathFinder._find_dir(KOLLA_SEARCH_PATHS, None)
 
     @staticmethod
-    def find_kolla_service_config_files(service_name):
-        path = PathFinder.find_service_config_dir(service_name)
-        return PathFinder._list_dir_files(path)
-
-    @staticmethod
     def find_config_file(filename):
         search_paths = CONFIG_SEARCH_PATHS
         for d in search_paths:
@@ -61,7 +58,28 @@ class PathFinder(object):
         )
 
     @staticmethod
-    def find_service_config_dir(service_name):
+    def find_config_files(service_name):
+        path = PathFinder.find_config_dir(service_name)
+        return PathFinder._list_dir_files(path)
+
+    @staticmethod
+    def find_service_files(service_name):
+        path = os.path.join(PathFinder.find_service_dir(), service_name)
+        if not os.path.isdir(path):
+            raise exception.KollaDirNotFoundException(
+                "Unable to locate path=[{}]".format(path))
+        return PathFinder._list_dir_files(path)
+
+    @staticmethod
+    def find_bootstrap_files(service_name):
+        path = os.path.join(PathFinder.find_bootstrap_dir(), service_name)
+        if not os.path.isdir(path):
+            LOG.info('No bootstrap job for service %s', service_name)
+            return []
+        return PathFinder._list_dir_files(path)
+
+    @staticmethod
+    def find_config_dir(service_name):
         return PathFinder._find_dir(CONFIG_SEARCH_PATHS, service_name)
 
     @staticmethod
@@ -78,12 +96,19 @@ class PathFinder(object):
 
     @staticmethod
     def _find_dir(search_paths, dir_name):
+        # check the cache first
+        cache_key = ("-".join(search_paths) +
+                     (dir_name if dir_name is not None else ""))
+        if cache_key in PathFinder._find_dir_cache:
+            return PathFinder._find_dir_cache[cache_key]
+
         # returns the first directory that exists
         for path in search_paths:
             p = path
             if dir_name is not None:
                 p = os.path.join(path, dir_name)
             if os.path.isdir(p):
+                PathFinder._find_dir_cache[cache_key] = p
                 return p
         raise exception.KollaDirNotFoundException(
             "Unable to locate {} directory in search_paths=[{}]".format(

@@ -17,6 +17,7 @@ import time
 
 from kolla_kubernetes.common.utils import FileUtils
 from kolla_kubernetes.common.utils import JinjaUtils
+from kolla_kubernetes.common.utils import StringUtils
 from kolla_kubernetes.common.utils import YamlUtils
 from kolla_kubernetes.tests import base
 
@@ -134,6 +135,15 @@ class TestJinjaUtils(UtilsTestCase):
         d4 = YamlUtils.yaml_dict_from_string(test_conf12_merged_rendered)
         self.assertEqual(YamlUtils.yaml_dict_to_string(d3),
                          YamlUtils.yaml_dict_to_string(d4))
+
+
+class TestStringUtils(UtilsTestCase):
+
+    def test_pad_str(self):
+        self.assertEqual(StringUtils.pad_str(" ", 2, ""), "  ")
+        self.assertEqual(StringUtils.pad_str(" ", 3, "  "), "     ")
+        self.assertEqual(StringUtils.pad_str("  ", 3, " "), "       ")
+        self.assertEqual(StringUtils.pad_str("aa", 2, ""), "aaaa")
 
 
 class TestYamlUtils(UtilsTestCase):

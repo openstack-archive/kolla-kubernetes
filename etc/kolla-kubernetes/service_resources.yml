@@ -1,0 +1,90 @@
+# YAML mapping of service->pods->containers
+#   This structure leaves room for adding configuration parameters
+
+kolla-kubernetes:
+  services:
+  - name: mariadb
+    pods:
+    - name: mariadb
+      containers:
+      - name: mariadb
+  - name: memcached
+    pods:
+    - name: memcached
+      containers:
+      - name: memcached
+  - name: keystone
+    pods:
+    - name: keystone
+      containers:
+      - name: keystone
+  - name: horizon
+    pods:
+    - name: horizon
+      containers:
+      - name: horizon
+  - name: rabbitmq
+    pods:
+    - name: rabbitmq
+      containers:
+      - name: rabbitmq
+  - name: glance
+    pods:
+    - name: glance
+      containers:
+      - name: glance-api
+      - name: glance-registry
+  - name: nova
+    pods:
+    - name: nova-compute
+      containers:
+      - name: nova-compute
+      - name: nova-libvirt
+    - name: nova-control
+      containers:
+      - name: nova-api
+      - name: nova-scheduler
+      - name: nova-conductor
+  - name: neutron
+    pods:
+    - name: neutron-compute
+      containers:
+      - name: openvswitch-db-server
+      - name: openvswitch-vswitchd
+      - name: neutron-openvswitch-agent
+      - name: neutron-linuxbridge-agent
+    - name: neutron-network
+      containers:
+      - name: neutron-l3-agent
+      - name: neutron-dhcp-agent
+      - name: neutron-medadata-agent
+    - name: neutron-control
+      containers:
+      - name: neutron-server
+  - name: swift
+    pods:
+    - name: swift-account
+      containers:
+      - name: swift-rsyncd
+      - name: swift-account-server
+      - name: swift-account-auditor
+      - name: swift-account-replicator
+      - name: swift-account-reaper'
+    - name: swift-container
+      containers:
+      - name: swift-rsyncd
+      - name: swift-container-server
+      - name: swift-container-auditor
+      - name: swift-container-replicator
+      - name: swift-container-updater
+    - name: swift-object
+      containers:
+      - name: swift-rsyncd
+      - name: swift-object-server
+      - name: swift-object-auditor
+      - name: swift-object-replicator
+      - name: swift-object-updater
+      - name: swift-object-expirer
+    - name: swift-proxy
+      containers:
+      - name: swift-proxy-server
