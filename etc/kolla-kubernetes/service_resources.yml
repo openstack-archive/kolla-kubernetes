@@ -1,5 +1,17 @@
 # YAML mapping of service->pods->containers
-#   This structure leaves room for adding configuration parameters
+# This structure leaves room for adding configuration parameters.
+# ORDER MATTERS: Kolla-Kubernetes will evaluate these list-item
+#   resources in order.
+# The (configmap) resources are not defined here, since they come
+#   directly from kolla.
+# The (disk, pv, pvc, and svc) resources hold volume or network state,
+#   and are more dangerous to delete.  These resources are stateful.
+#   Deleting a disk, pv, or pvc will lose data on a volume. Deleting
+#   a svc will lose a load-balancer IP.
+# The (bootstrap) resources should be run only once, to setup
+#   persistent state.
+# The (pod) resources may be destroyed willy-nilly, since they hold no
+#   state.
 
 kolla-kubernetes:
   services:
@@ -8,32 +20,95 @@ kolla-kubernetes:
     - name: mariadb
       containers:
       - name: mariadb
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/mariadb/mariadb-service.yml.j2
+      bootstrap:
+      - bootstrap/mariadb/mariadb-job.yml.j2
+      pod:
+      - services/mariadb/mariadb-pod.yml.j2
   - name: memcached
     pods:
     - name: memcached
       containers:
       - name: memcached
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/memcached/memcached-service.yml.j2
+      bootstrap:
+      pod:
+      - services/memcached/memcached-pod.yml.j2
   - name: keystone
     pods:
     - name: keystone
       containers:
       - name: keystone
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/keystone/keystone-service-admin.yml.j2
+      - services/keystone/keystone-service-public.yml.j2
+      bootstrap:
+      - bootstrap/keystone/keystone-job.yml.j2
+      pod:
+      - services/keystone/keystone-pod.yml.j2
   - name: horizon
     pods:
     - name: horizon
       containers:
       - name: horizon
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/horizon/horizon-service.yml.j2
+      bootstrap:
+      pod:
+      - services/horizon/horizon-pod.yml.j2
   - name: rabbitmq
     pods:
     - name: rabbitmq
       containers:
       - name: rabbitmq
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/rabbitmq/rabbitmq-service-management.yml.j2
+      - services/rabbitmq/rabbitmq-service.yml.j2
+      bootstrap:
+      - bootstrap/rabbitmq/rabbitmq-job.yml.j2
+      pod:
+      - services/rabbitmq/rabbitmq-pod.yml.j2
   - name: glance
     pods:
     - name: glance
       containers:
       - name: glance-api
       - name: glance-registry
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/glance/glance-api-pod.yml.j2
+      - services/glance/glance-registry-pod.yml.j2
+      bootstrap:
+      - bootstrap/glance/glance-job.yml.j2
+      pod:
+      - services/glance/glance-api-service.yml.j2
+      - services/glance/glance-registry-service.yml.j2
+
   - name: nova
     pods:
     - name: nova-compute
@@ -45,6 +120,18 @@ kolla-kubernetes:
       - name: nova-api
       - name: nova-scheduler
       - name: nova-conductor
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/nova/nova-service-compute.yml.j2
+      bootstrap:
+      - bootstrap/nova/nova-compute-job.yml.j2
+      - bootstrap/nova/nova-control-job.yml.j2
+      pod:
+      - services/nova/nova-compute-pod.yml.j2
+      - services/nova/nova-control-pod.yml.j2
   - name: neutron
     pods:
     - name: neutron-compute
@@ -61,6 +148,18 @@ kolla-kubernetes:
     - name: neutron-control
       containers:
       - name: neutron-server
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/neutron/neutron-server-service.yml.j2
+      bootstrap:
+      - bootstrap/neutron/neutron-job.yml.j2
+      pod:
+      - services/neutron/neutron-compute-pod.yml.j2
+      - services/neutron/neutron-control-pod.yml.j2
+      - services/neutron/neutron-network-pod.yml.j2
   - name: swift
     pods:
     - name: swift-account
@@ -88,3 +187,19 @@ kolla-kubernetes:
     - name: swift-proxy
       containers:
       - name: swift-proxy-server
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/swift/swift-account-service.yml.j2
+      - services/swift/swift-container-service.yml.j2
+      - services/swift/swift-object-service.yml.j2
+      - services/swift/swift-proxy-service.yml.j2
+      - services/swift/swift-rsync-service.yml.j2
+      bootstrap:
+      pod:
+      - services/swift/swift-account-pod.yml.j2
+      - services/swift/swift-container-pod.yml.j2
+      - services/swift/swift-object-pod.yml.j2
+      - services/swift/swift-proxy-pod.yml.j2

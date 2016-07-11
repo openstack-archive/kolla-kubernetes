@@ -29,9 +29,7 @@ CONF = cfg.CONF
 CONF.import_group('kolla', 'kolla_kubernetes.config')
 CONF.import_group('kolla_kubernetes', 'kolla_kubernetes.config')
 
-# Set to global for now, until we can refactor later
-KKR = KollaKubernetesResources(
-    PathFinder.find_config_file('service_resources.yml'))
+KKR = KollaKubernetesResources.Get()
 
 
 def _create_working_directory(target='services'):
@@ -44,36 +42,6 @@ def _create_working_directory(target='services'):
     return working_dir
 
 
-def _load_variables_from_file(service_name=None, debug_regex=None):
-    # Apply basic variables that aren't defined in any config file
-    jvars = {'deployment_id': CONF.kolla.deployment_id,
-             'node_config_directory': '',
-             'timestamp': str(time.time())}
-
-    # Create the prioritized list of config files that need to be
-    # merged.  Search method for config files: locks onto the first
-    # path where the file exists.  Search method for template files:
-    # locks onto the first path that exists, and then expects the file
-    # to be there.
-    kolla_dir = PathFinder.find_kolla_dir()
-    files = [
-        PathFinder.find_config_file('kolla-kubernetes.yml'),
-        PathFinder.find_config_file('globals.yml'),
-        PathFinder.find_config_file('passwords.yml'),
-        os.path.join(kolla_dir, 'ansible/group_vars/all.yml')]
-    if service_name is not None:
-        files.append(os.path.join(kolla_dir, 'ansible/roles',
-                                  service_name, 'defaults/main.yml'))
-    files.append(os.path.join(kolla_dir,
-                              'ansible/roles/common/defaults/main.yml'))
-
-    # Create the config dict
-    x = JinjaUtils.merge_configs_to_dict(reversed(files), jvars, debug_regex)
-
-    # Render values containing nested jinja variables
-    return JinjaUtils.dict_self_render(x)
-
-
 def _build_bootstrap(working_dir, service_name, variables=None):
     for filename in PathFinder.find_bootstrap_files(service_name):
         proj_filename = filename.split('/')[-1].replace('.j2', '')
@@ -81,7 +49,7 @@ def _build_bootstrap(working_dir, service_name, variables=None):
         LOG.debug(
             'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
 
-        variables = _load_variables_from_file(proj_name)
+        variables = KKR.GetJinjaDict(proj_name)
         content = JinjaUtils.render_jinja(
             variables,
             FileUtils.read_string_from_file(filename))
@@ -98,7 +66,7 @@ def _build_runner(working_dir, service_name, pod_list, variables=None):
         LOG.debug(
             'proj_filename : %s proj_name: %s' % (proj_filename, proj_name))
 
-        variables = _load_variables_from_file(proj_name)
+        variables = KKR.GetJinjaDict(proj_name)
         content = JinjaUtils.render_jinja(
             variables,
             FileUtils.read_string_from_file(filename))
@@ -153,10 +121,6 @@ def _bootstrap_instance(directory, service_name):
         for container in container_list:
             cmd = [CONF.kolla_kubernetes.kubectl_path, "create",
                    "configmap", '%s-configmap' % container]
-
-            # TODO(VerifyLogic) Should not be container, but service.
-            # Probably works because most of our services have a
-            # container of the same name
             for f in PathFinder.find_config_files(container):
                 cmd = cmd + ['--from-file=%s=%s' % (
                     os.path.basename(f).replace("_", "-"), f)]
