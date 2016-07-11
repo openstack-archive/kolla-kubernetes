@@ -1,0 +1,11 @@
+Code-Review+2: David Wang <dcwangmit01@gmail.com>
+Code-Review+1: Flavio Percoco <fpercoco@redhat.com>
+Code-Review+1: Eduardo Gonzalez <dabarren@gmail.com>
+Code-Review+2: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Workflow+1: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 11 Jul 2016 09:56:53 +0000
+Reviewed-on: https://review.openstack.org/337909
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
