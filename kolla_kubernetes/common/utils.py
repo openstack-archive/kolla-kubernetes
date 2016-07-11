@@ -10,10 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
 import copy
 import jinja2
 import os
 import re
+import subprocess
+import sys
 import yaml
 
 from oslo_log import log as logging
@@ -29,6 +32,24 @@ def env(*args, **kwargs):
         if value:
             return value
     return kwargs.get('default', '')
+
+
+class ExecUtils(object):
+
+    @staticmethod
+    def exec_command(cmd):
+        """Executes command and returns tuple of (stdout, errorException)
+
+        Callers should check for errorException == None
+        """
+        try:
+            LOG.info("executing cmd[{}]".format(cmd))
+            res = subprocess.check_output(
+                cmd, shell=True, executable='/bin/bash')
+            LOG.info("returned[{}]".format(res))
+            return (res, None)
+        except Exception as e:
+            return ('', e)
 
 
 class FileUtils(object):
@@ -85,10 +106,10 @@ class JinjaUtils(object):
 
                 # Handle debug requests
                 if debug_regex is not None:
-                    print("FILE " + file_)
+                    print("FILE {}".format(file_), file=sys.stderr)
                     for k, v in x.items():
                         if re.match(debug_regex, k):
-                            print(k + ": " + v)
+                            print("  {}: {}".format(k, v), file=sys.stderr)
             except Exception as e:
                 LOG.warning('Unable to read file %s: %s', file_, e)
                 raise e
@@ -144,6 +165,13 @@ class YamlUtils(object):
     def yaml_dict_from_string(string_):
         # Use BaseLoader to keep "True|False" strings as strings
         return yaml.load(string_, Loader=yaml.loader.BaseLoader)
+
+    @staticmethod
+    def yaml_dict_normalize(dict_):
+        # This is used to flip "True|False" typed values back to
+        #   strings in a dict.
+        return YamlUtils.yaml_dict_from_string(
+            YamlUtils.yaml_dict_to_string(dict_))
 
     @staticmethod
     def yaml_dict_to_file(dict_, file_):
