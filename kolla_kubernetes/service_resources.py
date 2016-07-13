@@ -117,6 +117,14 @@ class KollaKubernetesResources(object):
 class Service(object):
     VALID_ACTIONS = 'create delete'.split(" ")
     VALID_RESOURCE_TYPES = 'configmap disk pv pvc svc bootstrap pod'.split(" ")
+    # Keep old logic for LEGACY support of bootstrap, run, and kill commands
+    #   Legacy commands did not keep order.  Here, we define order.
+    #   Hoping to get rid of the LEGACY commands entirely if people okay.
+    #   Otherwise, we wait until Ansible workflow engine.
+    #   SVC should really be in bootstrap command, since it is stateful
+    #   CONFIGMAP remains listed twice, since that was the old logic.
+    LEGACY_BOOTSTRAP_RESOURCES = 'configmap disk pv pvc bootstrap'.split(" ")
+    LEGACY_RUN_RESOURCES = 'configmap svc pod'.split(" ")
 
     def __init__(self, y):
         self.y = y
@@ -173,6 +181,11 @@ class Service(object):
         for t in resource_types:
             assert t in Service.VALID_RESOURCE_TYPES
 
+        # If action is delete, then delete the resource types in
+        # reverse order.
+        if action == 'delete':
+            resource_types = reversed(resource_types)
+
         # Execute the action for each resource_type
         for rt in resource_types:
             if rt == "configmap":
@@ -210,8 +223,15 @@ class Service(object):
         return ret
 
     def _ensureResource(self, action, resource_type):
-        for file_ in self.getResourceFilesByType(resource_type):
 
+        resource_files = self.getResourceFilesByType(resource_type)
+
+        # If action is delete, then delete the resource files in
+        # reverse order.
+        if action == 'delete':
+            resource_files = reversed(resource_files)
+
+        for file_ in resource_files:
             # Build the command based on if shell script or not. If
             # shell script, pipe to sh.  Else, pipe to kubectl
             cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
