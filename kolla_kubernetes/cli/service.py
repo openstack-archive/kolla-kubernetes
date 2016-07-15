@@ -17,6 +17,7 @@ from cliff import command
 from oslo_config import cfg
 from oslo_log import log
 
+from kolla_kubernetes.cmd.shell import KollaKubernetesShell
 from kolla_kubernetes.common.utils import FileUtils
 from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes.common.utils import YamlUtils
@@ -29,7 +30,14 @@ LOG = log.getLogger(__name__)
 KKR = KollaKubernetesResources.Get()
 
 
-class _ServiceCommand(command.Command):
+class _BaseCommand(command.Command):
+
+    def get_global_args(self):
+        """Provides a method to access global parsed options"""
+        return KollaKubernetesShell.Get().get_parsed_options()
+
+
+class _ServiceCommand(_BaseCommand):
 
     _action = None  # must be set in derived classes
 
@@ -68,7 +76,7 @@ class Kill(_ServiceCommand):
     _action = 'kill'
 
 
-class Resource(command.Command):
+class Resource(_BaseCommand):
     """Create or delete kolla-kubernetes resources"""
 
     def get_parser(self, prog_name):
@@ -177,7 +185,7 @@ class ResourceTemplate(Resource):
             FileUtils.read_string_from_file(args.template_file)))
 
 
-class ResourceMap(command.Command):
+class ResourceMap(_BaseCommand):
     """List available kolla-kubernetes resources to be created or deleted"""
 
     # If the operator has any question on what Services have what resources,
