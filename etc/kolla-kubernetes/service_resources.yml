@@ -203,3 +203,20 @@ kolla-kubernetes:
       - services/swift/swift-container-pod.yml.j2
       - services/swift/swift-object-pod.yml.j2
       - services/swift/swift-proxy-pod.yml.j2
+  - name: skydns
+    pods:
+    - name: skydns
+      containers:
+      - name: etcd
+      - name: kube2sky
+      - name: skydns
+      - name: healthz
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - services/skydns/skydns-service.yml.j2
+      pod:
+      - services/skydns/skydns-pod.yml.j2
+
