@@ -20,7 +20,6 @@ from oslo_log import log
 from kolla_kubernetes.common.utils import FileUtils
 from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes.common.utils import YamlUtils
-from kolla_kubernetes import service
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.service_resources import Service
 
@@ -42,7 +41,16 @@ class _ServiceCommand(command.Command):
     def take_action(self, parsed_args):
         assert self._action is not None, (
             "code error: derived classes must set _action")
-        service.execute_action(parsed_args.service, self._action)
+
+        service = KKR.getServiceByName(parsed_args.service)
+        if (self._action == 'bootstrap'):
+            service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
+        elif (self._action == 'run'):
+            service.do_apply('create', Service.LEGACY_RUN_RESOURCES)
+        elif (self._action == 'kill'):
+            service.do_apply('delete', Service.VALID_RESOURCE_TYPES)
+        else:
+            raise Exception("Code Error")
 
 
 class Bootstrap(_ServiceCommand):
