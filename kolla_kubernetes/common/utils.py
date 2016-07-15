@@ -123,6 +123,7 @@ class JinjaUtils(object):
             loader=jinja2.DictLoader({name: template_str}))
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = type_utils.str_to_bool
+        j2env.globals['KubeUtils'] = KubeUtils
         rendered_template = j2env.get_template(name).render(dict_)
         return rendered_template + "\n"
 
@@ -182,3 +183,38 @@ class YamlUtils(object):
     def yaml_dict_from_file(file):
         s = FileUtils.read_string_from_file(file)
         return YamlUtils.yaml_dict_from_string(s)
+
+
+class KubeUtils(object):
+
+    @staticmethod
+    def get_api_url(context):
+        """Executes kubectl config view
+
+        Returns either None or a string with API server url.
+
+        Callers should check for returned string if it is not == None
+        """
+        res, code = ExecUtils.exec_command('kubectl config current-context')
+        if code is not None:
+            return ('', e)
+
+        current_context = res[:-1]
+
+        res, code = ExecUtils.exec_command('kubectl config view')
+        if code is not None:
+            return ('', e)
+
+        configuration = yaml.safe_load(res)
+        api_endpoints = []
+
+        for cluster in configuration['clusters']:
+            server, context = cluster.iteritems()
+            if context[1] == current_context:
+                api_endpoints.append(server[1].get('server'))
+
+        api_server_url = str(api_endpoints[0]).replace('[', '').replace(']',
+                                                                        '')
+        api_server_url = api_server_url.replace('\'', '')
+
+        return (api_server_url)
