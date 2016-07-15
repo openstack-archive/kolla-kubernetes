@@ -144,7 +144,7 @@ kolla-kubernetes:
       containers:
       - name: neutron-l3-agent
       - name: neutron-dhcp-agent
-      - name: neutron-medadata-agent
+      - name: neutron-metadata-agent
     - name: neutron-control
       containers:
       - name: neutron-server
