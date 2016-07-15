@@ -182,3 +182,38 @@ class YamlUtils(object):
     def yaml_dict_from_file(file):
         s = FileUtils.read_string_from_file(file)
         return YamlUtils.yaml_dict_from_string(s)
+
+class KubeUtils(object):
+
+    @staticmethod
+    def get_api_url(context):
+        """Executes kubectl config view and returns either None or a string 
+        with API server url.
+        
+        Callers should check for returned string if it is not == None
+        """
+        try:
+            res = subprocess.check_output(
+                ['kubectl', 'config', 'current-context'])
+        except Exception as e:
+            return ('')
+        current_context = res[:-1]
+
+        try:
+            res = subprocess.check_output(
+                ['kubectl', 'config', 'view'])
+        except Exception as e:
+            return ('')
+
+        configuration = yaml.safe_load(res)
+        api_endpoints = []
+
+        for element in configuration['clusters']:
+            value_1, value_2 = element.iteritems()
+            if value_2[1] == current_context:
+               api_endpoints.append(value_1[1].get('server'))
+
+        api_server_url = str(api_endpoints[0]).replace('[', '').replace(']', '')
+        api_server_url = api_server_url.replace('\'', '')
+
+        return (api_server_url)
