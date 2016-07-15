@@ -23,6 +23,7 @@ from kolla_kubernetes.common.utils import ExecUtils
 from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes.common.utils import StringUtils
 from kolla_kubernetes.common.utils import YamlUtils
+from kolla_kubernetes.common.utils import KubeUtils
 
 CONF = cfg.CONF
 LOG = logging.getLogger()
