@@ -23,6 +23,7 @@ from kolla_kubernetes.common.utils import ExecUtils
 from kolla_kubernetes.common.utils import JinjaUtils
 from kolla_kubernetes.common.utils import StringUtils
 from kolla_kubernetes.common.utils import YamlUtils
+from kolla_kubernetes.common.utils import KubeUtils
 
 CONF = cfg.CONF
 LOG = logging.getLogger()
@@ -70,8 +71,10 @@ class KollaKubernetesResources(object):
             PathFinder.find_config_file('passwords.yml'),
             os.path.join(kolla_dir, 'ansible/group_vars/all.yml')]
         if service_name is not None:
-            files.append(os.path.join(kolla_dir, 'ansible/roles',
-                                      service_name, 'defaults/main.yml'))
+            service_ansible_file = os.path.join(
+                kolla_dir, 'ansible/roles', service_name, 'defaults/main.yml')
+            if os.path.exists(service_ansible_file):
+                files.append(service_ansible_file)
         files.append(os.path.join(kolla_dir,
                                   'ansible/roles/common/defaults/main.yml'))
 
