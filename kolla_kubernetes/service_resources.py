@@ -50,8 +50,7 @@ class KollaKubernetesResources(object):
             return KollaKubernetesResources._jinja_dict_cache[cache_key]
 
         # Apply basic variables that aren't defined in any config file
-        jvars = {'deployment_id': CONF.kolla.deployment_id,
-                 'node_config_directory': '',
+        jvars = {'node_config_directory': '',
                  'timestamp': str(time.time())}
 
         # Add the cli args to the template vars, to be fed into templates

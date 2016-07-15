@@ -67,36 +67,8 @@ class PathFinder(object):
         return PathFinder._list_dir_files(path)
 
     @staticmethod
-    def find_service_files(service_name):
-        path = os.path.join(PathFinder.find_service_dir(), service_name)
-        if not os.path.isdir(path):
-            raise exception.KollaDirNotFoundException(
-                "Unable to locate path=[{}]".format(path))
-        return PathFinder._list_dir_files(path)
-
-    @staticmethod
-    def find_bootstrap_files(service_name):
-        path = os.path.join(PathFinder.find_bootstrap_dir(), service_name)
-        if not os.path.isdir(path):
-            LOG.info('No bootstrap job for service %s', service_name)
-            return []
-        return PathFinder._list_dir_files(path)
-
-    @staticmethod
     def find_config_dir(service_name):
         return PathFinder._find(CONFIG_SEARCH_PATHS, service_name)
-
-    @staticmethod
-    def find_service_dir():
-        if CONF.service_dir:
-            return CONF.service_dir
-        return PathFinder._find(KOLLA_KUBERNETES_SEARCH_PATHS, 'services')
-
-    @staticmethod
-    def find_bootstrap_dir():
-        if CONF.bootstrap_dir:
-            return CONF.bootstrap_dir
-        return PathFinder._find(KOLLA_KUBERNETES_SEARCH_PATHS, 'bootstrap')
 
     @staticmethod
     def _find(search_paths, dir_or_file):
