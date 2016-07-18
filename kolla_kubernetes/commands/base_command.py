@@ -10,10 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cliff import command
 
-def str_to_bool(text):
-    if not text:
-        return False
-    if text.lower() in ['true', 'yes']:
-        return True
-    return False
+from kolla_kubernetes.app import KollaKubernetesApp
+
+
+class KollaKubernetesBaseCommand(command.Command):
+
+    def get_global_args(self):
+        """Provides a method to access global parsed options"""
+        return KollaKubernetesApp.Get().get_parsed_options()

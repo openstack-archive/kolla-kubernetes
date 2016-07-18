@@ -29,14 +29,14 @@ logging.getLogger("requests").setLevel(logging.INFO)
 logging.getLogger("stevedore.extension").setLevel(logging.INFO)
 
 
-class KollaKubernetesShell(app.App):
+class KollaKubernetesApp(app.App):
     _singleton = None
 
     @staticmethod
     def Get():
-        if KollaKubernetesShell._singleton is None:
-            KollaKubernetesShell._singleton = KollaKubernetesShell()
-        return KollaKubernetesShell._singleton
+        if KollaKubernetesApp._singleton is None:
+            KollaKubernetesApp._singleton = KollaKubernetesApp()
+        return KollaKubernetesApp._singleton
 
     def __init__(self):
         super(self.__class__, self).__init__(
@@ -80,10 +80,10 @@ class KollaKubernetesShell(app.App):
         command.Command.get_parser().  That argparse namepace is then
         handed directly to the command.Command.take_action() method of
         each subcommand.  Subcommands may access global options by
-        calling KollaKubernetesShell.Get().get_parsed_options().
+        calling KollaKubernetesApp.Get().get_parsed_options().
 
         """
-        parser = super(KollaKubernetesShell, self).build_option_parser(
+        parser = super(KollaKubernetesApp, self).build_option_parser(
             description,
             version)
 
@@ -102,7 +102,7 @@ class KollaKubernetesShell(app.App):
 
 
 def main(argv=sys.argv[1:]):
-    kks = KollaKubernetesShell().Get()
+    kks = KollaKubernetesApp().Get()
     return kks.run(argv)
 
 if __name__ == '__main__':

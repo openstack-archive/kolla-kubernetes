@@ -18,11 +18,11 @@ import time
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from kolla_kubernetes.common.pathfinder import PathFinder
-from kolla_kubernetes.common.utils import ExecUtils
-from kolla_kubernetes.common.utils import JinjaUtils
-from kolla_kubernetes.common.utils import StringUtils
-from kolla_kubernetes.common.utils import YamlUtils
+from kolla_kubernetes.pathfinder import PathFinder
+from kolla_kubernetes.utils import ExecUtils
+from kolla_kubernetes.utils import JinjaUtils
+from kolla_kubernetes.utils import StringUtils
+from kolla_kubernetes.utils import YamlUtils
 
 CONF = cfg.CONF
 LOG = logging.getLogger()
