@@ -21,8 +21,6 @@ import yaml
 
 from oslo_log import log as logging
 
-from kolla_kubernetes.common import type_utils
-
 LOG = logging.getLogger()
 
 
@@ -123,7 +121,7 @@ class JinjaUtils(object):
             loader=jinja2.DictLoader({name: template_str}))
 
         # Do not print type for bools "!!bool" on output
-        j2env.filters['bool'] = type_utils.str_to_bool
+        j2env.filters['bool'] = TypeUtils.str_to_bool
 
         # Add a "raise" keyword for raising exceptions from within jinja
         def jinja_raise(message):
@@ -161,6 +159,17 @@ class StringUtils(object):
     @staticmethod
     def pad_str(pad, num, s):
         return re.sub("^", (pad * num), s, 0, re.MULTILINE)
+
+
+class TypeUtils(object):
+
+    @staticmethod
+    def str_to_bool(text):
+        if not text:
+            return False
+        if text.lower() in ['true', 'yes']:
+            return True
+        return False
 
 
 class YamlUtils(object):

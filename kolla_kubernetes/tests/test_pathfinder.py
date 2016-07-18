@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kolla_kubernetes.common.pathfinder import PathFinder
+from kolla_kubernetes.pathfinder import PathFinder
 from kolla_kubernetes.tests import base
 
 

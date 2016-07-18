@@ -13,70 +13,21 @@
 from __future__ import print_function
 import sys
 
-from cliff import command
-from oslo_config import cfg
 from oslo_log import log
 
-from kolla_kubernetes.cmd.shell import KollaKubernetesShell
-from kolla_kubernetes.common.utils import FileUtils
-from kolla_kubernetes.common.utils import JinjaUtils
-from kolla_kubernetes.common.utils import YamlUtils
+from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.service_resources import Service
+from kolla_kubernetes.utils import FileUtils
+from kolla_kubernetes.utils import JinjaUtils
+from kolla_kubernetes.utils import YamlUtils
 
-CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
 KKR = KollaKubernetesResources.Get()
 
 
-class _BaseCommand(command.Command):
-
-    def get_global_args(self):
-        """Provides a method to access global parsed options"""
-        return KollaKubernetesShell.Get().get_parsed_options()
-
-
-class _ServiceCommand(_BaseCommand):
-
-    _action = None  # must be set in derived classes
-
-    def get_parser(self, prog_name):
-        parser = super(_ServiceCommand, self).get_parser(prog_name)
-        parser.add_argument('service')
-        return parser
-
-    def take_action(self, parsed_args):
-        assert self._action is not None, (
-            "code error: derived classes must set _action")
-
-        service = KKR.getServiceByName(parsed_args.service)
-        if (self._action == 'bootstrap'):
-            service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
-        elif (self._action == 'run'):
-            service.do_apply('create', Service.LEGACY_RUN_RESOURCES)
-        elif (self._action == 'kill'):
-            service.do_apply('delete', Service.VALID_RESOURCE_TYPES)
-        else:
-            raise Exception("Code Error")
-
-
-class Bootstrap(_ServiceCommand):
-    """Roll out configurations and bootstrap a service."""
-    _action = 'bootstrap'
-
-
-class Run(_ServiceCommand):
-    """Run a service."""
-    _action = 'run'
-
-
-class Kill(_ServiceCommand):
-    """Kill a service."""
-    _action = 'kill'
-
-
-class Resource(_BaseCommand):
+class Resource(KollaKubernetesBaseCommand):
     """Create or delete kolla-kubernetes resources"""
 
     def get_parser(self, prog_name):
@@ -185,7 +136,7 @@ class ResourceTemplate(Resource):
             FileUtils.read_string_from_file(args.template_file)))
 
 
-class ResourceMap(_BaseCommand):
+class ResourceMap(KollaKubernetesBaseCommand):
     """List available kolla-kubernetes resources to be created or deleted"""
 
     # If the operator has any question on what Services have what resources,
