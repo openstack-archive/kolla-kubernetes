@@ -22,15 +22,15 @@ kolla-kubernetes:
       - name: mariadb
     resources:
       disk:
-      - bootstrap/mariadb/mariadb-disk.sh.j2
+      - services/mariadb/mariadb-disk.sh.j2
       pv:
-      - bootstrap/mariadb/mariadb-pv.yml.j2
+      - services/mariadb/mariadb-pv.yml.j2
       pvc:
-      - bootstrap/mariadb/mariadb-pvc.yml.j2
+      - services/mariadb/mariadb-pvc.yml.j2
       svc:
       - services/mariadb/mariadb-service.yml.j2
       bootstrap:
-      - bootstrap/mariadb/mariadb-job.yml.j2
+      - services/mariadb/mariadb-bootstrap-job.yml.j2
       pod:
       - services/mariadb/mariadb-pod.yml.j2
   - name: memcached
@@ -60,7 +60,7 @@ kolla-kubernetes:
       - services/keystone/keystone-service-admin.yml.j2
       - services/keystone/keystone-service-public.yml.j2
       bootstrap:
-      - bootstrap/keystone/keystone-job.yml.j2
+      - services/keystone/keystone-bootstrap-job.yml.j2
       pod:
       - services/keystone/keystone-pod.yml.j2
   - name: horizon
@@ -90,7 +90,7 @@ kolla-kubernetes:
       - services/rabbitmq/rabbitmq-service-management.yml.j2
       - services/rabbitmq/rabbitmq-service.yml.j2
       bootstrap:
-      - bootstrap/rabbitmq/rabbitmq-job.yml.j2
+      - services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
       pod:
       - services/rabbitmq/rabbitmq-pod.yml.j2
   - name: glance
@@ -107,7 +107,7 @@ kolla-kubernetes:
       - services/glance/glance-api-pod.yml.j2
       - services/glance/glance-registry-pod.yml.j2
       bootstrap:
-      - bootstrap/glance/glance-job.yml.j2
+      - services/glance/glance-bootstrap-job.yml.j2
       pod:
       - services/glance/glance-api-service.yml.j2
       - services/glance/glance-registry-service.yml.j2
@@ -130,8 +130,8 @@ kolla-kubernetes:
       svc:
       - services/nova/nova-service-compute.yml.j2
       bootstrap:
-      - bootstrap/nova/nova-compute-job.yml.j2
-      - bootstrap/nova/nova-control-job.yml.j2
+      - services/nova/nova-compute-bootstrap-job.yml.j2
+      - services/nova/nova-control-bootstrap-job.yml.j2
       pod:
       - services/nova/nova-compute-pod.yml.j2
       - services/nova/nova-control-pod.yml.j2
@@ -158,7 +158,7 @@ kolla-kubernetes:
       svc:
       - services/neutron/neutron-server-service.yml.j2
       bootstrap:
-      - bootstrap/neutron/neutron-job.yml.j2
+      - services/neutron/neutron-bootstrap-job.yml.j2
       pod:
       - services/neutron/neutron-compute-pod.yml.j2
       - services/neutron/neutron-control-pod.yml.j2
@@ -220,6 +220,6 @@ kolla-kubernetes:
       pvc:
       svc:
       - services/skydns/skydns-service.yml.j2
+      bootstrap:
       pod:
       - services/skydns/skydns-pod.yml.j2
-
