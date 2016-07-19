@@ -38,8 +38,8 @@ class PathFinder(object):
         # Editable installs (aka. Development: pip install --editable .)
         #   use this root path to locate ../kolla
         # For editable, resolves to /path/to/git/repo/kolla-kubernetes
-        return os.path.dirname(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))))
+        return os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))
 
     @staticmethod
     def find_kolla_dir():

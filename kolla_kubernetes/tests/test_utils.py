@@ -15,11 +15,12 @@ import os
 import tempfile
 import time
 
-from kolla_kubernetes.common.utils import FileUtils
-from kolla_kubernetes.common.utils import JinjaUtils
-from kolla_kubernetes.common.utils import StringUtils
-from kolla_kubernetes.common.utils import YamlUtils
 from kolla_kubernetes.tests import base
+from kolla_kubernetes.utils import FileUtils
+from kolla_kubernetes.utils import JinjaUtils
+from kolla_kubernetes.utils import StringUtils
+from kolla_kubernetes.utils import TypeUtils
+from kolla_kubernetes.utils import YamlUtils
 
 
 test_yaml = '''
@@ -144,6 +145,27 @@ class TestStringUtils(UtilsTestCase):
         self.assertEqual(StringUtils.pad_str(" ", 3, "  "), "     ")
         self.assertEqual(StringUtils.pad_str("  ", 3, " "), "       ")
         self.assertEqual(StringUtils.pad_str("aa", 2, ""), "aaaa")
+
+
+class TestTypeUtils(base.BaseTestCase):
+
+    scenarios = [
+        ('none', dict(text=None, expect=False)),
+        ('empty', dict(text='', expect=False)),
+        ('junk', dict(text='unlikely', expect=False)),
+        ('no', dict(text='no', expect=False)),
+        ('yes', dict(text='yes', expect=True)),
+        ('0', dict(text='0', expect=False)),
+        ('1', dict(text='1', expect=False)),
+        ('True', dict(text='True', expect=True)),
+        ('False', dict(text='False', expect=False)),
+        ('true', dict(text='true', expect=True)),
+        ('false', dict(text='false', expect=False)),
+        ('shouty', dict(text='TRUE', expect=True)),
+    ]
+
+    def test_str_to_bool(self):
+        self.assertEqual(self.expect, TypeUtils.str_to_bool(self.text))
 
 
 class TestYamlUtils(UtilsTestCase):
