@@ -28,7 +28,7 @@ KKR = KollaKubernetesResources.Get()
 
 
 class Resource(KollaKubernetesBaseCommand):
-    """Create or delete kolla-kubernetes resources"""
+    """Create, delete, or query status for kolla-kubernetes resources"""
 
     def get_parser(self, prog_name):
         parser = super(Resource, self).get_parser(prog_name)

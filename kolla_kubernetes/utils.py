@@ -40,14 +40,21 @@ class ExecUtils(object):
 
         Callers should check for errorException == None
         """
+        # TODO(modify): modify function to include stderr in output tuple
+        cmd = cmd.strip()  # strip whitespace
         try:
-            LOG.info("executing cmd[{}]".format(cmd))
+            LOG.debug("executing cmd[{}]".format(cmd))
             res = subprocess.check_output(
-                cmd, shell=True, executable='/bin/bash')
-            LOG.info("returned[{}]".format(res))
+                cmd, shell=True,
+                executable='/bin/bash')
+            res = res.strip()  # strip whitespace
+            LOG.debug("returned[{}]".format(res))
             return (res, None)
-        except Exception as e:
-            return ('', e)
+        except subprocess.CalledProcessError as e:
+            # Any non-zero exit code will result in a thrown exception
+            # The stdout may be accessed with e.output
+            # The exit code may be accessed with e.returncode
+            return (e.output.rstrip(), e)
 
 
 class FileUtils(object):

@@ -19,6 +19,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from kolla_kubernetes.pathfinder import PathFinder
+from kolla_kubernetes.status import KubeResourceTemplate
 from kolla_kubernetes.utils import ExecUtils
 from kolla_kubernetes.utils import JinjaUtils
 from kolla_kubernetes.utils import StringUtils
@@ -116,7 +117,7 @@ class KollaKubernetesResources(object):
 
 
 class Service(object):
-    VALID_ACTIONS = 'create delete'.split(" ")
+    VALID_ACTIONS = 'create delete status'.split(" ")
     VALID_RESOURCE_TYPES = 'configmap disk pv pvc svc bootstrap pod'.split(" ")
     # Keep old logic for LEGACY support of bootstrap, run, and kill commands
     #   Legacy commands did not keep order.  Here, we define order.
@@ -189,6 +190,14 @@ class Service(object):
 
         # Execute the action for each resource_type
         for rt in resource_types:
+            # Handle status action
+            if action == "status":
+                if rt == "disk":
+                    raise Exception('resource type for disk not supported yet')
+                self._getKubeResourceStatus(action, rt)
+                continue
+
+            # Handle create and delete action
             if rt == "configmap":
                 # Take care of configmap as a special case
                 for pod in self.getPods().values():
@@ -244,6 +253,59 @@ class Service(object):
 
             # Execute the command
             ExecUtils.exec_command(cmd)
+
+    def _getKubeResourceStatus(self, action, resource_type):
+        """Checks service resource_type resources in Kubernetes
+
+        For each resource file of resource_type
+          Process the template (which may contain a stream of yaml definitions)
+          For each yaml definition
+            Send to kubernetes
+            Compare input definition to output status (do checks!)
+            Note: This is kube check only.  Othe subcommands should
+            take care of application specific health checks (e.g. port checks)
+        Summarize all of the above into a results dict
+        Prints results dict to stdout as yaml status string
+        """
+
+        # Do checks
+        assert resource_type in Service.VALID_RESOURCE_TYPES
+        if resource_type == 'disk':
+            LOG.warn('resource_type disk is not supported yet')
+            return
+
+        # If the template output produces a stream of yaml documents
+        # which are then piped to kubectl, then we will receive a
+        # stream of reports separated by "\n\n".  Split on "\n\n" and
+        # process each result individually.  The overall result is the
+        # merged output.
+        res = {}  # the results dict
+        res['status'] = ''
+        res['service_name'] = self.getName()
+        res['resource_type'] = resource_type
+        res['files'] = []
+
+        resource_files = self.getResourceFilesByType(resource_type)
+
+        resource_templates = []
+        for file_ in resource_files:
+
+            # Skip unsupported script templates
+            if file_.endswith('.sh.j2'):
+                LOG.warn('Shell templates are not supported yet. '
+                         'Skipping processing status of {}'.format(file_))
+                continue
+
+            krt = KubeResourceTemplate(self.getName(), resource_type, file_)
+            resource_templates.append(krt)
+
+        res['status'] = 'ok'
+        for krt in resource_templates:
+            if krt.getStatus() == 'error':
+                res['status'] = 'error'
+            res['files'].append(krt.asDict())
+
+        print(YamlUtils.yaml_dict_to_string(res))
 
 
 class Pod(object):
