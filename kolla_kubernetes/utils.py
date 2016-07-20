@@ -23,6 +23,9 @@ from oslo_log import log as logging
 
 LOG = logging.getLogger()
 
+# Disable yaml short-form printing of aliases and anchors
+yaml.SafeDumper.ignore_aliases = lambda self, data: True
+
 
 def env(*args, **kwargs):
     for arg in args:
@@ -40,14 +43,21 @@ class ExecUtils(object):
 
         Callers should check for errorException == None
         """
+        # TODO(modify): modify function to include stderr in output tuple
+        cmd = cmd.strip()  # strip whitespace
         try:
-            LOG.info("executing cmd[{}]".format(cmd))
+            LOG.debug("executing cmd[{}]".format(cmd))
             res = subprocess.check_output(
-                cmd, shell=True, executable='/bin/bash')
-            LOG.info("returned[{}]".format(res))
+                cmd, shell=True,
+                executable='/bin/bash')
+            res = res.strip()  # strip whitespace
+            LOG.debug("returned[{}]".format(res))
             return (res, None)
-        except Exception as e:
-            return ('', e)
+        except subprocess.CalledProcessError as e:
+            # Any non-zero exit code will result in a thrown exception
+            # The stdout may be accessed with e.output
+            # The exit code may be accessed with e.returncode
+            return (e.output.rstrip(), e)
 
 
 class FileUtils(object):
@@ -146,7 +156,7 @@ class JinjaUtils(object):
         d = copy.deepcopy(dict_)
         template = None
         for i in range(0, 10):
-            template = YamlUtils.yaml_dict_to_string(d)
+            template = YamlUtils.yaml_dict_to_string_jinja(d)
             rendered_template = JinjaUtils.render_jinja(d, template)
             d = YamlUtils.yaml_dict_from_string(rendered_template)
             if rendered_template.strip() == template.strip():
@@ -176,6 +186,22 @@ class YamlUtils(object):
 
     @staticmethod
     def yaml_dict_to_string(dict_):
+        """Convert dict to string for human output"""
+        # Use width=1000000 to prevent wrapping
+        return yaml.safe_dump(dict_, default_flow_style=False,
+                              width=1000000)
+
+    @staticmethod
+    def yaml_dict_to_string_jinja(dict_):
+        """Convert dict to string for jinja processing
+
+        Use this only for dict strings that jinja will process.  If
+        you use the normal style instead of double-quote style, then
+        yaml dump will escape all single quotes (') by doubling them
+        up ('').  If jinja is to process the string, it will fail.
+        Thus, change the quote style to avoid escaping single quote
+        (').
+        """
         # Use width=1000000 to prevent wrapping
         # Use double-quote style to prevent escaping of ' to ''
         return yaml.safe_dump(dict_, default_flow_style=False,

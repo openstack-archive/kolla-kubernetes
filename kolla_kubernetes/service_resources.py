@@ -18,6 +18,7 @@ import time
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from kolla_kubernetes.kube_service_status import KubeResourceTypeStatus
 from kolla_kubernetes.pathfinder import PathFinder
 from kolla_kubernetes.utils import ExecUtils
 from kolla_kubernetes.utils import JinjaUtils
@@ -116,7 +117,7 @@ class KollaKubernetesResources(object):
 
 
 class Service(object):
-    VALID_ACTIONS = 'create delete'.split(" ")
+    VALID_ACTIONS = 'create delete status'.split(" ")
     VALID_RESOURCE_TYPES = 'configmap disk pv pvc svc bootstrap pod'.split(" ")
     # Keep old logic for LEGACY support of bootstrap, run, and kill commands
     #   Legacy commands did not keep order.  Here, we define order.
@@ -189,6 +190,15 @@ class Service(object):
 
         # Execute the action for each resource_type
         for rt in resource_types:
+            # Handle status action
+            if action == "status":
+                if rt == "disk":
+                    raise Exception('resource type for disk not supported yet')
+                krs = KubeResourceTypeStatus(self, self.getName(), rt)
+                print(YamlUtils.yaml_dict_to_string(krs.asDict()))
+                continue
+
+            # Handle create and delete action
             if rt == "configmap":
                 # Take care of configmap as a special case
                 for pod in self.getPods().values():
