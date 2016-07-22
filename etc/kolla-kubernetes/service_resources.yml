@@ -104,13 +104,13 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/glance/glance-api-pod.yml.j2
-      - services/glance/glance-registry-pod.yml.j2
+      - services/glance/glance-api-service.yml.j2
+      - services/glance/glance-registry-service.yml.j2
       bootstrap:
       - services/glance/glance-bootstrap-job.yml.j2
       pod:
-      - services/glance/glance-api-service.yml.j2
-      - services/glance/glance-registry-service.yml.j2
+      - services/glance/glance-api-pod.yml.j2
+      - services/glance/glance-registry-pod.yml.j2
 
   - name: nova
     pods:
