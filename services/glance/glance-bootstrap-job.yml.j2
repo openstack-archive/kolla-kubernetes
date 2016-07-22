@@ -11,12 +11,14 @@ spec:
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-glance-database
-          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
-          command: ["usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_db",
-                    "-a", "login_host='mariadb'
-                    login_user='{{ database_user }}'
-                    login_password='{{ database_password }}'
-                    name='{{ glance_database_name }}'"]
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_db -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='{{ database_password }}'
+               name='{{ glance_database_name }}'"
           volumeMounts:
             - mountPath: /dev
               name: dev
@@ -32,16 +34,18 @@ spec:
 
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-glance-user-and-permissions
-          #TODO: Assign the IP to be mariadb's serivce ip exposed by Kubernetes
-          command: ["/usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_user",
-                     "-a", "login_host='mariadb'
-                     login_user='{{ database_user }}'
-                     login_password='{{ database_password }}'
-                     name='{{ glance_database_name }}'
-                     password='{{ glance_database_password }}'
-                     host='%'
-                     priv='{{ glance_database_name }}.*:ALL'
-                     append_privs='yes'"]
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_user -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='{{ database_password }}'
+               name='{{ glance_database_name }}'
+               password='{{ glance_database_password }}'
+               host='%'
+               priv='{{ glance_database_name }}.*:ALL'
+               append_privs='yes'"
           volumeMounts:
             - mountPath: /dev
               name: dev
@@ -68,6 +72,113 @@ spec:
               readOnly: true
             - mountPath: /var/log/kolla
               name: kolla-logs
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-service-and-endpoint-admin
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=glance
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ glance_admin_endpoint }}'
+               interface=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
+               "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-service-and-endpoint-internal
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=glance
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ glance_internal_endpoint }}'
+               interface=internal
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
+               "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-service-and-endpoint-public
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=glance
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ glance_public_endpoint }}'
+               interface=public
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
+               "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-glance-user-project-role
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_user -a
+              "project=service
+               user=glance
+               password={{ glance_keystone_password }}
+               role=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
+               "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+
       volumes:
         - name: glance-api-config
           configMap:

@@ -39,3 +39,11 @@ storage_ceph:
   secretName: pkt-ceph-secret
   ssh_user: root
   user: admin
+
+auth_url: "http://keystone-admin:35357"
+
+openstack_glance_auth: "{'auth_url':'http://keystone-admin:35357','username':'{{ openstack_auth.username }}','password':'{{ openstack_auth.password }}','project_name':'{{ openstack_auth.project_name }}','domain_name':'default'}"
+
+glance_admin_endpoint: "http://glance-api:{{ glance_api_port }}"
+glance_public_endpoint: "http://glance-api:{{ glance_api_port }}"
+glance_internal_endpoint: "http://glance-api:{{ glance_api_port }}"
