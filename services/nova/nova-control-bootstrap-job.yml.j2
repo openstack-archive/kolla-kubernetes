@@ -5,8 +5,91 @@ spec:
     metadata:
       name: nova-compute-generate
     spec:
-      hostNetwork: True
       containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-nova-database
+          command: ["usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_db",
+                    "-a", "login_host='mariadb'
+                    login_user='{{ database_user }}'
+                    login_password='{{ database_password }}'
+                    name='{{ nova_database_name }}'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-nova-api-database
+          command: ["usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_db",
+                    "-a", "login_host='mariadb'
+                    login_user='{{ database_user }}'
+                    login_password='{{ database_password }}'
+                    name='{{ nova_api_database_name }}'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-nova-user-and-permissions
+          command: ["/usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_user",
+                     "-a", "login_host='mariadb'
+                     login_user='{{ database_user }}'
+                     login_password='{{ database_password }}'
+                     name='{{ nova_database_name }}'
+                     password='{{ nova_database_password }}'
+                     host='%'
+                     priv='{{ nova_database_name }}.*:ALL'
+                     append_privs='yes'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-nova-api-user-and-permissions
+          command: ["/usr/bin/ansible", "localhost", "-vvvv", "-m", "mysql_user",
+                     "-a", "login_host='mariadb'
+                     login_user='{{ database_user }}'
+                     login_password='{{ database_password }}'
+                     name='{{ nova_api_database_name }}'
+                     password='{{ nova_api_database_password }}'
+                     host='%'
+                     priv='{{ nova_api_database_name }}.*:ALL'
+                     append_privs='yes'"]
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
         - image: "{{ nova_api_image_full }}"
           name: nova-api
           volumeMounts:
@@ -16,34 +99,6 @@ spec:
               name: etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-          env:
-            - name: KOLLA_BOOTSTRAP
-              value: ""
-            - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
-        - image: "{{ nova_conductor_image_full }}"
-          name: nova-conductor
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: nova-conductor-config
-            - mountPath: /etc/localtime
-              name: etc-localtime
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-          env:
-            - name: KOLLA_BOOTSTRAP
-              value: ""
-            - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
-        - image: "{{ nova_scheduler_image_full }}"
-          name: nova-scheduler
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: nova-scheduler-config
-            - mountPath: /etc/localtime
-              name: etc-localtime
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
@@ -61,6 +116,12 @@ spec:
         - name: nova-scheduler-config
           configMap:
             name: nova-scheduler-configmap
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
