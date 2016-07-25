@@ -56,29 +56,28 @@ class Resource(KollaKubernetesBaseCommand):
 
     def validate_args(self, args):
         if args.action not in Service.VALID_ACTIONS:
-            LOG.error("action [%s] not in valid actions [%s]",
-                      args.action,
-                      "|".join(Service.VALID_ACTIONS))
-            return 1
+            msg = ("action [{}] not in valid actions [{}]".format(
+                args.action,
+                "|".join(Service.VALID_ACTIONS)))
+            raise Exception(msg)
         if args.resource_type not in Service.VALID_RESOURCE_TYPES:
-            LOG.error("resource_type [%s] not in valid resource_types [%s]",
-                      args.resource_type,
-                      "|".join(Service.VALID_RESOURCE_TYPES))
-            return 1
+            msg = ("resource_type [{}] not in valid resource_types [{}]"
+                   .format(args.resource_type,
+                           "|".join(Service.VALID_RESOURCE_TYPES)))
+            raise Exception(msg)
         if args.service_name not in KKR.getServices().keys():
-            LOG.error("service_name [%s] not in valid service_names [%s]",
-                      args.service_name,
-                      "|".join(KKR.getServices().keys()))
-            return 1
+            msg = ("service_name [{}] not in valid service_names [{}]".format(
+                args.service_name,
+                "|".join(KKR.getServices().keys())))
+            raise Exception(msg)
 
         service = KKR.getServiceByName(args.service_name)
         if (args.resource_type != 'configmap') and (
             len(service.getResourceFilesByType(args.resource_type)) == 0):
-            LOG.error("service_name [%s] has no resource"
-                      " files defined for type [%s]",
-                      args.service_name,
-                      args.resource_type)
-            return 1
+            msg = ("service_name [{}] has no resource"
+                   " files defined for type [{}]".format(
+                       args.service_name, args.resource_type))
+            raise Exception(msg)
 
 
 class ResourceTemplate(Resource):
