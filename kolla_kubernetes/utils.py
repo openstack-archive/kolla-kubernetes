@@ -218,7 +218,7 @@ class KubeUtils(object):
         if code is not None:
             return ('', code)
 
-        current_context = res[:-1]
+        current_context = res
 
         res, code = ExecUtils.exec_command('kubectl config view')
         if code is not None:
