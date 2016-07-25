@@ -29,14 +29,24 @@ class _ServiceCommand(KollaKubernetesBaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(_ServiceCommand, self).get_parser(prog_name)
-        parser.add_argument('service')
+        parser.add_argument(
+            "service_name",
+            metavar="<service-name>",
+            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
+        )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, args):
         assert self._action is not None, (
             "code error: derived classes must set _action")
 
-        service = KKR.getServiceByName(parsed_args.service)
+        if args.service_name not in KKR.getServices().keys():
+            msg = ("service_name [{}] not in valid service_names [{}]".format(
+                args.service_name,
+                "|".join(KKR.getServices().keys())))
+            raise Exception(msg)
+
+        service = KKR.getServiceByName(args.service_name)
         if (self._action == 'bootstrap'):
             service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
         elif (self._action == 'run'):
