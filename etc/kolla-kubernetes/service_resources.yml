@@ -129,12 +129,15 @@ kolla-kubernetes:
       pvc:
       svc:
       - services/nova/nova-service-compute.yml.j2
+      - services/nova/nova-service-metadata.yml.j2
       bootstrap:
       - services/nova/nova-compute-bootstrap-job.yml.j2
       - services/nova/nova-control-bootstrap-job.yml.j2
       pod:
       - services/nova/nova-compute-pod.yml.j2
-      - services/nova/nova-control-pod.yml.j2
+      - services/nova/nova-control-api-pod.yml.j2
+      - services/nova/nova-control-conductor-pod.yml.j2
+      - services/nova/nova-control-scheduler-pod.yml.j2
   - name: neutron
     pods:
     - name: neutron-compute

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ReplicationController
+spec:
+  replicas: {{ nova_conductor_replicas }}
+  selector:
+    service: nova
+    type: conductor
+  template:
+    metadata:
+      labels:
+        service: nova
+        type: conductor
+    spec:
+      containers:
+        - name: nova-conductor
+          image: "{{ nova_conductor_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-conductor-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: nova-conductor-config
+          configMap:
+            name: nova-conductor-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
+metadata:
+   name: nova-conductor
