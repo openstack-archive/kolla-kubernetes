@@ -39,6 +39,9 @@ SkyDNS as configured above will any external DNS requests through to the Google
 DNS servers, which should work under most circumstances.  You may change the
 DNS servers 8.8.8.8 and 8.8.4.4 to custom DNS providers if necessary.
 
+P.S. Stop using libvirt service before you running skydns service because it
+will use dnsmasq service which the port 53 maybe used by libvirt service.
+
 Download kubectl::
 
    wget http://storage.googleapis.com/kubernetes-release/release/v1.2.4/bin/linux/amd64/kubectl
