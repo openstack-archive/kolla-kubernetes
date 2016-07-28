@@ -1,0 +1,44 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+
+{%- if storage_provider in ["host", "ceph", "gce"] -%}
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ resourceName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: {{ glance_volume_size }}'Gi'
+{%- if storage_provider == "host" %}
+  hostPath:
+    path: /var/lib/kolla/volumes/{{ resourceName }}
+{%- elif storage_provider == "gce" %}
+  gcePersistentDisk:
+    pdName: {{ resourceName }}
+    fsType: ext4
+{%- elif storage_provider == "ceph" %}
+  rbd:
+    monitors:
+      {%- for k in storage_ceph.monitors %}
+      - "{{ k }}:6789"
+      {%- endfor %}
+    pool: {{ storage_ceph.pool }}
+    image: {{ resourceName }}
+    user: {{ storage_ceph.user }}
+    keyring: {{ storage_ceph.keyring }}
+    secretRef:
+      name: {{ storage_ceph.secretName }}
+    fsType: ext4
+    readOnly: false
+{%- endif %}
+
+{%- elif storage_provider == "aws" %}
+  # NO-OP for AWS, which supports Experimental Persistent Volume Provisioning
+  # https://github.com/kubernetes/kubernetes/blob/release-1.2/examples/experimental/persistent-volume-provisioning/README.md
+
+{%- else %}
+  {{ raise('Unknown storage_provider: check kolla-kubernetes.yml:storage_provider') }}
+
+{%- endif %}
