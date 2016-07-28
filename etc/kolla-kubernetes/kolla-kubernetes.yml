@@ -39,3 +39,8 @@ storage_ceph:
   secretName: pkt-ceph-secret
   ssh_user: root
   user: admin
+
+################################
+# Persistent volumes sizes in GB
+################################
+glance_volume_size: "30"
