@@ -131,8 +131,14 @@ kolla-kubernetes:
       - name: glance-registry
     resources:
       disk:
+      - name: glance-disk
+        template: services/glance/glance-disk.sh.j2
       pv:
+      - name: glance-pv
+        template: services/glance/glance-pv.yml.j2
       pvc:
+      - name: glance-pvc
+        template: services/glance/glance-pvc.yml.j2
       svc:
       - name: glance-api-service
         template: services/glance/glance-api-service.yml.j2
@@ -146,7 +152,6 @@ kolla-kubernetes:
         template: services/glance/glance-api-pod.yml.j2
       - name: glance-registry-pod
         template: services/glance/glance-registry-pod.yml.j2
-
   - name: nova
     pods:
     - name: nova-compute
