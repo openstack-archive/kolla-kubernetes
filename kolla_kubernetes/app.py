@@ -17,7 +17,6 @@ import sys
 from cliff import app
 from cliff import commandmanager
 from cliff.help import HelpAction
-from openstackclient.i18n import _
 
 from kolla_kubernetes.version import version_info
 
@@ -92,7 +91,7 @@ class KollaKubernetesApp(app.App):
             metavar='<kube-context>',
             # TODO(when_we_implement_auto_kube_config):
             #  default=KubeUtils.get_current_context(),
-            help=_('The kubectl context which to use'),
+            help=('The kubectl context which to use'),
         )
         return parser
 
