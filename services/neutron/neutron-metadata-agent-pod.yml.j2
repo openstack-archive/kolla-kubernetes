@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ neutron_metadata_agent_image_full }}"
+      name: neutron-metadata-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: neutron-metadata-agent-config
+          readOnly: true
+        - mountPath: /var/lib/neutron/kolla/
+          name: neutron-metadata-socket
+        - mountPath: /run/netns/
+          name: host-run-netns
+          # shared: true # This seems not support in K8s yet :(
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: neutron-metadata-agent-config
+      configMap:
+        name: neutron-metadata-agent-configmap
+        items:
+        - key: neutron.conf
+          path: neutron.conf
+        - key: config.json
+          path: config.json
+        - key: ml2-conf.ini
+          path: ml2_conf.ini
+        - key: metadata-agent.ini
+          path: metadata_agent.ini
+    - name: host-run-netns
+      hostPath:
+        path: /run/netns
+    - name: host-run
+      hostPath:
+        path: /run
+    - name: host-etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: neutron-metadata-socket
+      hostPath:
+        path: /var/lib/neutron/kolla/metadata_proxy
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: neutron-metadata-agent

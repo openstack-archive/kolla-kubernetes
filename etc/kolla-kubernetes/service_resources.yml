@@ -162,7 +162,9 @@ kolla-kubernetes:
       pod:
       - services/neutron/neutron-compute-pod.yml.j2
       - services/neutron/neutron-control-pod.yml.j2
-      - services/neutron/neutron-network-pod.yml.j2
+      - services/neutron/neutron-dhcp-agent-pod.yml.j2
+      - services/neutron/neutron-l3-agent-pod.yml.j2
+      - services/neutron/neutron-metadata-agent-pod.yml.j2
   - name: swift
     pods:
     - name: swift-account
