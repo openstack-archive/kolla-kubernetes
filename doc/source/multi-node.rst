@@ -167,6 +167,7 @@ Operator Create Resources
 
 ::
 
+  kolla-kubernetes bootstrap ceph  # adds ceph secret, no-op for storage_provider!=ceph
   kolla-kubernetes bootstrap mariadb
   sleep 30  # wait for mariadb bootstrap to finish
   kolla-kubernetes resource delete bootstrap mariadb  # workaround known issue #1
@@ -188,6 +189,7 @@ bits of logic.
 
 ::
 
+  kolla-kubernetes resource create secret ceph
   kolla-kubernetes resource create disk mariadb
   kolla-kubernetes resource create pv mariadb
   kolla-kubernetes resource create pvc mariadb
@@ -227,6 +229,7 @@ Operator Delete Resources
   kolla-kubernetes kill keystone
   kolla-kubernetes kill memcached
   kolla-kubernetes kill mariadb
+  kolla-kubernetes kill ceph
 
 
 Workflow Engine Delete Resources
@@ -251,3 +254,4 @@ Workflow Engine Delete Resources
   kolla-kubernetes resource delete pvc mariadb
   kolla-kubernetes resource delete pv mariadb
   kolla-kubernetes resource delete disk mariadb
+  kolla-kubernetes resource delete secret ceph

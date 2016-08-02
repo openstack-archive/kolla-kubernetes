@@ -10,11 +10,12 @@
   {%- else %}
     {{ raise('Unknown action') }}
   {%- endif %}
+
 {%- elif storage_provider == "ceph" %}
   {%- if kolla_kubernetes.cli.args.action == "create" %}
   ssh {{ storage_ceph.ssh_user -}} @ {{- storage_ceph.monitors[0] }} rbd create {{ storage_ceph.pool -}}/{{- resourceName }} --size "{{ size }}G" --image-feature layering
   {%- elif kolla_kubernetes.cli.args.action == "delete" %}
-  ssh {{ storage_ceph.ssh_user -}} @ {{- storage_ceph.monitors[0] }} rbd delete {{ storage_ceph.pool -}}/{{- resourceName }}
+  ssh {{ storage_ceph.ssh_user -}} @ {{- storage_ceph.monitors[0] }} rbd rm {{ storage_ceph.pool -}}/{{- resourceName }}
   {%- else %}
     {{ raise('Unknown action') }}
   {%- endif %}

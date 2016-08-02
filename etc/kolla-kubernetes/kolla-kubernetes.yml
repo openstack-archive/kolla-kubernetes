@@ -12,13 +12,13 @@
 ########################
 # Kubernetes Cluster
 ########################
-keystone_replicas: "1"
-memcached_replicas: "1"
-rabbitmq_replicas: "1"
-horizon_replicas: "1"
-glance_api_replicas: "1"
-glance_registry_replicas: "1"
-neutron_control_replicas: "1"
+keystone_replicas: "1"  # may be > 1
+memcached_replicas: "1"  # must == 1 even for multinode
+rabbitmq_replicas: "1"  # must == 1 even for multinode
+horizon_replicas: "1"  # may be > 1
+glance_api_replicas: "1"  # may be > 1
+glance_registry_replicas: "1"  # may be > 1
+neutron_control_replicas: "1"  # may be > 1
 
 #################################
 # Kubernetes Cluster DNS setting
@@ -32,11 +32,27 @@ dns_domain_name: "openstack.kolla"
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
 storage_ceph:
-  keyring: /etc/ceph/ceph.client.admin.keyring
+  # List of ceph monitor nodes
   monitors:
   - x.x.x.x
   - y.y.y.y
-  pool: rbd
-  secretName: pkt-ceph-secret
-  ssh_user: root
+  # Default ceph user to for mounts
   user: admin
+  # The default pool to locate ceph volumes
+  pool: rbd
+  # Default user to use in order to run remote SSH commands for creating volumes, etc.
+  ssh_user: root
+  # Kubernetes nodes are also ceph clients.
+  #   Kubernetes will first look for the ceph credentials within the
+  #   kubernetes secret.  If the secret is not defined, kubernetes
+  #   will fall back to locating the ceph keyring on the kubernetes
+  #   node's local filesystem.  Prefer using the kubernetes secret for
+  #   ceph credentials, to avoid provisioning the ceph key on every node.
+  # "secretName": May be any unique secret string within the kube env
+  secretName: ceph-secret
+  # "key": Is the base64-encoded secret key which pods need in order to mount ceph volumes
+  #   Create via this command:
+  #   ssh ceph-mon cat /etc/ceph/ceph.client.admin.keyring | grep key | awk '{print $3}' | base64
+  key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
+  # "keyring": Is the ceph keyring location on the kubernetes node's filesystem.
+  keyring: /etc/ceph/ceph.client.admin.keyring
