@@ -29,9 +29,13 @@ spec:
     pool: {{ storage_ceph.pool }}
     image: {{ resourceName }}
     user: {{ storage_ceph.user }}
+    {%- if storage_ceph.keyring is defined and storage_ceph.keyring|length>0 %}
     keyring: {{ storage_ceph.keyring }}
+    {%- endif %}
+    {%- if storage_ceph.secretName is defined and storage_ceph.secretName|length>0 and storage_ceph.key is defined and storage_ceph.key|length>0 %}
     secretRef:
       name: {{ storage_ceph.secretName }}
+    {%- endif %}
     fsType: ext4
     readOnly: false
 {%- endif %}
