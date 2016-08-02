@@ -12,13 +12,13 @@
 ########################
 # Kubernetes Cluster
 ########################
-keystone_replicas: "1"
-memcached_replicas: "1"
-rabbitmq_replicas: "1"
-horizon_replicas: "1"
-glance_api_replicas: "1"
-glance_registry_replicas: "1"
-neutron_control_replicas: "1"
+keystone_replicas: "1"  # may be > 1
+memcached_replicas: "1"  # must == 1 even for multinode
+rabbitmq_replicas: "1"  # must == 1 even for multinode
+horizon_replicas: "1"  # may be > 1
+glance_api_replicas: "1"  # may be > 1
+glance_registry_replicas: "1"  # must == 1 even for multinode
+neutron_control_replicas: "1"  # may be > 1
 
 #################################
 # Kubernetes Cluster DNS setting
@@ -32,11 +32,50 @@ dns_domain_name: "openstack.kolla"
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
 storage_ceph:
-  keyring: /etc/ceph/ceph.client.admin.keyring
+  # - WARNING: These sample defaults configure ceph access using the
+  #   ceph "admin" user/key, because it involves the least amount of
+  #   work for the a user to get ceph volumes working.  However, it is
+  #   highly recommended that the operator create a dedicated ceph
+  #   user/key with access only to the ceph pool to be used by this
+  #   Kubernetes cluster.
+  #
+  # Kubernetes nodes act as ceph clients because they must mount ceph
+  #   volumes on behalf of pods.  For a particular ceph user, there
+  #   are two ways to pass the ceph secret keyring to Kubernetes.
+  #
+  #   1) The ceph user secret keyring may be loaded as a kubernetes
+  #      secret.  The base64-encoded secret must be referenced by
+  #      storage_ceph.key.  To disable this method, comment out the
+  #      storage_ceph.key definition or set the value to "".  The
+  #      encoded secret may be created with this command:
+  #      $ ssh ceph-mon cat /etc/ceph/path/to/ceph.client.keyring \
+  #          | grep key | awk '{print $3}' | base64
+  #
+  #   2) The ceph user secret keyring may be stored on the Kubernetes
+  #      node's filesystem, and then referenced by
+  #      storage_ceph.keyring.  To disable this method, comment out
+  #      the storage_ceph.keyring definition or set the value to "".
+  #
+  # If both configurations are defined, Method 1) above takes
+  #   precedence over method 2).  Prefer using Method 1) to avoid
+  #   provisioning the ceph key on every node, which is difficult if
+  #   using cloud provider auto-provisioning.
+  #
+  # List of ceph monitor nodes
   monitors:
   - x.x.x.x
   - y.y.y.y
-  pool: rbd
-  secretName: pkt-ceph-secret
-  ssh_user: root
+  # Default ceph user for authenticated access
   user: admin
+  # The default pool to locate ceph volumes
+  pool: rbd
+  # Default user to use in order to run remote SSH commands
+  #   e.g. kolla-kubernetes may execute:
+  #        ssh root@ceph-mon rbd create pool/resourceName --size 1024
+  ssh_user: root
+  # Any unique secret string within the kube env
+  secretName: ceph-secret
+  # The base64-encoded secret key which nodes need for mounting ceph volumes
+  key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
+  # The ceph keyring file location on each kubernetes node's filesystem
+  keyring: /etc/ceph/ceph.client.admin.keyring
