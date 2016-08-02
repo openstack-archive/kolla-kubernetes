@@ -118,14 +118,16 @@ class KollaKubernetesResources(object):
 
 class Service(object):
     VALID_ACTIONS = 'create delete status'.split(" ")
-    VALID_RESOURCE_TYPES = 'configmap disk pv pvc svc bootstrap pod'.split(" ")
+    VALID_RESOURCE_TYPES = ('configmap secret '
+                            'disk pv pvc svc bootstrap pod').split(" ")
     # Keep old logic for LEGACY support of bootstrap, run, and kill commands
     #   Legacy commands did not keep order.  Here, we define order.
     #   Hoping to get rid of the LEGACY commands entirely if people okay.
     #   Otherwise, we wait until Ansible workflow engine.
     #   SVC should really be in bootstrap command, since it is stateful
     #   CONFIGMAP remains listed twice, since that was the old logic.
-    LEGACY_BOOTSTRAP_RESOURCES = 'configmap disk pv pvc bootstrap'.split(" ")
+    LEGACY_BOOTSTRAP_RESOURCES = ('configmap secret '
+                                  'disk pv pvc bootstrap').split(" ")
     LEGACY_RUN_RESOURCES = 'configmap svc pod'.split(" ")
 
     def __init__(self, y):

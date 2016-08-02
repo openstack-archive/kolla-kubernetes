@@ -20,15 +20,26 @@
 #   jinja references, and are passed unmodified directly to the
 #   template.
 
-
 kolla-kubernetes:
   services:
+  - name: ceph
+    pods:
+    resources:
+      secret:
+      - services/ceph/ceph-secret.yml.j2
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
   - name: mariadb
     pods:
     - name: mariadb
       containers:
       - name: mariadb
     resources:
+      secret:
       disk:
       - name: mariadb-disk
         template: services/common/common-disk.sh.j2
@@ -59,6 +70,7 @@ kolla-kubernetes:
       containers:
       - name: memcached
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -75,6 +87,7 @@ kolla-kubernetes:
       containers:
       - name: keystone
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -95,6 +108,7 @@ kolla-kubernetes:
       containers:
       - name: horizon
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -111,6 +125,7 @@ kolla-kubernetes:
       containers:
       - name: rabbitmq
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -132,6 +147,7 @@ kolla-kubernetes:
       - name: glance-api
       - name: glance-registry
     resources:
+      secret:
       disk:
       - name: glance-disk
         template: services/common/common-disk.sh.j2
@@ -172,6 +188,7 @@ kolla-kubernetes:
       - name: nova-scheduler
       - name: nova-conductor
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -211,6 +228,7 @@ kolla-kubernetes:
       containers:
       - name: neutron-server
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -259,6 +277,7 @@ kolla-kubernetes:
       containers:
       - name: swift-proxy-server
     resources:
+      secret:
       disk:
       pv:
       pvc:
@@ -292,6 +311,7 @@ kolla-kubernetes:
       - name: skydns
       - name: healthz
     resources:
+      secret:
       disk:
       pv:
       pvc:
