@@ -31,11 +31,22 @@ dns_domain_name: "openstack.kolla"
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
 storage_ceph:
-  keyring: /etc/ceph/ceph.client.admin.keyring
+  # List of ceph monitor nodes
   monitors:
   - x.x.x.x
   - y.y.y.y
-  pool: rbd
-  secretName: pkt-ceph-secret
-  ssh_user: root
+  # Default ceph user to for mounts
   user: admin
+  # The default pool to locate ceph volumes
+  pool: rbd
+  # Default user to use in order to run remote SSH commands for creating volumes, etc.
+  ssh_user: root
+  # TODO(dave): Keyring may not be needed
+  # Kubernetes nodes are also ceph clients.  Kubernetes nodes need
+  #   to find the ceph keyring on the local filesystem.
+  keyring: /etc/ceph/ceph.client.admin.keyring
+  # May be any unique secret string in the kube env
+  secretName: ceph-secret
+  # This is the base64-encoded secret key which pods need in order to mount ceph volumes
+  #   ssh ceph-mon cat /etc/ceph/ceph.client.admin.keyring | grep key | awk '{print $3}' | base64
+  key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=

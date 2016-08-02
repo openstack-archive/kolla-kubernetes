@@ -188,6 +188,7 @@ bits of logic.
 
 ::
 
+  kolla-kubernetes resource create secret ceph
   kolla-kubernetes resource create disk mariadb
   kolla-kubernetes resource create pv mariadb
   kolla-kubernetes resource create pvc mariadb
