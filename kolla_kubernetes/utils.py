@@ -132,6 +132,7 @@ class JinjaUtils(object):
 
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = TypeUtils.str_to_bool
+        j2env.filters['min'] = min
 
         # Add a "raise" keyword for raising exceptions from within jinja
         def jinja_raise(message):
