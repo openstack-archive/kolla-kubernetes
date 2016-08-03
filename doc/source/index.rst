@@ -16,6 +16,7 @@ Contents:
    kubernetes-all-in-one
    quickstart
    multi-node
+   private-registry
    readme
    usage
    labels
