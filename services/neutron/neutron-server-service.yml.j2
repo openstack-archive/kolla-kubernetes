@@ -6,6 +6,7 @@ spec:
       protocol: TCP
       targetPort: {{ neutron_server_port }}
   selector:
-    name: neutron-server
+    service: neutron
+    type: control
 metadata:
   name: neutron-server

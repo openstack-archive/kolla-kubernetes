@@ -18,6 +18,7 @@ rabbitmq_replicas: "1"
 horizon_replicas: "1"
 glance_api_replicas: "1"
 glance_registry_replicas: "1"
+neutron_control_replicas: "1"
 
 #################################
 # Kubernetes Cluster DNS setting
