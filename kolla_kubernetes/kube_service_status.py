@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import re
 
 from oslo_log import log
@@ -23,7 +22,7 @@ LOG = log.getLogger(__name__)
 
 class KubeResourceTypeStatus(object):
 
-    def __init__(self, service_obj, service_name, resource_type):
+    def __init__(self, service_obj, resource_type):
 
         # Check input args
         if resource_type == 'disk':
@@ -32,7 +31,6 @@ class KubeResourceTypeStatus(object):
 
         # Initialize internal vars
         self.service_obj = service_obj
-        self.service_name = service_name
         self.resource_type = resource_type
 
         self.resource_templates = []
@@ -42,7 +40,7 @@ class KubeResourceTypeStatus(object):
     def asDict(self):
         res = {}
         res['meta'] = {}
-        res['meta']['service_name'] = self.service_name
+        res['meta']['service_name'] = self.service_obj.getName()
         res['meta']['resource_type'] = self.resource_type
 
         res['results'] = {}
@@ -64,9 +62,9 @@ class KubeResourceTypeStatus(object):
     def doTemplateAndCheck(self):
         """Checks service resource_type resources in Kubernetes
 
-        For each resource file of resource_type
+        For each resourceTemplate of resource_type
           Process the template (which may contain a stream of yaml definitions)
-          For each yaml definition
+          For each individual yaml definition
             Send to kubernetes
             Compare input definition to output status (do checks!)
             Note: This is kube check only.  Other subcommands should
@@ -75,9 +73,10 @@ class KubeResourceTypeStatus(object):
         Prints results dict to stdout as yaml status string
         """
 
-        resource_files = self.service_obj.getResourceFilesByType(
+        resourceTemplates = self.service_obj.getResourceTemplatesByType(
             self.resource_type)
-        for file_ in resource_files:
+        for rt in resourceTemplates:
+            file_ = rt.getTemplatePath()
 
             # Skip unsupported script templates
             if file_.endswith('.sh.j2'):
@@ -86,7 +85,7 @@ class KubeResourceTypeStatus(object):
                 continue
 
             krt = KubeResourceTemplateStatus(
-                self.service_name, self.resource_type, file_)
+                self.service_obj, self.resource_type, rt)
             self.resource_templates.append(krt)
 
 
@@ -100,16 +99,13 @@ class KubeResourceTemplateStatus(object):
        may print nothing or whitespace (NO-OP).
     """
 
-    def __init__(self, service_name, resource_type,
-                 kube_resource_template_path):
-
-        # Check input args
-        assert os.path.exists(kube_resource_template_path)
+    def __init__(self, service_obj, resource_type,
+                 resource_template_obj):
 
         # Initialize internal vars
-        self.service_name = service_name
+        self.service_obj = service_obj
         self.resource_type = resource_type
-        self.template = kube_resource_template_path
+        self.resource_template_obj = resource_template_obj
 
         self.errors = []
         self.oks = []
@@ -120,7 +116,7 @@ class KubeResourceTemplateStatus(object):
     def asDict(self):
         res = {}
         res['meta'] = {}
-        res['meta']['template'] = self.template
+        res['meta']['template'] = self.resource_template_obj.getTemplatePath()
 
         res['results'] = {}
         res['results']['status'] = self.getStatus()
@@ -145,7 +141,8 @@ class KubeResourceTemplateStatus(object):
 
         # Build the templating command
         cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
-            'create', self.resource_type, self.service_name, self.template)
+            'create', self.service_obj.getName(), self.resource_type,
+            self.resource_template_obj.getName())
 
         # Execute the command to get the processed template output
         template_out, err = ExecUtils.exec_command(cmd)
@@ -160,7 +157,7 @@ class KubeResourceTemplateStatus(object):
             return
         elif re.match("^\s+$", template_out):
             msg = "template {} produced empty output (NO-OP)".format(
-                self.template)
+                self.resource_template_obj.getTemplatePath())
             self.oks.append(msg)
             return
 
