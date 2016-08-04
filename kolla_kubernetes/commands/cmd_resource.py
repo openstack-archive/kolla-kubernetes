@@ -37,14 +37,14 @@ class Resource(KollaKubernetesBaseCommand):
             help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
         )
         parser.add_argument(
-            "resource_type",
-            metavar="<resource-type>",
-            help=("One of [%s]" % ("|".join(Service.VALID_RESOURCE_TYPES)))
-        )
-        parser.add_argument(
             "service_name",
             metavar="<service-name>",
             help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
+        )
+        parser.add_argument(
+            "resource_type",
+            metavar="<resource-type>",
+            help=("One of [%s]" % ("|".join(Service.VALID_RESOURCE_TYPES)))
         )
         return parser
 
@@ -59,20 +59,20 @@ class Resource(KollaKubernetesBaseCommand):
                 args.action,
                 "|".join(Service.VALID_ACTIONS)))
             raise Exception(msg)
-        if args.resource_type not in Service.VALID_RESOURCE_TYPES:
-            msg = ("resource_type [{}] not in valid resource_types [{}]"
-                   .format(args.resource_type,
-                           "|".join(Service.VALID_RESOURCE_TYPES)))
-            raise Exception(msg)
         if args.service_name not in KKR.getServices().keys():
             msg = ("service_name [{}] not in valid service_names [{}]".format(
                 args.service_name,
                 "|".join(KKR.getServices().keys())))
             raise Exception(msg)
+        if args.resource_type not in Service.VALID_RESOURCE_TYPES:
+            msg = ("resource_type [{}] not in valid resource_types [{}]"
+                   .format(args.resource_type,
+                           "|".join(Service.VALID_RESOURCE_TYPES)))
+            raise Exception(msg)
 
         service = KKR.getServiceByName(args.service_name)
         if (args.resource_type != 'configmap') and (
-            len(service.getResourceFilesByType(args.resource_type)) == 0):
+            len(service.getResourceTemplatesByType(args.resource_type)) == 0):
             msg = ("service_name [{}] has no resource"
                    " files defined for type [{}]".format(
                        args.service_name, args.resource_type))
@@ -93,9 +93,9 @@ class ResourceTemplate(Resource):
     def get_parser(self, prog_name):
         parser = super(ResourceTemplate, self).get_parser(prog_name)
         parser.add_argument(
-            "template_file",
-            metavar="<template-file>",
-            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
+            "resource_name",
+            metavar="<resource-name>",
+            help=("The unique resource-name under service->resource_type")
         )
         parser.add_argument(
             '--print-jinja-vars',
@@ -126,8 +126,16 @@ class ResourceTemplate(Resource):
                    "is not yet supported".format(args.resource_type))
             raise Exception(msg)
 
-        variables = KKR.GetJinjaDict(args.service_name, vars(args),
+        service = KKR.getServiceByName(args.service_name)
+        rt = service.getResourceTemplateByTypeAndName(
+            args.resource_type, args.resource_name)
+
+        variables = KKR.GetJinjaDict(service.getName(), vars(args),
                                      args.print_jinja_keys_regex)
+
+        # Merge the template vars with the jinja vars before processing
+        variables['kolla_kubernetes'].update(
+            {"template": {"vars": rt.getVars()}})
 
         # handle the debug option --print-jinja-vars
         if args.print_jinja_vars is True:
@@ -136,7 +144,7 @@ class ResourceTemplate(Resource):
         # process the template
         print(JinjaUtils.render_jinja(
             variables,
-            FileUtils.read_string_from_file(args.template_file)))
+            FileUtils.read_string_from_file(rt.getTemplatePath())))
 
 
 class ResourceMap(KollaKubernetesBaseCommand):
@@ -184,11 +192,11 @@ class ResourceMap(KollaKubernetesBaseCommand):
                 if t == 'configmap':
                     continue
 
-                resource_files = s.getResourceFilesByType(t)
+                resourceTemplates = s.getResourceTemplatesByType(t)
 
                 print('  resource_type[{}] num_items[{}]'.format(
-                    t, len(resource_files)))
+                    t, len(resourceTemplates)))
 
                 # Print the resource files
-                for rf in s.getResourceFilesByType(t):
-                    print('    ' + rf)
+                for rt in s.getResourceTemplatesByType(t):
+                    print('    ' + str(rt))

@@ -133,6 +133,17 @@ class Service(object):
         self.pods = collections.OrderedDict()
         for i in self.y['pods']:
             self.pods[i['name']] = Pod(i)
+        self.resourceTemplates = {}
+        for rt in self.VALID_RESOURCE_TYPES:
+            # Initialize instance resourceTemplates hash
+            if rt not in self.resourceTemplates:
+                self.resourceTemplates[rt] = []
+            # Skip empty definitions
+            if rt not in self.y['resources']:
+                continue
+            # Handle definitions
+            for i in self.y['resources'][rt]:
+                self.resourceTemplates[rt].append(ResourceTemplate(i))
 
     def getName(self):
         return self.y['name']
@@ -146,6 +157,24 @@ class Service(object):
             print("unable to find pod={}", name)
             sys.exit(1)
         return r[name]
+
+    def getResourceTemplatesByType(self, resource_type):
+        assert resource_type in self.resourceTemplates
+        return self.resourceTemplates[resource_type]
+
+    def getResourceTemplateByTypeAndName(
+            self, resource_type, resource_name):
+
+        # create an inverted hash[name]=resourceTemplate
+        resourceTemplates = self.getResourceTemplatesByType(resource_type)
+        h = {i.getName(): i for i in resourceTemplates}
+
+        # validate
+        if resource_name not in h.keys():
+            print("unable to find resource_name={}", resource_name)
+            sys.exit(1)
+
+        return h[resource_name]
 
     def __str__(self):
         s = self.__class__.__name__ + " " + self.getName()
@@ -213,41 +242,26 @@ class Service(object):
                 # Handle all other resource_types as the same
                 self._ensureResource(action, rt)
 
-    def getResourceFilesByType(self, type_):
-        assert type_ in Service.VALID_RESOURCE_TYPES
-        assert 'resources' in self.y
-
-        # Handle where resource files not defined for type.
-        #   i.e Not all services may require 'disk' resources
-        if type_ not in self.y['resources']:
-            return []
-        if type(self.y['resources'][type_]) is not list:
-            return []
-
-        # Fully resolve each resource file
-        ret = []
-        kkdir = PathFinder.find_kolla_kubernetes_dir()
-        for i in self.y['resources'][type_]:
-            file_ = os.path.join(kkdir, i)
-            assert os.path.exists(file_)
-            ret.append(file_)
-        return ret
-
     def _ensureResource(self, action, resource_type):
+        # Check input args
+        assert action in Service.VALID_ACTIONS
+        assert resource_type in Service.VALID_RESOURCE_TYPES
+        assert resource_type in self.resourceTemplates
 
-        resource_files = self.getResourceFilesByType(resource_type)
+        resourceTemplates = self.resourceTemplates[resource_type]
 
-        # If action is delete, then delete the resource files in
+        # If action is delete, then delete the resourceTemplates in
         # reverse order.
         if action == 'delete':
-            resource_files = reversed(resource_files)
+            resourceTemplates = reversed(resourceTemplates)
 
-        for file_ in resource_files:
+        for resourceTemplate in resourceTemplates:
             # Build the command based on if shell script or not. If
             # shell script, pipe to sh.  Else, pipe to kubectl
             cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
-                action, resource_type, self.getName(), file_)
-            if file_.endswith('.sh.j2'):
+                action, self.getName(), resource_type,
+                resourceTemplate.getName())
+            if resourceTemplate.getTemplatePath().endswith('.sh.j2'):
                 cmd += " | sh"
             else:
                 cmd += " | kubectl {} -f -".format(action)
@@ -317,3 +331,38 @@ class Container(object):
 
         # Execute the command
         ExecUtils.exec_command(cmd)
+
+
+class ResourceTemplate(object):
+
+    def __init__(self, y):
+        # Checks
+        assert 'template' in y  # not optional
+        assert 'name' in y  # not optional
+        # Construct
+        self.y = y
+
+    def getName(self):
+        return self.y['name']
+
+    def getTemplate(self):
+        return self.y['template']
+
+    def getVars(self):
+        return (self.y['vars']
+                if 'vars' in self.y else None)  # optional
+
+    def getTemplatePath(self):
+        kkdir = PathFinder.find_kolla_kubernetes_dir()
+        path = os.path.join(kkdir, self.getTemplate())
+        assert os.path.exists(path)
+        return path
+
+    def __str__(self):
+        s = self.__class__.__name__
+        s += " name[{}]".format(
+            self.getName() if self.getName() is not None else "")
+        s += " template[{}]".format(self.getTemplate())
+        s += " vars[{}]".format(
+            self.getVars() if self.getVars() is not None else "")
+        return s
