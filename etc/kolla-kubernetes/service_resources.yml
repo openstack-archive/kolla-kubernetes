@@ -12,6 +12,14 @@
 #   persistent state.
 # The (pod) resources may be destroyed willy-nilly, since they hold no
 #   state.
+# Template.vars are additional vars in the form of a dict passed to
+#   the jinja templating engine. Templates may access this dict with
+#   "kolla_kubernetes.template.vars.<subkey>".  This enables arguments
+#   to be passed to templates so that they may be re-used or
+#   configured.  These template.vars may not contain any other nested
+#   jinja references, and are passed unmodified directly to the
+#   template.
+
 
 kolla-kubernetes:
   services:
@@ -22,17 +30,27 @@ kolla-kubernetes:
       - name: mariadb
     resources:
       disk:
-      - services/mariadb/mariadb-disk.sh.j2
+      - name: mariadb-disk
+        template: services/mariadb/mariadb-disk.sh.j2
+        vars:
+          size_in_gb: 10
       pv:
-      - services/mariadb/mariadb-pv.yml.j2
+      - name: mariadb-pv
+        template: services/mariadb/mariadb-pv.yml.j2
+        vars:
+          size_in_gb: 10
       pvc:
-      - services/mariadb/mariadb-pvc.yml.j2
+      - name: mariadb-pvc
+        template: services/mariadb/mariadb-pvc.yml.j2
       svc:
-      - services/mariadb/mariadb-service.yml.j2
+      - name: mariadb-service
+        template: services/mariadb/mariadb-service.yml.j2
       bootstrap:
-      - services/mariadb/mariadb-bootstrap-job.yml.j2
+      - name: mariadb-bootstrap-job
+        template: services/mariadb/mariadb-bootstrap-job.yml.j2
       pod:
-      - services/mariadb/mariadb-pod.yml.j2
+      - name: mariadb-pod
+        template: services/mariadb/mariadb-pod.yml.j2
   - name: memcached
     pods:
     - name: memcached
@@ -43,10 +61,12 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/memcached/memcached-service.yml.j2
+      - name: memcached-service
+        template: services/memcached/memcached-service.yml.j2
       bootstrap:
       pod:
-      - services/memcached/memcached-pod.yml.j2
+      - name: memcached-pod
+        template: services/memcached/memcached-pod.yml.j2
   - name: keystone
     pods:
     - name: keystone
@@ -57,12 +77,16 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/keystone/keystone-service-admin.yml.j2
-      - services/keystone/keystone-service-public.yml.j2
+      - name: keystone-service-admin
+        template: services/keystone/keystone-service-admin.yml.j2
+      - name: keystone-service-public
+        template: services/keystone/keystone-service-public.yml.j2
       bootstrap:
-      - services/keystone/keystone-bootstrap-job.yml.j2
+      - name: keystone-bootstrap-job
+        template: services/keystone/keystone-bootstrap-job.yml.j2
       pod:
-      - services/keystone/keystone-pod.yml.j2
+      - name: keystone-pod
+        template: services/keystone/keystone-pod.yml.j2
   - name: horizon
     pods:
     - name: horizon
@@ -73,10 +97,12 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/horizon/horizon-service.yml.j2
+      - name: horizon-service
+        template: services/horizon/horizon-service.yml.j2
       bootstrap:
       pod:
-      - services/horizon/horizon-pod.yml.j2
+      - name: horizon-pod
+        template: services/horizon/horizon-pod.yml.j2
   - name: rabbitmq
     pods:
     - name: rabbitmq
@@ -87,12 +113,16 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/rabbitmq/rabbitmq-service-management.yml.j2
-      - services/rabbitmq/rabbitmq-service.yml.j2
+      - name: rabbitmq-service-management
+        template: services/rabbitmq/rabbitmq-service-management.yml.j2
+      - name: rabbitmq-service
+        template: services/rabbitmq/rabbitmq-service.yml.j2
       bootstrap:
-      - services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
+      - name: rabbitmq-bootstrap-job
+        template: services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
       pod:
-      - services/rabbitmq/rabbitmq-pod.yml.j2
+      - name: rabbitmq-pod
+        template: services/rabbitmq/rabbitmq-pod.yml.j2
   - name: glance
     pods:
     - name: glance
@@ -104,13 +134,18 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/glance/glance-api-service.yml.j2
-      - services/glance/glance-registry-service.yml.j2
+      - name: glance-api-service
+        template: services/glance/glance-api-service.yml.j2
+      - name: glance-registry-service
+        template: services/glance/glance-registry-service.yml.j2
       bootstrap:
-      - services/glance/glance-bootstrap-job.yml.j2
+      - name: glance-bootstrap-job
+        template: services/glance/glance-bootstrap-job.yml.j2
       pod:
-      - services/glance/glance-api-pod.yml.j2
-      - services/glance/glance-registry-pod.yml.j2
+      - name: glance-api-pod
+        template: services/glance/glance-api-pod.yml.j2
+      - name: glance-registry-pod
+        template: services/glance/glance-registry-pod.yml.j2
 
   - name: nova
     pods:
@@ -128,13 +163,18 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/nova/nova-service-compute.yml.j2
+      - name: nova-service-compute
+        template: services/nova/nova-service-compute.yml.j2
       bootstrap:
-      - services/nova/nova-compute-bootstrap-job.yml.j2
-      - services/nova/nova-control-bootstrap-job.yml.j2
+      - name: nova-compute-bootstrap-job
+        template: services/nova/nova-compute-bootstrap-job.yml.j2
+      - name: nova-control-bootstrap-job
+        template: services/nova/nova-control-bootstrap-job.yml.j2
       pod:
-      - services/nova/nova-compute-pod.yml.j2
-      - services/nova/nova-control-pod.yml.j2
+      - name: nova-compute-pod
+        template: services/nova/nova-compute-pod.yml.j2
+      - name: nova-control-pod
+        template: services/nova/nova-control-pod.yml.j2
   - name: neutron
     pods:
     - name: neutron-compute
@@ -156,13 +196,18 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/neutron/neutron-server-service.yml.j2
+      - name: neutron-server-service
+        template: services/neutron/neutron-server-service.yml.j2
       bootstrap:
-      - services/neutron/neutron-bootstrap-job.yml.j2
+      - name: neutron-bootstrap-job
+        template: services/neutron/neutron-bootstrap-job.yml.j2
       pod:
-      - services/neutron/neutron-compute-pod.yml.j2
-      - services/neutron/neutron-control-pod.yml.j2
-      - services/neutron/neutron-network-pod.yml.j2
+      - name: neutron-compute-pod
+        template: services/neutron/neutron-compute-pod.yml.j2
+      - name: neutron-control-pod
+        template: services/neutron/neutron-control-pod.yml.j2
+      - name: neutron-network-pod
+        template: services/neutron/neutron-network-pod.yml.j2
   - name: swift
     pods:
     - name: swift-account
@@ -195,17 +240,26 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/swift/swift-account-service.yml.j2
-      - services/swift/swift-container-service.yml.j2
-      - services/swift/swift-object-service.yml.j2
-      - services/swift/swift-proxy-service.yml.j2
-      - services/swift/swift-rsync-service.yml.j2
+      - name: swift-account-service
+        template: services/swift/swift-account-service.yml.j2
+      - name: swift-container-service
+        template: services/swift/swift-container-service.yml.j2
+      - name: swift-object-service
+        template: services/swift/swift-object-service.yml.j2
+      - name: swift-proxy-service
+        template: services/swift/swift-proxy-service.yml.j2
+      - name: swift-rsync-service
+        template: services/swift/swift-rsync-service.yml.j2
       bootstrap:
       pod:
-      - services/swift/swift-account-pod.yml.j2
-      - services/swift/swift-container-pod.yml.j2
-      - services/swift/swift-object-pod.yml.j2
-      - services/swift/swift-proxy-pod.yml.j2
+      - name: swift-account-pod
+        template: services/swift/swift-account-pod.yml.j2
+      - name: swift-container-pod
+        template: services/swift/swift-container-pod.yml.j2
+      - name: swift-object-pod
+        template: services/swift/swift-object-pod.yml.j2
+      - name: swift-proxy-pod
+        template: services/swift/swift-proxy-pod.yml.j2
   - name: skydns
     pods:
     - name: skydns
@@ -219,7 +273,9 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - services/skydns/skydns-service.yml.j2
+      - name: skydns-service
+        template: services/skydns/skydns-service.yml.j2
       bootstrap:
       pod:
-      - services/skydns/skydns-pod.yml.j2
+      - name: skydns-pod
+        template: services/skydns/skydns-pod.yml.j2
