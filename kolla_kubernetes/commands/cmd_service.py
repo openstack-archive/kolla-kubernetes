@@ -32,7 +32,11 @@ class _ServiceCommand(KollaKubernetesBaseCommand):
         parser.add_argument(
             "service_name",
             metavar="<service-name>",
-            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
+            help=("One of [%s]" % ("|".join(KKR.getServices().keys()))))
+        parser.add_argument(
+            '--all-in-one',
+            action='store_true',
+            help=('Deploy a service in an all in one environment'),
         )
         return parser
 
@@ -48,9 +52,16 @@ class _ServiceCommand(KollaKubernetesBaseCommand):
 
         service = KKR.getServiceByName(args.service_name)
         if (self._action == 'bootstrap'):
-            service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
+            if (args.all_in_one):
+                service.do_apply('create',
+                                 Service.ALL_IN_ONE_BOOTSTRAP_RESOURCES)
+            else:
+                service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
         elif (self._action == 'run'):
-            service.do_apply('create', Service.LEGACY_RUN_RESOURCES)
+            if (args.all_in_one):
+                service.do_apply('create', Service.ALL_IN_ONE_RESOURCES)
+            else:
+                service.do_apply('create', Service.LEGACY_RUN_RESOURCES)
         elif (self._action == 'kill'):
             service.do_apply('delete', Service.VALID_RESOURCE_TYPES)
         else:
