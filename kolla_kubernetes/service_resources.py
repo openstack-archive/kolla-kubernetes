@@ -127,6 +127,8 @@ class Service(object):
     #   CONFIGMAP remains listed twice, since that was the old logic.
     LEGACY_BOOTSTRAP_RESOURCES = 'configmap disk pv pvc bootstrap'.split(" ")
     LEGACY_RUN_RESOURCES = 'configmap svc pod'.split(" ")
+    ALL_IN_ONE_BOOTSTRAP_RESOURCES = 'configmap bootstrap'.split(" ")
+    ALL_IN_ONE_RESOURCES = 'configmap pod'.split(" ")
 
     def __init__(self, y):
         self.y = y
