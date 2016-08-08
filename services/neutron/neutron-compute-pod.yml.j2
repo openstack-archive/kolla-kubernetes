@@ -16,7 +16,9 @@ spec:
         - mountPath: /etc/localtime
           name: host-etc-localtime
           readOnly: true
-
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
     - image: "{{ openvswitch_vswitchd_image_full }}"
       name: openvswitch-vswitchd
       securityContext:
@@ -33,7 +35,9 @@ spec:
         - mountPath: /lib/modules
           name: host-lib-modules
           readOnly: true
-
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
     # TODO: create containers for fake nova-compute.
     - image: "{{ neutron_openvswitch_agent_image_full }}"
       name: neutron-openvswitch-agent
@@ -53,7 +57,9 @@ spec:
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
-
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
     - image: "{{ neutron_linuxbridge_agent_image_full }}"
       name: neutron-linuxbridge-agent
       securityContext:
@@ -90,9 +96,23 @@ spec:
     - name: neutron-openvswitch-agent-config
       configMap:
         name: neutron-openvswitch-agent-configmap
+        items:
+        - key: neutron.conf
+          path: neutron.conf
+        - key: config.json
+          path: config.json
+        - key: ml2-conf.ini
+          path: ml2_conf.ini
     - name: neutron-linuxbridge-agent-config
       configMap:
         name: neutron-linuxbridge-agent-configmap
+        items:
+        - key: neutron.conf
+          path: neutron.conf
+        - key: config.json
+          path: config.json
+        - key: ml2-conf.ini
+          path: ml2_conf.ini
     - name: openvswitch-db
       hostPath:
         path: /var/lib/kolla/openvswitch
