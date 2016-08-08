@@ -31,7 +31,7 @@ kolla-kubernetes:
     resources:
       disk:
       - name: mariadb-disk
-        template: services/mariadb/mariadb-disk.sh.j2
+        template: services/common/common-disk.sh.j2
         vars:
           size_in_gb: 10
       pv:
