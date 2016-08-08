@@ -142,11 +142,12 @@ was prior mounted by the mariadb-bootstrap job, until the
 mariadb-bootstrap job is deleted.  The same should also occur for AWS
 and Ceph.
 
-#2. When running Kubernetes version < 1.3, Ceph RBD volumes will
-auto-detach when Kubernetes nodes disappear, causing problems when a
-pod migrates to a new node and cannot mount the required volume.
-Details are found in the in this `kubernetes pull
-request<https://github.com/kubernetes/kubernetes/pull/26351>`_.
+#2. When running Kubernetes, Ceph RBD volumes will not auto-unlock
+when Kubernetes nodes disappear, causing problems when a pod migrates
+to a new node and cannot mount the required volume.  This was supposed
+to have been fixed in Kubernetes 1.3, but we have been unable to
+verify it working.  Details are found in the in this `kubernetes pull
+request <https://github.com/kubernetes/kubernetes/pull/26351>`_.
 
 
 Create all Kolla-Kubernetes Resources
@@ -169,7 +170,7 @@ Operator Create Resources
 
   kolla-kubernetes bootstrap mariadb
   sleep 30  # wait for mariadb bootstrap to finish
-  kolla-kubernetes resource delete bootstrap mariadb  # workaround known issue #1
+  kolla-kubernetes resource delete mariadb bootstrap  # workaround known issue #1
   kolla-kubernetes run mariadb
   kolla-kubernetes run memcached
   sleep 30  # wait for mariadb and memcached to start up
@@ -183,33 +184,59 @@ Operator Create Resources
 Workflow Engine Create Resources
 --------------------------------
 
-A future Ansible Workflow Engine would discretely call the individual
+A future Ansible Workflow Engine would individually call the discrete
 bits of logic.
 
 ::
 
-  kolla-kubernetes resource create disk mariadb
-  kolla-kubernetes resource create pv mariadb
-  kolla-kubernetes resource create pvc mariadb
-  kolla-kubernetes resource create svc mariadb
-  kolla-kubernetes resource create configmap mariadb
-  kolla-kubernetes resource create bootstrap mariadb
+  kolla-kubernetes resource create mariadb disk
+  kolla-kubernetes resource create mariadb pv
+  kolla-kubernetes resource create mariadb pvc
+  kolla-kubernetes resource create mariadb svc
+  kolla-kubernetes resource create mariadb configmap
+  kolla-kubernetes resource create mariadb bootstrap
   sleep 30  # wait for mariadb bootstrap to finish
-  kolla-kubernetes resource delete bootstrap mariadb  # workaround known issue #1
-  kolla-kubernetes resource create pod mariadb
-  kolla-kubernetes resource create svc memcached
-  kolla-kubernetes resource create configmap memcached
-  kolla-kubernetes resource create pod memcached
-  kolla-kubernetes resource create svc keystone
-  kolla-kubernetes resource create configmap keystone
+  kolla-kubernetes resource delete mariadb bootstrap  # workaround known issue #1
+  kolla-kubernetes resource create mariadb pod
+  kolla-kubernetes resource create memcached svc
+  kolla-kubernetes resource create memcached configmap
+  kolla-kubernetes resource create memcached pod
+  kolla-kubernetes resource create keystone svc
+  kolla-kubernetes resource create keystone configmap
   sleep 30  # wait for mariadb and memcached to start up
-  kolla-kubernetes resource create bootstrap keystone
+  kolla-kubernetes resource create keystone bootstrap
   sleep 30  # wait for keystone to bootstrap in mariadb
-  kolla-kubernetes resource create pod keystone
-  kolla-kubernetes resource create svc horizon
-  kolla-kubernetes resource create configmap horizon
+  kolla-kubernetes resource create keystone pod
+  kolla-kubernetes resource create horizon svc
+  kolla-kubernetes resource create horizon configmap
   sleep 30  # wait for keystone to start up
-  kolla-kubernetes resource create pod horizon
+  kolla-kubernetes resource create horizon pod
+
+
+Check Status of all Kolla-Kubernetes Resources
+==============================================
+
+Checking status is the same whether for operators or workflow engine.
+
+::
+
+  kolla-kubernetes resource status mariadb disk
+  kolla-kubernetes resource status mariadb pv
+  kolla-kubernetes resource status mariadb pvc
+  kolla-kubernetes resource status mariadb svc
+  kolla-kubernetes resource status mariadb configmap
+  kolla-kubernetes resource status mariadb bootstrap
+  kolla-kubernetes resource status mariadb pod
+  kolla-kubernetes resource status memcached svc
+  kolla-kubernetes resource status memcached configmap
+  kolla-kubernetes resource status memcached pod
+  kolla-kubernetes resource status keystone svc
+  kolla-kubernetes resource status keystone configmap
+  kolla-kubernetes resource status keystone bootstrap
+  kolla-kubernetes resource status keystone pod
+  kolla-kubernetes resource status horizon svc
+  kolla-kubernetes resource status horizon configmap
+  kolla-kubernetes resource status horizon pod
 
 
 Delete all Kolla-Kubernetes Resources
@@ -234,20 +261,20 @@ Workflow Engine Delete Resources
 
 ::
 
-  kolla-kubernetes resource delete pod horizon
-  kolla-kubernetes resource delete configmap horizon
-  kolla-kubernetes resource delete svc horizon
-  kolla-kubernetes resource delete pod keystone
-  kolla-kubernetes resource delete bootstrap keystone
-  kolla-kubernetes resource delete configmap keystone
-  kolla-kubernetes resource delete svc keystone
-  kolla-kubernetes resource delete pod memcached
-  kolla-kubernetes resource delete configmap memcached
-  kolla-kubernetes resource delete svc memcached
-  kolla-kubernetes resource delete pod mariadb
-  kolla-kubernetes resource delete bootstrap mariadb
-  kolla-kubernetes resource delete configmap mariadb
-  kolla-kubernetes resource delete svc mariadb
-  kolla-kubernetes resource delete pvc mariadb
-  kolla-kubernetes resource delete pv mariadb
-  kolla-kubernetes resource delete disk mariadb
+  kolla-kubernetes resource delete horizon pod
+  kolla-kubernetes resource delete horizon configmap
+  kolla-kubernetes resource delete horizon svc
+  kolla-kubernetes resource delete keystone pod
+  kolla-kubernetes resource delete keystone bootstrap
+  kolla-kubernetes resource delete keystone configmap
+  kolla-kubernetes resource delete keystone svc
+  kolla-kubernetes resource delete memcached pod
+  kolla-kubernetes resource delete memcached configmap
+  kolla-kubernetes resource delete memcached svc
+  kolla-kubernetes resource delete mariadb pod
+  kolla-kubernetes resource delete mariadb bootstrap
+  kolla-kubernetes resource delete mariadb configmap
+  kolla-kubernetes resource delete mariadb svc
+  kolla-kubernetes resource delete mariadb pvc
+  kolla-kubernetes resource delete mariadb pv
+  kolla-kubernetes resource delete mariadb disk
