@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: True
+  containers:
+    - image: "{{ neutron_dhcp_agent_image_full }}"
+      name: neutron-dhcp-agent
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: {{ container_config_directory }}
+          name: neutron-dhcp-agent-config
+          readOnly: true
+        - mountPath: /var/lib/neutron/kolla/
+          name: neutron-metadata-socket
+        - mountPath: /run
+          name: host-run
+        - mountPath: /run/netns/
+          name: host-run-netns
+          # shared: true # This seems not support in K8s yet :(
+        - mountPath: /etc/localtime
+          name: host-etc-localtime
+          readOnly: true
+        - mountPath: /var/log/kolla/
+          name: kolla-logs
+      env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: {{ config_strategy }}
+  volumes:
+    - name: neutron-dhcp-agent-config
+      configMap:
+        name: neutron-dhcp-agent-configmap
+        items:
+        - key: neutron.conf
+          path: neutron.conf
+        - key: config.json
+          path: config.json
+        - key: ml2-conf.ini
+          path: ml2_conf.ini
+        - key: dhcp-agent.ini
+          path: dhcp_agent.ini
+        - key: dnsmasq.conf
+          path: dnsmasq.conf
+    - name: host-run-netns
+      hostPath:
+        path: /run/netns
+    - name: host-run
+      hostPath:
+        path: /run
+    - name: host-etc-localtime
+      hostPath:
+        path: /etc/localtime
+    - name: neutron-metadata-socket
+      hostPath:
+        path: /var/lib/neutron/kolla/metadata_proxy
+    - name: kolla-logs
+      emptyDir: {}
+metadata:
+   name: neutron-dhcp-agent
