@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ heat_engine_port }}
+      name: heat-engine
+  selector:
+    service: heat
+    type: engine
+metadata:
+   name: heat-engine

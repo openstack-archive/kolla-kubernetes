@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ReplicationController
+spec:
+  replicas: {{ heat_api_replicas }}
+  selector:
+      service: heat
+      type: api
+  template:
+    metadata:
+      labels:
+        service: heat
+        type: api
+    spec:
+      containers:
+        - name: heat-api
+          image: "{{ heat_api_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: heat-config
+            - mountPath: /var/lib/heat/
+              name: heat-persistent-storage
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          ports:
+            - containerPort: {{ heat_api_port }}
+              name: heat-api
+      volumes:
+        - name: heat-config
+          configMap:
+            name: heat-api-configmap
+        - name: heat-persistent-storage
+          hostPath:
+            path: /var/lib/kolla/heat
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
+metadata:
+   name: heat-api

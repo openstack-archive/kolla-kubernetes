@@ -264,6 +264,34 @@ kolla-kubernetes:
         template: services/swift/swift-object-pod.yml.j2
       - name: swift-proxy-pod
         template: services/swift/swift-proxy-pod.yml.j2
+  - name: heat
+    pods:
+    - name: heat
+      containers:
+      - name: heat-api
+      - name: heat-api-cfn
+      - name: heat-engine
+    resources:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - name: heat-api-service
+        template: services/heat/heat-api-service.yml.j2
+      - name: heat-api-cfn-service
+        template: services/heat/heat-api-cfn-service.yml.j2
+      - name: heat-engine-service
+        template: services/heat/heat-engine-service.yml.j2
+      bootstrap:
+      - name: heat-bootstrap-job
+        template: services/heat/heat-bootstrap-job.yml.j2
+      pod:
+      - name: heat-api-pod
+        template: services/heat/heat-api-pod.yml.j2
+      - name: heat-api-cfn-pod
+        template: services/heat/heat-api-cfn-pod.yml.j2
+      - name: heat-engine-pod
+        template: services/heat/heat-engine-pod.yml.j2
   - name: skydns
     pods:
     - name: skydns
