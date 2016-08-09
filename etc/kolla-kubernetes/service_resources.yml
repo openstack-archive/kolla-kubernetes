@@ -36,12 +36,14 @@ kolla-kubernetes:
           size_in_gb: 10
       pv:
       - name: mariadb-pv
-        template: services/mariadb/mariadb-pv.yml.j2
+        template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
       - name: mariadb-pvc
-        template: services/mariadb/mariadb-pvc.yml.j2
+        template: services/common/common-pvc.yml.j2
+        vars:
+          size_in_gb: 10
       svc:
       - name: mariadb-service
         template: services/mariadb/mariadb-service.yml.j2
@@ -137,12 +139,14 @@ kolla-kubernetes:
           size_in_gb: 10
       pv:
       - name: glance-pv
-        template: services/glance/glance-pv.yml.j2
+        template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
       - name: glance-pvc
-        template: services/glance/glance-pvc.yml.j2
+        template: services/common/common-pvc.yml.j2
+        vars:
+          size_in_gb: 10
       svc:
       - name: glance-api-service
         template: services/glance/glance-api-service.yml.j2
