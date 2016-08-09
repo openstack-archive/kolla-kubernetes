@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ReplicationController
+spec:
+  replicas: {{ nova_scheduler_replicas }}
+  selector:
+    service: nova
+    type: scheduler
+  template:
+    metadata:
+      labels:
+        service: nova
+        type: scheduler
+    spec:
+      containers:
+        - name: nova-scheduler
+          image: "{{ nova_scheduler_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-scheduler-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: nova-scheduler-config
+          configMap:
+            name: nova-scheduler-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
+metadata:
+   name: nova-scheduler

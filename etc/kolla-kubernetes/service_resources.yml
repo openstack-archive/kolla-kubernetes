@@ -165,6 +165,8 @@ kolla-kubernetes:
       svc:
       - name: nova-service-compute
         template: services/nova/nova-service-compute.yml.j2
+      - name: nova-service-metadata
+        template: services/nova/nova-service-metadata.yml.j2
       bootstrap:
       - name: nova-compute-bootstrap-job
         template: services/nova/nova-compute-bootstrap-job.yml.j2
@@ -173,8 +175,12 @@ kolla-kubernetes:
       pod:
       - name: nova-compute-pod
         template: services/nova/nova-compute-pod.yml.j2
-      - name: nova-control-pod
-        template: services/nova/nova-control-pod.yml.j2
+      - name: nova-api-pod
+        template: services/nova/nova-control-api-pod.yml.j2
+      - name: nova-conductor-pod
+        template: services/nova/nova-control-conductor-pod.yml.j2
+      - name: nova-scheduler-pod
+        template: services/nova/nova-control-scheduler-pod.yml.j2        
   - name: neutron
     pods:
     - name: neutron-compute
