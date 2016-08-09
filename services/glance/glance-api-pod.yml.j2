@@ -34,8 +34,8 @@ spec:
           configMap:
             name: glance-api-configmap
         - name: glance-persistent-storage
-          hostPath:
-            path: /var/lib/kolla/glance
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
