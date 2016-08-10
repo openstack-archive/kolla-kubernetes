@@ -55,6 +55,108 @@ spec:
               readOnly: true
             - mountPath: /var/log/kolla
               name: kolla-logs
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-admin
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_admin_endpoint }}'
+               interface=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-internal
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_internal_endpoint }}'
+               interface=internal
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-public
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_public_endpoint }}'
+               interface=public
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-user-project-role
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_user -a
+              "project=service
+               user=neutron
+               password={{ neutron_keystone_password }}
+               role=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
       volumes:
         - name: neutron-server-config
           configMap:
@@ -66,6 +168,15 @@ spec:
               path: config.json
             - key: ml2-conf.ini
               path: ml2_conf.ini
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure
