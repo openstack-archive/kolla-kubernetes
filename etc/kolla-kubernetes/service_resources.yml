@@ -26,7 +26,8 @@ kolla-kubernetes:
     pods:
     resources:
       secret:
-      - services/ceph/ceph-secret.yml.j2
+      - name: ceph-secret
+        template: services/ceph/ceph-secret.yml.j2
       disk:
       pv:
       pvc:
