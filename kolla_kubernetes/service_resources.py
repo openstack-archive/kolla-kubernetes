@@ -340,8 +340,8 @@ class ResourceTemplate(object):
 
     def __init__(self, y):
         # Checks
-        assert 'template' in y  # not optional
-        assert 'name' in y  # not optional
+        assert 'template' in y, str(y)  # not optional
+        assert 'name' in y, str(y)  # not optional
         # Construct
         self.y = y
 
