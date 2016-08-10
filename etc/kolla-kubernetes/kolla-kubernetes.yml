@@ -99,3 +99,11 @@ openstack_glance_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ ope
 glance_admin_endpoint: "http://glance-api:{{ glance_api_port }}"
 glance_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ glance_api_port }}"
 glance_internal_endpoint: "http://glance-api:{{ glance_api_port }}"
+
+########################
+# Neutron variables
+########################
+openstack_neutron_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ openstack_auth.username }}','password':'$KEYSTONE_ADMIN_PASSWORD','project_name':'{{ openstack_auth.project_name }}','domain_name':'default'}"
+neutron_admin_endpoint: "http://neutron:{{ neutron_server_port }}"
+neutron_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ neutron_server_port }}"
+neutron_internal_endpoint: "http://neutron:{{ neutron_server_port }}"
