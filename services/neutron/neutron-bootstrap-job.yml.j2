@@ -10,19 +10,24 @@ spec:
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-database
-          command: ["sh", "-c"]
+          command: ["bash", "-c"]
           args:
             - ansible localhost -m mysql_db -a
               "login_host='{{ neutron_database_address }}'
                login_port='{{ mariadb_port }}'
                login_user='{{ database_user }}'
-               login_password='{{ database_password }}'
+               login_password='$DATABASE_PASSWORD'
                name='{{ neutron_database_name }}'"
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
             - name: ANSIBLE_LIBRARY
               value: "/usr/share/ansible"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-user-permissions
           command: ["sh", "-c"]
@@ -31,9 +36,9 @@ spec:
               "login_host='{{ neutron_database_address }}'
                login_port='{{ mariadb_port }}'
                login_user='{{ database_user }}'
-               login_password='{{ database_password }}'
+               login_password='$DATABASE_PASSWORD'
                name='{{ neutron_database_name }}'
-               password='{{ neutron_database_password }}'
+               password='$NEUTRON_DATABASE_PASSWORD'
                host='%'
                priv='{{ neutron_database_name }}.*:ALL'
                append_privs='yes'"
@@ -42,6 +47,16 @@ spec:
               value: "1"
             - name: ANSIBLE_LIBRARY
               value: "/usr/share/ansible"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
+            - name: NEUTRON_DATABASE_PASSWORD 
+              valueFrom:
+                secretKeyRef:
+                  name: neutron-database-password
+                  key: password
         - image: "{{ neutron_server_image_full }}"
           name: neutron-server
           env:
@@ -55,6 +70,128 @@ spec:
               readOnly: true
             - mountPath: /var/log/kolla
               name: kolla-logs
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-admin
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_admin_endpoint }}'
+               interface=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-internal
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_internal_endpoint }}'
+               interface=internal
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-service-and-endpoint-public
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=neutron
+               service_type=image
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ neutron_public_endpoint }}'
+               interface=public
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-neutron-user-project-role
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_user -a
+              "project=service
+               user=neutron
+               password=$NEUTRON_KEYSTONE_PASSWORD
+               role=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
+               "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /dev
+              name: dev
+            - mountPath: /run
+              name: run
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+            - name: NEUTRON_KEYSTONE_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                  name: neutron-keystone-password
+                  key: password
       volumes:
         - name: neutron-server-config
           configMap:
@@ -66,6 +203,15 @@ spec:
               path: config.json
             - key: ml2-conf.ini
               path: ml2_conf.ini
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure
