@@ -237,6 +237,8 @@ kolla-kubernetes:
       - name: neutron-server-service
         template: services/neutron/neutron-server-service.yml.j2
       bootstrap:
+      - name: neutron-bootstrap-secret
+        template: services/neutron/neutron-bootstrap-secret.yml.j2
       - name: neutron-bootstrap-job
         template: services/neutron/neutron-bootstrap-job.yml.j2
       pod:
