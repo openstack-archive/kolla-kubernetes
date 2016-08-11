@@ -1,3 +1,4 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
 apiVersion: batch/v1
 kind: Job
 spec:
@@ -27,8 +28,8 @@ spec:
           configMap:
             name: rabbitmq-configmap
         - name: rabbitmq-persistent-storage
-          hostPath:
-            path: /var/lib/rabbitmq
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure

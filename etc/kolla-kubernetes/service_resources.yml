@@ -128,8 +128,20 @@ kolla-kubernetes:
     resources:
       secret:
       disk:
+      - name: rabbitmq-disk
+        template: services/common/common-disk.sh.j2
+        vars:
+          size_in_gb: 10
       pv:
+      - name: rabbitmq-pv
+        template: services/common/common-pv.yml.j2
+        vars:
+          size_in_gb: 10
       pvc:
+      - name: rabbitmq-pvc
+        template: services/common/common-pvc.yml.j2
+        vars:
+          size_in_gb: 10
       svc:
       - name: rabbitmq-service-management
         template: services/rabbitmq/rabbitmq-service-management.yml.j2
