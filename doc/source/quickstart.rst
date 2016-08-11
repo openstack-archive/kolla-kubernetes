@@ -225,9 +225,8 @@ Generating Kubernetes Secrets
 =============================
 
 Secret for each service must be generated before attempting to bootstrap
-any services. PS https://review.openstack.org/#/c/354199/
-provides a script which can be used to generate or to remove Secrets.
-This is only a temporary solution which will be replaced in the near future.
+any services. secret-generator.py is a script which can be used to generate
+or to remove Secrets.
 
 Before using this script, you MUST generate passwords by using
 generate_passwords.py (comes with kolla distribution), if there is no
@@ -240,8 +239,6 @@ Script accepts 1 parameter: "create" or "delete".
     secret-generator.py create
     # To delete Secrets for all services in passwords.yml run:
     secret-generator.py delete
-
-.. NOTE:: This script is a TEMPORARY solution. Check this doc again soon.
 
 
 Running Kolla-Kubernetes
