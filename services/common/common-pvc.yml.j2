@@ -6,9 +6,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ resourceName }}
-{%- if storage_provider in ["aws"] %}
+{%- elif storage_provider in ["aws"] %}
   annotations:
     volume.alpha.kubernetes.io/storage-class: experimental_can_be_anything_in_kubernetes_1_2
+{%- else %}
+  {{ raise('Unknown storage_provider: check kolla-kubernetes.yml:storage_provider') }}
 {%- endif %}
 spec:
   accessModes:
