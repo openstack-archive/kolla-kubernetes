@@ -84,8 +84,10 @@ spec:
             - mountPath: {{ container_config_directory }}
               name: glance-api-config
               readOnly: true
+{% if glance_backend_ceph != "yes" %}
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
+{% endif %}
             - mountPath: /var/log/kolla
               name: kolla-logs
         - image: "{{ kolla_toolbox_image_full }}"
@@ -214,9 +216,11 @@ spec:
         - name: glance-api-config
           configMap:
             name: glance-api-configmap
+{% if glance_backend_ceph != "yes" %}
         - name: glance-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
+{% endif %}
         - name: dev
           hostPath:
             path: /dev
