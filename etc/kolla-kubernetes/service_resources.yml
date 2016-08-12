@@ -185,6 +185,8 @@ kolla-kubernetes:
       - name: glance-bootstrap-job
         template: services/glance/glance-bootstrap-job.yml.j2
       pod:
+      - name: glance-api-haproxy-configmap
+        template: services/glance/glance-api-haproxy-configmap.yml.j2
       - name: glance-api-pod
         template: services/glance/glance-api-pod.yml.j2
       - name: glance-registry-pod
