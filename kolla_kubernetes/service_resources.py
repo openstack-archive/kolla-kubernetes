@@ -76,6 +76,9 @@ class KollaKubernetesResources(object):
                 files.append(service_ansible_file)
         files.append(os.path.join(kolla_dir,
                                   'ansible/roles/common/defaults/main.yml'))
+#FIXME probably should move this stuff into ansible/roles/common/defaults/main.yml instead.
+        files.append(os.path.join(kolla_dir,
+                                  'ansible/roles/haproxy/defaults/main.yml'))
 
         # Create the config dict
         x = JinjaUtils.merge_configs_to_dict(
