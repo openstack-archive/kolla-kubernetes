@@ -1,35 +1,130 @@
-apiVersion: v1
-kind: ReplicationController
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: glance-registry
 spec:
   replicas: {{ glance_registry_replicas }}
-  selector:
-      service: glance
-      type: registry
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
         service: glance
         type: registry
+      annotations:
+#FIXME Enable once status check is fixed.
+#       kolla_upgrade=minor_rolling_safe
+#FIXME Once out of alpha, this should be converted to yaml.
+#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
+# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
+# other containers from directly accessing the service
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/a/..data/* /srv/b/;
+                   crudini --set /srv/b/glance-registry.conf DEFAULT bind_host 127.0.0.1;
+                   crudini --set /srv/b/glance-registry.conf DEFAULT bind_port 8080;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "glance-config-configmap",
+                      "mountPath": "/srv/a"
+                  },
+                  {
+                      "name": "glance-config",
+                      "mountPath": "/srv/b"
+                  }
+              ]
+          }
+      ]'
     spec:
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
       containers:
-        - name: glance-registry
-          image: "{{ glance_registry_image_full }}"
+        - name: haproxy
+          image: "{{ haproxy_image_full }}"
+          command:
+          - /bin/bash
+          - -c
+          - |
+            kolla_start;
+            touch /var/lib/kolla-kubernetes/event/shutdown;
+#FIXME glance-registry seems to have a bug. it is 401'ing on status.
+#          readinessProbe:
+#            httpGet:
+#              path: /status
+#              port: {{ glance_registry_port }}
+#            initialDelaySeconds: 5
+#            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+#NOTE this only works if you arn't doing a haproxy reconfigure too.
+#But shouldn't ever have to do that in a setup like this.
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  kill -USR1 $(</var/run/haproxy.pid);
+                  while true; do sleep 1000; done
           volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
-              name: glance-config
+              name: glance-haproxy-config
             - mountPath: /var/log/kolla/
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
           ports:
             - containerPort: {{ glance_registry_port }}
               name: glance-registry
+        - name: main
+          image: "{{ glance_registry_image_full }}"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: glance-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
       volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
         - name: glance-config
+          emptyDir: {}
+        - name: glance-config-configmap
           configMap:
             name: glance-registry-configmap
+        - name: glance-haproxy-config
+          configMap:
+            name: glance-registry-haproxy
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
-metadata:
-   name: glance-registry
