@@ -1,11 +1,20 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 spec:
   replicas: {{ glance_api_replicas }}
-  selector:
-      service: glance
-      type: api
+  strategy:
+{% if glance_backend_ceph == "yes" %}
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+{% else %}
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+{% endif %}
   template:
     metadata:
       labels:
@@ -13,13 +22,25 @@ spec:
         type: api
     spec:
       containers:
-        - name: glance-api
-          image: "{{ glance_api_image_full }}"
+        - name: haproxy
+          image: "{{ haproxy_image_full }}"
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  PID=$(</run/haproxy.pid) &&
+                  kill -USR1 $PID &&
+                  while true; do
+                    sleep 1; ps -p $PID > /dev/null;
+                    [ $! -ne 0 ] && break;
+                  done
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: glance-config
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
+              name: glance-haproxy-config
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
@@ -30,13 +51,34 @@ spec:
           ports:
             - containerPort: {{ glance_api_port }}
               name: glance-api
+        - name: api
+          image: "{{ glance_api_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-config
+{% if glance_backend_ceph != "yes" %}
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+{% endif %}
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
       volumes:
         - name: glance-config
           configMap:
             name: glance-api-configmap
+        - name: glance-haproxy-config
+          configMap:
+            name: glance-api-haproxy-configmap
+{% if glance_backend_ceph != "yes" %}
         - name: glance-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
+{% endif %}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
