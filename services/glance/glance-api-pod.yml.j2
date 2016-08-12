@@ -1,25 +1,74 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 spec:
   replicas: {{ glance_api_replicas }}
-  selector:
-      service: glance
-      type: api
+  strategy:
+{% if glance_backend_ceph == "yes" %}
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+{% else %}
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+{% endif %}
   template:
     metadata:
       labels:
         service: glance
         type: api
+      annotations:
+#FIXME Once out of alpha, this should be converted to yaml.
+#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
+# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
+# other containers from directly accessing the service
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/a/..data/* /srv/b/; crudini --set /srv/b/glance-api.conf DEFAULT bind_host 127.0.0.1; crudini --set /srv/b/glance-api.conf DEFAULT bind_port 8080;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "glance-config-configmap",
+                      "mountPath": "/srv/a"
+                  },
+                  {
+                      "name": "glance-config",
+                      "mountPath": "/srv/b"
+                  }
+              ]
+          }
+      ]'
     spec:
       containers:
-        - name: glance-api
-          image: "{{ glance_api_image_full }}"
+        - name: haproxy
+          image: "{{ haproxy_image_full }}"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ glance_api_port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  kill -INT $(pgrep -f /usr/sbin/haproxy-systemd-wrapper)
+                  while true; do sleep 1000; done
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: glance-config
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
+              name: glance-haproxy-config
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
@@ -30,13 +79,36 @@ spec:
           ports:
             - containerPort: {{ glance_api_port }}
               name: glance-api
+        - name: api
+          image: "{{ glance_api_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-config
+{% if glance_backend_ceph != "yes" %}
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+{% endif %}
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
       volumes:
         - name: glance-config
+          emptyDir: {}
+        - name: glance-config-configmap
           configMap:
             name: glance-api-configmap
+        - name: glance-haproxy-config
+          configMap:
+            name: glance-api-haproxy
+{% if glance_backend_ceph != "yes" %}
         - name: glance-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
+{% endif %}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
