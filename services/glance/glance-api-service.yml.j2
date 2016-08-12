@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: Service
 spec:
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
   ports:
     - port: {{ glance_api_port }}
       name: glance-api
