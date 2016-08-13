@@ -1,10 +1,8 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 spec:
   replicas: 1
-  selector:
-      service: mariadb
   template:
     metadata:
       labels:
@@ -13,6 +11,10 @@ spec:
       containers:
         - image: "{{ mariadb_image_full }}"
           name: mariadb
+          lifecycle:
+            preStop:
+              exec:
+                command: ["mysqladmin shutdown"]
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
