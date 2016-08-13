@@ -1,18 +1,23 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1alpha1 
+kind: PetSet
 spec:
+  serviceName: "mariadb"
   replicas: 1
-  selector:
-      service: mariadb
   template:
     metadata:
       labels:
         service: mariadb
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
     spec:
       containers:
         - image: "{{ mariadb_image_full }}"
           name: mariadb
+          lifecycle:
+            preStop:
+              exec:
+                command: ["mysqladmin shutdown"]
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
