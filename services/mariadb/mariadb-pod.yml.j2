@@ -1,5 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
+apiVersion: extensions/v1beta1
 kind: ReplicationController
 spec:
   replicas: 1
@@ -13,6 +13,11 @@ spec:
       containers:
         - image: "{{ mariadb_image_full }}"
           name: mariadb
+          lifecycle:
+            preStop:
+              exec:
+		command: ["/bin/sh","-c"]
+                args: ["echo 'Shutting down Mariadb...' && mysqladmin shutdown"]
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
