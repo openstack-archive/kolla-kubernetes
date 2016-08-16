@@ -1,69 +1,31 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: openvswitch-db
+  name: neutron-openvswitch-agent
   labels:
-    component: openvswitch
-    system: openvswitch-db
+    component: neutron
+    system: openvswitch-agent
   namespace: default
 spec:
   template:
     metadata:
-      name: openvswitch-db
+      name: neutron-openvswitch-agent
       labels:
-        component: openvswitch
-        system: openvswitch-db
+        component: neutron
+        system: openvswitch-agent
       namespace: default
     spec:
       hostNetwork: True
       containers:
-        - image: "{{ openvswitch_db_image_full }}"
-          name: openvswitch-db-server
-          securityContext:
-            privileged: true
-          env:
-            - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: openvswitch-db-config
-              readOnly: true
-            - mountPath: /etc/openvswitch
-              name: openvswitch-db
-            - mountPath: /var/run/openvswitch
-              name: openvswitch-run
-            - mountPath: /run
-              name: host-run
-            - mountPath: /dev
-              name: host-dev
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-
-        - image: "{{ openvswitch_vswitchd_image_full }}"
-          name: openvswitch-vswitchd
-          securityContext:
-            privileged: true
-          env:
-            - name: KOLLA_CONFIG_STRATEGY
-              value: {{ config_strategy }}
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: openvswitch-vswitchd-config
-              readOnly: true
-            - mountPath: /run
-              name: host-run
-            - mountPath: /dev
-              name: host-dev
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /lib/modules
-              name: host-lib-modules
-              readOnly: true
-
         - image: "{{ neutron_openvswitch_agent_image_full }}"
           name: neutron-openvswitch-agent
+          command: [/bin/bash, -c]
+          args:
+          - |
+            IP=$(ip addr list {{ tunnel_interface }} | grep 'inet ' |cut -d' ' -f6|cut -d/ -f1) &&
+            "(echo '[ovs]'; echo local_ip=$IP) >> /var/lib/kolla/config_files/ml2_conf.ini &&
+	    exec kolla_start
+            #FIXME could be this instead here, or in init container: crudini --set /var/lib/kolla/config_files/ml2_conf.ini ovs local_ip $IP &&
           securityContext:
             privileged: true
           env:
@@ -116,12 +78,6 @@ spec:
 #          value: {{ neutron_external_interface }}
 
       volumes:
-        - name: openvswitch-vswitchd-config
-          configMap:
-            name: openvswitch-vswitchd-configmap
-        - name: openvswitch-db-config
-          configMap:
-            name: openvswitch-db-server-configmap
         - name: neutron-openvswitch-agent-config
           configMap:
             name: neutron-openvswitch-agent-configmap
@@ -137,12 +93,6 @@ spec:
 #        - name: neutron-linuxbridge-agent-config
 #          configMap:
 #            name: neutron-linuxbridge-agent-configmap
-        - name: openvswitch-db
-          hostPath:
-            path: /etc/openvswitch
-        - name: openvswitch-run
-          hostPath:
-            path: /run/openvswitch
         - name: host-run
           hostPath:
             path: /run
