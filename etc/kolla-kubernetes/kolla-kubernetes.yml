@@ -107,3 +107,11 @@ openstack_neutron_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ op
 neutron_admin_endpoint: "http://neutron:{{ neutron_server_port }}"
 neutron_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ neutron_server_port }}"
 neutron_internal_endpoint: "http://neutron:{{ neutron_server_port }}"
+
+########################
+# Keystone variables
+########################
+keystone_admin_url: "{{ admin_protocol }}://keystone-admin:{{ keystone_admin_port }}/v3"
+keystone_internal_url: "{{ internal_protocol }}://keystone-internal:{{ keystone_public_port }}/v3"
+keystone_public_url: "{{ public_protocol }}://{{ kolla_kubernetes_external_vip }}:{{ keystone_public_port }}/v3"
+keystone_database_address: "mariadb"
