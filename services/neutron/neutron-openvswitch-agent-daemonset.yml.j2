@@ -64,6 +64,13 @@ spec:
 
         - image: "{{ neutron_openvswitch_agent_image_full }}"
           name: neutron-openvswitch-agent
+          command: [/bin/bash, -c]
+          args:
+          - |
+            IP=$(ip addr list {{ tunnel_interface }} | grep 'inet ' |cut -d' ' -f6|cut -d/ -f1) &&
+            "(echo '[ovs]'; echo local_ip=$IP) >> /var/lib/kolla/config_files/ml2_conf.ini &&
+	    exec kolla_start
+            #FIXME could be this instead here, or in init container: crudini --set /var/lib/kolla/config_files/ml2_conf.ini ovs local_ip $IP &&
           securityContext:
             privileged: true
           env:

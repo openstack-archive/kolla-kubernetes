@@ -252,8 +252,8 @@ kolla-kubernetes:
       - name: neutron-bootstrap-job
         template: services/neutron/neutron-bootstrap-job.yml.j2
       pod:
-      - name: neutron-compute-pod
-        template: services/neutron/neutron-compute-pod.yml.j2
+      - name: neutron-openvswitch-agent-daemonset
+        template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
       - name: neutron-control-pod
         template: services/neutron/neutron-control-pod.yml.j2
       - name: neutron-dhcp-agent-pod
