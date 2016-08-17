@@ -221,6 +221,29 @@ The brief summary for horizon kolla dependencies is as follows::
     kolla-build mariadb memcached kolla-toolbox keystone horizon
 
 
+Generating Kubernetes Secrets
+=============================
+
+Secret for each service must be generated before attempting to bootstrap
+any services. PS https://review.openstack.org/#/c/354199/
+provides a script which can be used to generate or to remove Secrets.
+This is only a temporary solution which will be replaced in the near future.
+
+Before using this script, you MUST generate passwords by using
+generate_passwords.py. if there is no password.yml at /etc/kolla, the script
+will generate an error.
+Script accepts 1 parameter: "create" or "delete".
+
+::
+
+    # To create Secrets for all services in passwords.yml run:
+    secret-generator.py create
+    # To delete Secrets for all services in passwords.yml run:
+    secret-generator.py delete
+
+.. NOTE:: This script is a TEMPORARY solution. Check this doc again soon.
+
+
 Running Kolla-Kubernetes
 ========================
 
