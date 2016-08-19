@@ -21,27 +21,8 @@ KKR = KollaKubernetesResources.Get()
 RESOURCE_TYPES = ('secret pv pvc svc bootstrap pod').split(" ")
 
 technical_debt = {
-    'nodeSelector': [
-        ['pod', 'openvswitch', 'openvswitch-db'],
-        ['pod', 'openvswitch', 'openvswitch-vswitchd'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
-        ['bootstrap', 'glance', 'glance-bootstrap-job'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
-        ['pod', 'neutron', 'neutron-control-pod'],
-        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
-        ['pod', 'neutron', 'neutron-l3-agent-pod'],
-        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
-    ],
-    'namespaceNotFound': [
-        ['svc', 'neutron', 'neutron-server-service'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
-        ['pod', 'horizon', 'horizon-pod'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
-        ['pod', 'neutron', 'neutron-control-pod'],
-        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
-        ['pod', 'neutron', 'neutron-l3-agent-pod'],
-        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
-    ],
+    'nodeSelector': [],
+    'namespaceNotFound': [],
     'namespaceInTemplate': [],
     'namespaceHardCoded': []
 }
