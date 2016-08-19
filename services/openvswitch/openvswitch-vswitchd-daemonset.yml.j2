@@ -9,7 +9,6 @@ metadata:
 spec:
   template:
     metadata:
-      name: openvswitch-vswitchd
       labels:
         component: openvswitch
         system: openvswitch-vswitchd
@@ -40,6 +39,18 @@ spec:
     spec:
       hostNetwork: True
       hostIPC: True
+      nodeSelector:
+{%- if kolla_kubernetes.template.vars.type == "compute" %}
+{%- set selector = kolla_kubernetes_hostlabel_openvswitch_vswitchd_compute |
+                   default(kolla_kubernetes_hostlabel_compute) %}
+{%- else %}
+{%- set selector = global['kolla_kubernetes_hostlabel_openvswitch_vswitchd_' ~ kolla_kubernetes.template.vars.type] |
+                   default(kolla_kubernetes_hostlabel_network |
+                     default(kolla_kubernetes_hostlabel_controller)
+                   )
+%}
+{%- endif %}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ openvswitch_vswitchd_image_full }}"
           name: openvswitch-vswitchd

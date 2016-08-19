@@ -1,0 +1,128 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-dhcp-agent
+  namespace: {{ kolla_kubernetes_namespace }}
+  labels:
+    component: neutron
+    system: dhcp-agent
+spec:
+  template:
+    metadata:
+      labels:
+        component: neutron
+        system: dhcp-agent
+      annotations:
+#FIXME Its unclear if ovsdb_connection, local_ip, and/or hostPID required. Try removing them once we have a working gate to test with.
+#FIXME Once out of alpha, this should be converted to yaml.
+        pod.alpha.kubernetes.io/init-containers: '[
+            {
+                "name": "update-config",
+                "image": "{{ kolla_toolbox_image_full }}",
+                "command": [
+                    "/bin/sh",
+                    "-c",
+                    "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{%- if enable_openvswitch_tcp == "yes" -%}
+                    TUNNEL_INTERFACE={{ tunnel_interface }};
+                    F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
+                    [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
+                    IP=$(ip addr list {{ tunnel_interface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                    crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
+{%- endif -%}
+                    crudini --set /srv/pod-main-config/ml2_conf.ini ovs local_ip $IP;
+                "],
+                "volumeMounts": [
+                    {
+                        "name": "neutron-l3-agent-configmap",
+                        "mountPath": "/srv/configmap"
+                    },
+                    {
+                        "name": "pod-main-config",
+                        "mountPath": "/srv/pod-main-config"
+                    }
+                ]
+            },
+            {
+                "name": "update-permissions",
+                "image": "{{ neutron_dhcp_agent_image_full }}",
+                "securityContext": {
+                    "runAsUser": 0
+                },
+                "command": [
+                    "/bin/sh",
+                    "-c",
+                    "chown --recursive neutron.kolla /var/log/kolla;"
+                ],
+                "volumeMounts": [
+                    {
+                        "name": "kolla-logs",
+                        "mountPath": "/var/log/kolla"
+                    }
+                ]
+            }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      hostPID: True
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_dhcp_agent |
+                       default(kolla_kubernetes_hostlabel_network |
+                         default(kolla_kubernetes_hostlabel_controller)
+                       )
+%}
+        {{ selector.key }}: {{ selector.value }}
+      containers:
+        - image: "{{ neutron_dhcp_agent_image_full }}"
+          name: neutron-dhcp-agent
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: neutron-dhcp-agent-config
+              readOnly: true
+            - mountPath: /var/lib/neutron/kolla/
+              name: neutron-metadata-socket
+            - mountPath: /run
+              name: host-run
+            - mountPath: /run/netns/
+              name: host-run-netns
+              # shared: true # This seems not support in K8s yet :(
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: neutron-dhcp-agent-config
+          configMap:
+            name: neutron-dhcp-agent-configmap
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+            - key: dhcp-agent.ini
+              path: dhcp_agent.ini
+            - key: dnsmasq.conf
+              path: dnsmasq.conf
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
+        - name: host-run
+          hostPath:
+            path: /run
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: neutron-metadata-socket
+          hostPath:
+            path: /var/lib/neutron/kolla/metadata_proxy
+        - name: kolla-logs
+          emptyDir: {}

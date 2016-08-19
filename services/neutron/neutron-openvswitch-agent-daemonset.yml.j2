@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: neutron-openvswitch-agent
+  name: neutron-openvswitch-agent-{{ kolla_kubernetes.template.vars.type}}
+  namespace: {{ kolla_kubernetes_namespace }}
   labels:
     component: neutron
-    system: openvswitch-agent
+    system: openvswitch-agent-{{ kolla_kubernetes.template.vars.type}}
 spec:
   template:
     metadata:
-      name: neutron-openvswitch-agent
       labels:
         component: neutron
-        system: openvswitch-agent
+        system: openvswitch-agent-{{ kolla_kubernetes.template.vars.type}}
       annotations:
 #FIXME Once out of alpha, this should be converted to yaml.
         pod.alpha.kubernetes.io/init-containers: '[
@@ -63,6 +63,15 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      nodeSelector:
+{%- if kolla_kubernetes.template.vars.type == "compute" %}
+{%- set selector = kolla_kubernetes_hostlabel_compute %}
+{%- else %}
+{%- set selector = kolla_kubernetes_hostlabel_network |
+                   default(kolla_kubernetes_hostlabel_controller)
+%}
+{%- endif %}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ neutron_openvswitch_agent_image_full }}"
           name: main
