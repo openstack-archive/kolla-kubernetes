@@ -53,8 +53,11 @@ to "shared" and restart Docker.
 ::
 
    # CentOS (and other systemd distros)
-   # Edit /usr/lib/system/systemd/docker.service to set:
+   cat > /etc/systemd/system/docker.service <<EOF
+   .include /usr/lib/systemd/system/mariadb.service
+   [Service]
    MountFlags=shared
+   EOF
 
    # Restart the Docker daemon
    systemctl daemon-reload
@@ -220,6 +223,23 @@ The brief summary for horizon kolla dependencies is as follows::
 
     kolla-build mariadb memcached kolla-toolbox keystone horizon
 
+Labeling Nodes
+==============
+
+Your cluster needs to have at least one node labeled with each of the
+following labels::
+
+    kolla_compute=v1
+    kolla_controller=v1
+
+example::
+    ALLINONENODE=$(hostname)
+    kubectl label node $ALLINONENODE kolla_compute=v1
+    kubectl label node $ALLINONENODE kolla_controller=v1
+
+Alternately, you can override the default labeling used in the
+kolla-kubernetes.yml file. It is also possible to target specific
+services to specific pools of nodes with this mechanism.
 
 Generating Kubernetes Secrets
 =============================
