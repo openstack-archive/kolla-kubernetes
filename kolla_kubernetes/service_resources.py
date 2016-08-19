@@ -84,6 +84,9 @@ class KollaKubernetesResources(object):
         # Render values containing nested jinja variables
         r = JinjaUtils.dict_self_render(x)
 
+        # Add a self referential link so templates can look up things by name.
+        r['global'] = r
+
         # Update the cache
         KollaKubernetesResources._jinja_dict_cache[cache_key] = r
         return r

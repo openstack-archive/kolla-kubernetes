@@ -220,6 +220,23 @@ The brief summary for horizon kolla dependencies is as follows::
 
     kolla-build mariadb memcached kolla-toolbox keystone horizon
 
+Labeling Nodes
+==============
+
+Your cluster needs to have at least one node labeled with each of the
+following labels::
+
+    kolla_compute=v1
+    kolla_controller=v1
+
+example::
+    ALLINONENODE=$(hostname)
+    kubectl label node $ALLINONENODE kolla_compute=v1
+    kubectl label node $ALLINONENODE kolla_controller=v1
+
+Alternately, you can override the default labeling used in the
+kolla-kubernetes.yml file. It is also possible to target specific
+services to specific pools of nodes with this mechanism.
 
 Running Kolla-Kubernetes
 ========================

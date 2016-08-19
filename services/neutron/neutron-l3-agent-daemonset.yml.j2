@@ -1,0 +1,121 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-l3-agent-{{ kolla_kubernetes.template.vars.type}}
+  namespace: {{ kolla_kubernetes_namespace }}
+  labels:
+    component: neutron
+    system: l3-agent-{{ kolla_kubernetes.template.vars.type}}
+spec:
+  template:
+    metadata:
+      labels:
+        component: neutron
+        system: l3-agent-{{ kolla_kubernetes.template.vars.type}}
+      annotations:
+#FIXME Once out of alpha, this should be converted to yaml.
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/a/..data/* /srv/b/;
+{%- if kolla_kubernetes.template.vars.type == "compute" -%}
+                   crudini --set /srv/b/l3_agent.ini DEFAULT agent_mode dvr;
+                   crudini --set /srv/b/l3_agent.ini DEFAULT handle_internal_only_routers false;
+{%- else -%}
+                   crudini --set /srv/b/l3_agent.ini DEFAULT handle_internal_only_routers true;
+{%- if enable_dvr == "yes" -%}
+                   crudini --set /srv/b/l3_agent.ini DEFAULT agent_mode dvr_snat;
+{%- else -%}
+                   crudini --set /srv/b/l3_agent.ini DEFAULT agent_mode legacy;
+{%- endif -%}
+{%- endif %}"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "neutron-l3-agent-configmap",
+                      "mountPath": "/srv/a"
+                  },
+                  {
+                      "name": "neutron-l3-agent-config",
+                      "mountPath": "/srv/b"
+                  }
+              ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+{%- if kolla_kubernetes.template.vars.type == "compute" %}
+{%- if enable_dvr != "yes" %}
+        kolla-never-use: v1
+{%- else %}
+{%- set selector = kolla_kubernetes_hostlabel_neutron_l3_agent_compute |
+                   default(kolla_kubernetes_hostlabel_compute) %}
+          {{ selector.key }}: {{ selector.value }}
+{%- endif %}
+{%- else %}
+{%- set selector = global['kolla_kubernetes_hostlabel_neutron_l3_agent_network_' ~ kolla_kubernetes.template.vars.type] |
+                   default(kolla_kubernetes_hostlabel_network |
+                     default(kolla_kubernetes_hostlabel_controller)
+                   )
+%}
+          {{ selector.key }}: {{ selector.value }}
+{%- endif %}
+      containers:
+        - image: "{{ neutron_l3_agent_image_full }}"
+          name: neutron-l3-agent
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: neutron-l3-agent-config
+            - mountPath: /var/lib/neutron/kolla/
+              name: neutron-metadata-socket
+            - mountPath: /run
+              name: host-run
+            - mountPath: /run/netns/
+              name: host-run-netns
+              # shared: true # This seems not support in K8s yet :(
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: neutron-l3-agent-config
+          emptyDir: {}
+        - name: neutron-l3-agent-configmap
+          configMap:
+            name: neutron-l3-agent-configmap
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+            - key: fwaas-driver.ini
+              path: fwaas_driver.ini
+            - key: l3-agent.ini
+              path: l3_agent.ini
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
+        - name: host-run
+          hostPath:
+            path: /run
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: neutron-metadata-socket
+          hostPath:
+            path: /var/lib/neutron/kolla/metadata_proxy
+        - name: kolla-logs
+          emptyDir: {}
