@@ -23,9 +23,6 @@ RESOURCE_TYPES = ('secret pv pvc svc bootstrap pod').split(" ")
 technical_debt = {
     'nodeSelector': [
         ['pod', 'nova', 'nova-compute-pod'],
-        ['pod', 'openvswitch', 'openvswitch-db'],
-        ['pod', 'openvswitch', 'openvswitch-vswitchd'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
         ['bootstrap', 'mariadb', 'mariadb-bootstrap-job'],
         ['pod', 'mariadb', 'mariadb-pod'],
         ['pod', 'memcached', 'memcached-pod'],
@@ -44,11 +41,6 @@ technical_debt = {
         ['pod', 'nova', 'nova-api-pod'],
         ['pod', 'nova', 'nova-conductor-pod'],
         ['pod', 'nova', 'nova-scheduler-pod'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
-        ['pod', 'neutron', 'neutron-control-pod'],
-        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
-        ['pod', 'neutron', 'neutron-l3-agent-pod'],
-        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
         ['pod', 'swift', 'swift-account-pod'],
         ['pod', 'swift', 'swift-container-pod'],
         ['pod', 'swift', 'swift-object-pod'],
@@ -64,14 +56,7 @@ technical_debt = {
         ['pod', 'cinder', 'cinder-scheduler-pod']
     ],
     'namespaceNotFound': [
-        ['svc', 'neutron', 'neutron-server-service'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
         ['pod', 'horizon', 'horizon-pod'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
-        ['pod', 'neutron', 'neutron-control-pod'],
-        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
-        ['pod', 'neutron', 'neutron-l3-agent-pod'],
-        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
     ],
     'namespaceInTemplate': [],
     'namespaceHardCoded': []
