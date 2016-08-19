@@ -296,12 +296,24 @@ kolla-kubernetes:
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
       - name: neutron-control-pod
         template: services/neutron/neutron-control-pod.yml.j2
-      - name: neutron-dhcp-agent-pod
-        template: services/neutron/neutron-dhcp-agent-pod.yml.j2
-      - name: neutron-l3-agent-pod
-        template: services/neutron/neutron-l3-agent-pod.yml.j2
-      - name: neutron-metadata-agent-pod
-        template: services/neutron/neutron-metadata-agent-pod.yml.j2
+      - name: neutron-dhcp-agent
+        template: services/neutron/neutron-dhcp-agent-daemonset.yml.j2
+      - name: neutron-l3-agent-network
+        template: services/neutron/neutron-l3-agent-daemonset.yml.j2
+        vars:
+          type: network
+      - name: neutron-l3-agent-compute
+        template: services/neutron/neutron-l3-agent-daemonset.yml.j2
+        vars:
+          type: compute
+      - name: neutron-metadata-agent-network
+        template: services/neutron/neutron-metadata-agent-daemonset.yml.j2
+        vars:
+          type: network
+      - name: neutron-metadata-agent-compute
+        template: services/neutron/neutron-metadata-agent-daemonset.yml.j2
+        vars:
+          type: compute
   - name: swift
     pods:
     - name: swift-account

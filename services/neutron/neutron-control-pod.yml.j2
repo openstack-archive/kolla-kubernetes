@@ -11,6 +11,13 @@ spec:
         service: neutron
         type: control
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_neutron_server |
+                   default(kolla_kubernetes_hostlabel_network |
+                     default(kolla_kubernetes_hostlabel_controller)
+                   )
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ neutron_server_image_full }}"
           name: neutron-server
@@ -45,4 +52,5 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 metadata:
-   name: neutron-control
+  name: neutron-control
+  namespace: default
