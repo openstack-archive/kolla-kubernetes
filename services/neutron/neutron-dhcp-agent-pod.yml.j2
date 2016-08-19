@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Pod
 spec:
   hostNetwork: True
+  nodeSelector:
+    kolla-{{ kolla_kubernetes_namespace }}-controller: v1
   containers:
     - image: "{{ neutron_dhcp_agent_image_full }}"
       name: neutron-dhcp-agent
@@ -57,3 +59,4 @@ spec:
       emptyDir: {}
 metadata:
    name: neutron-dhcp-agent
+   namespace: {{ kolla_kubernetes_namespace }}

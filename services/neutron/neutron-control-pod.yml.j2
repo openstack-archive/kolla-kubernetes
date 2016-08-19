@@ -11,6 +11,8 @@ spec:
         service: neutron
         type: control
     spec:
+      nodeSelector:
+        kolla-{{ kolla_kubernetes_namespace }}-controller: v1
       containers:
         - image: "{{ neutron_server_image_full }}"
           name: neutron-server
@@ -45,4 +47,5 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 metadata:
-   name: neutron-control
+  name: neutron-control
+  namespace: {{ kolla_kubernetes_namespace }}

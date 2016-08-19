@@ -11,6 +11,7 @@
 # This address is used in ALL public endpoints and it serves as an entry point
 # into kolla kubernetes cluster, needs to be changed by the operator.
 kolla_kubernetes_external_vip: "10.57.120.254"
+kolla_kubernetes_namespace: default
 
 ########################
 # Kubernetes Cluster
@@ -107,3 +108,4 @@ openstack_neutron_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ op
 neutron_admin_endpoint: "http://neutron:{{ neutron_server_port }}"
 neutron_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ neutron_server_port }}"
 neutron_internal_endpoint: "http://neutron:{{ neutron_server_port }}"
+enable_dvr: "no"

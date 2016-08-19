@@ -220,6 +220,29 @@ The brief summary for horizon kolla dependencies is as follows::
 
     kolla-build mariadb memcached kolla-toolbox keystone horizon
 
+Labeling Nodes
+==============
+
+Your cluster needs to have at least one node labeled with each of the
+following labels::
+
+    kolla-default-l3-agent=network
+    kolla-default-compute=v1
+    kolla-default-controler=v1
+
+For all-in-one configurations or configurations where you mix
+compute nodes and network nodes with DVR, just use network.
+
+If using DVR and you have seperate compute nodes, label them
+with the comute label::
+
+    kolla-default-l3-agent=compute
+
+example::
+    ALLINONENODE=$(hostname)
+    kubectl label node $ALLINONENODE kolla-default-l3-agent=network
+    kubectl label node $ALLINONENODE kolla-default-compute=v1
+    kubectl label node $ALLINONENODE kolla-default-controller=v1
 
 Running Kolla-Kubernetes
 ========================
