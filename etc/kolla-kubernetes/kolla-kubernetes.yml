@@ -107,3 +107,4 @@ openstack_neutron_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ op
 neutron_admin_endpoint: "http://neutron:{{ neutron_server_port }}"
 neutron_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ neutron_server_port }}"
 neutron_internal_endpoint: "http://neutron:{{ neutron_server_port }}"
+enable_dvr: "no"
