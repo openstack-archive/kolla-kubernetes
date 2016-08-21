@@ -1,6 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 spec:
   replicas: {{ rabbitmq_replicas }}
   selector:
@@ -38,4 +38,4 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 metadata:
-   name: rabbitmq
+  name: rabbitmq

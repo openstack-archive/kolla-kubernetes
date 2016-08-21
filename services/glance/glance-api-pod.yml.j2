@@ -1,6 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.service_name %}
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 spec:
   replicas: {{ glance_api_replicas }}
   selector:
@@ -43,4 +43,4 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 metadata:
-   name: glance-api
+  name: glance-api
