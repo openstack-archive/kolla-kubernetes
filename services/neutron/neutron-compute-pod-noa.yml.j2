@@ -1,0 +1,104 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-openvswitch-agent 
+  labels:
+    component: neutron
+    system: neutron-openvswitch-agent 
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: neutron-openvswitch-agent
+      labels:
+        component: neutron
+        system: neutron-openvswitch-agent
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-neutron-openvswitch-agent",
+             "image": "{{ neutron_openvswitch_agent_image_full }}",
+             "command": [
+                 "sh",
+                 "-c",
+                 "mkdir -p /var/log/kolla/neutron/;
+                  mkdir -p /neutron/plugins/ml2/;
+                  chown -R neutron:kolla /neutron;
+                  cp -f /var/lib/kolla/config_files/neutron.conf /neutron/neutron.conf;
+                  cp -f /var/lib/kolla/config_files/ml2_conf.ini /neutron/plugins/ml2/ml2_conf.ini;
+                  ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
+                  sed -i ''s|^ovsdb_connection.*=.*|ovsdb_connection=tcp:''${ip%/*}'':6640|g'' /neutron/plugins/ml2/ml2_conf.ini;
+                  sed -i ''s|^local_ip.*=.*|local_ip=''${ip%/*}''|g'' /neutron/plugins/ml2/ml2_conf.ini;
+                  chown -R neutron:kolla /var/log/kolla;
+                  echo $(date) >> /var/log/kolla/neutron-openvswitch-agent-init.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "neutron-openvswitch-agent-config",
+                   "mountPath": "/var/lib/kolla/config_files"
+                },
+                {
+                   "name": "neutron-config",
+                   "mountPath": "/neutron/"
+                },
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      containers:
+        - image: "{{ neutron_openvswitch_agent_image_full }}" 
+          name: neutron-openvswitch-agent
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: neutron-openvswitch-agent-config
+              readOnly: true
+            - mountPath: /neutron
+              name: neutron-config
+            - mountPath: /var/run
+              name: host-run
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+          command: ["sh", "-c"]
+          args:
+            - neutron-openvswitch-agent
+              --config-file
+              /neutron/neutron.conf
+              --config-file
+              /neutron/plugins/ml2/ml2_conf.ini
+              --config-dir
+              /etc/neutron
+      volumes:
+        - name: neutron-openvswitch-agent-config
+          configMap:
+            name: neutron-openvswitch-agent-configmap
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+        - name: neutron-config
+          emptyDir: {}
+        - name: host-run 
+          hostPath:
+            path: /var/run
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
