@@ -1,0 +1,95 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: openvswitch-vswitchd
+  labels:
+    component: openvswitch
+    system: openvswitch-vswitchd
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: openvswitch-vswitchd
+      labels:
+        component: openvswitch
+        system: openvswitch-vswitchd
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-ovs-vswitchd",
+             "image": "{{ openvswitch_vswitchd_image_full }}",
+             "command": [
+                 "sh",
+                 "-c",
+                 "mkdir -p /var/log/kolla/openvswitch;
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ neutron_bridge_name }} ;
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ neutron_bridge_name }} {{ neutron_external_interface }};
+                  echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "openvswitch-run",
+                   "mountPath": "/var/run/openvswitch/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      containers:
+        - image: "{{ openvswitch_vswitchd_image_full }}"
+          name: openvswitch-vswitchd
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: openvswitch-vswitchd-config
+              readOnly: true
+            - mountPath: /var/run/openvswitch
+              name: openvswitch-run
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: true
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          command: ["sh", "-c"]
+          args:
+            - modprobe openvswitch;
+              /usr/sbin/ovs-vswitchd
+              unix:/var/run/openvswitch/db.sock
+              -vconsole:emer
+              -vsyslog:err
+              -vfile:info
+              --mlockall
+              --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
+      volumes:
+        - name: openvswitch-vswitchd-config
+          configMap:
+            name: openvswitch-vswitchd-configmap
+        - name: openvswitch-run
+          hostPath:
+            path: /var/run/openvswitch
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
