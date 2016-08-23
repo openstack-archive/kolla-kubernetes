@@ -10,6 +10,42 @@ spec:
       labels:
         service: nova
         type: api
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-nova-api",
+             "image": "{{ nova_api_image_full }}",
+             "command": [
+                 "sh",
+                 "-c",
+                 "mkdir -p /var/log/kolla/nova/;
+                  chown -R nova:kolla /nova;
+                  chown -R nova:kolla /var/log/kolla;
+                  cp -f {{ container_config_directory }}/nova.conf /nova/nova.conf;
+                  ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
+                  sed -i ''s|^my_ip.*=.*|my_ip=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^novncproxy_host.*=.*|novncproxy_host=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^vncserver_listen.*=.*|vncserver_listen=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^vncserver_proxyclient_address.*=.*|vncserver_proxyclient_address=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^novncproxy_base_url.*=.*|novncproxy_base_url=http://''${ip%/*}'':6080/vnc_auto.html|g'' /nova/nova.conf;
+                  sed -i ''s|^connection_uri.*=.*|connection_uri=qemu+tcp://''${ip%/*}''/system|g'' /nova/nova.conf;
+                  echo $(date) >> /var/log/kolla/nova-api-init.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "nova-api-config",
+                   "mountPath": "{{ container_config_directory }}"
+                },
+                {
+                   "name": "nova-config",
+                   "mountPath": "/nova/"
+                },
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                }
+             ]
+          }
+        ]'
     spec:
       containers:
         - name: nova-api
@@ -21,6 +57,8 @@ spec:
               name: etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
+            - mountPath: /nova
+              name: nova-config
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
@@ -33,6 +71,15 @@ spec:
               name: nova-metadata
           securityContext:
             privileged: true
+          command: ["sh", "-c"]
+          args:
+            - sleep 86400
+#            - nova-api 
+#              --config-file
+#              /nova/nova.conf
+#              --config-dir
+#              /etc/nova
+
       volumes:
         - name: nova-api-config
           configMap:
@@ -43,6 +90,8 @@ spec:
         - name: lib-modules
           hostPath:
             path: /lib/modules
+        - name: nova-config
+          emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
 metadata:
