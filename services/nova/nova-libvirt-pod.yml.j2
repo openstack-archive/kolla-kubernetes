@@ -1,44 +1,41 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: nova-compute
+  name: nova-libvirt
   labels:
     component: nova
-    system: nova-compute
+    system: nova-libvirt
   namespace: default
 spec:
   template:
     metadata:
-      name: nova-compute
+      name: nova-libvirt
       labels:
         component: nova
-        system: nova-compute
+        system: nova-libvirt
       namespace: default
       annotations:
         pod.alpha.kubernetes.io/init-containers: '[
           {
-             "name": "initialize-nova-compute",
-             "image": "{{ nova_compute_image_full }}",
+             "name": "initialize-nova-libvirt",
+             "image": "{{ nova_libvirt_image_full }}",
              "command": [
                  "sh",
                  "-c",
-                 "mkdir -p /var/log/kolla/nova/;
-                  mkdir -p /var/lib/nova/instances;
-                  chown -R nova: /nova;
-                  chown -R nova: /var/log/kolla;
-                  chown -R nova: /var/lib/nova;
-                  cp -f {{ container_config_directory }}/nova.conf /nova/nova.conf;
+                 "chmod 660 /dev/kvm;
+                  chown root:kvm /dev/kvm;
+                  mkdir -p /var/log/kolla/libvirt;
+                  chmod 755 /var/log/kolla/libvirt;
+                  touch /var/log/kolla/libvirt/libvirtd.log;
+                  chmod 644 /var/log/kolla/libvirt/libvirtd.log;
+                  cp -f {{ container_config_directory }}/libvirtd.conf /nova/libvirtd.conf;
+                  cp -f {{ container_config_directory }}/qemu.conf /nova/qemu.conf;
                   ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
-                  sed -i ''s|^my_ip.*=.*|my_ip=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^novncproxy_host.*=.*|novncproxy_host=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^vncserver_listen.*=.*|vncserver_listen=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^vncserver_proxyclient_address.*=.*|vncserver_proxyclient_address=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^novncproxy_base_url.*=.*|novncproxy_base_url=http://''${ip%/*}'':6080/vnc_auto.html|g'' /nova/nova.conf;
-                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://''${ip%/*}''/system\"|g'' /nova/nova.conf;
+                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"''${ip%/*}''\"|g'' /nova/libvirtd.conf;
                   echo $(date) >> /var/log/kolla/nova-compute-init.log;" ],
              "volumeMounts": [
                 {
-                   "name": "nova-compute-config",
+                   "name": "nova-libvirt-config",
                    "mountPath": "{{ container_config_directory }}"
                 },
                 {
@@ -46,26 +43,29 @@ spec:
                    "mountPath": "/nova/"
                 },
                 {
-                   "name": "nova-compute-persistent-storage",
-                   "mountPath": "/var/lib/nova"
-                },
-                {
                    "name": "kolla-logs",
                    "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "nova-libvirt-persistent-storage",
+                   "mountPath": "/var/lib/libvirt/"
                 }
              ]
           }
         ]'
     spec:
       hostNetwork: True
+      hostPID: True
       containers:
-        - name: nova-compute
-          image: "{{ nova_compute_image_full }}"
+        - name: nova-libvirt
+          image: "{{ nova_libvirt_image_full }}"
           securityContext:
             privileged: true
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: nova-compute-config
+              name: nova-libvirt-config
+            - mountPath: /var/lib/libvirt
+              name: nova-libvirt-persistent-storage
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
             - mountPath: /etc/localtime
@@ -88,18 +88,21 @@ spec:
           command: ["sh", "-c"]
           args:
 #            - sleep 86400
-            - nova-compute
-              --config-file
-              /nova/nova.conf
-              --config-dir
-              /etc/nova
+            - /usr/sbin/libvirtd
+              --listen
+              --config
+              /nova/libvirtd.conf
+              --verbose
       volumes:
-        - name: nova-compute-config
-          configMap:
-            name: nova-compute-configmap
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova
+        - name: nova-libvirt-config
+          configMap:
+            name: nova-libvirt-configmap
+        - name: nova-libvirt-persistent-storage
+          hostPath:
+            path: /var/lib/libvirt
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
@@ -120,4 +123,4 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 metadata:
-   name: nova-compute
+   name: nova-libvirt
