@@ -10,20 +10,54 @@ spec:
       labels:
         service: nova
         type: scheduler
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-nova-scheduler",
+             "image": "{{ nova_scheduler_image_full }}",
+             "command": [
+                 "sh",
+                 "-c",
+                 "cp -a /config/..data/* /nova/;
+                  ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
+                  sed -i ''s|^my_ip.*=.*|my_ip=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^novncproxy_host.*=.*|novncproxy_host=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^vncserver_listen.*=.*|vncserver_listen=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^vncserver_proxyclient_address.*=.*|vncserver_proxyclient_address=''${ip%/*}''|g'' /nova/nova.conf;
+                  sed -i ''s|^novncproxy_base_url.*=.*|novncproxy_base_url=http://''${ip%/*}'':6080/vnc_auto.html|g'' /nova/nova.conf;
+                  sed -i ''s|^connection_uri.*=.*|connection_uri=qemu+tcp://''${ip%/*}''/system|g'' /nova/nova.conf;" ],
+             "volumeMounts": [
+                {
+                   "name": "nova-scheduler-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "nova-config",
+                   "mountPath": "/nova/"
+                }
+             ]
+          }
+        ]'
     spec:
       containers:
         - name: nova-scheduler
           image: "{{ nova_scheduler_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: nova-scheduler-config
+              name: nova-config
             - mountPath: /etc/localtime
               name: etc-localtime
+            - mountPath: /nova
+              name: nova-config
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+          securityContext:
+            privileged: true
+          command: ["sh", "-c"]
+          args:
       volumes:
         - name: nova-scheduler-config
           configMap:
@@ -34,6 +68,8 @@ spec:
         - name: lib-modules
           hostPath:
             path: /lib/modules
+        - name: nova-config
+          emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
 metadata:
