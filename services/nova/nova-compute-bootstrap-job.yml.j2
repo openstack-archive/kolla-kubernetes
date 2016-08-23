@@ -1,6 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 spec:
+  parallelism: 1
+  completions: 1
   template:
     metadata:
       name: nova-compute-generate
