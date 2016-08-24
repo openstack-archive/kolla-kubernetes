@@ -26,6 +26,8 @@ nova_api_replicas: "1"
 nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
 
+enable_openvswitch_tcp: "no"
+
 #################################
 # Kubernetes Cluster DNS setting
 #################################
