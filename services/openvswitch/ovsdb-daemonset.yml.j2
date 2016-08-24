@@ -43,7 +43,7 @@ spec:
       hostIPC: True
       containers:
         - image: "{{ openvswitch_db_image_full }}"
-          name: openvswitch-db-server
+          name: openvswitch-db
           securityContext:
             privileged: true
           env:

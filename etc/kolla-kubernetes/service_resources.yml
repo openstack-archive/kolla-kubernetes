@@ -223,7 +223,27 @@ kolla-kubernetes:
       - name: nova-conductor-pod
         template: services/nova/nova-control-conductor-pod.yml.j2
       - name: nova-scheduler-pod
-        template: services/nova/nova-control-scheduler-pod.yml.j2        
+        template: services/nova/nova-control-scheduler-pod.yml.j2
+  - name: openvswitch
+    pods:
+    - name: openvswitch-db
+      containers:
+      - name: openvswitch-db
+    - name: openvswitch-vswitchd
+      containers:
+      - name: openvswitch-vswitchd
+    resources:
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
+      - name: openvswitch-db
+        template: services/openvswitch/ovsdb-daemonset.yml.j2
+      - name: openvswitch-vswitchd
+        template: services/openvswitch/vswitchd-daemonset.yml.j2
   - name: neutron
     pods:
     - name: neutron-compute
