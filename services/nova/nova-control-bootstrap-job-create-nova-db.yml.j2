@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: nova-control-bootstrap-create-nova-db
+    spec:
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-nova-database-and-users
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost  -m mysql_db -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ nova_database_name }}'" &&
+              ansible localhost  -m mysql_db -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ nova_api_database_name }}'" &&
+              ansible localhost -m mysql_user -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ nova_database_name }}'
+               password='$NOVA_DATABASE_PASSWORD'
+               host='%'
+               priv='{{ nova_database_name }}.*:ALL'
+               append_privs='yes'" &&
+              ansible localhost -m mysql_user -a
+              "login_host=mariadb
+               login_port='{{ mariadb_port }}'
+               login_user='{{ database_user }}'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ nova_api_database_name }}'
+               password='$NOVA_API_DATABASE_PASSWORD'
+               host='%'
+               priv='{{ nova_api_database_name }}.*:ALL'
+               append_privs='yes'"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
+            - name: NOVA_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nova-database-password
+                  key: password
+            - name: NOVA_API_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nova-api-database-password
+                  key: password
+      volumes:
+        - name: nova-api-config
+          configMap:
+            name: nova-api-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: nova-control-bootstrap-create-nova-db

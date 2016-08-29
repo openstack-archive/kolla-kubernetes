@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: nova-control-database-upgrade
+    spec:
+      containers:
+        - image: "{{ nova_api_image_full }}"
+          name: nova-control-database-upgrade
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-api-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: nova-api-config
+          configMap:
+            name: nova-api-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
+metadata:
+  name: nova-control-databse-upgrade
