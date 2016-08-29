@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: busybox
+spec:
+  template:
+    metadata:
+      name: busybox
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - image: busybox
+          imagePullPolicy: IfNotPresent
+          name: busybox
+          command:
+            - nslookup
+            - kubernetes
