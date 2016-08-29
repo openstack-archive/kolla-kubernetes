@@ -20,11 +20,7 @@ spec:
                  "cp -a /config/..data/* /nova/;
                   IP=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   crudini --set /nova/nova.conf DEFAULT my_ip $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_host $IP;
-                  crudini --set /nova/nova.conf vnc vncserver_listen $IP;
-                  crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_base_url $IP;
-                  crudini --set /nova/nova.conf vnc connection_uri ''qemu+tcp://''$IP"],
+             "],
              "volumeMounts": [
                 {
                    "name": "nova-scheduler-config",
