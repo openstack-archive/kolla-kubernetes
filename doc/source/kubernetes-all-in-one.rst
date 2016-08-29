@@ -36,11 +36,11 @@ Execute the following commands to create an all-in-one Kubernetes setup::
    git clone https://github.com/kubernetes/kube-deploy
    ./kube-deploy/docker-multinode/master.sh
 
-Download kubectl::
+The ``setup-kubectl.sh`` script will pull the latest kubectl from git::
 
-   wget http://storage.googleapis.com/kubernetes-release/release/v1.2.4/bin/linux/amd64/kubectl
-   chmod 755 kubectl
-   PATH=$PATH:`pwd`
+  git clone https://github.com/openstack/kolla-kubernetes
+  cd kolla-kubernetes
+  ./tools/setup-kubectl.sh
 
 Try it out::
 
