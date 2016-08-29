@@ -11,10 +11,10 @@ Dependencies
 Component               Min Version  Max Version  Comment
 =====================   ===========  ===========  =========================
 Ansible                 2.00         none         On deployment host
-Docker                  1.10.0       < 1.11.0     On target nodes
+Docker                  1.12.0       none         On target nodes
 Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.8.0        none         On deployment host
-Kubernetes              1.2.4        none         On all hosts
+Kubernetes              1.3.0        none         On all hosts
 =====================   ===========  ===========  =========================
 
 .. NOTE:: Kolla (which provides the templating) is sensitive about the
@@ -188,13 +188,14 @@ are specific to kolla-kubernetes:
 ::
 
     # Kolla-kubernetes custom configuration
+    orchestration_engine: "KUBERNETES"
     api_interface_address: "0.0.0.0"
     memcached_servers: "memcached"
     keystone_database_address: "mariadb"
     keystone_admin_url: "http://keystone-admin:35357/v3"
     keystone_internal_url: "http://keystone-public:5000/v3"
     keystone_public_url: "http://keystone-public:5000/v3"
-
+    glance_registry_host: "glance"
 
 Then, generate the Kolla configuration files:
 
