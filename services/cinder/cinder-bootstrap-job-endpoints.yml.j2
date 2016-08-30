@@ -1,0 +1,210 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cinder-bootstrap-job-endpoints 
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cinder-bootstrap-job-endpoints
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinder-service-and-endpoint-admin
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinder
+               service_type=volume
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_admin_endpoint }}'
+               interface=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinder-service-and-endpoint-internal
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinder
+               service_type=volume
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_internal_endpoint }}'
+               interface=internal
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinder-service-and-endpoint-public
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinder
+               service_type=volume
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_public_endpoint }}'
+               interface=public
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinderv2-service-and-endpoint-admin
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinderv2
+               service_type=volumev2
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_admin_endpoint }}'
+               interface=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinderv2-service-and-endpoint-internal
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinderv2
+               service_type=volumev2
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_internal_endpoint }}'
+               interface=internal
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinderv2-service-and-endpoint-public
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_service -a
+              "service_name=cinderv2
+               service_type=volumev2
+               description='Openstack Image'
+               endpoint_region={{ openstack_region_name }}
+               url='{{ cinder_public_endpoint }}'
+               interface=public
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: creating-cinder-user-project-role
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m kolla_keystone_user -a
+              "project=service
+               user=cinder
+               password={{ cinder_keystone_password }}
+               role=admin
+               region_name={{ openstack_region_name }}
+               auth={{ '{{' }} openstack_cinder_auth {{ '}}' }}"
+               "-e" "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+        - name: cinder-api-config
+          configMap:
+            name: cinder-api-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
