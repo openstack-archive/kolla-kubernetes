@@ -24,7 +24,10 @@ spec:
                  "-c",
                  "cp -a /config/..data/* /nova/;
                   ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
-                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"''${ip%/*}''\"|g'' /nova/libvirtd.conf;"],
+{%- if enable_libvirt_tcp == "yes" %}
+                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"''${ip%/*}''\"|g'' /nova/libvirtd.conf;
+{%- endif %}
+             "],
              "volumeMounts": [
                 {
                    "name": "nova-libvirt-config",
@@ -40,6 +43,9 @@ spec:
     spec:
       hostNetwork: True
       hostPID: True
+{%- if enable_libvirt_tcp != "yes" %}
+      hostIPC: True
+{%- endif %}
       containers:
         - name: nova-libvirt
           image: "{{ nova_libvirt_image_full }}"
