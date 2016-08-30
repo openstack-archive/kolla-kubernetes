@@ -1,0 +1,41 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+   name: cinder-scheduler
+spec:
+  serviceName: "cinder-api"
+  replicas: {{ cinder_scheduler_replicas }}
+  template:
+    metadata:
+      labels:
+        service: cinder
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+    spec:
+      containers:
+        - name: cinder-scheduler
+          image: "{{ cinder_scheduler_image_full }}"
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: cinder-scheduler-configmap
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: cinder-scheduler-configmap
+          configMap:
+            name: cinder-scheduler-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
