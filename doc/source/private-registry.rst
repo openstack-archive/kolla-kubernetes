@@ -115,4 +115,3 @@ private docker registry.
     kubectl patch serviceaccount default -p '{"imagePullSecrets":[{"name":"private-docker-registry-secret"}]}'
 
 Now, your kubernetes cluster should have access to the private docker registry.
-

@@ -55,4 +55,3 @@ under ./doc/build/html.
     git checkout master
 
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
-

@@ -11,15 +11,15 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   contributing
-   installation
-   kubernetes-all-in-one
+   setup-host
+   kubernetes-setup/kubernetes-setup
    quickstart
-   multi-node
-   private-registry
-   readme
+   multinode
    usage
    labels
+   private-registry
+   service-security
+   contributing
 
 Kolla-Kubernetes Services
 =========================

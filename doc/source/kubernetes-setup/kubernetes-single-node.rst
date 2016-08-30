@@ -1,8 +1,8 @@
-.. kubernetes-all-in-one:
+.. kubernetes-single-node:
 
-=================================
-Kolla Kubernetes All In One Guide
-=================================
+============================
+Kubernetes Single Node Guide
+============================
 
 Single-node Kubernetes setup
 ============================
@@ -38,9 +38,7 @@ Execute the following commands to create an all-in-one Kubernetes setup::
 
 The ``setup-kubectl.sh`` script will pull the latest kubectl from git::
 
-  git clone https://github.com/openstack/kolla-kubernetes
-  cd kolla-kubernetes
-  ./tools/setup-kubectl.sh
+  ./kolla-kubernetes/tools/setup-kubectl.sh
 
 Try it out::
 
@@ -54,3 +52,9 @@ then DNS is up and running.
 
   kubectl create -f tools/test-dns.yml
   kubectl get jobs
+
+Moving to Multinode
+===================
+
+The same process for setting up all-in-one Kubernetes can be used for multinode.
+Follow the :doc:`quickstart-multinode` doc for more detail.
