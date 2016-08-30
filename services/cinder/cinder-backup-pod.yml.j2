@@ -1,0 +1,146 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: cinder-backup
+spec:
+  replicas: {{ cinder_backup_replicas }}
+  strategy:
+{% if cinder_backend_ceph == "yes" %}
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+{% else %}
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+{% endif %}
+  template:
+    metadata:
+      labels:
+        service: cinder
+        type: api
+      annotations:
+{% if cinder_backend_ceph == "yes" %}
+        kolla_upgrade: minor_rolling_safe
+{% endif %}
+#FIXME Once out of alpha, this should be converted to yaml.
+#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
+# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
+# other containers from directly accessing the service
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                   crudini --set /srv/pod-main-config/cinder-backup.conf DEFAULT bind_host 127.0.0.1;
+                   crudini --set /srv/pod-main-config/cinder-backup.conf DEFAULT bind_port 8080;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "cinder-backup-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          }
+      ]'
+    spec:
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
+      containers:
+        - name: haproxy
+          image: "{{ haproxy_image_full }}"
+          command:
+          - /bin/bash
+          - -c
+          - |
+            kolla_start;
+            touch /var/lib/kolla-kubernetes/event/shutdown;
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: {{ cinder_backup_port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+#NOTE this only works if you arn't doing a haproxy reconfigure too.
+#But shouldn't ever have to do that in a setup like this.
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  kill -USR1 $(</var/run/haproxy.pid);
+                  while true; do sleep 1000; done
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: cinder-haproxy-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          ports:
+            - containerPort: {{ cinder_backup_port }}
+              name: cinder-backup
+        - name: cinder-backup
+          image: "{{ cinder_backup_image_full }}"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+{% if cinder_backend_ceph != "yes" %}
+            - mountPath: /var/lib/cinder/
+              name: cinder-persistent-storage
+{% endif %}
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: cinder-backup-configmap
+          configMap:
+            name: cinder-backup-configmap
+        - name: cinder-haproxy-config
+          configMap:
+            name: cinder-backup-haproxy
+{% if cinder_backend_ceph != "yes" %}
+        - name: cinder-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
+{% endif %}
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
