@@ -1,0 +1,10 @@
+Code-Review+2: Ryan Hallisey <rhallise@redhat.com>
+Code-Review-1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Ryan Hallisey <rhallise@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 30 Aug 2016 21:19:52 +0000
+Reviewed-on: https://review.openstack.org/354199
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
