@@ -365,3 +365,49 @@ kolla-kubernetes:
       pod:
       - name: skydns-pod
         template: services/skydns/skydns-pod.yml.j2
+  - name: cinder
+    pods:
+    - name: cinder
+      containers:
+      - name: cinder-api
+      - name: cinder-scheduler
+      - name: cinder-backup
+    resources:
+      secret:
+      disk:
+      - name: cinder-disk
+        template: services/common/common-disk.sh.j2
+        vars:
+          size_in_gb: 10
+      pv:
+      - name: cinder-pv
+        template: services/common/common-pv.yml.j2
+        vars:
+          size_in_gb: 10
+      pvc:
+      - name: cinder-pvc
+        template: services/common/common-pvc.yml.j2
+        vars:
+          size_in_gb: 10
+      svc:
+      - name: cinder-api-service
+        template: services/cinder/cinder-api-service.yml.j2
+      bootstrap:
+      - name: cinder-bootstrap-job-create-db
+        template: services/cinder/cinder-bootstrap-job-create-db.yml.j2
+      - name: cinder-bootstrap-job-manage-db
+        template: services/cinder/cinder-bootstrap-job-manage-db.yml.j2
+      - name: cinder-bootstrap-job-endpoints
+        template: services/cinder/cinder-bootstrap-job-endpoints.yml.j2
+      pod:
+      - name: cinder-api-haproxy-configmap
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: cinder-api-haproxy
+          port_name: cinder_api_port
+      - name: cinder-api-pod
+        template: services/cinder/cinder-api-pod.yml.j2
+      - name: cinder-scheduler-pod
+        template: services/cinder/cinder-scheduler-pod.yml.j2
+      - name: cinder-backup-pod
+        template: services/cinder/cinder-backup-pod.yml.j2
