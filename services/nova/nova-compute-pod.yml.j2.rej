@@ -1,0 +1,12 @@
+--- services/nova/nova-compute-pod.yml.j2
++++ services/nova/nova-compute-pod.yml.j2
+@@ -27,7 +27,9 @@
+                   crudini --set /nova/nova.conf DEFAULT my_ip $IP;
+                   crudini --set /nova/nova.conf vnc vncserver_listen $IP;
+                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
++{%- if enable_libvirt_tcp == "yes" -%}
+                   crudini --set /nova/nova.conf vnc connection_uri ''qemu+tcp://''$IP;
++{%- endif -%}
+              "],
+              "volumeMounts": [
+                 {
