@@ -18,18 +18,18 @@ spec:
         pod.alpha.kubernetes.io/init-containers: '[
           {
              "name": "initialize-nova-compute",
-             "image": "{{ nova_compute_image_full }}",
+             "image": "{{ kolla_toolbox_image_full }}",
              "command": [
                  "sh",
                  "-c",
                  "cp -a /config/..data/* /nova/;
-                  ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
-                  sed -i ''s|^my_ip.*=.*|my_ip=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^novncproxy_host.*=.*|novncproxy_host=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^vncserver_listen.*=.*|vncserver_listen=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^vncserver_proxyclient_address.*=.*|vncserver_proxyclient_address=''${ip%/*}''|g'' /nova/nova.conf;
-                  sed -i ''s|^novncproxy_base_url.*=.*|novncproxy_base_url=http://''${ip%/*}'':6080/vnc_auto.html|g'' /nova/nova.conf;
-                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://''${ip%/*}''/system\"|g'' /nova/nova.conf;"],
+                  IP=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  crudini --set /nova/nova.conf DEFAULT my_ip $IP;
+                  crudini --set /nova/nova.conf vnc novncproxy_host $IP;
+                  crudini --set /nova/nova.conf vnc vncserver_listen $IP;
+                  crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
+                  crudini --set /nova/nova.conf vnc novncproxy_base_url $IP;
+                  crudini --set /nova/nova.conf vnc connection_uri ''qemu+tcp://''$IP"],
              "volumeMounts": [
                 {
                    "name": "nova-compute-config",
