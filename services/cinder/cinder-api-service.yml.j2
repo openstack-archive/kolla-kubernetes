@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+spec:
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
+  ports:
+    - port: {{ cinder_api_port }}
+      name: cinder-api
+  selector:
+    service: cinder
+    type: api
+metadata:
+   name: cinder-api
