@@ -55,8 +55,6 @@ spec:
               value: {{ config_strategy }}
           securityContext:
             privileged: true
-          command: ["sh", "-c"]
-          args:
       volumes:
         - name: nova-scheduler-config
           configMap:
