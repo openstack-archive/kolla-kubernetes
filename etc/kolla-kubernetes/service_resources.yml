@@ -216,10 +216,20 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: nova-service-compute
-        template: services/nova/nova-service-compute.yml.j2
-      - name: nova-service-metadata
-        template: services/nova/nova-service-metadata.yml.j2
+      - name: nova-api
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: nova_api_port
+          service: nova
+          type: api
+          name: nova-api
+      - name: nova-metadata
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: nova_metadata_port
+          service: nova
+          type: metadata
+          name: nova-metadata
       bootstrap:
       - name: nova-compute-bootstrap-job
         template: services/nova/nova-compute-bootstrap-job.yml.j2

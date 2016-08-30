@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ global[kolla_kubernetes.template.vars.port_name] }}
+      targetPort: {{ global[kolla_kubernetes.template.vars.port_name] }}
+      name: {{ kolla_kubernetes.template.vars.name }}
+{%- if global[kolla_kubernetes.template.vars.port_name + '_nodeport'] is defined %}
+      nodePort: {{ global[kolla_kubernetes.template.vars.port_name + '_nodeport'] }}
+  type: NodePort
+{%- else %}
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
+{%- endif %}
+  selector:
+    service: {{ kolla_kubernetes.template.vars.service }}
+    type: {{ kolla_kubernetes.template.vars.type }}
+metadata:
+   name: {{ kolla_kubernetes.template.vars.name }}
