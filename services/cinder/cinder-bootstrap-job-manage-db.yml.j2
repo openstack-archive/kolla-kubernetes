@@ -1,0 +1,53 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cinder-bootstrap-job-manage-db 
+  parallelism: 1
+  completions: 1
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cinder-bootstrap-job-manage-db
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - image: "{{ cinder_api_image_full }}"
+          name: cinder-api-config
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: cinder-api-config
+              readOnly: true
+#{% if cinder_backend_ceph != "yes" %}
+#            - mountPath: /var/lib/cinder/
+#              name: cinder-persistent-storage
+#{% endif %}
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+      volumes:
+        - name: cinder-api-config
+          configMap:
+            name: cinder-api-configmap
+#{% if cinder_backend_ceph != "yes" %}
+#        - name: cinder-persistent-storage
+#          persistentVolumeClaim:
+#            claimName: {{ resourceName }}
+#{% endif %}
+#        - name: dev
+#          hostPath:
+#            path: /dev
+#        - name: run
+#          hostPath:
+#            path: /run
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
