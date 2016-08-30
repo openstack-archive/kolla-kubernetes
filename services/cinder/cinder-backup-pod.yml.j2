@@ -1,0 +1,42 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: cinder-backup
+spec:
+  replicas: {{ cinder_backup_replicas }}
+  template:
+    metadata:
+      labels:
+        service: cinder
+        type: api
+      annotations:
+    spec:
+      containers:
+        - name: cinder-backup
+          image: "{{ cinder_backup_image_full }}"
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: cinder-backup-configmap
+          configMap:
+            name: cinder-backup-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}

@@ -25,7 +25,9 @@ neutron_control_replicas: "1"  # may be > 1
 nova_api_replicas: "1"
 nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
+cinder_api_replicas: "1"
 
+external_loadbalancer: "yes"
 enable_openvswitch_tcp: "no"
 
 #################################
@@ -125,3 +127,12 @@ openstack_nova_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ opens
 nova_admin_endpoint: "http://nova-api:{{ nova_api_port }}/v2/%(tenant_id)s"
 nova_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ nova_api_port }}/v2/%(tenant_id)s"
 nova_internal_endpoint: "http://nova-api:{{ nova_api_port }}/v2/%(tenant_id)s"
+
+########################
+# Cinder variables
+########################
+openstack_cinder_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ openstack_auth.username }}','password':'$KEYSTONE_ADMIN_PASSWORD','project_name':'{{ openstack_auth.project_name }}','domain_name':'default'}"
+cinder_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_api_port_nodeport: "30877"
