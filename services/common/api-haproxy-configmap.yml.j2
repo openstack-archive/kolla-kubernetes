@@ -28,7 +28,7 @@ data:
       timeout check 10s
 
     listen api
-      bind 0.0.0.0:{{ global[kolla_kubernetes.template.vars.port_name] }}
+      bind 0.0.0.0:{{ global[kolla_kubernetes.template.vars.port_name + 'internal'].default(global[kolla_kubernetes.template.vars.port_name]) }}
       server local-api 127.0.0.1:8080 check inter 2000 rise 2 fall 5
 
 {% if kolla_kubernetes.template.vars.configmap_name == 'nova-api' %}

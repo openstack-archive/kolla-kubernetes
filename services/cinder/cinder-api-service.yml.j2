@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+  - name: cinder-api
+    port: {{ cinder_api_port }}
+{% if external_loadbalancer == "yes" %}
+    nodePort: {{ cinder_api_port_internal }} 
+    targetPort: {{ cinder_api_port }} 
+  type: NodePort
+{% else %}
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
+{% endif %}
+  selector:
+    service: cinder
+    type: api
+metadata:
+   name: cinder-api
