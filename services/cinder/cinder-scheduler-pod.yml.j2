@@ -3,6 +3,7 @@ apiVersion: apps/v1alpha1
 kind: PetSet
 metadata:
    name: cinder-scheduler
+   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   serviceName: "cinder"
   replicas: {{ cinder_scheduler_replicas }}
