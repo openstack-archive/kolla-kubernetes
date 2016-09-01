@@ -3,6 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
    name: cinder-api
+   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   replicas: {{ cinder_api_replicas }}
   strategy:
