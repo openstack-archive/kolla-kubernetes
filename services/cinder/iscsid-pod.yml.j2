@@ -1,0 +1,98 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: iscsid 
+  labels:
+    component: iscsid
+    system: iscsid 
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: iscsid
+      labels:
+        component: iscsid
+        system: iscsid
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-iscsid",
+             "image": "{{ kolla_toolbox_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
+             "volumeMounts": [
+                {
+                   "name": "iscsid-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          kolla_compute: "true"
+      containers:
+        - image: {{ iscsid_image_full }}
+          name: iscsid 
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config 
+              readOnly: true
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /etc/iscsid
+              name: iscsid-info
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: iscsid-configmap
+          configMap:
+            name: iscsid-configmap
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: iscsid-info
+          hostPath:
+            path: /etc/iscsid
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
