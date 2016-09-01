@@ -1,0 +1,104 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: tgtd
+  labels:
+    component: tgtd
+    system: tgtd
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: tgtd
+      labels:
+        component: tgtd
+        system: tgtd
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-tgtd",
+             "image": "{{ kolla_toolbox_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  sed ''s/\( portal=\)[^ ]*/\10.0.0.0:3260\"/'' /srv/configmap/..data/config.json > /srv/pod-main-config/config.json; "],
+             "volumeMounts": [
+                {
+                   "name": "tgtd-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          kolla_storage: "true"
+      containers:
+        - image: "{{ tgtd_image_full }}"
+          name: tgtd
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+              readOnly: true
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/lib/cinder
+              name: cinder-volumes
+            - mountPath: /etc/iscsi
+              name: iscsi-info
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: tgtd-configmap
+          configMap:
+            name: tgtd-configmap
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: cinder-volumes
+          hostPath:
+            path: /var/lib/cinder
+        - name: iscsi-info
+          hostPath:
+            path: /etc/iscsi
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
