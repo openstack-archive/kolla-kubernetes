@@ -1,0 +1,85 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-openvswitch-agent 
+  labels:
+    component: neutron
+    system: neutron-openvswitch-agent 
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: neutron-openvswitch-agent
+      labels:
+        component: neutron
+        system: neutron-openvswitch-agent
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-neutron-openvswitch-agent",
+             "image": "192.168.80.240:4000/kollaglue/centos-source-neutron-openvswitch-agent:3.0.0",
+             "command": [
+                 "sh",
+                 "-c",
+                 "cp -a /config/..data/* /neutron/;
+                  ip=$(ip addr show dev eth0 | grep -G ''inet '' | awk ''{print $2}'');
+                  sed -i ''s|^ovsdb_connection.*=.*|ovsdb_connection=tcp:''${ip%/*}'':6640|g'' /neutron/ml2_conf.ini;
+                  sed -i ''s|^local_ip.*=.*|local_ip=''${ip%/*}''|g'' /neutron/ml2_conf.ini;"],
+             "volumeMounts": [
+                {
+                   "name": "neutron-openvswitch-agent-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "neutron-config",
+                   "mountPath": "/neutron/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          kolla_compute: "true"
+      containers:
+        - image: "192.168.80.240:4000/kollaglue/centos-source-neutron-openvswitch-agent:3.0.0"
+          name: neutron-openvswitch-agent
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+          volumeMounts:
+            - mountPath: /var/lib/kolla/config_files
+              name: neutron-config
+              readOnly: true
+            - mountPath: /var/run
+              name: host-run
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+      volumes:
+        - name: neutron-openvswitch-agent-config
+          configMap:
+            name: neutron-openvswitch-agent-configmap
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+        - name: neutron-config
+          emptyDir: {}
+        - name: host-run 
+          hostPath:
+            path: /var/run
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
