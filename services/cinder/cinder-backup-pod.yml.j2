@@ -1,0 +1,83 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+   name: cinder-backup
+spec:
+  serviceName: "cinder-backup"
+  replicas: {{ cinder_backup_replicas }}
+  template:
+    metadata:
+      labels:
+        service: cinder-backup
+        type: backup
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-cinder-volume",
+             "image": "{{ kolla_toolbox_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
+             "volumeMounts": [
+                {
+                   "name": "cinder-backup-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          },
+          {
+             "name": "initialize-cinder-logs",
+             "image": "{{ cinder_backup_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "mkdir /var/log/kolla/cinder ;
+                  chown -R cinder: /var/log/kolla/cinder "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          }
+        ]'
+
+    spec:
+      nodeSelector:
+          kolla_storage: "true"
+      containers:
+        - name: cinder-backup
+          image: "{{ cinder_backup_image_full }}"
+          volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: cinder-backup-configmap
+          configMap:
+            name: cinder-backup-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
