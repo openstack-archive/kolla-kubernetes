@@ -381,23 +381,15 @@ kolla-kubernetes:
       containers:
       - name: cinder-api
       - name: cinder-scheduler
+      - name: cinder-backup
+      - name: cinder-volume
+      - name: tgtd
+      - name: iscsid
     resources:
       secret:
       disk:
-      - name: cinder-disk
-        template: services/common/common-disk.sh.j2
-        vars:
-          size_in_gb: 10
       pv:
-      - name: cinder-pv
-        template: services/common/common-pv.yml.j2
-        vars:
-          size_in_gb: 10
       pvc:
-      - name: cinder-pvc
-        template: services/common/common-pvc.yml.j2
-        vars:
-          size_in_gb: 10
       svc:
       - name: cinder-api-service
         template: services/common/generic-service.yml.j2
@@ -423,3 +415,11 @@ kolla-kubernetes:
         template: services/cinder/cinder-api-pod.yml.j2
       - name: cinder-scheduler-pod
         template: services/cinder/cinder-scheduler-pod.yml.j2
+      - name: cinder-backup-pod
+        template: services/cinder/cinder-backup-pod.yml.j2
+      - name: cinder-volume-pod
+        template: services/cinder/cinder-volume-pod.yml.j2
+      - name: tgtd-pod
+        template: services/cinder/tgtd-pod.yml.j2
+      - name: iscsid-pod
+        template: services/cinder/iscsid-pod.yml.j2
