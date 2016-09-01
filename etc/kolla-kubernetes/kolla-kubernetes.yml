@@ -137,3 +137,7 @@ cinder_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s
 cinder_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_api_port_nodeport: "30877"
+enabled_backend: "lvm-1"
+volume_group_name: "cinder-volumes"
+volume_backend_name: "lvm-1"
+

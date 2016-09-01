@@ -1,0 +1,122 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: cinder-volume 
+  labels:
+    component: cinder-volume
+    system: cinder-volume 
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: cinder-volume
+      labels:
+        component: cinder-volume
+        system: cinder-volume
+      namespace: default
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-cinder-volume",
+             "image": "192.168.80.240:4000/kolla/centos-source-kolla-toolbox:3.0.0",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  crudini --set /srv/pod-main-config/cinder.conf DEFAULT enabled_backends {{ enabled_backend }} ;
+                  crudini --set /srv/pod-main-config/cinder.conf {{ enabled_backend }} volume_group {{ volume_group_name }}; 
+                  crudini --set /srv/pod-main-config/cinder.conf {{ enabled_backend }} volume_backend_name {{ volume_backend_name }};
+                  ip=$(ip addr show dev eth0 | grep -G ''inet '' | awk ''{print $2}'');
+                  crudini --set /srv/pod-main-config/cinder.conf lvm-1 iscsi_ip_address ${ip%/*}; "],
+             "volumeMounts": [
+                {
+                   "name": "cinder-volume-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          },
+          {
+             "name": "initialize-cinder-logs",
+             "image": "192.168.80.240:4000/kolla/centos-source-cinder-volume:3.0.0",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "mkdir /var/log/kolla/cinder ;
+                  chown -R cinder: /var/log/kolla/cinder "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          kolla_storage: "true"
+      containers:
+        - image: "192.168.80.240:4000/kolla/centos-source-cinder-volume:3.0.0"
+          name: cinder-volume 
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config 
+              readOnly: true
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+#            - mountPath: /sys/fs/cgroup
+#              name: sys-fs-cgroup
+            - mountPath: /var/lib/cinder
+              name: cinder-volumes
+            - mountPath: /etc/iscsi
+              name: iscsi-info
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+      volumes:
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: cinder-volume-configmap
+          configMap:
+            name: cinder-volume-configmap
+#        - name: lib-modules
+#          hostPath:
+#            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+#        - name: sys-fs-cgroup
+#          hostPath:
+#            path: /sys/fs/cgroup
+        - name: cinder-volumes 
+          hostPath:
+            path: /var/lib/cinder
+        - name: iscsi-info
+          hostPath:
+            path: /etc/iscsi
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
