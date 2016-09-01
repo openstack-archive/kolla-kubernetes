@@ -48,7 +48,7 @@ for element in passwords:
         service_name = element.replace('_', '-')
         password_value = passwords[element]
         if command == "create":
-            command_line = 'kubectl create secret generic {} {} {}'.format(
+            command_line = 'kubectl create secret generic {} {}{}'.format(
                            service_name,
                            " --from-literal=password=",
                            password_value)
