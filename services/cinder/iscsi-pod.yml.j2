@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: iscsi 
+  labels:
+    component: iscsi
+    system: iscsi
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: iscsi
+      labels:
+        component: neutron
+        system: iscsi
+      namespace: default
+      annotations:
+#        pod.alpha.kubernetes.io/init-containers: '[
+#          {
+#             "name": "initialize-iscsi",
+#             "image": "192.168.80.240:4000/kollaglue/centos-source-iscsi:3.0.0",
+#             "command": [
+#                 "sh",
+#                 "-c",
+#                 "cp -a /config/..data/* /neutron/;
+#                  ip=$(ip addr show dev eth0 | grep -G ''inet '' | awk ''{print $2}'');
+#                  sed -i ''s|^ovsdb_connection.*=.*|ovsdb_connection=tcp:''${ip%/*}'':6640|g'' /neutron/ml2_conf.ini;
+#                  sed -i ''s|^local_ip.*=.*|local_ip=''${ip%/*}''|g'' /neutron/ml2_conf.ini;"],
+#             "volumeMounts": [
+#                {
+#                   "name": "iscsi-config",
+#                   "mountPath": "/config/"
+#                },
+#                {
+#                   "name": "neutron-config",
+#                   "mountPath": "/neutron/"
+#                }
+#             ]
+#          }
+#        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          kolla_compute: "true"
+      containers:
+        - image: "192.168.80.240:4000/kollaglue/centos-source-iscsi:3.0.0"
+          name: iscsi
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+          volumeMounts:
+            - mountPath: /var/lib/kolla/config_files
+              name: neutron-config
+              readOnly: true
+            - mountPath: /var/run
+              name: host-run
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+      volumes:
+        - name: iscsi-config
+          configMap:
+            name: iscsi-configmap
+        - name: main-pod-config
+          emptyDir: {}
+        - name: host-run 
+          hostPath:
+            path: /var/run
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
