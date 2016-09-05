@@ -12,6 +12,29 @@
 # into kolla kubernetes cluster, needs to be changed by the operator.
 kolla_kubernetes_external_vip: "10.57.120.254"
 
+##############################
+# Kolla Kubernetes labels
+##############################
+# Labels can be overwridden like so
+#kolla_kubernetes_hostlabel_specific_thing:
+#  key: kolla_other
+#  value: v1
+
+# To split your network nodes of from
+# the controllers, do something like
+# this:
+#kolla_kubernetes_hostlabel_network:
+#  key: kolla_network
+#  value: v1
+
+kolla_kubernetes_hostlabel_controller:
+  key: kolla_controller
+  value: v1
+
+kolla_kubernetes_hostlabel_compute:
+  key: kolla_compute
+  value: v1
+
 ########################
 # Kubernetes Cluster
 ########################
