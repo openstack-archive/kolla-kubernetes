@@ -233,8 +233,12 @@ kolla-kubernetes:
       bootstrap:
       - name: nova-compute-bootstrap-job
         template: services/nova/nova-compute-bootstrap-job.yml.j2
-      - name: nova-control-bootstrap-job
-        template: services/nova/nova-control-bootstrap-job.yml.j2
+      - name: create-api-db
+        template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
+      - name: create-endpoints
+        template: services/nova/nova-control-bootstrap-job-create-nova-endpoints.yml.j2
+      - name: create-db
+        template: services/nova/nova-control-bootstrap-job-create-nova-db.yml.j2
       pod:
       - name: nova-compute-pod
         template: services/nova/nova-compute-pod.yml.j2
