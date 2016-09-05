@@ -118,7 +118,7 @@ class ResourceTemplate(Resource):
         )
         return parser
 
-    def take_action(self, args):
+    def take_action(self, args, skip_and_return=False):
         # Validate input arguments
         self.validate_args(args)
         if args.resource_type == 'configmap':
@@ -142,9 +142,14 @@ class ResourceTemplate(Resource):
             print(YamlUtils.yaml_dict_to_string(variables), file=sys.stderr)
 
         # process the template
-        print(JinjaUtils.render_jinja(
+        res = JinjaUtils.render_jinja(
             variables,
-            FileUtils.read_string_from_file(rt.getTemplatePath())))
+            FileUtils.read_string_from_file(rt.getTemplatePath()))
+
+        if skip_and_return:
+            return res
+
+        print(res)
 
 
 class ResourceMap(KollaKubernetesBaseCommand):
