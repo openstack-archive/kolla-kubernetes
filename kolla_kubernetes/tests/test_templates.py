@@ -128,6 +128,11 @@ technical_debt = {
         ['pod', 'nova', 'nova-compute-pod'],
         ['pod', 'openvswitch', 'openvswitch-db'],
         ['pod', 'openvswitch', 'openvswitch-vswitchd']
+    ],
+    'namespaceHardCoded': [
+        ['pod', 'openvswitch', 'openvswitch-db'],
+        ['pod', 'openvswitch', 'openvswitch-vswitchd'],
+        ['pod', 'skydns', 'skydns-pod']
     ]
 }
 
@@ -199,6 +204,10 @@ class TestTemplatesTest(base.BaseTestCase):
                    kind != 'PersistentVolume' and \
                    unknown_technical_debt(args, 'namespaceNotFound'):
                     raise("namespace not found but required.")
+                if 'namespace' in y['metadata'] and \
+                   y['metadata']['namespace'] != 'not_real_namespace' and \
+                   unknown_technical_debt(args, 'namespaceHardCoded'):
+                    raise("namespace is hardcoded.")
                 if kind in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
                             'ReplicationController', 'Pod'):
                     pod = y
