@@ -91,6 +91,9 @@ class KollaKubernetesResources(object):
         # Add a self referential link so templates can look up things by name.
         r['global'] = r
 
+        if os.environ.get('KOLLA_KUBERNETES_TOX', None):
+            r['kolla_kubernetes_namespace'] = 'not_real_namespace'
+
         # Update the cache
         KollaKubernetesResources._jinja_dict_cache[cache_key] = r
         return r
@@ -330,8 +333,10 @@ class Container(object):
     def _ensureConfigMaps(self, action):
         assert action in Service.VALID_ACTIONS
 
-        cmd = ("kubectl {} configmap {}-configmap".format(
-            action, self.getName()))
+        nsname = 'kolla_kubernetes_namespace'
+        cmd = ("kubectl {} configmap {}-configmap --namespace={}".format(
+            action, self.getName(),
+            KollaKubernetesResources.GetJinjaDict()[nsname]))
 
         # For the create action, add some more arguments
         if action == 'create':

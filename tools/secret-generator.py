@@ -16,6 +16,8 @@ import subprocess
 import sys
 import yaml
 
+from kolla_kubernetes.service_resources import KollaKubernetesResources
+
 
 def usage():
     print("secret-generator.py requires one of these two commands: \
@@ -47,14 +49,18 @@ for element in passwords:
     if isinstance(passwords[element], basestring):
         service_name = element.replace('_', '-')
         password_value = passwords[element]
+        nsname = 'kolla_kubernetes_namespace'
+        nsname = KollaKubernetesResources.GetJinjaDict()[nsname]
         if command == "create":
-            command_line = 'kubectl create secret generic {} {}{}'.format(
+            command_line = 'kubectl create secret generic {} {}{} {}{}'.format(
                            service_name,
                            " --from-literal=password=",
-                           password_value)
+                           password_value,
+                           "--namespace=",
+                           nsname)
         else:
-            command_line = "kubectl delete secret {} ".format(
-                           service_name)
+            command_line = "kubectl delete secret {} --namespace={}".format(
+                           service_name, nsname)
         try:
             res = subprocess.check_output(
                 command_line, shell=True,
