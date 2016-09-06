@@ -225,6 +225,15 @@ The brief summary for horizon kolla dependencies is as follows::
 Generating Kubernetes Secrets
 =============================
 
+Create the kubernetes namespace. By default it is 'kolla'.
+
+::
+    kubectl create namespace 'kolla'
+
+
+Generating Kubernetes Secrets
+=============================
+
 Secret for each service must be generated before attempting to bootstrap
 any services. PS https://review.openstack.org/#/c/354199/
 provides a script which can be used to generate or to remove Secrets.
