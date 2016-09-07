@@ -11,7 +11,10 @@
 # limitations under the License.
 
 from __future__ import print_function
+import tempfile
+import subprocess
 import sys
+import yaml
 
 from oslo_log import log
 
@@ -26,20 +29,15 @@ LOG = log.getLogger(__name__)
 KKR = KollaKubernetesResources.Get()
 
 
-class Resource(KollaKubernetesBaseCommand):
+class ResourceBase(KollaKubernetesBaseCommand):
     """Create, delete, or query status for kolla-kubernetes resources"""
 
     def get_parser(self, prog_name):
-        parser = super(Resource, self).get_parser(prog_name)
+        parser = super(ResourceBase, self).get_parser(prog_name)
         parser.add_argument(
             "action",
             metavar="<action>",
             help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
-        )
-        parser.add_argument(
-            "service_name",
-            metavar="<service-name>",
-            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
         )
         parser.add_argument(
             "resource_type",
@@ -48,21 +46,11 @@ class Resource(KollaKubernetesBaseCommand):
         )
         return parser
 
-    def take_action(self, args):
-        self.validate_args(args)
-        service = KKR.getServiceByName(args.service_name)
-        service.do_apply(args.action, args.resource_type)
-
     def validate_args(self, args):
         if args.action not in Service.VALID_ACTIONS:
             msg = ("action [{}] not in valid actions [{}]".format(
                 args.action,
                 "|".join(Service.VALID_ACTIONS)))
-            raise Exception(msg)
-        if args.service_name not in KKR.getServices().keys():
-            msg = ("service_name [{}] not in valid service_names [{}]".format(
-                args.service_name,
-                "|".join(KKR.getServices().keys())))
             raise Exception(msg)
         if args.resource_type not in Service.VALID_RESOURCE_TYPES:
             msg = ("resource_type [{}] not in valid resource_types [{}]"
@@ -70,16 +58,8 @@ class Resource(KollaKubernetesBaseCommand):
                            "|".join(Service.VALID_RESOURCE_TYPES)))
             raise Exception(msg)
 
-        service = KKR.getServiceByName(args.service_name)
-        if (args.resource_type != 'configmap') and (
-            len(service.getResourceTemplatesByType(args.resource_type)) == 0):
-            msg = ("service_name [{}] has no resource"
-                   " files defined for type [{}]".format(
-                       args.service_name, args.resource_type))
-            raise Exception(msg)
 
-
-class ResourceTemplate(Resource):
+class ResourceTemplate(ResourceBase):
     """Jinja process kolla-kubernetes resource template files"""
 
     # This command adds the CLI params as part of the Jinja vars for processing
@@ -125,12 +105,13 @@ class ResourceTemplate(Resource):
             msg = ("resource-template subcommand for resource-type {} "
                    "is not yet supported".format(args.resource_type))
             raise Exception(msg)
-
-        service = KKR.getServiceByName(args.service_name)
+        service_name = KKR.getServiceNameByResourceTypeName(args.resource_type,
+                                                            args.resource_name)
+        service = KKR.getServiceByName(service_name)
         rt = service.getResourceTemplateByTypeAndName(
             args.resource_type, args.resource_name)
 
-        variables = KKR.GetJinjaDict(service.getName(), vars(args),
+        variables = KKR.GetJinjaDict(service_name, vars(args),
                                      args.print_jinja_keys_regex)
 
         # Merge the template vars with the jinja vars before processing
@@ -150,6 +131,55 @@ class ResourceTemplate(Resource):
             return res
 
         print(res)
+
+
+class Resource(ResourceTemplate):
+    """Create kolla-kubernetes resources"""
+
+    def validate_args(self, args):
+        t = super(Resource, self).validate_args(args)
+        if args.action not in ['create', 'delete', 'status']:
+            msg = ("action [{}] currently not supported".format(
+                args.action))
+            raise Exception(msg)
+
+    def take_action(self, args):
+        t = super(Resource, self).take_action(args,
+                                                      skip_and_return=True)
+        y = yaml.load(t)
+        kind = y['kind']
+        # FIXME for delete or status, we need to know the resource type out of
+        # the template to query with.
+        if args.action == 'create':
+            with tempfile.NamedTemporaryFile() as tf:
+                tf.write(t)
+                tf.flush()
+                subprocess.call("kubectl %s -f %s" %(args.action, tf.name),
+                                shell=True)
+                tf.close()
+        else:
+            kind_map = {
+                'PetSet': 'petset',
+                'Pod': 'pod',
+                'ReplicationController': 'rc',
+                'DaemonSet': 'daemonset',
+                'Job': 'job',
+                'Deployment': 'deployment',
+            }
+            if kind not in kind_map:
+                msg = ("unknown template kind [{}].".format(
+            	kind))
+                raise Exception(msg)
+            if args.action == "delete":
+                subprocess.call("kubectl delete %s %s" \
+                                % (kind_map[kind],
+                                   y['metadata']['name']),
+                                shell=True)
+            elif args.action == 'status':
+                subprocess.call("kubectl get %s %s -o yaml" \
+                                % (kind_map[kind],
+                                   y['metadata']['name']),
+                                shell=True)
 
 
 class ResourceMap(KollaKubernetesBaseCommand):

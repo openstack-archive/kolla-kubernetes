@@ -103,8 +103,15 @@ class KollaKubernetesResources(object):
         self.filename = filename
         self.y = YamlUtils.yaml_dict_from_file(filename)
         self.services = collections.OrderedDict()
+        self.rtn2sn = {}
         for i in self.y['kolla-kubernetes']['services']:
             self.services[i['name']] = Service(i)
+            for (key, value) in i['resources'].iteritems():
+                t = self.rtn2sn.get(key)
+                if t is None:
+                    self.rtn2sn[key] = t = {}
+                for j in value:
+                    t[j['name']] = i['name']
 
     def getServices(self):
         return self.services
@@ -115,6 +122,17 @@ class KollaKubernetesResources(object):
             print("unable to find service={}", name)
             sys.exit(1)
         return r[name]
+
+    def getServiceNameByResourceTypeName(self, resource_type, resource_name):
+        t = self.rtn2sn.get(resource_type)
+        if t is None:
+            print("unable to find resource_type={}", resource_type)
+            sys.exit(1)
+        service_name = t.get(resource_name)
+        if service_name is None:
+            print("unable to find resource_name={}", resource_name)
+            sys.exit(1)
+        return service_name
 
     def __str__(self):
         s = self.__class__.__name__
@@ -268,8 +286,8 @@ class Service(object):
         for resourceTemplate in resourceTemplates:
             # Build the command based on if shell script or not. If
             # shell script, pipe to sh.  Else, pipe to kubectl
-            cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
-                action, self.getName(), resource_type,
+            cmd = "kolla-kubernetes resource-template {} {} {}".format(
+                action, resource_type,
                 resourceTemplate.getName())
             if resourceTemplate.getTemplatePath().endswith('.sh.j2'):
                 cmd += " | sh"
