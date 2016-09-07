@@ -77,6 +77,11 @@ class TestTemplatesTest(base.BaseTestCase):
                             % template_name
                         raise Exception(s)
                     tnprt[template_name] = True
+                    if not template_name.startswith("%s-" % service_name) and \
+                       template_name != service_name:
+                        m = "%s doesn't start with %s-" % (template_name,
+                                                           service_name)
+                        raise Exception(m)
 
     def test_validate_templates(self):
         def func(argobj, o):
