@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: keystone-bootstrap
+  namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
     metadata:
