@@ -25,7 +25,6 @@ technical_debt = {
         ['pod', 'openvswitch', 'openvswitch-db'],
         ['pod', 'openvswitch', 'openvswitch-vswitchd'],
         ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
-        ['bootstrap', 'glance', 'glance-bootstrap-job'],
         ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
         ['pod', 'neutron', 'neutron-control-pod'],
         ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
@@ -111,6 +110,11 @@ class TestTemplatesTest(base.BaseTestCase):
                             % template_name
                         raise Exception(s)
                     tnprt[template_name] = True
+                    if not template_name.startswith("%s-" % service_name) and \
+                       template_name != service_name:
+                        m = "%s doesn't start with %s-" % (template_name,
+                                                           service_name)
+                        raise Exception(m)
 
     def test_validate_templates(self):
         WERROR = True
