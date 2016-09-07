@@ -37,14 +37,14 @@ class Resource(KollaKubernetesBaseCommand):
             help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
         )
         parser.add_argument(
-            "service_name",
-            metavar="<service-name>",
-            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
-        )
-        parser.add_argument(
             "resource_type",
             metavar="<resource-type>",
             help=("One of [%s]" % ("|".join(Service.VALID_RESOURCE_TYPES)))
+        )
+        parser.add_argument(
+            "service_name",
+            metavar="<service-name>",
+            help=("One of [%s]" % ("|".join(KKR.getServices().keys())))
         )
         return parser
 
