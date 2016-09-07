@@ -5,7 +5,7 @@ metadata:
   labels:
     component: openvswitch
     system: openvswitch-vswitchd
-  namespace: default
+  namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
     metadata:
@@ -13,7 +13,6 @@ spec:
       labels:
         component: openvswitch
         system: openvswitch-vswitchd
-      namespace: default
       annotations:
         pod.alpha.kubernetes.io/init-containers: '[
           {

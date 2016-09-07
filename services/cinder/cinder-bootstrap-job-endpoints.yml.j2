@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: cinder-bootstrap-job-endpoints
+  namespace: {{ kolla_kubernetes_namespace }}
 spec:
   parallelism: 1
   completions: 1
