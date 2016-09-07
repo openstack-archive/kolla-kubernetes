@@ -42,22 +42,22 @@ kolla-kubernetes:
     resources:
       secret:
       disk:
-      - name: mariadb-disk
+      - name: mariadb
         template: services/common/common-disk.sh.j2
         vars:
           size_in_gb: 10
       pv:
-      - name: mariadb-pv
+      - name: mariadb
         template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
-      - name: mariadb-pvc
+      - name: mariadb
         template: services/common/common-pvc.yml.j2
         vars:
           size_in_gb: 10
       svc:
-      - name: mariadb-service
+      - name: mariadb
         template: services/mariadb/mariadb-service.yml.j2
       bootstrap:
       - name: mariadb-bootstrap-job

@@ -269,7 +269,7 @@ class Service(object):
             # Build the command based on if shell script or not. If
             # shell script, pipe to sh.  Else, pipe to kubectl
             cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
-                action, self.getName(), resource_type,
+                action, resource_type, self.getName(),
                 resourceTemplate.getName())
             if resourceTemplate.getTemplatePath().endswith('.sh.j2'):
                 cmd += " | sh"
