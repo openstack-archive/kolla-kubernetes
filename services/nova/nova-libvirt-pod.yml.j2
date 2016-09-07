@@ -5,7 +5,7 @@ metadata:
   labels:
     component: nova
     system: nova-libvirt
-  namespace: default
+  namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
     metadata:
@@ -13,7 +13,6 @@ spec:
       labels:
         component: nova
         system: nova-libvirt
-      namespace: default
       annotations:
         pod.alpha.kubernetes.io/init-containers: '[
           {
@@ -104,5 +103,3 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
-metadata:
-   name: nova-libvirt

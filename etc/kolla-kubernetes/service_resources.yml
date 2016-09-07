@@ -178,9 +178,19 @@ kolla-kubernetes:
           size_in_gb: 10
       svc:
       - name: glance-api-service
-        template: services/glance/glance-api-service.yml.j2
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: glance_api_port
+          service: glance
+          type: api
+          name: glance-api
       - name: glance-registry-service
-        template: services/glance/glance-registry-service.yml.j2
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: glance_registry_port
+          service: glance
+          type: registry
+          name: glance-registry
       bootstrap:
       - name: glance-bootstrap-job
         template: services/glance/glance-bootstrap-job.yml.j2
