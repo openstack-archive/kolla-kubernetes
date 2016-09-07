@@ -53,6 +53,31 @@ def on_each_template(func):
 
 class TestTemplatesTest(base.BaseTestCase):
 
+    def test_validate_names(self):
+        service_names = {}
+        template_names = {}
+        for service_name in KKR.getServices():
+            service_names[service_name] = True
+            service = KKR.getServiceByName(service_name)
+            for resource_type in RESOURCE_TYPES:
+                tnprt = template_names.get(resource_type)
+                if tnprt == None:
+                    template_names[resource_type] = tnprt = {}
+                templates = service.getResourceTemplatesByType(resource_type)
+                for template in templates:
+                    template_name = template.getName()
+                    if service_names.get(template_name, False) and \
+                        len(templates) != 1:
+                        s = "Resource name %s matches service name and" \
+                            " there are more then one resource." \
+                              %template_name
+                        raise Exception(s)
+                    if tnprt.get(template_name, False):
+                        s = "Resource name %s matches another template name" \
+                            %template_name
+                        raise Exception(s)
+                    tnprt[template_name] = True
+
     def test_validate_templates(self):
         def func(argobj, o):
             # Check if template is yaml

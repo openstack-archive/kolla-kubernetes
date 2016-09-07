@@ -141,7 +141,7 @@ class KubeResourceTemplateStatus(object):
 
         # Build the templating command
         cmd = "kolla-kubernetes resource-template {} {} {} {}".format(
-            'create', self.service_obj.getName(), self.resource_type,
+            'create', self.resource_type, self.service_obj.getName(),
             self.resource_template_obj.getName())
 
         # Execute the command to get the processed template output
