@@ -55,6 +55,8 @@ nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
 cinder_api_replicas: "1"
 cinder_scheduler_replicas: "1"
+nova_consoleauth_replicas: "1"
+nova_novncproxy_replicas: "1"
 
 enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
@@ -65,7 +67,6 @@ enable_libvirt_tcp: "no"
 dns_replicas: "1"
 #dns_server_ip: ""
 dns_domain_name: "openstack.kolla"
-
 ########################
 # Persistent Storage
 ########################
@@ -156,6 +157,8 @@ openstack_nova_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ opens
 nova_admin_endpoint: "http://nova-api:{{ nova_api_port }}/v2/%(tenant_id)s"
 nova_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ nova_api_port }}/v2/%(tenant_id)s"
 nova_internal_endpoint: "http://nova-api:{{ nova_api_port }}/v2/%(tenant_id)s"
+novncproxy_base_url: "{{ public_protocol }}://{{ kolla_kubernetes_external_vip }}:{{ nova_novncproxy_port }}/vnc_auto.html"
+
 
 ########################
 # Cinder variables
