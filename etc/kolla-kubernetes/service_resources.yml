@@ -192,8 +192,12 @@ kolla-kubernetes:
           type: registry
           name: glance-registry
       bootstrap:
-      - name: glance-bootstrap-job
-        template: services/glance/glance-bootstrap-job.yml.j2
+      - name: glance-bootstrap-job-create-db
+        template: services/glance/glance-bootstrap-job-create-db.yml.j2
+      - name: glance-bootstrap-job-manage-db
+        template: services/glance/glance-bootstrap-job-manage-db.yml.j2
+      - name: glance-bootstrap-job-endpoints
+        template: services/glance/glance-bootstrap-job-endpoints.yml.j2
       pod:
       - name: glance-api-haproxy-configmap
         template: services/common/api-haproxy-configmap.yml.j2

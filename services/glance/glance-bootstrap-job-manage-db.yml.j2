@@ -1,0 +1,48 @@
+{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-bootstrap
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: glance-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - image: "{{ glance_api_image_full }}"
+          name: glance-api-config
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: glance-api-config
+              readOnly: true
+{% if glance_backend_ceph != "yes" %}
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+{% endif %}
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+      volumes:
+        - name: glance-api-config
+          configMap:
+            name: glance-api-configmap
+{% if glance_backend_ceph != "yes" %}
+        - name: glance-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ resourceName }}
+{% endif %}
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}

@@ -5,92 +5,14 @@ metadata:
   name: glance-bootstrap
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
+  parallelism: 1
+  completions: 1
   template:
     metadata:
       name: glance-bootstrap
     spec:
       restartPolicy: OnFailure
       containers:
-        - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-glance-database
-          command: ["sh", "-c"]
-          args:
-            - ansible localhost -m mysql_db -a
-              "login_host=mariadb
-               login_port='{{ mariadb_port }}'
-               login_user='{{ database_user }}'
-               login_password='$DATABASE_PASSWORD'
-               name='{{ glance_database_name }}'"
-          volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-          env:
-            - name: ANSIBLE_NOCOLOR
-              value: "1"
-            - name: ANSIBLE_LIBRARY
-              value: "/usr/share/ansible"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: database-password
-                  key: password
-        - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-glance-user-and-permissions
-          command: ["sh", "-c"]
-          args:
-            - ansible localhost -m mysql_user -a
-              "login_host=mariadb
-               login_port='{{ mariadb_port }}'
-               login_user='{{ database_user }}'
-               login_password='$DATABASE_PASSWORD'
-               name='{{ glance_database_name }}'
-               password='$GLANCE_DATABASE_PASSWORD'
-               host='%'
-               priv='{{ glance_database_name }}.*:ALL'
-               append_privs='yes'"
-          volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-          env:
-            - name: ANSIBLE_NOCOLOR
-              value: "1"
-            - name: ANSIBLE_LIBRARY
-              value: "/usr/share/ansible"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: database-password
-                  key: password
-            - name: GLANCE_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: glance-database-password
-                  key: password
-        - image: "{{ glance_api_image_full }}"
-          name: glance-api-config
-          env:
-            - name: KOLLA_BOOTSTRAP
-              value: ""
-            - name: KOLLA_CONFIG_STRATEGY
-              value: "{{ config_strategy }}"
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: glance-api-config
-              readOnly: true
-{% if glance_backend_ceph != "yes" %}
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
-{% endif %}
-            - mountPath: /var/log/kolla
-              name: kolla-logs
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-glance-service-and-endpoint-admin
           command: ["sh", "-c"]
@@ -106,12 +28,10 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -137,12 +57,10 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -168,12 +86,10 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -197,12 +113,10 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -214,22 +128,8 @@ spec:
                   name: keystone-admin-password
                   key: password
       volumes:
-        - name: glance-api-config
-          configMap:
-            name: glance-api-configmap
-{% if glance_backend_ceph != "yes" %}
-        - name: glance-persistent-storage
-          persistentVolumeClaim:
-            claimName: {{ resourceName }}
-{% endif %}
-        - name: dev
-          hostPath:
-            path: /dev
-        - name: run
-          hostPath:
-            path: /run
+        - name: kolla-logs
+          emptyDir: {}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
