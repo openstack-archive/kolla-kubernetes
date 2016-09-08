@@ -34,7 +34,6 @@ technical_debt = {
         ['pod', 'horizon', 'horizon-pod'],
         ['bootstrap', 'rabbitmq', 'rabbitmq-bootstrap-job'],
         ['pod', 'rabbitmq', 'rabbitmq-pod'],
-        ['bootstrap', 'glance', 'glance-bootstrap-job'],
         ['pod', 'glance', 'glance-api-pod'],
         ['pod', 'glance', 'glance-registry-pod'],
         ['bootstrap', 'nova', 'nova-compute-bootstrap-job'],
