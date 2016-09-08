@@ -28,7 +28,7 @@ spec:
                   crudini --set /nova/nova.conf vnc novncproxy_host $IP;
                   crudini --set /nova/nova.conf vnc vncserver_listen $IP;
                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_base_url $IP;
+                  crudini --set /nova/nova.conf vnc novncproxy_base_url '{{ novncproxy_base_url }}';
 {%- if enable_libvirt_tcp == "yes" %}
                   crudini --set /nova/nova.conf vnc connection_uri ''qemu+tcp://''$IP;
 {%- endif %}
