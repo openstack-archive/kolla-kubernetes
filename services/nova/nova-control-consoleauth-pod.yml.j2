@@ -1,0 +1,68 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+   name: nova-consoleauth
+   namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  serviceName: "nova"
+  replicas: {{ nova_consoleauth_replicas }}
+  template:
+    metadata:
+      labels:
+        service: nova
+        type: consoleauth
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-nova-consoleauth",
+             "image": "{{ kolla_toolbox_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /config/..data/* /nova/"],
+             "volumeMounts": [
+                {
+                   "name": "nova-consoleauth-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "nova-config",
+                   "mountPath": "/nova/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_nova_consoleauth |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
+      containers:
+        - name: main
+          image: "{{ nova_consoleauth_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+      volumes:
+        - name: nova-consoleauth-config
+          configMap:
+            name: nova-consoleauth
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: nova-config
+          emptyDir: {}
+        - name: kolla-logs
+          emptyDir: {}
+
