@@ -203,11 +203,11 @@ class TestTemplatesTest(base.BaseTestCase):
                 if 'namespace' not in y['metadata'] and \
                    kind != 'PersistentVolume' and \
                    unknown_technical_debt(args, 'namespaceNotFound'):
-                    raise("namespace not found but required.")
+                    raise Exception("namespace not found but required.")
                 if 'namespace' in y['metadata'] and \
                    y['metadata']['namespace'] != 'not_real_namespace' and \
                    unknown_technical_debt(args, 'namespaceHardCoded'):
-                    raise("namespace is hardcoded.")
+                    raise Exception("namespace is hardcoded.")
                 if kind in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
                             'ReplicationController', 'Pod'):
                     pod = y
@@ -215,11 +215,11 @@ class TestTemplatesTest(base.BaseTestCase):
                         pod = y['spec']['template']
                     if 'nodeSelector' not in pod['spec'] and \
                        unknown_technical_debt(args, 'nodeSelector'):
-                        raise("nodeSelector not found but required.")
+                        raise Exception("nodeSelector not found but required.")
                     if 'namespace' in pod['metadata'] and kind != 'Pod' and \
                        unknown_technical_debt(args, 'namespaceInTemplate'):
-                        raise("namespace found in inner template." +
-                              " Its redundant.")
+                        raise Exception("namespace found in inner template." +
+                                        " Its redundant.")
         on_each_template(func)
         if WARNING['found'] and WERROR:
             raise Exception('Found Warning when Werror set.')
