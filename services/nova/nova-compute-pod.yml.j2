@@ -21,9 +21,11 @@ spec:
              "image": "{{ kolla_toolbox_image_full }}",
              "command": [
                  "sh",
-                 "-c",
+                 "-ec",
                  "cp -a /config/..data/* /nova/;
                   IP=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  mkdir -p /var/log/kolla/nova-init;
+                  echo Using $IP | tee /var/log/kolla/nova-init/ip.log;
                   crudini --set /nova/nova.conf DEFAULT my_ip $IP;
                   crudini --set /nova/nova.conf vnc novncproxy_host $IP;
                   crudini --set /nova/nova.conf vnc vncserver_listen $IP;
@@ -34,6 +36,10 @@ spec:
 {%- endif %}
              "],
              "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
                 {
                    "name": "nova-compute-config",
                    "mountPath": "/config/"
