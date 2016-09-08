@@ -247,17 +247,31 @@ kolla-kubernetes:
       - name: nova-api
       - name: nova-scheduler
       - name: nova-conductor
+      - name: nova-consoleauth
+      - name: nova-novncproxy
     resources:
       configmap:
       - name: nova-api
       - name: nova-compute
       - name: nova-conductor
       - name: nova-scheduler
+      - name: novnc-proxy-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: novnc-proxy-haproxy
+          port_name: nova_novncproxy_port
       secret:
       disk:
       pv:
       pvc:
       svc:
+      - name: nova-novncproxy
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: nova_novncproxy_port
+          service: nova
+          type: novncproxy
+          name: nova-novncproxy
       - name: nova-api
         template: services/common/generic-service.yml.j2
         vars:
@@ -290,6 +304,10 @@ kolla-kubernetes:
         template: services/nova/nova-control-conductor-pod.yml.j2
       - name: nova-scheduler
         template: services/nova/nova-control-scheduler-pod.yml.j2
+      - name: nova-consoleauth-pod
+        template: services/nova/nova-control-consoleauth-pod.yml.j2
+      - name: nova-novncproxy-pod
+        template: services/nova/nova-control-novncproxy-pod.yml.j2
   - name: openvswitch
     pods:
     - name: openvswitch-ovsdb
