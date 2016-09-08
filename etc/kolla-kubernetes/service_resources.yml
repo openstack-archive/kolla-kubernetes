@@ -210,12 +210,21 @@ kolla-kubernetes:
       - name: nova-api
       - name: nova-scheduler
       - name: nova-conductor
+      - name: nova-consoleauth
+      - name: nova-novncproxy
     resources:
       secret:
       disk:
       pv:
       pvc:
       svc:
+      - name: nova-novncproxy
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: nova_novncproxy_port
+          service: nova
+          type: novncproxy
+          name: nova-novncproxy
       - name: nova-api
         template: services/common/generic-service.yml.j2
         vars:
@@ -248,6 +257,10 @@ kolla-kubernetes:
         template: services/nova/nova-control-conductor-pod.yml.j2
       - name: nova-scheduler-pod
         template: services/nova/nova-control-scheduler-pod.yml.j2
+      - name: nova-consoleauth-pod
+        template: services/nova/nova-control-consoleauth-pod.yml.j2
+      - name: nova-novncproxy-pod
+        template: services/nova/nova-control-novncproxy-pod.yml.j2
   - name: openvswitch
     pods:
     - name: openvswitch-db

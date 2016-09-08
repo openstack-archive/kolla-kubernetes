@@ -1,0 +1,44 @@
+apiVersion: apps/v1alpha1
+kind: PetSet
+spec:
+  serviceName: "nova"
+  replicas: {{ nova_novncproxy_replicas }}
+  template:
+    metadata:
+      labels:
+        service: nova
+        type: novncproxy
+    spec:
+      containers:
+        - name: nova-novncproxy
+          image: "{{ nova_novncproxy_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: nova-novncproxy-config
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /nova
+              name: nova-config
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          securityContext:
+            privileged: true
+      volumes:
+        - name: nova-novncproxy-config
+          configMap:
+            name: nova-novncproxy-configmap
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: nova-config
+          emptyDir: {}
+        - name: kolla-logs
+          emptyDir: {}
+metadata:
+   name: nova-novncproxy
