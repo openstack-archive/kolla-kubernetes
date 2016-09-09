@@ -19,6 +19,11 @@ spec:
         version: v11
         kubernetes.io/cluster-service: "true"
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_dns |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
       - name: etcd
         image: gcr.io/google_containers/etcd-amd64:2.2.1

@@ -2,6 +2,13 @@ apiVersion: v1
 kind: Pod
 spec:
   hostNetwork: True
+  nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_storage_swift |
+                       default(kolla_kubernetes_hostlabel_storage |
+                         default(kolla_kubernetes_hostlabel_controller)
+                       )
+%}
+      {{ selector.key }}: {{ selector.value }}
   containers:
     - image: "{{ swift_proxy_server_image_full }}"
       name: swift-proxy-server

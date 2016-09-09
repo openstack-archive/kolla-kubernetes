@@ -53,7 +53,12 @@ spec:
 
     spec:
       nodeSelector:
-          kolla_storage: "true"
+{%- set selector = kolla_kubernetes_hostlabel_cinder_backup |
+                       default(kolla_kubernetes_hostlabel_storage |
+                         default(kolla_kubernetes_hostlabel_controller)
+                       )
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: cinder-backup
           image: "{{ cinder_backup_image_full }}"

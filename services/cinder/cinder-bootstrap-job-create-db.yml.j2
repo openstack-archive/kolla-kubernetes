@@ -12,6 +12,9 @@ spec:
       name: cinder-bootstrap-job-create-db
     spec:
       restartPolicy: OnFailure
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-cinder-database

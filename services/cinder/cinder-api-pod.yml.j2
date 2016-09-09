@@ -43,6 +43,11 @@ spec:
     spec:
 #You've got 2 days to drain or figure out why it won't.
       terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_cinder_api |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: haproxy
           image: "{{ haproxy_image_full }}"

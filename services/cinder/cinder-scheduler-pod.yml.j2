@@ -15,6 +15,11 @@ spec:
       annotations:
         pod.alpha.kubernetes.io/initialized: "true"
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_cinder_scheduler |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: cinder-scheduler
           image: "{{ cinder_scheduler_image_full }}"

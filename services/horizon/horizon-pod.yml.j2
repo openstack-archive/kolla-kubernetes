@@ -9,6 +9,11 @@ spec:
       labels:
         service: horizon
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_horizon |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: horizon
           image: "{{ horizon_image_full }}"
