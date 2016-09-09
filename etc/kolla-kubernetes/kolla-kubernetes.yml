@@ -19,26 +19,26 @@ kolla_kubernetes_namespace: "kolla"
 # Labels can be overwridden like so
 #kolla_kubernetes_hostlabel_specific_thing:
 #  key: kolla_other
-#  value: 'true'
+#  value: 'yes'
 
 # To split your network nodes of from
 # the controllers, do something like
 # this:
 #kolla_kubernetes_hostlabel_network:
 #  key: kolla_network
-#  value: 'true'
+#  value: 'yes'
 
 kolla_kubernetes_hostlabel_controller:
   key: kolla_controller
-  value: 'true'
+  value: 'yes'
 
 kolla_kubernetes_hostlabel_compute:
   key: kolla_compute
-  value: 'true'
+  value: 'yes'
 
 #kolla_kubernetes_hostlabel_storage_lvm:
 #  key: kolla_storage
-#  value: 'true'
+#  value: 'yes'
 
 ########################
 # Kubernetes Cluster
