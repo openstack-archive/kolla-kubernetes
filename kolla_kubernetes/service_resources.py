@@ -91,6 +91,12 @@ class KollaKubernetesResources(object):
         # Add a self referential link so templates can look up things by name.
         r['global'] = r
 
+        # Fix up hostlabels so that they are always strings. Kubernetes
+        # expects this.
+        for (key, value) in r.items():
+            if key.startswith('kolla_kubernetes_hostlabel_'):
+                value['value'] = "'%s'" % value['value'].replace("'", "''")
+
         if os.environ.get('KOLLA_KUBERNETES_TOX', None):
             r['kolla_kubernetes_namespace'] = 'not_real_namespace'
 
