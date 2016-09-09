@@ -38,6 +38,11 @@ spec:
           }
         ]'
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_nova_scheduler |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: nova-scheduler
           image: "{{ nova_scheduler_image_full }}"

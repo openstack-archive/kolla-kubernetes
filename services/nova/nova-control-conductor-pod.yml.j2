@@ -38,6 +38,11 @@ spec:
           }
         ]'
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_nova_conductor |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - name: nova-conductor
           image: "{{ nova_conductor_image_full }}"

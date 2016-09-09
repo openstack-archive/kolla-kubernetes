@@ -52,6 +52,9 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_compute %}
+          {{ selector.key }}: {{ selector.value }}
 {%- if enable_libvirt_tcp != "yes" %}
       hostIPC: True
 {%- endif %}

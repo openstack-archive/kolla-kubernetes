@@ -8,6 +8,9 @@ spec:
     metadata:
       name: keystone-bootstrap
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
       restartPolicy: OnFailure
       containers:
         - image: "{{ kolla_toolbox_image_full }}"

@@ -9,6 +9,11 @@ spec:
       labels:
         service: keystone
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_keystone |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ keystone_image_full }}"
           name: keystone
