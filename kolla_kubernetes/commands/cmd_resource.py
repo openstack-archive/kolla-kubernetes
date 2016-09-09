@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from __future__ import print_function
+import json
 import subprocess
 import sys
 import tempfile
@@ -199,9 +200,18 @@ class ResourceMap(KollaKubernetesBaseCommand):
             help=("Filter by one of [%s]" % (
                 "|".join(KKR.getServices().keys())))
         )
+        parser.add_argument(
+            "-o",
+            "--output",
+            metavar="output",
+            default="text",
+            help=("Format output into one of [%s]" % (
+                "|".join(['txt', 'json', 'yaml'])))
+        )
         return parser
 
     def take_action(self, args):
+        resources = []
         for service_name, s in KKR.getServices().items():
 
             # Skip specific services if the user has defined a filter
@@ -209,7 +219,8 @@ class ResourceMap(KollaKubernetesBaseCommand):
                     args.service_name != service_name):
                 continue
 
-            print('service[{}]'.format(s.getName()))
+            if args.output == 'text':
+                print('service[{}]'.format(s.getName()))
 
             for t in Service.VALID_RESOURCE_TYPES:
                 # Skip specific resource_types if the user has defined a filter
@@ -224,9 +235,23 @@ class ResourceMap(KollaKubernetesBaseCommand):
 
                 resourceTemplates = s.getResourceTemplatesByType(t)
 
-                print('  resource_type[{}] num_items[{}]'.format(
-                    t, len(resourceTemplates)))
+                if args.output == 'text':
+                    print('  resource_type[{}] num_items[{}]'.format(
+                        t, len(resourceTemplates)))
 
                 # Print the resource files
                 for rt in s.getResourceTemplatesByType(t):
-                    print('    ' + str(rt))
+                    if args.output == 'text':
+                        print('    ' + str(rt))
+                    resources.append({
+                        'resource_type': t,
+                        'service_name': service_name,
+                        'resource_name': rt.getName(),
+                        'template': rt.getTemplate(),
+                        'vars': rt.getVars(),
+                    })
+
+        if args.output == 'json':
+            print(json.dumps(resources))
+        if args.output == 'yaml':
+            print(yaml.safe_dump(resources))
