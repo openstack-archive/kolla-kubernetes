@@ -393,6 +393,20 @@ kolla-kubernetes:
       pod:
       - name: skydns-pod
         template: services/skydns/skydns-pod.yml.j2
+  - name: iscsi
+    pods:
+    resources:
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
+      - name: iscsi-iscsid
+        template: services/iscsi/iscsi-iscsid-daemonset.yml.j2
+      - name: iscsi-tgtd
+        template: services/iscsi/iscsi-tgtd-daemonset.yml.j2
   - name: cinder
     pods:
     - name: cinder
@@ -401,8 +415,6 @@ kolla-kubernetes:
       - name: cinder-scheduler
       - name: cinder-backup
       - name: cinder-volume
-      - name: tgtd
-      - name: iscsid
     resources:
       secret:
       disk:
@@ -437,7 +449,3 @@ kolla-kubernetes:
         template: services/cinder/cinder-backup-pod.yml.j2
       - name: cinder-volume-lvm-pod
         template: services/cinder/cinder-volume-lvm-pod.yml.j2
-      - name: tgtd-pod
-        template: services/cinder/tgtd-pod.yml.j2
-      - name: iscsid-pod
-        template: services/cinder/iscsid-pod.yml.j2

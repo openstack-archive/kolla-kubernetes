@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: iscsid
+  name: iscsi-iscsid
   labels:
     component: iscsid
     system: iscsid
@@ -10,7 +10,6 @@ metadata:
 spec:
   template:
     metadata:
-      name: iscsid
       labels:
         component: iscsid
         system: iscsid
