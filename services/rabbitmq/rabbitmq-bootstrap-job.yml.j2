@@ -6,6 +6,9 @@ spec:
     metadata:
       name: rabbitmq-generate
     spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ rabbitmq_image_full }}"
           name: rabbitmq-bootstrap
