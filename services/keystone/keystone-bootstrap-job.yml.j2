@@ -5,8 +5,6 @@ metadata:
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
-    metadata:
-      name: keystone-bootstrap
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}
