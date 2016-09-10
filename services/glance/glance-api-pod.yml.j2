@@ -104,7 +104,7 @@ spec:
           ports:
             - containerPort: {{ glance_api_port }}
               name: glance-api
-        - name: glance-api
+        - name: main
           image: "{{ glance_api_image_full }}"
           lifecycle:
             preStop:

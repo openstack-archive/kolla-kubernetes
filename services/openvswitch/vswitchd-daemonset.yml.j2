@@ -42,7 +42,7 @@ spec:
       hostIPC: True
       containers:
         - image: "{{ openvswitch_vswitchd_image_full }}"
-          name: openvswitch-vswitchd
+          name: main
           securityContext:
             privileged: true
           env:

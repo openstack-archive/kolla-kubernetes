@@ -15,7 +15,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ cinder_api_image_full }}"
-          name: cinder-api-config
+          name: main
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""

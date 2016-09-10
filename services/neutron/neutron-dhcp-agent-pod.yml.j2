@@ -4,7 +4,7 @@ spec:
   hostNetwork: True
   containers:
     - image: "{{ neutron_dhcp_agent_image_full }}"
-      name: neutron-dhcp-agent
+      name: main
       securityContext:
         privileged: true
       volumeMounts:

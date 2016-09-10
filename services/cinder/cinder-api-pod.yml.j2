@@ -90,7 +90,7 @@ spec:
           ports:
             - containerPort: {{ cinder_api_port }}
               name: cinder-api
-        - name: cinder-api
+        - name: main
           image: "{{ cinder_api_image_full }}"
           lifecycle:
             preStop:

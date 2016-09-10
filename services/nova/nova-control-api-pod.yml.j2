@@ -44,7 +44,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: nova-api
+        - name: main
           image: "{{ nova_api_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}

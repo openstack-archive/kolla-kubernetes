@@ -44,7 +44,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: nova-scheduler
+        - name: main
           image: "{{ nova_scheduler_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}

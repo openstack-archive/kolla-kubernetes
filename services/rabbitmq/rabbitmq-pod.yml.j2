@@ -17,7 +17,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ rabbitmq_image_full }}"
-          name: rabbitmq
+          name: main
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: rabbitmq-config

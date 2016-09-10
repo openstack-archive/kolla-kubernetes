@@ -93,7 +93,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ cinder_volume_image_full }}"
-          name: cinder-volume-lvm
+          name: main
           securityContext:
             privileged: true
           env:

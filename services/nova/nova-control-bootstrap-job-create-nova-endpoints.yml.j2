@@ -10,7 +10,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-nova-endpoints
+          name: main
           command: ["sh", "-c"]
           args:
             - /usr/bin/ansible localhost -vvvv -m kolla_keystone_service

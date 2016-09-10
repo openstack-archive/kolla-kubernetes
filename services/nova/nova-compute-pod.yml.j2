@@ -59,7 +59,7 @@ spec:
       hostIPC: True
 {%- endif %}
       containers:
-        - name: nova-compute
+        - name: main
           image: "{{ nova_compute_image_full }}"
           securityContext:
             privileged: true

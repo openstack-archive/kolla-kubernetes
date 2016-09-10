@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 120 
       containers:
         - image: "{{ mariadb_image_full }}"
-          name: mariadb
+          name: main
           lifecycle:
             preStop:
               exec:

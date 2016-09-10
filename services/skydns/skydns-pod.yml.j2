@@ -83,7 +83,7 @@ spec:
         # command = "/kube2sky"
         - --domain={{ dns_domain_name }}
         - --kube_master_url={{ KubeUtils.get_api_url(None) }}
-      - name: skydns
+      - name: main
         image: gcr.io/google_containers/skydns:2015-10-13-8c72f8c
         resources:
           limits:

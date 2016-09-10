@@ -10,7 +10,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ nova_api_image_full }}"
-          name: nova-control-database-upgrade
+          name: main
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: nova-api-config

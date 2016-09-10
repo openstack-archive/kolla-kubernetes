@@ -53,7 +53,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ tgtd_image_full }}"
-          name: tgtd
+          name: main
           securityContext:
             privileged: true
           env:

@@ -4,7 +4,7 @@ spec:
   hostNetwork: True
   containers:
     - image: "{{ neutron_l3_agent_image_full }}"
-      name: neutron-l3-agent
+      name: main
       securityContext:
         privileged: true
       volumeMounts:

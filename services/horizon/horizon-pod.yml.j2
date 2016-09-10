@@ -15,7 +15,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: horizon
+        - name: main
           image: "{{ horizon_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}
