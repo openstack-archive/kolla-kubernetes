@@ -3,8 +3,6 @@ apiVersion: batch/v1
 kind: Job
 spec:
   template:
-    metadata:
-      name: rabbitmq-generate
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}

@@ -6,8 +6,6 @@ metadata:
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
-    metadata:
-      name: mariadb-bootstrap
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}
