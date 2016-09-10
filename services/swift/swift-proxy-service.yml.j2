@@ -4,7 +4,7 @@ spec:
   ports:
     - port: {{ swift_proxy_server_port }}
   selector:
-    name: swift-proxy-server
+    name: swift-proxy
 metadata:
-   name: swift-proxy-server
+   name: swift-proxy
    namespace: {{ kolla_kubernetes_namespace }}
