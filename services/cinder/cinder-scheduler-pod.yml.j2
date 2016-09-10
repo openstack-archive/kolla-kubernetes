@@ -21,7 +21,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: cinder-scheduler
+        - name: main
           image: "{{ cinder_scheduler_image_full }}"
           volumeMounts:
             - mountPath: /var/lib/kolla-kubernetes/event

@@ -17,7 +17,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ glance_api_image_full }}"
-          name: glance-api-config
+          name: main
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""

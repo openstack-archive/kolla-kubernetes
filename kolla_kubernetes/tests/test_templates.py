@@ -65,50 +65,7 @@ technical_debt = {
         ['bootstrap', 'cinder', 'cinder-endpoints'],
         ['pod', 'cinder', 'cinder-volume-lvm']
     ],
-    'mainContainer': [
-        ['bootstrap', u'mariadb', u'mariadb-bootstrap'],
-        ['pod', u'mariadb', u'mariadb'],
-        ['pod', u'memcached', u'memcached'],
-        ['bootstrap', u'keystone', u'keystone-bootstrap'],
-        ['pod', u'keystone', u'keystone'],
-        ['pod', u'horizon', u'horizon'],
-        ['bootstrap', u'rabbitmq', u'rabbitmq-bootstrap'],
-        ['pod', u'rabbitmq', u'rabbitmq'],
-        ['bootstrap', u'glance', u'glance-create-db'],
-        ['bootstrap', u'glance', u'glance-manage-db'],
-        ['bootstrap', u'glance', u'glance-endpoints'],
-        ['pod', u'glance', u'glance-api'],
-        ['pod', u'glance', u'glance-registry'],
-        ['bootstrap', u'nova', u'nova-compute-bootstrap'],
-        ['bootstrap', u'nova', u'nova-create-api-db'],
-        ['bootstrap', u'nova', u'nova-create-endpoints'],
-        ['bootstrap', u'nova', u'nova-create-db'],
-        ['pod', u'nova', u'nova-compute'],
-        ['pod', u'nova', u'nova-api'],
-        ['pod', u'nova', u'nova-conductor'],
-        ['pod', u'nova', u'nova-scheduler'],
-        ['pod', u'openvswitch', u'openvswitch-db'],
-        ['pod', u'openvswitch', u'openvswitch-vswitchd'],
-        ['bootstrap', u'neutron', u'neutron-bootstrap'],
-        ['pod', u'neutron', u'neutron-control'],
-        ['pod', u'neutron', u'neutron-dhcp-agent'],
-        ['pod', u'neutron', u'neutron-l3-agent'],
-        ['pod', u'neutron', u'neutron-metadata-agent'],
-        ['pod', u'swift', u'swift-account'],
-        ['pod', u'swift', u'swift-container'],
-        ['pod', u'swift', u'swift-object'],
-        ['pod', u'swift', u'swift-proxy'],
-        ['pod', u'skydns', u'kube-dns-v11'],
-        ['pod', u'iscsi', u'iscsi-iscsid'],
-        ['pod', u'iscsi', u'iscsi-tgtd'],
-        ['bootstrap', u'cinder', u'cinder-create-db'],
-        ['bootstrap', u'cinder', u'cinder-manage-db'],
-        ['bootstrap', u'cinder', u'cinder-create-endpoints'],
-        ['pod', u'cinder', u'cinder-api'],
-        ['pod', u'cinder', u'cinder-scheduler'],
-        ['pod', u'cinder', u'cinder-backup'],
-        ['pod', u'cinder', u'cinder-volume-lvm'],
-    ],
+    'mainContainer': [],
     'resourceNameObjNameNoMatch': [
         ['pod', 'glance', 'glance-api-haproxy-configmap'],
         ['pod', 'glance', 'glance-registry-haproxy-configmap'],
@@ -259,7 +216,9 @@ class TestTemplatesTest(base.BaseTestCase):
                     for container in pod['spec']['containers']:
                         if container['name'] == 'main':
                             main_found = True
-                    if not main_found and \
+                    container_count = len(pod['spec']['containers'])
+                    if ((kind == 'Job' and container_count == 1) or
+                        kind != 'Job') and not main_found and \
                        unknown_technical_debt(args, 'mainContainer'):
                         raise Exception("Pod does not contain a container" +
                                         " named main.")

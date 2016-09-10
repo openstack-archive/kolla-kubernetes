@@ -60,7 +60,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: cinder-backup
+        - name: main
           image: "{{ cinder_backup_image_full }}"
           volumeMounts:
             - mountPath: /var/lib/kolla-kubernetes/event

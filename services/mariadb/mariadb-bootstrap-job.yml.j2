@@ -15,7 +15,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - image: "{{ mariadb_image_full }}"
-          name: mariadb-bootstrap
+          name: main
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: mariadb-config

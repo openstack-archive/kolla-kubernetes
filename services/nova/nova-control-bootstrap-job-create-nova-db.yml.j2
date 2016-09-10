@@ -10,7 +10,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-nova-database-and-users
+          name: main
           command: ["sh", "-c"]
           args:
             - ansible localhost  -m mysql_db -a

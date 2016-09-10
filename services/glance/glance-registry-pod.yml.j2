@@ -95,7 +95,7 @@ spec:
           ports:
             - containerPort: {{ glance_registry_port }}
               name: glance-registry
-        - name: glance-registry
+        - name: main
           image: "{{ glance_registry_image_full }}"
           lifecycle:
             preStop:

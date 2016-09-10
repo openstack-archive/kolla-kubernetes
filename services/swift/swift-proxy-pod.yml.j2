@@ -11,7 +11,7 @@ spec:
       {{ selector.key }}: {{ selector.value }}
   containers:
     - image: "{{ swift_proxy_server_image_full }}"
-      name: swift-proxy-server
+      name: main
       volumeMounts:
         - mountPath: /var/lib/kolla/swift/
           name: swift-config

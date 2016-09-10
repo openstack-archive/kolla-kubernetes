@@ -44,7 +44,7 @@ spec:
 %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: nova-conductor
+        - name: main
           image: "{{ nova_conductor_image_full }}"
           volumeMounts:
             - mountPath: {{ container_config_directory }}

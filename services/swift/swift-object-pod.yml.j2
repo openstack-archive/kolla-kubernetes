@@ -24,7 +24,7 @@ spec:
         - mountPath: /var/log/kolla/
           name: kolla-logs
     - image: "{{ swift_object_image_full }}"
-      name: swift-object-server
+      name: main
       volumeMounts:
         - mountPath: /var/lib/kolla/swift/
           name: swift-config

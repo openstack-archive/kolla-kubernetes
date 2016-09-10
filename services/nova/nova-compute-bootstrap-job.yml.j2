@@ -12,7 +12,7 @@ spec:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - name: nova-compute
+        - name: main
           image: "{{ nova_compute_image_full }}"
           securityContext:
             privileged: true

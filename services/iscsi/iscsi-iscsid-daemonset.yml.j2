@@ -44,7 +44,7 @@ spec:
           {{ selector.key }}: {{ selector.value }}
       containers:
         - image: {{ iscsid_image_full }}
-          name: iscsid
+          name: main
           securityContext:
             privileged: true
           env:

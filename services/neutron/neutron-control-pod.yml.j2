@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - image: "{{ neutron_server_image_full }}"
-          name: neutron-server
+          name: main
           ports:
           - containerPort: {{ neutron_server_port }}
           volumeMounts:
