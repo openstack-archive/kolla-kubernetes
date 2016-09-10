@@ -2,14 +2,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cinder-bootstrap-job-manage-db
+  name: cinder-manage-db
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   parallelism: 1
   completions: 1
   template:
-    metadata:
-      name: cinder-bootstrap-job-manage-db
     spec:
       restartPolicy: OnFailure
       nodeSelector:

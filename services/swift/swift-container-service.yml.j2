@@ -4,7 +4,7 @@ spec:
   ports:
     - port: {{ swift_container_server_port }}
   selector:
-    name: swift-container-server
+    name: swift-container
 metadata:
-   name: swift-container-server
+   name: swift-container
    namespace: {{ kolla_kubernetes_namespace }}

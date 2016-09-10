@@ -26,7 +26,7 @@ kolla-kubernetes:
     pods:
     resources:
       secret:
-      - name: ceph-secret
+      - name: ceph
         template: services/ceph/ceph-secret.yml.j2
       disk:
       pv:
@@ -44,28 +44,28 @@ kolla-kubernetes:
       configmap:
       - name: mariadb-configmap
       disk:
-      - name: mariadb-disk
+      - name: mariadb
         template: services/common/common-disk.sh.j2
         vars:
           size_in_gb: 10
       pv:
-      - name: mariadb-pv
+      - name: mariadb
         template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
-      - name: mariadb-pvc
+      - name: mariadb
         template: services/common/common-pvc.yml.j2
         vars:
           size_in_gb: 10
       svc:
-      - name: mariadb-service
+      - name: mariadb
         template: services/mariadb/mariadb-service.yml.j2
       bootstrap:
-      - name: mariadb-bootstrap-job
+      - name: mariadb-bootstrap
         template: services/mariadb/mariadb-bootstrap-job.yml.j2
       pod:
-      - name: mariadb-pod
+      - name: mariadb
         template: services/mariadb/mariadb-pod.yml.j2
   - name: memcached
     pods:
@@ -80,11 +80,11 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: memcached-service
+      - name: memcached
         template: services/memcached/memcached-service.yml.j2
       bootstrap:
       pod:
-      - name: memcached-pod
+      - name: memcached
         template: services/memcached/memcached-pod.yml.j2
   - name: keystone
     pods:
@@ -99,15 +99,15 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: keystone-service-admin
+      - name: keystone-admin
         template: services/keystone/keystone-service-admin.yml.j2
-      - name: keystone-service-public
+      - name: keystone-public
         template: services/keystone/keystone-service-public.yml.j2
       bootstrap:
-      - name: keystone-bootstrap-job
+      - name: keystone-bootstrap
         template: services/keystone/keystone-bootstrap-job.yml.j2
       pod:
-      - name: keystone-pod
+      - name: keystone
         template: services/keystone/keystone-pod.yml.j2
   - name: horizon
     pods:
@@ -122,11 +122,11 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: horizon-service
+      - name: horizon
         template: services/horizon/horizon-service.yml.j2
       bootstrap:
       pod:
-      - name: horizon-pod
+      - name: horizon
         template: services/horizon/horizon-pod.yml.j2
   - name: rabbitmq
     pods:
@@ -138,30 +138,30 @@ kolla-kubernetes:
       - name: rabbitmq-configmap
       secret:
       disk:
-      - name: rabbitmq-disk
+      - name: rabbitmq
         template: services/common/common-disk.sh.j2
         vars:
           size_in_gb: 10
       pv:
-      - name: rabbitmq-pv
+      - name: rabbitmq
         template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
-      - name: rabbitmq-pvc
+      - name: rabbitmq
         template: services/common/common-pvc.yml.j2
         vars:
           size_in_gb: 10
       svc:
-      - name: rabbitmq-service-management
+      - name: rabbitmq-management
         template: services/rabbitmq/rabbitmq-service-management.yml.j2
-      - name: rabbitmq-service
+      - name: rabbitmq-main
         template: services/rabbitmq/rabbitmq-service.yml.j2
       bootstrap:
-      - name: rabbitmq-bootstrap-job
+      - name: rabbitmq-bootstrap
         template: services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
       pod:
-      - name: rabbitmq-pod
+      - name: rabbitmq
         template: services/rabbitmq/rabbitmq-pod.yml.j2
   - name: glance
     pods:
@@ -185,29 +185,29 @@ kolla-kubernetes:
           port_name: glance_registry_port
       secret:
       disk:
-      - name: glance-disk
+      - name: glance
         template: services/common/common-disk.sh.j2
         vars:
           size_in_gb: 10
       pv:
-      - name: glance-pv
+      - name: glance
         template: services/common/common-pv.yml.j2
         vars:
           size_in_gb: 10
       pvc:
-      - name: glance-pvc
+      - name: glance
         template: services/common/common-pvc.yml.j2
         vars:
           size_in_gb: 10
       svc:
-      - name: glance-api-service
+      - name: glance-api
         template: services/common/generic-service.yml.j2
         vars:
           port_name: glance_api_port
           service: glance
           type: api
           name: glance-api
-      - name: glance-registry-service
+      - name: glance-registry
         template: services/common/generic-service.yml.j2
         vars:
           port_name: glance_registry_port
@@ -222,9 +222,9 @@ kolla-kubernetes:
       - name: glance-endpoints
         template: services/glance/glance-bootstrap-job-endpoints.yml.j2
       pod:
-      - name: glance-api-pod
+      - name: glance-api
         template: services/glance/glance-api-pod.yml.j2
-      - name: glance-registry-pod
+      - name: glance-registry
         template: services/glance/glance-registry-pod.yml.j2
   - name: nova
     pods:
@@ -263,22 +263,22 @@ kolla-kubernetes:
           type: metadata
           name: nova-metadata
       bootstrap:
-      - name: nova-compute-bootstrap-job
+      - name: nova-compute-bootstrap
         template: services/nova/nova-compute-bootstrap-job.yml.j2
-      - name: create-api-db
+      - name: nova-create-api-db
         template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
-      - name: create-endpoints
+      - name: nova-create-endpoints
         template: services/nova/nova-control-bootstrap-job-create-nova-endpoints.yml.j2
-      - name: create-db
+      - name: nova-create-db
         template: services/nova/nova-control-bootstrap-job-create-nova-db.yml.j2
       pod:
-      - name: nova-compute-pod
+      - name: nova-compute
         template: services/nova/nova-compute-pod.yml.j2
-      - name: nova-api-pod
+      - name: nova-api
         template: services/nova/nova-control-api-pod.yml.j2
-      - name: nova-conductor-pod
+      - name: nova-conductor
         template: services/nova/nova-control-conductor-pod.yml.j2
-      - name: nova-scheduler-pod
+      - name: nova-scheduler
         template: services/nova/nova-control-scheduler-pod.yml.j2
   - name: openvswitch
     pods:
@@ -331,21 +331,21 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: neutron-server-service
+      - name: neutron-server
         template: services/neutron/neutron-server-service.yml.j2
       bootstrap:
-      - name: neutron-bootstrap-job
+      - name: neutron-bootstrap
         template: services/neutron/neutron-bootstrap-job.yml.j2
       pod:
-      - name: neutron-openvswitch-agent-daemonset
+      - name: neutron-openvswitch-agent
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
-      - name: neutron-control-pod
+      - name: neutron-control
         template: services/neutron/neutron-control-pod.yml.j2
-      - name: neutron-dhcp-agent-pod
+      - name: neutron-dhcp-agent
         template: services/neutron/neutron-dhcp-agent-pod.yml.j2
-      - name: neutron-l3-agent-pod
+      - name: neutron-l3-agent
         template: services/neutron/neutron-l3-agent-pod.yml.j2
-      - name: neutron-metadata-agent-pod
+      - name: neutron-metadata-agent
         template: services/neutron/neutron-metadata-agent-pod.yml.j2
   - name: swift
     pods:
@@ -398,25 +398,25 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: swift-account-service
+      - name: swift-account
         template: services/swift/swift-account-service.yml.j2
-      - name: swift-container-service
+      - name: swift-container
         template: services/swift/swift-container-service.yml.j2
-      - name: swift-object-service
+      - name: swift-object
         template: services/swift/swift-object-service.yml.j2
-      - name: swift-proxy-service
+      - name: swift-proxy
         template: services/swift/swift-proxy-service.yml.j2
-      - name: swift-rsync-service
+      - name: swift-rsyncd
         template: services/swift/swift-rsync-service.yml.j2
       bootstrap:
       pod:
-      - name: swift-account-pod
+      - name: swift-account
         template: services/swift/swift-account-pod.yml.j2
-      - name: swift-container-pod
+      - name: swift-container
         template: services/swift/swift-container-pod.yml.j2
-      - name: swift-object-pod
+      - name: swift-object
         template: services/swift/swift-object-pod.yml.j2
-      - name: swift-proxy-pod
+      - name: swift-proxy
         template: services/swift/swift-proxy-pod.yml.j2
   - name: skydns
     pods:
@@ -432,11 +432,11 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: skydns-service
+      - name: kube-dns
         template: services/skydns/skydns-service.yml.j2
       bootstrap:
       pod:
-      - name: skydns-pod
+      - name: kube-dns-v11
         template: services/skydns/skydns-pod.yml.j2
   - name: iscsi
     pods:
@@ -479,7 +479,7 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: cinder-api-service
+      - name: cinder-api
         template: services/common/generic-service.yml.j2
         vars:
           port_name: cinder_api_port
@@ -487,18 +487,18 @@ kolla-kubernetes:
           type: api
           name: cinder-api
       bootstrap:
-      - name: cinder-bootstrap-job-create-db
+      - name: cinder-create-db
         template: services/cinder/cinder-bootstrap-job-create-db.yml.j2
-      - name: cinder-bootstrap-job-manage-db
+      - name: cinder-manage-db
         template: services/cinder/cinder-bootstrap-job-manage-db.yml.j2
-      - name: cinder-bootstrap-job-endpoints
+      - name: cinder-create-endpoints
         template: services/cinder/cinder-bootstrap-job-endpoints.yml.j2
       pod:
-      - name: cinder-api-pod
+      - name: cinder-api
         template: services/cinder/cinder-api-pod.yml.j2
-      - name: cinder-scheduler-pod
+      - name: cinder-scheduler
         template: services/cinder/cinder-scheduler-pod.yml.j2
-      - name: cinder-backup-pod
+      - name: cinder-backup
         template: services/cinder/cinder-backup-pod.yml.j2
-      - name: cinder-volume-lvm-pod
+      - name: cinder-volume-lvm
         template: services/cinder/cinder-volume-lvm-pod.yml.j2

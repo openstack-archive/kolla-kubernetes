@@ -4,7 +4,7 @@ spec:
   ports:
     - port: {{ swift_account_server_port }}
   selector:
-    name: swift-account-server
+    name: swift-account
 metadata:
-   name: swift-account-server
+   name: swift-account
    namespace: {{ kolla_kubernetes_namespace }}

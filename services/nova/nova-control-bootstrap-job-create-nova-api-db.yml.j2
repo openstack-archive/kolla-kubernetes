@@ -4,8 +4,6 @@ spec:
   parallelism: 1
   completions: 1
   template:
-    metadata:
-      name: nova-control-database-upgrade
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}
@@ -41,5 +39,5 @@ spec:
           emptyDir: {}
       restartPolicy: OnFailure
 metadata:
-  name: nova-control-databse-upgrade
+  name: nova-create-api-db
   namespace: {{ kolla_kubernetes_namespace }}
