@@ -43,7 +43,200 @@ technical_debt = {
         ['pod', 'neutron', 'neutron-metadata-agent-pod'],
     ],
     'namespaceInTemplate': [],
-    'namespaceHardCoded': []
+    'namespaceHardCoded': [],
+    'nameInTemplateMetadata': [
+        ['bootstrap', 'mariadb', 'mariadb-bootstrap-job'],
+        ['bootstrap', 'keystone', 'keystone-bootstrap-job'],
+        ['bootstrap', 'rabbitmq', 'rabbitmq-bootstrap-job'],
+        ['bootstrap', 'glance', 'glance-create-db'],
+        ['bootstrap', 'glance', 'glance-manage-db'],
+        ['bootstrap', 'glance', 'glance-endpoints'],
+        ['bootstrap', 'nova', 'nova-compute-bootstrap-job'],
+        ['bootstrap', 'nova', 'create-api-db'],
+        ['bootstrap', 'nova', 'create-endpoints'],
+        ['bootstrap', 'nova', 'create-db'],
+        ['pod', 'nova', 'nova-compute-pod'],
+        ['pod', 'openvswitch', 'openvswitch-db'],
+        ['pod', 'openvswitch', 'openvswitch-vswitchd'],
+        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
+        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-create-db'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-manage-db'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-endpoints'],
+        ['pod', 'cinder', 'cinder-volume-lvm-pod']
+    ],
+    'mainContainer': [
+        ['bootstrap', u'mariadb', u'mariadb-bootstrap-job'],
+        ['pod', u'mariadb', u'mariadb-pod'],
+        ['pod', u'memcached', u'memcached-pod'],
+        ['bootstrap', u'keystone', u'keystone-bootstrap-job'],
+        ['pod', u'keystone', u'keystone-pod'],
+        ['pod', u'horizon', u'horizon-pod'],
+        ['bootstrap', u'rabbitmq', u'rabbitmq-bootstrap-job'],
+        ['pod', u'rabbitmq', u'rabbitmq-pod'],
+        ['bootstrap', u'glance', u'glance-create-db'],
+        ['bootstrap', u'glance', u'glance-manage-db'],
+        ['bootstrap', u'glance', u'glance-endpoints'],
+        ['pod', u'glance', u'glance-api-pod'],
+        ['pod', u'glance', u'glance-registry-pod'],
+        ['bootstrap', u'nova', u'nova-compute-bootstrap-job'],
+        ['bootstrap', u'nova', u'create-api-db'],
+        ['bootstrap', u'nova', u'create-endpoints'],
+        ['bootstrap', u'nova', u'create-db'],
+        ['pod', u'nova', u'nova-compute-pod'],
+        ['pod', u'nova', u'nova-api-pod'],
+        ['pod', u'nova', u'nova-conductor-pod'],
+        ['pod', u'nova', u'nova-scheduler-pod'],
+        ['pod', u'openvswitch', u'openvswitch-db'],
+        ['pod', u'openvswitch', u'openvswitch-vswitchd'],
+        ['bootstrap', u'neutron', u'neutron-bootstrap-job'],
+        ['pod', u'neutron', u'neutron-control-pod'],
+        ['pod', u'neutron', u'neutron-dhcp-agent-pod'],
+        ['pod', u'neutron', u'neutron-l3-agent-pod'],
+        ['pod', u'neutron', u'neutron-metadata-agent-pod'],
+        ['pod', u'swift', u'swift-account-pod'],
+        ['pod', u'swift', u'swift-container-pod'],
+        ['pod', u'swift', u'swift-object-pod'],
+        ['pod', u'swift', u'swift-proxy-pod'],
+        ['pod', u'skydns', u'skydns-pod'],
+        ['pod', u'iscsi', u'iscsi-iscsid'],
+        ['pod', u'iscsi', u'iscsi-tgtd'],
+        ['bootstrap', u'cinder', u'cinder-bootstrap-job-create-db'],
+        ['bootstrap', u'cinder', u'cinder-bootstrap-job-manage-db'],
+        ['bootstrap', u'cinder', u'cinder-bootstrap-job-endpoints'],
+        ['pod', u'cinder', u'cinder-api-pod'],
+        ['pod', u'cinder', u'cinder-scheduler-pod'],
+        ['pod', u'cinder', u'cinder-backup-pod'],
+        ['pod', u'cinder', u'cinder-volume-lvm-pod'],
+    ],
+    'resourceNameObjNameNoMatch': [
+        ['pv', 'mariadb', 'mariadb-pv'],
+        ['pvc', 'mariadb', 'mariadb-pvc'],
+        ['svc', 'mariadb', 'mariadb-service'],
+        ['bootstrap', 'mariadb', 'mariadb-bootstrap-job'],
+        ['pod', 'mariadb', 'mariadb-pod'],
+        ['svc', 'memcached', 'memcached-service'],
+        ['pod', 'memcached', 'memcached-pod'],
+        ['svc', 'keystone', 'keystone-service-admin'],
+        ['svc', 'keystone', 'keystone-service-public'],
+        ['bootstrap', 'keystone', 'keystone-bootstrap-job'],
+        ['pod', 'keystone', 'keystone-pod'],
+        ['svc', 'horizon', 'horizon-service'],
+        ['pod', 'horizon', 'horizon-pod'],
+        ['pv', 'rabbitmq', 'rabbitmq-pv'],
+        ['pvc', 'rabbitmq', 'rabbitmq-pvc'],
+        ['svc', 'rabbitmq', 'rabbitmq-service-management'],
+        ['svc', 'rabbitmq', 'rabbitmq-service'],
+        ['bootstrap', 'rabbitmq', 'rabbitmq-bootstrap-job'],
+        ['pod', 'rabbitmq', 'rabbitmq-pod'],
+        ['pv', 'glance', 'glance-pv'],
+        ['pvc', 'glance', 'glance-pvc'],
+        ['svc', 'glance', 'glance-api-service'],
+        ['svc', 'glance', 'glance-registry-service'],
+        ['pod', 'glance', 'glance-api-haproxy-configmap'],
+        ['pod', 'glance', 'glance-api-pod'],
+        ['pod', 'glance', 'glance-registry-haproxy-configmap'],
+        ['pod', 'glance', 'glance-registry-pod'],
+        ['bootstrap', 'nova', 'nova-compute-bootstrap-job'],
+        ['bootstrap', 'nova', 'create-api-db'],
+        ['bootstrap', 'nova', 'create-endpoints'],
+        ['bootstrap', 'nova', 'create-db'],
+        ['pod', 'nova', 'nova-compute-pod'],
+        ['pod', 'nova', 'nova-api-pod'],
+        ['pod', 'nova', 'nova-conductor-pod'],
+        ['pod', 'nova', 'nova-scheduler-pod'],
+        ['svc', 'neutron', 'neutron-server-service'],
+        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
+        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
+        ['pod', 'neutron', 'neutron-control-pod'],
+        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
+        ['pod', 'neutron', 'neutron-l3-agent-pod'],
+        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
+        ['svc', 'swift', 'swift-account-service'],
+        ['svc', 'swift', 'swift-container-service'],
+        ['svc', 'swift', 'swift-object-service'],
+        ['svc', 'swift', 'swift-proxy-service'],
+        ['svc', 'swift', 'swift-rsync-service'],
+        ['pod', 'swift', 'swift-account-pod'],
+        ['pod', 'swift', 'swift-container-pod'],
+        ['pod', 'swift', 'swift-object-pod'],
+        ['pod', 'swift', 'swift-proxy-pod'],
+        ['svc', 'skydns', 'skydns-service'],
+        ['pod', 'skydns', 'skydns-pod'],
+        ['svc', 'cinder', 'cinder-api-service'],
+        ['pod', 'cinder', 'cinder-api-haproxy-configmap'],
+        ['pod', 'cinder', 'cinder-api-pod'],
+        ['pod', 'cinder', 'cinder-scheduler-pod'],
+        ['pod', 'cinder', 'cinder-backup-pod'],
+        ['pod', 'cinder', 'cinder-volume-lvm-pod']
+    ],
+    'typeInName': [
+        ['secret', 'ceph', 'ceph-secret'],
+        ['disk', 'mariadb', 'mariadb-disk'],
+        ['pv', 'mariadb', 'mariadb-pv'],
+        ['pvc', 'mariadb', 'mariadb-pvc'],
+        ['svc', 'mariadb', 'mariadb-service'],
+        ['bootstrap', 'mariadb', 'mariadb-bootstrap-job'],
+        ['pod', 'mariadb', 'mariadb-pod'],
+        ['svc', 'memcached', 'memcached-service'],
+        ['pod', 'memcached', 'memcached-pod'],
+        ['svc', 'keystone', 'keystone-service-admin'],
+        ['svc', 'keystone', 'keystone-service-public'],
+        ['bootstrap', 'keystone', 'keystone-bootstrap-job'],
+        ['pod', 'keystone', 'keystone-pod'],
+        ['svc', 'horizon', 'horizon-service'],
+        ['pod', 'horizon', 'horizon-pod'],
+        ['disk', 'rabbitmq', 'rabbitmq-disk'],
+        ['pv', 'rabbitmq', 'rabbitmq-pv'],
+        ['pvc', 'rabbitmq', 'rabbitmq-pvc'],
+        ['svc', 'rabbitmq', 'rabbitmq-service-management'],
+        ['svc', 'rabbitmq', 'rabbitmq-service'],
+        ['bootstrap', 'rabbitmq', 'rabbitmq-bootstrap-job'],
+        ['pod', 'rabbitmq', 'rabbitmq-pod'],
+        ['disk', 'glance', 'glance-disk'],
+        ['pv', 'glance', 'glance-pv'],
+        ['pvc', 'glance', 'glance-pvc'],
+        ['svc', 'glance', 'glance-api-service'],
+        ['svc', 'glance', 'glance-registry-service'],
+        ['pod', 'glance', 'glance-api-haproxy-configmap'],
+        ['pod', 'glance', 'glance-api-pod'],
+        ['pod', 'glance', 'glance-registry-haproxy-configmap'],
+        ['pod', 'glance', 'glance-registry-pod'],
+        ['svc', 'nova', 'nova-api'],
+        ['svc', 'nova', 'nova-metadata'],
+        ['bootstrap', 'nova', 'nova-compute-bootstrap-job'],
+        ['pod', 'nova', 'nova-compute-pod'],
+        ['pod', 'nova', 'nova-api-pod'],
+        ['pod', 'nova', 'nova-conductor-pod'],
+        ['pod', 'nova', 'nova-scheduler-pod'],
+        ['svc', 'neutron', 'neutron-server-service'],
+        ['bootstrap', 'neutron', 'neutron-bootstrap-job'],
+        ['pod', 'neutron', 'neutron-openvswitch-agent-daemonset'],
+        ['pod', 'neutron', 'neutron-control-pod'],
+        ['pod', 'neutron', 'neutron-dhcp-agent-pod'],
+        ['pod', 'neutron', 'neutron-l3-agent-pod'],
+        ['pod', 'neutron', 'neutron-metadata-agent-pod'],
+        ['svc', 'swift', 'swift-account-service'],
+        ['svc', 'swift', 'swift-container-service'],
+        ['svc', 'swift', 'swift-object-service'],
+        ['svc', 'swift', 'swift-proxy-service'],
+        ['svc', 'swift', 'swift-rsync-service'],
+        ['pod', 'swift', 'swift-account-pod'],
+        ['pod', 'swift', 'swift-container-pod'],
+        ['pod', 'swift', 'swift-object-pod'],
+        ['pod', 'swift', 'swift-proxy-pod'],
+        ['svc', 'skydns', 'skydns-service'],
+        ['pod', 'skydns', 'skydns-pod'],
+        ['svc', 'cinder', 'cinder-api-service'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-create-db'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-manage-db'],
+        ['bootstrap', 'cinder', 'cinder-bootstrap-job-endpoints'],
+        ['pod', 'cinder', 'cinder-api-haproxy-configmap'],
+        ['pod', 'cinder', 'cinder-api-pod'],
+        ['pod', 'cinder', 'cinder-scheduler-pod'],
+        ['pod', 'cinder', 'cinder-backup-pod'],
+        ['pod', 'cinder', 'cinder-volume-lvm-pod'],
+    ]
 }
 
 
@@ -100,6 +293,20 @@ class TestTemplatesTest(base.BaseTestCase):
                 templates = service.getResourceTemplatesByType(resource_type)
                 for template in templates:
                     template_name = template.getName()
+                    args = argobj('create',
+                                  resource_type,
+                                  service_name,
+                                  template_name)
+                    for part in template_name.split('-'):
+                        if part.lower() in ('petset', 'deployment', 'job',
+                                            'replicationcontroller', 'pod',
+                                            'daemonset', 'configmap',
+                                            'secret',
+                                            'ps', 'pv', 'pvc', 'disk',
+                                            'ds', 'persistentvolume',
+                                            'persistentvolumeclaim') and \
+                           unknown_technical_debt(args, 'typeInName'):
+                            raise Exception("type in name. [%s]" % part)
                     if service_names.get(template_name, False) and \
                         len(templates) != 1:
                         s = "Resource name %s matches service name and" \
@@ -143,6 +350,10 @@ class TestTemplatesTest(base.BaseTestCase):
                    y['metadata']['namespace'] != 'not_real_namespace' and \
                    unknown_technical_debt(args, 'namespaceHardCoded'):
                     raise Exception("namespace is hardcoded.")
+                if y['metadata']['name'] != args.resource_name and \
+                   unknown_technical_debt(args, 'resourceNameObjNameNoMatch'):
+                    raise Exception("Object name does not match the" +
+                                    " resource_name.")
                 if kind in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
                             'ReplicationController', 'Pod'):
                     pod = y
@@ -155,6 +366,19 @@ class TestTemplatesTest(base.BaseTestCase):
                        unknown_technical_debt(args, 'namespaceInTemplate'):
                         raise Exception("namespace found in inner template." +
                                         " Its redundant.")
+                    if 'name' in pod['metadata'] and kind != 'Pod' and \
+                       unknown_technical_debt(args, 'nameInTemplateMetadata'):
+                        raise Exception("name in pod metadata. Its generated" +
+                                        " from the main metadata. It can" +
+                                        " cause issues.")
+                    main_found = False
+                    for container in pod['spec']['containers']:
+                        if container['name'] == 'main':
+                            main_found = True
+                    if not main_found and \
+                       unknown_technical_debt(args, 'mainContainer'):
+                        raise Exception("Pod does not contain a container" +
+                                        " named main.")
         on_each_template(func)
         if WARNING['found'] and WERROR:
             raise Exception('Found Warning when Werror set.')
