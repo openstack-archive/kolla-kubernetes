@@ -41,6 +41,8 @@ kolla-kubernetes:
       - name: mariadb
     resources:
       secret:
+      configmap:
+      - name: mariadb-configmap
       disk:
       - name: mariadb-disk
         template: services/common/common-disk.sh.j2
@@ -71,6 +73,8 @@ kolla-kubernetes:
       containers:
       - name: memcached
     resources:
+      configmap:
+      - name: memcached-configmap
       secret:
       disk:
       pv:
@@ -88,6 +92,8 @@ kolla-kubernetes:
       containers:
       - name: keystone
     resources:
+      configmap:
+      - name: keystone-configmap
       secret:
       disk:
       pv:
@@ -109,6 +115,8 @@ kolla-kubernetes:
       containers:
       - name: horizon
     resources:
+      configmap:
+      - name: horizon-configmap
       secret:
       disk:
       pv:
@@ -126,6 +134,8 @@ kolla-kubernetes:
       containers:
       - name: rabbitmq
     resources:
+      configmap:
+      - name: rabbitmq-configmap
       secret:
       disk:
       - name: rabbitmq-disk
@@ -160,6 +170,19 @@ kolla-kubernetes:
       - name: glance-api
       - name: glance-registry
     resources:
+      configmap:
+      - name: glance-api-configmap
+      - name: glance-registry-configmap
+      - name: glance-api-haproxy-configmap
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: glance-api-haproxy
+          port_name: glance_api_port
+      - name: glance-registry-haproxy-configmap
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: glance-registry-haproxy
+          port_name: glance_registry_port
       secret:
       disk:
       - name: glance-disk
@@ -199,18 +222,8 @@ kolla-kubernetes:
       - name: glance-endpoints
         template: services/glance/glance-bootstrap-job-endpoints.yml.j2
       pod:
-      - name: glance-api-haproxy-configmap
-        template: services/common/api-haproxy-configmap.yml.j2
-        vars:
-          configmap_name: glance-api-haproxy
-          port_name: glance_api_port
       - name: glance-api-pod
         template: services/glance/glance-api-pod.yml.j2
-      - name: glance-registry-haproxy-configmap
-        template: services/common/api-haproxy-configmap.yml.j2
-        vars:
-          configmap_name: glance-registry-haproxy
-          port_name: glance_registry_port
       - name: glance-registry-pod
         template: services/glance/glance-registry-pod.yml.j2
   - name: nova
@@ -225,6 +238,11 @@ kolla-kubernetes:
       - name: nova-scheduler
       - name: nova-conductor
     resources:
+      configmap:
+      - name: nova-api-configmap
+      - name: nova-compute-configmap
+      - name: nova-conductor-configmap
+      - name: nova-scheduler-configmap
       secret:
       disk:
       pv:
@@ -271,6 +289,9 @@ kolla-kubernetes:
       containers:
       - name: openvswitch-vswitchd
     resources:
+      configmaps:
+      - name: openvswitch-db-server-configmap
+      - name: openvswitch-vswitchd-configmap
       secret:
       disk:
       pv:
@@ -299,6 +320,12 @@ kolla-kubernetes:
       containers:
       - name: neutron-server
     resources:
+      configmap:
+      - name: neutron-server-configmap
+      - name: neutron-dhcp-agent-configmap
+      - name: neutron-l3-agent-configmap
+      - name: neutron-metadata-agent-configmap
+      - name: neutron-openvswitch-agent-configmap
       secret:
       disk:
       pv:
@@ -348,6 +375,24 @@ kolla-kubernetes:
       containers:
       - name: swift-proxy-server
     resources:
+      configmap:
+      - name: swift-rsyncd-configmap
+      - name: swift-account-server-configmap
+      - name: swift-account-auditor-configmap
+      - name: swift-account-replicator-configmap
+      - name: swift-account-reaper-configmap
+      - name: swift-rsyncd-configmap
+      - name: swift-container-server-configmap
+      - name: swift-container-auditor-configmap
+      - name: swift-container-replicator-configmap
+      - name: swift-container-updater-configmap
+      - name: swift-rsyncd-configmap
+      - name: swift-object-server-configmap
+      - name: swift-object-auditor-configmap
+      - name: swift-object-replicator-configmap
+      - name: swift-object-updater-configmap
+      - name: swift-object-expirer-configmap
+      - name: swift-proxy-server-configmap
       secret:
       disk:
       pv:
@@ -396,6 +441,9 @@ kolla-kubernetes:
   - name: iscsi
     pods:
     resources:
+      configmap:
+      - name: iscsid-configmap
+      - name: tgtd-configmap
       secret:
       disk:
       pv:
@@ -416,6 +464,16 @@ kolla-kubernetes:
       - name: cinder-backup
       - name: cinder-volume
     resources:
+      configmap:
+      - name: cinder-api-configmap
+      - name: cinder-backup-configmap
+      - name: cinder-scheduler-configmap
+      - name: cinder-volume-configmap
+      - name: cinder-api-haproxy-configmap
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: cinder-api-haproxy
+          port_name: cinder_api_port
       secret:
       disk:
       pv:
@@ -436,11 +494,6 @@ kolla-kubernetes:
       - name: cinder-bootstrap-job-endpoints
         template: services/cinder/cinder-bootstrap-job-endpoints.yml.j2
       pod:
-      - name: cinder-api-haproxy-configmap
-        template: services/common/api-haproxy-configmap.yml.j2
-        vars:
-          configmap_name: cinder-api-haproxy
-          port_name: cinder_api_port
       - name: cinder-api-pod
         template: services/cinder/cinder-api-pod.yml.j2
       - name: cinder-scheduler-pod

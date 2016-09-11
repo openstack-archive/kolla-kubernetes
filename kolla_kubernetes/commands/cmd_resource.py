@@ -12,6 +12,8 @@
 
 from __future__ import print_function
 import json
+import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -20,8 +22,10 @@ import yaml
 from oslo_log import log
 
 from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
+from kolla_kubernetes.pathfinder import PathFinder
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.service_resources import Service
+from kolla_kubernetes.utils import ExecUtils
 from kolla_kubernetes.utils import FileUtils
 from kolla_kubernetes.utils import JinjaUtils
 from kolla_kubernetes.utils import YamlUtils
@@ -102,10 +106,6 @@ class ResourceTemplate(ResourceBase):
     def take_action(self, args, skip_and_return=False):
         # Validate input arguments
         self.validate_args(args)
-        if args.resource_type == 'configmap':
-            msg = ("resource-template subcommand for resource-type {} "
-                   "is not yet supported".format(args.resource_type))
-            raise Exception(msg)
         service_name = KKR.getServiceNameByResourceTypeName(args.resource_type,
                                                             args.resource_name)
         service = KKR.getServiceByName(service_name)
@@ -123,10 +123,29 @@ class ResourceTemplate(ResourceBase):
         if args.print_jinja_vars is True:
             print(YamlUtils.yaml_dict_to_string(variables), file=sys.stderr)
 
-        # process the template
-        res = JinjaUtils.render_jinja(
-            variables,
-            FileUtils.read_string_from_file(rt.getTemplatePath()))
+        res = ""
+        if args.resource_type == 'configmap' and rt.getTemplate() == 'auto':
+            nsname = 'kolla_kubernetes_namespace'
+            cmd = "kubectl create configmap {} -o yaml --dry-run"
+            cmd = cmd.format(args.resource_name)
+
+            # FIXME strip configmap out of name until its removed perminantly
+            short_name = re.sub('-configmap$', '', args.resource_name)
+            for f in PathFinder.find_config_files(short_name):
+                cmd += ' --from-file={}={}'.format(
+                    os.path.basename(f).replace("_", "-"), f)
+
+            # Execute the command
+            out, err = ExecUtils.exec_command(cmd)
+            y = yaml.load(out)
+            y['metadata']['namespace'] = variables[nsname]
+
+            res = yaml.safe_dump(y)
+        else:
+            # process the template
+            res = JinjaUtils.render_jinja(
+                variables,
+                FileUtils.read_string_from_file(rt.getTemplatePath()))
 
         if skip_and_return:
             return res
@@ -155,6 +174,7 @@ class Resource(ResourceTemplate):
             'DaemonSet': 'daemonset',
             'Job': 'job',
             'Deployment': 'deployment',
+            'ConfigMap': 'configmap',
         }
         if kind not in kind_map:
             msg = ("unknown template kind [{}].".format(kind))
@@ -163,19 +183,20 @@ class Resource(ResourceTemplate):
             with tempfile.NamedTemporaryFile() as tf:
                 tf.write(t)
                 tf.flush()
-                subprocess.call("kubectl %s -f %s" % (args.action, tf.name),
-                                shell=True)
+                s = "kubectl {} -f {} --namespace={}".format(
+                    args.action, tf.name, y['metadata']['namespace'])
+                subprocess.call(s, shell=True)
                 tf.close()
         elif args.action == "delete":
-            subprocess.call("kubectl delete %s %s"
-                            % (kind_map[kind],
-                               y['metadata']['name']),
-                            shell=True)
+            s = "kubectl delete {} {} --namespace={}".format(
+                kind_map[kind], y['metadata']['name'],
+                y['metadata']['namespace'])
+            subprocess.call(s, shell=True)
         elif args.action == 'status':
-            subprocess.call("kubectl get %s %s -o yaml"
-                            % (kind_map[kind],
-                               y['metadata']['name']),
-                            shell=True)
+            s = "kubectl get {} {} --namespace={}".format(
+                kind_map[kind], y['metadata']['name'],
+                y['metadata']['namespace'])
+            subprocess.call(s, shell=True)
 
 
 class ResourceMap(KollaKubernetesBaseCommand):
@@ -225,12 +246,6 @@ class ResourceMap(KollaKubernetesBaseCommand):
             for t in Service.VALID_RESOURCE_TYPES:
                 # Skip specific resource_types if the user has defined a filter
                 if args.resource_type is not None and args.resource_type != t:
-                    continue
-
-                # Skip special case configmaps, which are not defined in the
-                #   config file but instead are loaded from searching the kolla
-                #   configs.
-                if t == 'configmap':
                     continue
 
                 resourceTemplates = s.getResourceTemplatesByType(t)

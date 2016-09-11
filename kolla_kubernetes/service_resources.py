@@ -176,7 +176,7 @@ class Service(object):
                 continue
             # Handle definitions
             for i in self.y['resources'][rt]:
-                self.resourceTemplates[rt].append(ResourceTemplate(i))
+                self.resourceTemplates[rt].append(ResourceTemplate(i, rt))
 
     def getName(self):
         return self.y['name']
@@ -371,8 +371,11 @@ class Container(object):
 
 class ResourceTemplate(object):
 
-    def __init__(self, y):
+    def __init__(self, y, resource_type):
         # Checks
+        if resource_type == 'configmap' and \
+           'template' not in y:
+            y['template'] = 'auto'
         assert 'template' in y, str(y)  # not optional
         assert 'name' in y, str(y)  # not optional
         # Construct
