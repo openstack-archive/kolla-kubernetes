@@ -176,27 +176,34 @@ class Resource(ResourceTemplate):
             'Deployment': 'deployment',
             'ConfigMap': 'configmap',
             'Service': 'svc',
+            'PersistentVolume': 'pv',
+            'PersistentVolumeClaim': 'pvc',
         }
         if kind not in kind_map:
             msg = ("unknown template kind [{}].".format(kind))
             raise Exception(msg)
+        nsflag = ""
+        if kind != 'PersistentVolume':
+            nsflag = " --namespace={}".format(
+                y['metadata']['namespace']
+            )
         if args.action == 'create':
             with tempfile.NamedTemporaryFile() as tf:
                 tf.write(t)
                 tf.flush()
-                s = "kubectl {} -f {} --namespace={}".format(
-                    args.action, tf.name, y['metadata']['namespace'])
+                s = "kubectl {} -f {}{}".format(
+                    args.action, tf.name, nsflag)
                 subprocess.call(s, shell=True)
                 tf.close()
         elif args.action == "delete":
-            s = "kubectl delete {} {} --namespace={}".format(
+            s = "kubectl delete {} {}{}".format(
                 kind_map[kind], y['metadata']['name'],
-                y['metadata']['namespace'])
+                nsflag)
             subprocess.call(s, shell=True)
         elif args.action == 'status':
-            s = "kubectl get {} {} --namespace={}".format(
+            s = "kubectl get {} {}{}".format(
                 kind_map[kind], y['metadata']['name'],
-                y['metadata']['namespace'])
+                nsflag)
             subprocess.call(s, shell=True)
 
 

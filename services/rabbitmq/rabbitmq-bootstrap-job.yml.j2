@@ -27,7 +27,7 @@ spec:
       volumes:
         - name: rabbitmq-config
           configMap:
-            name: rabbitmq-configmap
+            name: rabbitmq
         - name: rabbitmq-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}

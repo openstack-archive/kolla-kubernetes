@@ -90,19 +90,19 @@ spec:
   volumes:
     - name: swift-rsyncd-config
       configMap:
-        name: swift-rsyncd-configmap
+        name: swift-rsyncd
     - name: swift-account-server-config
       configMap:
-        name: swift-account-server-configmap
+        name: swift-account-server
     - name: swift-account-auditor-config
       configMap:
-        name: swift-account-auditor-configmap
+        name: swift-account-auditor
     - name: swift-account-replicator-config
       configMap:
-        name: swift-account-replicator-configmap
+        name: swift-account-replicator
     - name: swift-account-reaper-config
       configMap:
-        name: swift-account-reaper-configmap
+        name: swift-account-reaper
     - name: swift-config
       hostPath:
         path: {{ node_config_directory }}/swift/

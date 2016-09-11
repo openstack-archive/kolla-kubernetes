@@ -33,7 +33,7 @@ spec:
       volumes:
         - name: mariadb-config
           configMap:
-            name: mariadb-configmap
+            name: mariadb
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}

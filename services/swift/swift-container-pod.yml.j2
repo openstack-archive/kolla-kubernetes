@@ -92,19 +92,19 @@ spec:
   volumes:
     - name: swift-rsyncd-config
       configMap:
-        name: swift-rsyncd-configmap
+        name: swift-rsyncd
     - name: swift-container-server-config
       configMap:
-        name: swift-container-server-configmap
+        name: swift-container-server
     - name: swift-container-auditor-config
       configMap:
-        name: swift-container-auditor-configmap
+        name: swift-container-auditor
     - name: swift-container-replicator-config
       configMap:
-        name: swift-container-replicator-configmap
+        name: swift-container-replicator
     - name: swift-container-updater-config
       configMap:
-        name: swift-container-updater-configmap
+        name: swift-container-updater
     - name: swift-config
       hostPath:
         path: {{ node_config_directory }}/swift/
