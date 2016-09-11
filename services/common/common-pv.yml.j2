@@ -1,4 +1,4 @@
-{%- set resourceName = kolla_kubernetes.cli.args.service_name %}
+{%- set resourceName = kolla_kubernetes.template.vars.name %}
 
 {%- if storage_provider in ["host", "ceph", "gce"] -%}
 

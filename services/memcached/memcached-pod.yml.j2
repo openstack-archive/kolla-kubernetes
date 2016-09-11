@@ -29,7 +29,7 @@ spec:
       volumes:
         - name: memcached-config
           configMap:
-            name: memcached-configmap
+            name: memcached
 metadata:
    name: memcached
    namespace: {{ kolla_kubernetes_namespace }}

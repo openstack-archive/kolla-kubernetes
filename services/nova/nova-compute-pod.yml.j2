@@ -87,7 +87,7 @@ spec:
       volumes:
         - name: nova-compute-config
           configMap:
-            name: nova-compute-configmap
+            name: nova-compute
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova

@@ -36,7 +36,7 @@ spec:
       volumes:
         - name: glance-api-config
           configMap:
-            name: glance-api-configmap
+            name: glance-api
 {% if glance_backend_ceph != "yes" %}
         - name: glance-persistent-storage
           persistentVolumeClaim:

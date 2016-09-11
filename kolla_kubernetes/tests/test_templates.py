@@ -18,6 +18,8 @@ from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.tests import base
 
 KKR = KollaKubernetesResources.Get()
+# FIXME configmap should be here, but requires config to be done in tox.
+# as it seems to change home.
 RESOURCE_TYPES = ('secret pv pvc svc bootstrap pod').split(" ")
 
 technical_debt = {
@@ -93,7 +95,7 @@ class TestTemplatesTest(base.BaseTestCase):
                         if part.lower() in ('petset', 'deployment', 'job',
                                             'replicationcontroller', 'pod',
                                             'daemonset', 'configmap',
-                                            'secret',
+                                            'secret', 'configmap'
                                             'ps', 'pv', 'pvc', 'disk',
                                             'ds', 'persistentvolume',
                                             'persistentvolumeclaim') and \

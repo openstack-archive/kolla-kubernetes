@@ -42,7 +42,7 @@ kolla-kubernetes:
     resources:
       secret:
       configmap:
-      - name: mariadb-configmap
+      - name: mariadb
       disk:
       - name: mariadb
         template: services/common/common-disk.sh.j2
@@ -52,11 +52,13 @@ kolla-kubernetes:
       - name: mariadb
         template: services/common/common-pv.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       pvc:
       - name: mariadb
         template: services/common/common-pvc.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       svc:
       - name: mariadb
@@ -74,7 +76,7 @@ kolla-kubernetes:
       - name: memcached
     resources:
       configmap:
-      - name: memcached-configmap
+      - name: memcached
       secret:
       disk:
       pv:
@@ -93,7 +95,7 @@ kolla-kubernetes:
       - name: keystone
     resources:
       configmap:
-      - name: keystone-configmap
+      - name: keystone
       secret:
       disk:
       pv:
@@ -116,7 +118,7 @@ kolla-kubernetes:
       - name: horizon
     resources:
       configmap:
-      - name: horizon-configmap
+      - name: horizon
       secret:
       disk:
       pv:
@@ -135,7 +137,7 @@ kolla-kubernetes:
       - name: rabbitmq
     resources:
       configmap:
-      - name: rabbitmq-configmap
+      - name: rabbitmq
       secret:
       disk:
       - name: rabbitmq
@@ -146,11 +148,13 @@ kolla-kubernetes:
       - name: rabbitmq
         template: services/common/common-pv.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       pvc:
       - name: rabbitmq
         template: services/common/common-pvc.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       svc:
       - name: rabbitmq-management
@@ -171,14 +175,14 @@ kolla-kubernetes:
       - name: glance-registry
     resources:
       configmap:
-      - name: glance-api-configmap
-      - name: glance-registry-configmap
-      - name: glance-api-haproxy-configmap
+      - name: glance-api
+      - name: glance-registry
+      - name: glance-api-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
           configmap_name: glance-api-haproxy
           port_name: glance_api_port
-      - name: glance-registry-haproxy-configmap
+      - name: glance-registry-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
           configmap_name: glance-registry-haproxy
@@ -193,11 +197,13 @@ kolla-kubernetes:
       - name: glance
         template: services/common/common-pv.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       pvc:
       - name: glance
         template: services/common/common-pvc.yml.j2
         vars:
+          name: mariadb
           size_in_gb: 10
       svc:
       - name: glance-api
@@ -239,10 +245,10 @@ kolla-kubernetes:
       - name: nova-conductor
     resources:
       configmap:
-      - name: nova-api-configmap
-      - name: nova-compute-configmap
-      - name: nova-conductor-configmap
-      - name: nova-scheduler-configmap
+      - name: nova-api
+      - name: nova-compute
+      - name: nova-conductor
+      - name: nova-scheduler
       secret:
       disk:
       pv:
@@ -290,8 +296,8 @@ kolla-kubernetes:
       - name: openvswitch-vswitchd
     resources:
       configmaps:
-      - name: openvswitch-db-server-configmap
-      - name: openvswitch-vswitchd-configmap
+      - name: openvswitch-db-server
+      - name: openvswitch-vswitchd
       secret:
       disk:
       pv:
@@ -333,11 +339,11 @@ kolla-kubernetes:
       - name: neutron-server
     resources:
       configmap:
-      - name: neutron-server-configmap
-      - name: neutron-dhcp-agent-configmap
-      - name: neutron-l3-agent-configmap
-      - name: neutron-metadata-agent-configmap
-      - name: neutron-openvswitch-agent-configmap
+      - name: neutron-server
+      - name: neutron-dhcp-agent
+      - name: neutron-l3-agent
+      - name: neutron-metadata-agent
+      - name: neutron-openvswitch-agent
       secret:
       disk:
       pv:
@@ -406,23 +412,23 @@ kolla-kubernetes:
       - name: swift-proxy-server
     resources:
       configmap:
-      - name: swift-rsyncd-configmap
-      - name: swift-account-server-configmap
-      - name: swift-account-auditor-configmap
-      - name: swift-account-replicator-configmap
-      - name: swift-account-reaper-configmap
-      - name: swift-rsyncd-configmap
-      - name: swift-container-server-configmap
-      - name: swift-container-auditor-configmap
-      - name: swift-container-replicator-configmap
-      - name: swift-container-updater-configmap
-      - name: swift-rsyncd-configmap
-      - name: swift-object-server-configmap
-      - name: swift-object-auditor-configmap
-      - name: swift-object-replicator-configmap
-      - name: swift-object-updater-configmap
-      - name: swift-object-expirer-configmap
-      - name: swift-proxy-server-configmap
+      - name: swift-rsyncd
+      - name: swift-account-server
+      - name: swift-account-auditor
+      - name: swift-account-replicator
+      - name: swift-account-reaper
+      - name: swift-rsyncd
+      - name: swift-container-server
+      - name: swift-container-auditor
+      - name: swift-container-replicator
+      - name: swift-container-updater
+      - name: swift-rsyncd
+      - name: swift-object-server
+      - name: swift-object-auditor
+      - name: swift-object-replicator
+      - name: swift-object-updater
+      - name: swift-object-expirer
+      - name: swift-proxy-server
       secret:
       disk:
       pv:
@@ -472,8 +478,8 @@ kolla-kubernetes:
     pods:
     resources:
       configmap:
-      - name: iscsid-configmap
-      - name: tgtd-configmap
+      - name: openvswitch-iscsid
+      - name: openvswitch-tgtd
       secret:
       disk:
       pv:
@@ -495,11 +501,11 @@ kolla-kubernetes:
       - name: cinder-volume
     resources:
       configmap:
-      - name: cinder-api-configmap
-      - name: cinder-backup-configmap
-      - name: cinder-scheduler-configmap
-      - name: cinder-volume-configmap
-      - name: cinder-api-haproxy-configmap
+      - name: cinder-api
+      - name: cinder-backup
+      - name: cinder-scheduler
+      - name: cinder-volume
+      - name: cinder-api-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
           configmap_name: cinder-api-haproxy
