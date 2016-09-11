@@ -34,7 +34,7 @@ spec:
                 "],
                 "volumeMounts": [
                     {
-                        "name": "neutron-l3-agent-configmap",
+                        "name": "neutron-dhcp-agent-configmap",
                         "mountPath": "/srv/configmap"
                     },
                     {
@@ -99,8 +99,10 @@ spec:
               value: {{ config_strategy }}
       volumes:
         - name: neutron-dhcp-agent-config
+          emptyDir: {}
+        - name: neutron-dhcp-agent-configmap
           configMap:
-            name: neutron-dhcp-agent-configmap
+            name: neutron-dhcp-agent
             items:
             - key: neutron.conf
               path: neutron.conf

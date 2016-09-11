@@ -30,7 +30,7 @@ spec:
   volumes:
     - name: swift-proxy-server-config
       configMap:
-        name: swift-proxy-server-configmap
+        name: swift-proxy-server
     - name: swift-config
       hostPath:
         path: {{ node_config_directory }}/swift/
