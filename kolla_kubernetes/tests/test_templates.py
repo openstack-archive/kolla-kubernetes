@@ -21,40 +21,14 @@ KKR = KollaKubernetesResources.Get()
 RESOURCE_TYPES = ('secret pv pvc svc bootstrap pod').split(" ")
 
 technical_debt = {
-    'nodeSelector': [
-        ['pod', 'openvswitch', 'openvswitch-db'],
-        ['pod', 'openvswitch', 'openvswitch-vswitchd'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap'],
-        ['pod', 'neutron', 'neutron-control'],
-        ['pod', 'neutron', 'neutron-dhcp-agent'],
-        ['pod', 'neutron', 'neutron-l3-agent'],
-        ['pod', 'neutron', 'neutron-metadata-agent'],
-    ],
-    'namespaceNotFound': [
-        ['svc', 'neutron', 'neutron-server'],
-        ['pod', 'neutron', 'neutron-openvswitch-agent'],
-        ['pod', 'horizon', 'horizon'],
-        ['bootstrap', 'neutron', 'neutron-bootstrap'],
-        ['pod', 'neutron', 'neutron-control'],
-        ['pod', 'neutron', 'neutron-dhcp-agent'],
-        ['pod', 'neutron', 'neutron-l3-agent'],
-        ['pod', 'neutron', 'neutron-metadata-agent'],
-    ],
+    'nodeSelector': [],
+    'namespaceNotFound': [],
     'namespaceInTemplate': [],
     'namespaceHardCoded': [],
     'nameInTemplateMetadata': [],
     'mainContainer': [],
-    'resourceNameObjNameNoMatch': [
-        ['pod', 'glance', 'glance-api-haproxy-configmap'],
-        ['pod', 'glance', 'glance-registry-haproxy-configmap'],
-        ['pod', 'cinder', 'cinder-api-haproxy-configmap'],
-    ],
-    'typeInName': [
-        ['pod', 'glance', 'glance-api-haproxy-configmap'],
-        ['pod', 'glance', 'glance-registry-haproxy-configmap'],
-        ['pod', 'cinder', 'cinder-api-haproxy-configmap']
-    ]
+    'resourceNameObjNameNoMatch': [],
+    'typeInName': []
 }
 
 
