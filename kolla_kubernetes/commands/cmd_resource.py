@@ -175,6 +175,7 @@ class Resource(ResourceTemplate):
             'Job': 'job',
             'Deployment': 'deployment',
             'ConfigMap': 'configmap',
+            'Service': 'svc',
         }
         if kind not in kind_map:
             msg = ("unknown template kind [{}].".format(kind))
