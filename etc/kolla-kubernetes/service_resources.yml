@@ -282,9 +282,9 @@ kolla-kubernetes:
         template: services/nova/nova-control-scheduler-pod.yml.j2
   - name: openvswitch
     pods:
-    - name: openvswitch-db
+    - name: openvswitch-ovsdb
       containers:
-      - name: openvswitch-db
+      - name: openvswitch-ovsdb
     - name: openvswitch-vswitchd
       containers:
       - name: openvswitch-vswitchd
@@ -299,10 +299,22 @@ kolla-kubernetes:
       svc:
       bootstrap:
       pod:
-      - name: openvswitch-db
-        template: services/openvswitch/ovsdb-daemonset.yml.j2
-      - name: openvswitch-vswitchd
-        template: services/openvswitch/vswitchd-daemonset.yml.j2
+      - name: openvswitch-ovsdb-compute
+        template: services/openvswitch/openvswitch-ovsdb-daemonset.yml.j2
+        vars:
+          type: compute
+      - name: openvswitch-ovsdb-network
+        template: services/openvswitch/openvswitch-ovsdb-daemonset.yml.j2
+        vars:
+          type: network
+      - name: openvswitch-vswitchd-compute
+        template: services/openvswitch/openvswitch-vswitchd-daemonset.yml.j2
+        vars:
+          type: compute
+      - name: openvswitch-vswitchd-network
+        template: services/openvswitch/openvswitch-vswitchd-daemonset.yml.j2
+        vars:
+          type: network
   - name: neutron
     pods:
     - name: neutron-compute
@@ -316,7 +328,7 @@ kolla-kubernetes:
       - name: neutron-l3-agent
       - name: neutron-dhcp-agent
       - name: neutron-metadata-agent
-    - name: neutron-control
+    - name: neutron-server
       containers:
       - name: neutron-server
     resources:
@@ -337,16 +349,34 @@ kolla-kubernetes:
       - name: neutron-bootstrap
         template: services/neutron/neutron-bootstrap-job.yml.j2
       pod:
-      - name: neutron-openvswitch-agent
+      - name: neutron-openvswitch-agent-compute
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
-      - name: neutron-control
-        template: services/neutron/neutron-control-pod.yml.j2
+        vars:
+          type: compute
+      - name: neutron-openvswitch-agent-network
+        template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
+        vars:
+          type: network
+      - name: neutron-server
+        template: services/neutron/neutron-server-pod.yml.j2
       - name: neutron-dhcp-agent
-        template: services/neutron/neutron-dhcp-agent-pod.yml.j2
-      - name: neutron-l3-agent
-        template: services/neutron/neutron-l3-agent-pod.yml.j2
-      - name: neutron-metadata-agent
-        template: services/neutron/neutron-metadata-agent-pod.yml.j2
+        template: services/neutron/neutron-dhcp-agent-daemonset.yml.j2
+      - name: neutron-l3-agent-network
+        template: services/neutron/neutron-l3-agent-daemonset.yml.j2
+        vars:
+          type: network
+      - name: neutron-l3-agent-compute
+        template: services/neutron/neutron-l3-agent-daemonset.yml.j2
+        vars:
+          type: compute
+      - name: neutron-metadata-agent-network
+        template: services/neutron/neutron-metadata-agent-daemonset.yml.j2
+        vars:
+          type: network
+      - name: neutron-metadata-agent-compute
+        template: services/neutron/neutron-metadata-agent-daemonset.yml.j2
+        vars:
+          type: compute
   - name: swift
     pods:
     - name: swift-account
