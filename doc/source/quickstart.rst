@@ -53,8 +53,11 @@ to "shared" and restart Docker.
 ::
 
    # CentOS (and other systemd distros)
-   # Edit /usr/lib/system/systemd/docker.service to set:
+   cat > /etc/systemd/system/docker.service <<EOF
+   .include /usr/lib/systemd/system/docker.service
+   [Service]
    MountFlags=shared
+   EOF
 
    # Restart the Docker daemon
    systemctl daemon-reload
