@@ -227,6 +227,8 @@ kolla-kubernetes:
         template: services/glance/glance-bootstrap-job-create-db.yml.j2
       - name: glance-manage-db
         template: services/glance/glance-bootstrap-job-manage-db.yml.j2
+        vars:
+          pvc_name: glance
       - name: glance-endpoints
         template: services/glance/glance-bootstrap-job-endpoints.yml.j2
       pod:
