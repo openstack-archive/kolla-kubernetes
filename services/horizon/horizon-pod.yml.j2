@@ -1,13 +1,40 @@
-apiVersion: v1
-kind: ReplicationController
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: horizon
+   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   replicas: {{ horizon_replicas }}
-  selector:
-      service: horizon
+  strategy:
   template:
     metadata:
       labels:
         service: horizon
+        type: api
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                   sed -i ''s|^OPENSTACK_HOST.*=.*|OPENSTACK_HOST=''\"{{ kolla_kubernetes_external_vip }}''\"|g'' /srv/pod-main-config/local_settings;
+              "],
+              "volumeMounts": [
+                  {
+                      "name": "horizon-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          }
+      ]'
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_horizon |
@@ -18,17 +45,20 @@ spec:
         - name: main
           image: "{{ horizon_image_full }}"
           volumeMounts:
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
-              name: horizon-configmap
+              name: pod-main-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-          ports:
-            - containerPort: 80
-              name: http
-            - containerPort: 443
-              name: https
       volumes:
+        - name: pod-main-config
+          emptyDir: {}
         - name: horizon-configmap
           configMap:
             name: horizon
@@ -39,6 +69,11 @@ spec:
               path: config.json
             - key: local-settings
               path: local_settings
-metadata:
-   name: horizon
-   namespace: {{ kolla_kubernetes_namespace }}
+        - name: horizon-haproxy-config
+          configMap:
+            name: horizon-haproxy
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
