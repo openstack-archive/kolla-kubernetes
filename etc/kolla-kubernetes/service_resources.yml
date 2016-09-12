@@ -66,6 +66,8 @@ kolla-kubernetes:
       bootstrap:
       - name: mariadb-bootstrap
         template: services/mariadb/mariadb-bootstrap-job.yml.j2
+        vars:
+          pvc_name: mariadb
       pod:
       - name: mariadb
         template: services/mariadb/mariadb-pod.yml.j2

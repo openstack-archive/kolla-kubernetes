@@ -36,6 +36,6 @@ spec:
             name: mariadb
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ resourceName }}
+            claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
         - name: kolla-logs
           emptyDir: {}
