@@ -19,19 +19,15 @@ import sys
 import tempfile
 import yaml
 
-from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
-from kolla_kubernetes.pathfinder import PathFinder
-from kolla_kubernetes.service_resources import KollaKubernetesResources
-from kolla_kubernetes.service_resources import Service
-from kolla_kubernetes.utils import ExecUtils
-from kolla_kubernetes.utils import FileUtils
-from kolla_kubernetes.utils import JinjaUtils
-from kolla_kubernetes.utils import YamlUtils
+from kolla_kubernetes.commands import base_command
+from kolla_kubernetes import pathfinder
+from kolla_kubernetes import service_resources
+from kolla_kubernetes import utils
 
-KKR = KollaKubernetesResources.Get()
+KKR = service_resources.KollaKubernetesResources.Get()
 
 
-class ResourceBase(KollaKubernetesBaseCommand):
+class ResourceBase(base_command.KollaKubernetesBaseCommand):
     """Create, delete, or query status for kolla-kubernetes resources"""
 
     def get_parser(self, prog_name, skip_action=False):
@@ -40,25 +36,30 @@ class ResourceBase(KollaKubernetesBaseCommand):
             parser.add_argument(
                 "action",
                 metavar="<action>",
-                help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
+                help=("One of [%s]" % ("|".join(service_resources.Service.
+                                                VALID_ACTIONS)))
             )
         parser.add_argument(
             "resource_type",
             metavar="<resource-type>",
-            help=("One of [%s]" % ("|".join(Service.VALID_RESOURCE_TYPES)))
+            help=("One of [%s]" % ("|".join(service_resources.Service.
+                                            VALID_RESOURCE_TYPES)))
         )
         return parser
 
     def validate_args(self, args, skip_action=False):
-        if not skip_action and args.action not in Service.VALID_ACTIONS:
+        if not skip_action and args.action not in service_resources.Service.\
+                VALID_ACTIONS:
             msg = ("action [{}] not in valid actions [{}]".format(
                 args.action,
-                "|".join(Service.VALID_ACTIONS)))
+                "|".join(service_resources.Service.VALID_ACTIONS)))
             raise Exception(msg)
-        if args.resource_type not in Service.VALID_RESOURCE_TYPES:
+        if args.resource_type not in service_resources.Service.\
+                VALID_RESOURCE_TYPES:
             msg = ("resource_type [{}] not in valid resource_types [{}]"
                    .format(args.resource_type,
-                           "|".join(Service.VALID_RESOURCE_TYPES)))
+                           "|".join(service_resources.Service.
+                                    VALID_RESOURCE_TYPES)))
             raise Exception(msg)
 
 
@@ -122,6 +123,7 @@ class ResourceTemplate(ResourceBase):
     def take_action(self, args, skip_and_return=False):
         # Validate input arguments
         self.validate_args(args)
+
         multi = len(args.resource_name) != 1
         multidoc = {
             'apiVersion': 'v1',
@@ -147,7 +149,7 @@ class ResourceTemplate(ResourceBase):
 
             # handle the debug option --print-jinja-vars
             if args.print_jinja_vars is True:
-                print(YamlUtils.yaml_dict_to_string(variables),
+                print(utils.YamlUtils.yaml_dict_to_string(variables),
                       file=sys.stderr)
 
             if args.resource_type == 'configmap' and \
@@ -156,21 +158,23 @@ class ResourceTemplate(ResourceBase):
                 cmd = "kubectl create configmap {} -o yaml --dry-run"
                 cmd = cmd.format(resource_name)
 
-                for f in PathFinder.find_config_files(resource_name):
+                for f in pathfinder.PathFinder.find_config_files(
+                        resource_name):
                     cmd += ' --from-file={}={}'.format(
                         os.path.basename(f).replace("_", "-"), f)
 
                 # Execute the command
-                out, err = ExecUtils.exec_command(cmd)
+                out, err = utils.ExecUtils.exec_command(cmd)
                 y = yaml.load(out)
                 y['metadata']['namespace'] = variables[nsname]
 
                 res = y
             else:
                 # process the template
-                raw_doc = JinjaUtils.render_jinja(
+                raw_doc = utils.JinjaUtils.render_jinja(
                     variables,
-                    FileUtils.read_string_from_file(rt.getTemplatePath()))
+                    utils.FileUtils.read_string_from_file(
+                        rt.getTemplatePath()))
                 res = yaml.load(raw_doc)
 
             if args.debug_container is not None:
@@ -348,7 +352,7 @@ class Resource(ResourceTemplate):
                                    args.action)
 
 
-class ResourceMap(KollaKubernetesBaseCommand):
+class ResourceMap(base_command.KollaKubernetesBaseCommand):
     """List available kolla-kubernetes resources to be created or deleted"""
 
     # If the operator has any question on what Services have what resources,
@@ -362,7 +366,7 @@ class ResourceMap(KollaKubernetesBaseCommand):
             "--resource-type",
             metavar="<resource-type>",
             help=("Filter by one of [%s]" % (
-                "|".join(Service.VALID_RESOURCE_TYPES)))
+                "|".join(service_resources.Service.VALID_RESOURCE_TYPES)))
         )
         parser.add_argument(
             "--service-name",
@@ -392,7 +396,7 @@ class ResourceMap(KollaKubernetesBaseCommand):
             if args.output == 'text':
                 print('service[{}]'.format(s.getName()))
 
-            for t in Service.VALID_RESOURCE_TYPES:
+            for t in service_resources.Service.VALID_RESOURCE_TYPES:
                 # Skip specific resource_types if the user has defined a filter
                 if args.resource_type is not None and args.resource_type != t:
                     continue
