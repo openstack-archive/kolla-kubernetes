@@ -15,18 +15,12 @@ import os
 import sys
 import time
 
-from oslo_config import cfg
-from oslo_log import log as logging
-
 from kolla_kubernetes.kube_service_status import KubeResourceTypeStatus
 from kolla_kubernetes.pathfinder import PathFinder
 from kolla_kubernetes.utils import ExecUtils
 from kolla_kubernetes.utils import JinjaUtils
 from kolla_kubernetes.utils import StringUtils
 from kolla_kubernetes.utils import YamlUtils
-
-CONF = cfg.CONF
-LOG = logging.getLogger()
 
 
 class KollaKubernetesResources(object):

@@ -10,15 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 import sys
 
 from kolla_kubernetes import exception
-from oslo_config import cfg
-
-CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
 
 
 class PathFinder(object):

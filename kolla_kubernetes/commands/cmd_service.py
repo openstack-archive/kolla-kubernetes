@@ -12,13 +12,9 @@
 
 from __future__ import print_function
 
-from oslo_log import log
-
 from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.service_resources import Service
-
-LOG = log.getLogger(__name__)
 
 KKR = KollaKubernetesResources.Get()
 
