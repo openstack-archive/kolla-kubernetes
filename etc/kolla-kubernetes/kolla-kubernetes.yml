@@ -165,6 +165,7 @@ cinder_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s
 cinder_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_api_port_nodeport: "30877"
+cinder_database_address: "mariadb"
 
 #######################
 # Configuration below, allows to configure multiple backends for Cinder.
