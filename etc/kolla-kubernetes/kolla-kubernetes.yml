@@ -202,3 +202,9 @@ cinder_storage_list:
      ip: "10.57.120.13"
      vg_name: "local-volumes"
 storage_interface: "eth0"
+
+########################
+# Horizon variables
+########################
+horizon_http_nodeport: "30080"
+horizon_https_nodeport: "30433"
