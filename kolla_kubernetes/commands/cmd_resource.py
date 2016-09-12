@@ -176,6 +176,8 @@ class Resource(ResourceTemplate):
             'Deployment': 'deployment',
             'ConfigMap': 'configmap',
             'Service': 'svc',
+            'PersistentVolumeClaim': 'pvc',
+            'PersistentVolume': 'pv',
         }
         if kind not in kind_map:
             msg = ("unknown template kind [{}].".format(kind))
