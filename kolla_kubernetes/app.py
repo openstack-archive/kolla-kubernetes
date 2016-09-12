@@ -16,7 +16,7 @@ import sys
 
 from cliff import app
 from cliff import commandmanager
-from cliff.help import HelpAction
+from cliff import help
 
 from kolla_kubernetes.version import version_info
 
@@ -48,7 +48,7 @@ class KollaKubernetesApp(app.App):
     def _print_help(self):
         """Generate the help string using cliff.help.HelpAction."""
 
-        action = HelpAction(None, None, default=self)
+        action = help.HelpAction(None, None, default=self)
         action(self.parser, self.options, None, None)
 
     def initialize_app(self, argv):
