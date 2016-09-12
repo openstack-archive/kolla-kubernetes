@@ -12,14 +12,14 @@
 
 from __future__ import print_function
 
-from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
-from kolla_kubernetes.service_resources import KollaKubernetesResources
-from kolla_kubernetes.service_resources import Service
-
-KKR = KollaKubernetesResources.Get()
+from kolla_kubernetes.commands import base_command
+from kolla_kubernetes import service_resources
 
 
-class _ServiceCommand(KollaKubernetesBaseCommand):
+KKR = service_resources.KollaKubernetesResources.Get()
+
+
+class _ServiceCommand(base_command.KollaKubernetesBaseCommand):
 
     _action = None  # must be set in derived classes
 
@@ -44,11 +44,14 @@ class _ServiceCommand(KollaKubernetesBaseCommand):
 
         service = KKR.getServiceByName(args.service_name)
         if (self._action == 'bootstrap'):
-            service.do_apply('create', Service.LEGACY_BOOTSTRAP_RESOURCES)
+            service.do_apply(
+                'create', service_resources.Service.LEGACY_BOOTSTRAP_RESOURCES)
         elif (self._action == 'run'):
-            service.do_apply('create', Service.LEGACY_RUN_RESOURCES)
+            service.do_apply('create',
+                             service_resources.Service.LEGACY_RUN_RESOURCES)
         elif (self._action == 'kill'):
-            service.do_apply('delete', Service.VALID_RESOURCE_TYPES)
+            service.do_apply('delete',
+                             service_resources.Service.VALID_RESOURCE_TYPES)
         else:
             raise Exception("Code Error")
 
