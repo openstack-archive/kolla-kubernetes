@@ -2,12 +2,26 @@ apiVersion: v1
 kind: Service
 spec:
   ports:
-    - name: http
-      port: 80
-    - name: https
-      port: 443
+    - port: 80 
+      targetPort: 80
+      name: http
+{%- if horizon_http_nodeport is defined %}
+      nodePort: {{ horizon_http_nodeport }}
+{%- endif %}
+    - port: 443
+      targetPort: 443
+      name: https
+{%- if horizon_https_nodeport is defined %}
+      nodePort: {{ horizon_https_nodeport }}
+{%- endif %}
+{%- if horizon_http_nodeport is defined %}
+  type: NodePort
+{%- else %}
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
+{%- endif %}
   selector:
-    service: horizon
+    service: horizon 
 metadata:
    name: horizon
    namespace: {{ kolla_kubernetes_namespace }}
