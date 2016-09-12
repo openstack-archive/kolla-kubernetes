@@ -119,6 +119,11 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: horizon
+      - name: horizon-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: horizon-haproxy
+          port_name: http
       secret:
       disk:
       pv:
