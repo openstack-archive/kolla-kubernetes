@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: neutron-bootstrap
+  name: neutron-endpoints
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
@@ -10,68 +10,6 @@ spec:
 {%- set selector = kolla_kubernetes_hostlabel_controller %}
           {{ selector.key }}: {{ selector.value }}
       containers:
-        - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-database
-          command: ["bash", "-c"]
-          args:
-            - ansible localhost -m mysql_db -a
-              "login_host='{{ neutron_database_address }}'
-               login_port='{{ mariadb_port }}'
-               login_user='{{ database_user }}'
-               login_password='$DATABASE_PASSWORD'
-               name='{{ neutron_database_name }}'"
-          env:
-            - name: ANSIBLE_NOCOLOR
-              value: "1"
-            - name: ANSIBLE_LIBRARY
-              value: "/usr/share/ansible"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: database-password
-                  key: password
-        - image: "{{ kolla_toolbox_image_full }}"
-          name: creating-user-permissions
-          command: ["sh", "-c"]
-          args:
-            - ansible localhost -m mysql_user -a
-              "login_host='{{ neutron_database_address }}'
-               login_port='{{ mariadb_port }}'
-               login_user='{{ database_user }}'
-               login_password='$DATABASE_PASSWORD'
-               name='{{ neutron_database_name }}'
-               password='$NEUTRON_DATABASE_PASSWORD'
-               host='%'
-               priv='{{ neutron_database_name }}.*:ALL'
-               append_privs='yes'"
-          env:
-            - name: ANSIBLE_NOCOLOR
-              value: "1"
-            - name: ANSIBLE_LIBRARY
-              value: "/usr/share/ansible"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: database-password
-                  key: password
-            - name: NEUTRON_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: neutron-database-password
-                  key: password
-        - image: "{{ neutron_server_image_full }}"
-          name: neutron-server
-          env:
-            - name: KOLLA_BOOTSTRAP
-              value: ""
-            - name: KOLLA_CONFIG_STRATEGY
-              value: "{{ config_strategy }}"
-          volumeMounts:
-            - mountPath: {{ container_config_directory }}
-              name: neutron-server-config
-              readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-neutron-service-and-endpoint-admin
           command: ["sh", "-c"]
@@ -87,12 +25,10 @@ spec:
                auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
                "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -118,12 +54,10 @@ spec:
                auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
                "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -149,12 +83,10 @@ spec:
                auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
                "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -178,12 +110,10 @@ spec:
                auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
                "-e" "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
           volumeMounts:
-            - mountPath: /dev
-              name: dev
-            - mountPath: /run
-              name: run
             - mountPath: /var/log/kolla
               name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -200,22 +130,6 @@ spec:
                   name: neutron-keystone-password
                   key: password
       volumes:
-        - name: neutron-server-config
-          configMap:
-            name: neutron-server
-            items:
-            - key: neutron.conf
-              path: neutron.conf
-            - key: config.json
-              path: config.json
-            - key: ml2-conf.ini
-              path: ml2_conf.ini
-        - name: dev
-          hostPath:
-            path: /dev
-        - name: run
-          hostPath:
-            path: /run
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
