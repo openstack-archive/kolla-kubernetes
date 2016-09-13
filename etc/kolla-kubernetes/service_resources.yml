@@ -367,8 +367,23 @@ kolla-kubernetes:
         template: services/neutron/neutron-bootstrap-job-create-db.yml.j2
       - name: neutron-manage-db
         template: services/neutron/neutron-bootstrap-job-manage-db.yml.j2
-      - name: neutron-endpoints
+      - name: neutron-admin-endpoint
         template: services/neutron/neutron-bootstrap-job-endpoints.yml.j2
+        vars:
+          url: neutron_admin_endpoint
+          interface: admin
+      - name: neutron-internal-endpoint
+        template: services/neutron/neutron-bootstrap-job-endpoints.yml.j2
+        vars:
+          url: neutron_internal_endpoint
+          interface: internal
+      - name: neutron-public-endpoint
+        template: services/neutron/neutron-bootstrap-job-endpoints.yml.j2
+        vars:
+          url: neutron_public_endpoint
+          interface: public
+      - name: neutron-role
+        template: services/neutron/neutron-bootstrap-job-role.yml.j2
       pod:
       - name: neutron-openvswitch-agent-compute
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2

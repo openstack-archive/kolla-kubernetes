@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: neutron-{{ kolla_kubernetes.template.vars.interface }}-endpoint
+  name: neutron-role
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   template:
@@ -14,16 +14,15 @@ spec:
           name: main
           command: ["sh", "-c"]
           args:
-            - /usr/bin/ansible localhost -m kolla_keystone_service
-              -a "service_name=neutron
-                  service_type=network
-                  description='Openstack Networking'
-                  endpoint_region={{ openstack_region_name }}
-                  url='{{ global[kolla_kubernetes.template.vars.url] }}'
-                  interface='{{ kolla_kubernetes.template.vars.interface }}'
-                  region_name={{ openstack_region_name }}
-                  auth={{ '{{' }} openstack_neutron_auth {{ '}}' }}"
-              -e "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+            - /usr/bin/ansible localhost
+                  -m kolla_keystone_user
+                  -a "project=service
+                      user=neutron
+                      password=$NEUTRON_KEYSTONE_PASSWORD
+                      role=admin
+                      region_name={{ openstack_region_name }}
+                      auth={{ '{{ openstack_neutron_auth }}' }}"
+                  -e "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
             - name: NEUTRON_KEYSTONE_PASSWORD
               valueFrom:
                secretKeyRef:
