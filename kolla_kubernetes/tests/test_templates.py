@@ -102,7 +102,7 @@ class TestTemplatesTest(base.BaseTestCase):
                            unknown_technical_debt(args, 'typeInName'):
                             raise Exception("type in name. [%s]" % part)
                     if service_names.get(template_name, False) and \
-                        len(templates) != 1:
+                        len(templates) != 1 and resource_type != 'svc':
                         s = "Resource name %s matches service name and" \
                             " there are more then one resource." \
                             % template_name

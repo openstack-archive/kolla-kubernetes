@@ -143,7 +143,7 @@ spec:
 {% if glance_backend_ceph != "yes" %}
         - name: glance-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ resourceName }}
+            claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
 {% endif %}
         - name: etc-localtime
           hostPath:
