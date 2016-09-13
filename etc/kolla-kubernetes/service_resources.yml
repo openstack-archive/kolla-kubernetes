@@ -166,6 +166,8 @@ kolla-kubernetes:
       bootstrap:
       - name: rabbitmq-bootstrap
         template: services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
+        vars:
+          pvc_name: rabbitmq
       pod:
       - name: rabbitmq
         template: services/rabbitmq/rabbitmq-pod.yml.j2

@@ -30,7 +30,7 @@ spec:
             name: rabbitmq
         - name: rabbitmq-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ resourceName }}
+            claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
         - name: kolla-logs
           emptyDir: {}
       restartPolicy: OnFailure
