@@ -12,7 +12,9 @@ data:
       daemon
       log /var/lib/kolla/heka/log local0
       maxconn 4000
-      stats socket /var/lib/kolla/haproxy/haproxy.sock
+      # commented out for now. Doesn't work on haproxy from kolla 2.x
+      # its unused anyway.
+      #stats socket /var/lib/kolla/haproxy/haproxy.sock
 
     defaults
       log global

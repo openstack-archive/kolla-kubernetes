@@ -161,7 +161,7 @@ kolla-kubernetes:
       svc:
       - name: rabbitmq-management
         template: services/rabbitmq/rabbitmq-service-management.yml.j2
-      - name: rabbitmq-main
+      - name: rabbitmq
         template: services/rabbitmq/rabbitmq-service.yml.j2
       bootstrap:
       - name: rabbitmq-bootstrap
@@ -236,6 +236,8 @@ kolla-kubernetes:
       pod:
       - name: glance-api
         template: services/glance/glance-api-pod.yml.j2
+        vars:
+          pvc_name: glance
       - name: glance-registry
         template: services/glance/glance-registry-pod.yml.j2
   - name: nova
