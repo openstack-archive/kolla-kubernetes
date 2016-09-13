@@ -353,11 +353,20 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: neutron-server
-        template: services/neutron/neutron-server-service.yml.j2
+      - name: neutron-server 
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: neutron_server_port
+          service: neutron-server
+          type: api
+          name: neutron-server
       bootstrap:
-      - name: neutron-bootstrap
-        template: services/neutron/neutron-bootstrap-job.yml.j2
+      - name: neutron-create-db
+        template: services/neutron/neutron-bootstrap-job-create-db.yml.j2
+      - name: neutron-manage-db
+        template: services/neutron/neutron-bootstrap-job-manage-db.yml.j2
+      - name: neutron-endpoints
+        template: services/neutron/neutron-bootstrap-job-endpoints.yml.j2
       pod:
       - name: neutron-openvswitch-agent-compute
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
