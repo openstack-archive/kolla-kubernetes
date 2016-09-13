@@ -361,7 +361,7 @@ class Container(object):
         assert action in Service.VALID_ACTIONS
 
         nsname = 'kolla_kubernetes_namespace'
-        cmd = ("kubectl {} configmap {}-configmap --namespace={}".format(
+        cmd = ("kubectl {} configmap {} --namespace={}".format(
             action, self.getName(),
             KollaKubernetesResources.GetJinjaDict()[nsname]))
 
