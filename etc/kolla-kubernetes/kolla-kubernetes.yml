@@ -59,6 +59,19 @@ cinder_scheduler_replicas: "1"
 enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
 
+memcached_servers: "memcached"
+keystone_database_address: "mariadb"
+glance_database_address: "mariadb"
+nova_database_address: "mariadb"
+nova_api_database_address: "mariadb"
+neutron_database_address: "mariadb"
+cinder_database_address: "mariadb"
+rabbitmq_servers: "rabbitmq"
+keystone_admin_url: "http://keystone-admin:35357/v3"
+keystone_internal_url: "http://keystone-public:5000/v3"
+keystone_public_url: "http://keystone-public:5000/v3"
+glance_registry_host: "glance-registry"
+
 #################################
 # Kubernetes Cluster DNS setting
 #################################
