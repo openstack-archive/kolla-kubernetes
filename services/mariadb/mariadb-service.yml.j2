@@ -6,6 +6,8 @@ spec:
       name: mariadb
   selector:
     service: mariadb
+  externalIPs:
+    - {{ kolla_internal_vip_address }}
 metadata:
    name: mariadb
    namespace: {{ kolla_kubernetes_namespace }}
