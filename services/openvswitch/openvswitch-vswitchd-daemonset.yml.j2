@@ -21,8 +21,12 @@ spec:
                  "sh",
                  "-c",
                  "mkdir -p /var/log/kolla/openvswitch;
+{%- if kolla_kubernetes_ovs_setup_bridge == "yes" %}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ neutron_bridge_name }} ;
+{%- if kolla_kubernetes_ovs_add_port == "yes" %}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ neutron_bridge_name }} {{ neutron_external_interface }};
+{%- endif %}
+{%- endif %}
                   echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
              "volumeMounts": [
                 {
