@@ -42,11 +42,11 @@ spec:
     spec:
       hostNetwork: True
       hostPID: True
+      hostIPC: True
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_compute %}
           {{ selector.key }}: {{ selector.value }}
 {%- if enable_libvirt_tcp != "yes" %}
-      hostIPC: True
 {%- endif %}
       containers:
         - name: nova-libvirt
@@ -64,7 +64,7 @@ spec:
               name: etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /run
+            - mountPath: /var/run
               name: run
             - mountPath: /dev
               name: dev
@@ -95,7 +95,7 @@ spec:
             path: /lib/modules
         - name: run
           hostPath:
-            path: /run
+            path: /var/run
         - name: dev
           hostPath:
             path: /dev
