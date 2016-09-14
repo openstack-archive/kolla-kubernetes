@@ -53,10 +53,25 @@ spec:
                       region_name={{ openstack_region_name }}
                       auth={{ '{{ openstack_neutron_auth }}' }}"
                   -e "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
+          volumeMounts:
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
             - name: NEUTRON_KEYSTONE_PASSWORD
               valueFrom:
                secretKeyRef:
                   name: neutron-keystone-password
+                  key: password
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
                   key: password
       volumes:
         - name: etc-localtime
