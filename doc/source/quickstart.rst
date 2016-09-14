@@ -24,8 +24,9 @@ Installing Docker
 =================
 
 Since Docker is required to build images as well as be present on all deployed
-targets, the kolla-kubernetes community recommends installing the official
-Docker, Inc. packaged version of Docker for maximum stability and compatibility.
+targets, the Kolla community recommends installing the official Docker, Inc.
+packaged version of Docker for maximum stability and compatibility with the
+following command:
 
 .. NOTE:: Docker 1.11.0 is not compatible with Kubernetes due to some issues in
   Docker. The below command will install the latest docker and revert back to
@@ -37,15 +38,13 @@ Docker, Inc. packaged version of Docker for maximum stability and compatibility.
     # Install Docker
     curl -sSL https://get.docker.io | bash
 
-    # CentOS
-    sudo yum downgrade -y docker-engine-1.10.3-1.el7.centos
-
-    # Ubuntu (Assuming "Trusty Tahr" 14.04 LTS)
-    sudo apt-get -y remove docker-engine
-    sudo apt-get -y install docker-engine=1.10.3-0~trusty
+Setup Docker
+============
 
 Docker needs to run with the root filesystem as shared in order for
-HyperKube to run and Neutron to function in 'thin' containers.
+Neutron to function in 'thin' containers. The reason for that is mount
+propogation.  Mounts need to be shared so the network namespaces are
+shared amoung the host and the Neutron containers.
 
 For CentOS and other systemd distros, change MountFlags from "slave"
 to "shared" and restart Docker.
@@ -75,34 +74,12 @@ filesystem as shared upon startup.
    # Ensure the mount is shared
    sudo sh /etc/rc.local
 
+Kubernetes Setup
+================
 
-For Ubuntu 14.04 LTS, configure the Docker daemon to use the DeviceMapper
-`Storage Backend <http://www.projectatomic.io/docs/filesystems>`_ instead of
-AUFS due to `this bug
-<https://github.com/docker/docker/issues/8966#issuecomment-94210446>`_.
-Without this modification, it would not be possible to run the Kolla-built
-CentOS docker images since they are created with an older version of AUFS.
-Therefore, use a different Storage Backend than AUFS.
-
-::
-
-   # Ubuntu
-   # Edit /etc/default/docker to add:
-   DOCKER_OPTS="-s devicemapper"
-
-   # Restart the Docker daemon
-   sudo service docker stop
-   sudo service docker start
-
-
-Kubernetes Setup with HyperKube
-===============================
-
-HyperKube is series of containers that will run all the needed Kubernetes
-services locally.  Follow the :doc:`kubernetes-all-in-one` documentation.
-
-`The Kubernetes documentation explains setting up a larger cluster
-<http://kubernetes.io/docs/getting-started-guides/>`_.
+A user can show up with an already running Kubernetes or follow
+the :doc:`kubernetes-all-in-one` for help on getting Kubernetes
+setup.
 
 Installing Kolla and Kolla-Kubernetes
 =====================================
