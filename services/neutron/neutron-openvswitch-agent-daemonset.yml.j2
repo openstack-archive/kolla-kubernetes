@@ -63,6 +63,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      hostIPC: True
       nodeSelector:
 {%- if kolla_kubernetes.template.vars.type == "compute" %}
 {%- set selector = kolla_kubernetes_hostlabel_compute %}
@@ -87,7 +88,7 @@ spec:
             - mountPath: /var/lib/kolla-kubernetes/neutron-openvswitch-agent
               name: openvswitch-config
               readOnly: true
-            - mountPath: /run
+            - mountPath: /var/run
               name: host-run
             - mountPath: /dev
               name: host-dev
@@ -111,7 +112,7 @@ spec:
 #        - mountPath: {{ container_config_directory }}/neutron-linuxbridge-agent/
 #          name: neutron-linuxbridge-agent-config
 #          readOnly: true
-#        - mountPath: /run
+#        - mountPath: /var/run
 #          name: host-run
 #        - mountPath: /etc/localtime
 #          name: host-etc-localtime
@@ -152,7 +153,7 @@ spec:
             path: /var/lib/kolla-kubernetes/neutron-openvswitch-agent
         - name: host-run
           hostPath:
-            path: /run
+            path: /var/run
         - name: host-dev
           hostPath:
             path: /dev

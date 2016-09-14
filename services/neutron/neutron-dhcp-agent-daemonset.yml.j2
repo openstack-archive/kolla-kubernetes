@@ -84,7 +84,7 @@ spec:
               readOnly: true
             - mountPath: /var/lib/neutron/kolla/
               name: neutron-metadata-socket
-            - mountPath: /run
+            - mountPath: /var/run
               name: host-run
             - mountPath: /run/netns/
               name: host-run-netns
@@ -119,7 +119,7 @@ spec:
             path: /run/netns
         - name: host-run
           hostPath:
-            path: /run
+            path: /var/run
         - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
