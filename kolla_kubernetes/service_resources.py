@@ -81,6 +81,11 @@ class KollaKubernetesResources(object):
         files.append(os.path.join(kolla_dir,
                                   'ansible/roles/haproxy/defaults/main.yml'))
 
+        # FIXME I think we need a way to add aditional roles to services
+        # in the service_resources.yaml.
+        files.append(os.path.join(kolla_dir,
+                                  'ansible/roles/neutron/defaults/main.yml'))
+
         # Create the config dict
         x = JinjaUtils.merge_configs_to_dict(
             reversed(files), jvars, debug_regex)

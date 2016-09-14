@@ -303,7 +303,7 @@ kolla-kubernetes:
       containers:
       - name: openvswitch-vswitchd
     resources:
-      configmaps:
+      configmap:
       - name: openvswitch-db-server
       - name: openvswitch-vswitchd
       secret:
