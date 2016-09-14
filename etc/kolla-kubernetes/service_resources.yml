@@ -108,8 +108,12 @@ kolla-kubernetes:
       - name: keystone-public
         template: services/keystone/keystone-service-public.yml.j2
       bootstrap:
-      - name: keystone-bootstrap
-        template: services/keystone/keystone-bootstrap-job.yml.j2
+      - name: keystone-create-db
+        template: services/neutron/keystone-bootstrap-job-create-db.yml.j2
+      - name: keystone-manage-db
+        template: services/neutron/keystone-bootstrap-job-manage-db.yml.j2
+      - name: keystone-endpoints
+        template: services/neutron/keystone-bootstrap-job-endpoints.yml.j2
       pod:
       - name: keystone
         template: services/keystone/keystone-pod.yml.j2
