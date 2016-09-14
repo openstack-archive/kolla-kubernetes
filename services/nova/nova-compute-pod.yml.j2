@@ -47,10 +47,31 @@ spec:
                    "mountPath": "/nova/"
                 }
              ]
+          },
+          {
+             "name": "initialize-nova",
+             "image": "{{ nova_compute_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "[ ! -d /var/lib/nova/instances ] && mkdir -p /var/lib/nova/instances;
+                  chown nova:qemu /var/lib/nova;
+                  chown nova:qemu /var/lib/nova/instances;
+             "],
+             "securityContext": {
+                 "runAsUser": 0
+             },
+             "volumeMounts": [
+                {
+                   "name": "nova-compute-persistent-storage",
+                   "mountPath": "/var/lib/nova"
+                }
+             ]
           }
         ]'
     spec:
       hostNetwork: True
+      hostIPC: True
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_compute %}
           {{ selector.key }}: {{ selector.value }}
@@ -71,7 +92,7 @@ spec:
               name: etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /run
+            - mountPath: /var/run
               name: run
             - mountPath: /dev
               name: dev
@@ -81,6 +102,11 @@ spec:
               name: nova-config
             - mountPath: /var/log/kolla
               name: kolla-logs
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+            - mountPath: /etc/resolv.conf
+              name: resolv-conf
+              subPath: resolv.conf
+{%- endif %}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -99,7 +125,7 @@ spec:
             path: /lib/modules
         - name: run
           hostPath:
-            path: /run
+            path: /var/run
         - name: dev
           hostPath:
             path: /dev
@@ -110,3 +136,8 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+        - name: resolv-conf
+          configMap:
+            name: resolv-conf
+{%- endif %}
