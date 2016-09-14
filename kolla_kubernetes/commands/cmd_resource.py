@@ -91,6 +91,14 @@ class ResourceTemplate(ResourceBase):
                   " from several sources before applying the dict to itself.")
         ),
         parser.add_argument(
+            "-o",
+            "--output",
+            metavar="output",
+            default="yaml",
+            help=("Format output into one of [%s]" % (
+                "|".join(['yaml', 'json'])))
+        ),
+        parser.add_argument(
             '--print-jinja-keys-regex',
             metavar='<print-jinja-keys-regex>',
             type=str,
@@ -149,6 +157,9 @@ class ResourceTemplate(ResourceBase):
 
         if skip_and_return:
             return res
+
+        if args.output == 'json':
+            res = json.dumps(yaml.load(res), indent=4)
 
         print(res)
 
