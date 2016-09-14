@@ -8,6 +8,7 @@ spec:
     metadata:
       labels:
         service: keystone
+      type: api
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_keystone |
