@@ -80,7 +80,7 @@ spec:
             privileged: true
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: neutron-dhcp-agent-config
+              name: pod-main-config
               readOnly: true
             - mountPath: /var/lib/neutron/kolla/
               name: neutron-metadata-socket
@@ -103,7 +103,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
       volumes:
-        - name: neutron-dhcp-agent-config
+        - name: pod-main-config
           emptyDir: {}
         - name: neutron-dhcp-agent-configmap
           configMap:
