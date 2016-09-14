@@ -293,8 +293,6 @@ kolla-kubernetes:
           type: metadata
           name: nova-metadata
       bootstrap:
-      - name: nova-compute-bootstrap
-        template: services/nova/nova-compute-bootstrap-job.yml.j2
       - name: nova-create-api-db
         template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
       - name: nova-create-endpoints
