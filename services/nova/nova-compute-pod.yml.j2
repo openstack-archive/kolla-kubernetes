@@ -91,7 +91,7 @@ spec:
               name: etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /run
+            - mountPath: /var/run
               name: run
             - mountPath: /dev
               name: dev
@@ -124,7 +124,7 @@ spec:
             path: /lib/modules
         - name: run
           hostPath:
-            path: /run
+            path: /var/run
         - name: dev
           hostPath:
             path: /dev
