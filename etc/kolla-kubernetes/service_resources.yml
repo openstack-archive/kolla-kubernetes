@@ -269,6 +269,7 @@ kolla-kubernetes:
       - name: nova-conductor
       - name: nova-scheduler
       - name: nova-consoleauth
+      - name: nova-libvirt
       - name: nova-novncproxy
       - name: nova-novncproxy-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
@@ -313,6 +314,8 @@ kolla-kubernetes:
       pod:
       - name: nova-compute
         template: services/nova/nova-compute-pod.yml.j2
+      - name: nova-libvirt
+        template: services/nova/nova-libvirt-pod.yml.j2
       - name: nova-api
         template: services/nova/nova-control-api-pod.yml.j2
       - name: nova-conductor
