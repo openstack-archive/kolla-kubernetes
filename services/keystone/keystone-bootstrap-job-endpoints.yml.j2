@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-endpoints
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  template:
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
+      restartPolicy: OnFailure
+      containers:
+        - image: "{{ keystone_image_full }}"
+          name: main
+          command: ["sh", "-c", "sudo -E kolla_set_configs;
+                    kolla_keystone_bootstrap admin
+                    $KEYSTONE_ADMIN_PASSWORD
+                    admin
+                    admin
+                    {{ keystone_admin_url }}
+                    {{ keystone_internal_url }}
+                    {{ keystone_public_url }}
+                    {{ openstack_region_name }}"]
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: keystone-config
+              readOnly: true
+            - mountPath: /var/log/kolla/keystone
+              name: kolla-logs
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+        - name: keystone-config
+          configMap:
+            name: keystone
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
