@@ -355,12 +355,12 @@ kolla-kubernetes:
       pv:
       pvc:
       svc:
-      - name: neutron-server 
+      - name: neutron-server
         template: services/common/generic-service.yml.j2
         vars:
           port_name: neutron_server_port
-          service: neutron-server
-          type: api
+          service: neutron
+          type: server
           name: neutron-server
       bootstrap:
       - name: neutron-create-db
