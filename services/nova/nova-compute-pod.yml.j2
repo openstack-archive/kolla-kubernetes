@@ -30,7 +30,7 @@ spec:
                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
                   crudini --set /nova/nova.conf vnc novncproxy_base_url {{ novncproxy_base_url }};
 {%- if enable_libvirt_tcp == "yes" %}
-                  crudini --set /nova/nova.conf vnc connection_uri ''qemu+tcp://''$IP;
+                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://''$IP''/system\"|g'' /nova/nova.conf;
 {%- endif %}
              "],
              "volumeMounts": [
@@ -45,6 +45,26 @@ spec:
                 {
                    "name": "nova-config",
                    "mountPath": "/nova/"
+                }
+             ]
+          },
+          {
+             "name": "initialize-nova",
+             "image": "{{ nova_compute_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "[ ! -d /var/lib/nova/instances ] && mkdir -p /var/lib/nova/instances;
+                  chown nova: /var/lib/nova;
+                  chown nova: /var/lib/nova/instances;
+             "],
+             "securityContext": {
+                 "runAsUser": 0
+             },
+             "volumeMounts": [
+                {
+                   "name": "nova-compute-persistent-storage",
+                   "mountPath": "/var/lib/nova"
                 }
              ]
           }
@@ -81,6 +101,11 @@ spec:
               name: nova-config
             - mountPath: /var/log/kolla
               name: kolla-logs
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+            - mountPath: /etc/resolv.conf
+              name: resolv-conf
+              subPath: resolv.conf
+{%- endif %}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -110,3 +135,8 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+        - name: resolv-conf
+          configMap:
+            name: resolv-conf
+{%- endif %}
