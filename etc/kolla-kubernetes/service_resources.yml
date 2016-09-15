@@ -299,7 +299,7 @@ kolla-kubernetes:
         vars:
           port_name: nova_metadata_port
           service: nova
-          type: metadata
+          type: api
           name: nova-metadata
       bootstrap:
       - name: nova-compute-bootstrap
