@@ -37,6 +37,10 @@ To start up a fresh kolla-kubernetes deployment, do the following.
 
     minikube start --vm-driver=kvm --memory=$((9*1024))
 
+Enter Password if requested.
+
+::
+
     minikube ssh
 
 wait until you get a prompt...
@@ -64,7 +68,7 @@ wait until you get a prompt...
     tools/kolla-ansible genconfig
     crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
     ../kolla-kubernetes/tools/secret-generator.py create
-    bash ../kolla-kubernetes/tools/setup-resolv-conf.sh
+    ../kolla-kubernetes/tools/setup-resolv-conf.sh
 
     for x in mariadb keystone horizon rabbitmq memcached nova-api \
              nova-conductor nova-scheduler glance-api-haproxy \
@@ -82,57 +86,46 @@ wait until you get a prompt...
     done
     for x in mariadb memcached keystone-admin keystone-public rabbitmq \
              rabbitmq-management nova-api glance-api glance-registry \
-             neutron-server; \
+             neutron-server nova-metadata; \
     do
         kolla-kubernetes resource create svc $x
     done
 
-    kolla-kubernetes resource create bootstrap mariadb-bootstrap
-    watch kolla-kubernetes resource status bootstrap mariadb-bootstrap
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
 
 wait for it....
 
 ::
 
-    kolla-kubernetes resource delete bootstrap mariadb-bootstrap
-    kolla-kubernetes resource create pod mariadb
-    watch kolla-kubernetes resource status pod mariadb
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
+    for x in mariadb memcached rabbitmq; do
+        kolla-kubernetes resource create pod $x
+    done
+    watch kubectl get pods --namespace kolla
 
 wait for it...
 
 ::
 
-    kolla-kubernetes resource create bootstrap keystone-bootstrap
-    watch kolla-kubernetes resource status bootstrap keystone-bootstrap
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
 
 wait for it...
 
 ::
 
-    kolla-kubernetes resource delete bootstrap keystone-bootstrap
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
     kolla-kubernetes resource create pod keystone
     watch kolla-kubernetes resource status pod keystone
-
-wait for it...
-
-::
-
-    kolla-kubernetes resource create pod memcached
-    watch kolla-kubernetes resource status pod memcached
-
-wait for it...
-
-::
-
-    kolla-kubernetes resource create bootstrap rabbitmq-bootstrap
-    watch kolla-kubernetes resource status bootstrap rabbitmq-bootstrap
-
-wait for it...
-::
-
-    kolla-kubernetes resource delete bootstrap rabbitmq-bootstrap
-    kolla-kubernetes resource create pod rabbitmq
-    watch kolla-kubernetes resource status pod rabbitmq
 
 wait for it...
 
@@ -189,6 +182,18 @@ To test things out
     ~/gen_keystone_admin.sh
     kubectl create -f ~/openstackcli.yaml --namespace=kolla
 
+In another window, do 'minikube ssh' in and run the following command:
+
+::
+
+    sudo ip addr add 172.18.0.1/24 dev br-ex
+    sudo ip link set br-ex up
+    exit
+
+Back in the main window in the openstackcli container
+
+::
+
     kubectl exec -it openstackcli --namespace=kolla /bin/bash
 
 Wait for prompt. Once you have one, you can run any openstack commands you wish.
@@ -218,16 +223,24 @@ for some tests:
         --allocation-pool start=172.18.1.65,end=172.18.1.254 \
         --name admin admin 172.18.1.0/24
     neutron router-interface-add admin admin
+    neutron security-group-rule-create --protocol icmp \
+        --direction ingress default
+    neutron security-group-rule-create --protocol tcp \
+        --port-range-min 22 --port-range-max 22 \
+        --direction ingress default
 
     openstack server create --flavor=m1.tiny --image CirrOS \
          --nic net-id=admin test
+    openstack server create --flavor=m1.tiny --image CirrOS \
+         --nic net-id=admin test2
+    FIP=$(openstack ip floating create external -f value -c ip)
+    FIP2=$(openstack ip floating create external -f value -c ip)
+    openstack ip floating add $FIP test
+    openstack ip floating add $FIP2 test2
 
+    openstack server list
 
-In another window, do 'minikube ssh' in and run the following command:
-
-::
-
-    ip addr add 172.18.0.1/24 dev br-ex; ip link set br-ex up
+    ssh cirros@$FIP
 
 
 NOTES
