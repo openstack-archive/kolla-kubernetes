@@ -26,6 +26,10 @@ spec:
 {%- if kolla_kubernetes_ovs_add_port == "yes" %}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ neutron_bridge_name }} {{ neutron_external_interface }};
 {%- endif %}
+{%- if kolla_kubernetes_ovs_add_external_ip == "yes" %}
+                  ip addr add {{ kolla_kubernetes_external_bridge_ip | default(kolla_kubernetes_external_vip) }}/{{ kolla_kubernetes_external_subnet | default("24") }} dev {{ neutron_bridge_name }};
+                  ip link set {{ neutron_bridge_name }} up;
+{%- endif %}
 {%- endif %}
                   echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
              "volumeMounts": [
