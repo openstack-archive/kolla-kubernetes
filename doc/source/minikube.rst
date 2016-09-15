@@ -20,7 +20,7 @@ Install minikube with kvm support
     sudo mv docker-machine-driver-kvm /usr/local/bin/
 
     curl -L -o minikube \
-      https://storage.googleapis.com/minikube/releases/v0.9.0/minikube-linux-amd64
+      https://storage.googleapis.com/minikube/releases/v0.10.0/minikube-linux-amd64
     chmod +x minikube
     sudo mv minikube /usr/local/bin/
 
@@ -35,16 +35,25 @@ To start up a fresh kolla-kubernetes deployment, do the following.
 
 ::
 
-    minikube start --vm-driver=kvm --memory=$((9*1024))
+    minikube start --vm-driver=kvm --memory=$((8*1024))
 
-    minikube ssh
+Enter Password if requested.
 
-wait until you get a prompt...
+Kubernetes web ui
+=================
+::
+
+    minikube dashboard
+
+Enter Password if requested.
 
 ::
 
-    sudo ifconfig lo:1 10.57.120.254 netmask 255.255.255.0
-    exit
+    minikube ip
+
+wait until you get a prompt...
+
+Make note of the ip for future use.
 
 Start a kolla-kubernetes environment
 
@@ -55,16 +64,25 @@ Start a kolla-kubernetes environment
 
 wait until you get a prompt...
 
+Run the following command, replacing <ip> with the ip you noted previously.
+
 ::
 
-    kubectl label node minikubevm kolla_controller=true
-    kubectl label node minikubevm kolla_compute=true
+    ~/set_external_ip.sh <ip>
+
+Run the folowing commands
+
+::
+
+    kubectl label node minikube kolla_controller=true
+    kubectl label node minikube kolla_compute=true
 
     kubectl create namespace kolla
     tools/kolla-ansible genconfig
+    ~/stash_config.sh push
     crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
     ../kolla-kubernetes/tools/secret-generator.py create
-    bash ../kolla-kubernetes/tools/setup-resolv-conf.sh
+    ../kolla-kubernetes/tools/setup-resolv-conf.sh
 
     for x in mariadb keystone horizon rabbitmq memcached nova-api \
              nova-conductor nova-scheduler glance-api-haproxy \
@@ -72,7 +90,11 @@ wait until you get a prompt...
              neutron-server neutron-dhcp-agent neutron-l3-agent \
              neutron-metadata-agent neutron-openvswitch-agent \
              openvswitch-db-server openvswitch-vswitchd nova-libvirt \
-             nova-compute; \
+             nova-compute nova-consoleauth nova-novncproxy \
+             nova-novncproxy-haproxy neutron-server-haproxy \
+             nova-api-haproxy cinder-api cinder-api-haproxy \
+             cinder-backup cinder-scheduler cinder-volume \
+             tgtd iscsid; \
     do
         kolla-kubernetes resource create configmap $x
     done
@@ -82,34 +104,45 @@ wait until you get a prompt...
     done
     for x in mariadb memcached keystone-admin keystone-public rabbitmq \
              rabbitmq-management nova-api glance-api glance-registry \
-             neutron-server; \
+             neutron-server nova-metadata nova-novncproxy horizon \
+             cinder-api; \
     do
         kolla-kubernetes resource create svc $x
     done
 
-    kolla-kubernetes resource create bootstrap mariadb-bootstrap
-    watch kolla-kubernetes resource status bootstrap mariadb-bootstrap
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
 
 wait for it....
 
 ::
 
-    kolla-kubernetes resource delete bootstrap mariadb-bootstrap
-    kolla-kubernetes resource create pod mariadb
-    watch kolla-kubernetes resource status pod mariadb
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
+    for x in mariadb memcached rabbitmq; do
+        kolla-kubernetes resource create pod $x
+    done
+    watch kubectl get pods --namespace kolla
 
 wait for it...
 
 ::
 
-    kolla-kubernetes resource create bootstrap keystone-bootstrap
-    watch kolla-kubernetes resource status bootstrap keystone-bootstrap
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
 
 wait for it...
 
 ::
 
-    kolla-kubernetes resource delete bootstrap keystone-bootstrap
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
     kolla-kubernetes resource create pod keystone
     watch kolla-kubernetes resource status pod keystone
 
@@ -117,30 +150,10 @@ wait for it...
 
 ::
 
-    kolla-kubernetes resource create pod memcached
-    watch kolla-kubernetes resource status pod memcached
-
-wait for it...
-
-::
-
-    kolla-kubernetes resource create bootstrap rabbitmq-bootstrap
-    watch kolla-kubernetes resource status bootstrap rabbitmq-bootstrap
-
-wait for it...
-::
-
-    kolla-kubernetes resource delete bootstrap rabbitmq-bootstrap
-    kolla-kubernetes resource create pod rabbitmq
-    watch kolla-kubernetes resource status pod rabbitmq
-
-wait for it...
-
-::
-
     for x in glance-create-db glance-endpoints glance-manage-db \
              nova-create-api-db nova-create-endpoints nova-create-db \
-             neutron-create-db neutron-endpoints neutron-manage-db; \
+             neutron-create-db neutron-endpoints neutron-manage-db \
+             cinder-create-db cinder-create-endpoints cinder-manage-db; \
     do
         kolla-kubernetes resource create bootstrap $x
     done
@@ -152,12 +165,14 @@ wait for it...
 
     for x in glance-create-db glance-endpoints glance-manage-db \
              nova-create-api-db nova-create-endpoints nova-create-db \
-             neutron-create-db neutron-endpoints neutron-manage-db; \
+             neutron-create-db neutron-endpoints neutron-manage-db \
+             cinder-create-db cinder-create-endpoints cinder-manage-db; \
     do
          kolla-kubernetes resource delete bootstrap $x
     done
     for x in nova-api nova-conductor nova-scheduler glance-api \
-             glance-registry neutron-server; \
+             glance-registry neutron-server horizon nova-consoleauth \
+             nova-novncproxy; \
     do
         kolla-kubernetes resource create pod $x
     done
@@ -182,12 +197,19 @@ wait for it...
 
 Services should be up now.
 
+If you want to simply access the web gui, see section `Web Access`_ below.
+
 To test things out
 
 ::
 
     ~/gen_keystone_admin.sh
     kubectl create -f ~/openstackcli.yaml --namespace=kolla
+    watch kubectl get pod openstackcli --namespace=kolla
+
+wait for it...
+
+::
 
     kubectl exec -it openstackcli --namespace=kolla /bin/bash
 
@@ -218,16 +240,41 @@ for some tests:
         --allocation-pool start=172.18.1.65,end=172.18.1.254 \
         --name admin admin 172.18.1.0/24
     neutron router-interface-add admin admin
+    neutron security-group-rule-create --protocol icmp \
+        --direction ingress default
+    neutron security-group-rule-create --protocol tcp \
+        --port-range-min 22 --port-range-max 22 \
+        --direction ingress default
 
     openstack server create --flavor=m1.tiny --image CirrOS \
          --nic net-id=admin test
+    openstack server create --flavor=m1.tiny --image CirrOS \
+         --nic net-id=admin test2
+    FIP=$(openstack ip floating create external -f value -c ip)
+    FIP2=$(openstack ip floating create external -f value -c ip)
+    openstack ip floating add $FIP test
+    openstack ip floating add $FIP2 test2
 
+    watch openstack server list
 
-In another window, do 'minikube ssh' in and run the following command:
+wait for it...
 
 ::
 
-    ip addr add 172.18.0.1/24 dev br-ex; ip link set br-ex up
+    ssh cirros@$FIP curl 169.254.169.254
+
+.. _`Web Access`:
+
+Web Access
+==========
+If you want to access the horizon website, fetch the admin password from
+within the toolbox like:
+
+::
+    grep keystone_admin /etc/kolla/passwords.yml
+
+And paste in the ip address you noted earlier from 'minikube ip' into your
+web browser. The username is 'admin'.
 
 
 NOTES
