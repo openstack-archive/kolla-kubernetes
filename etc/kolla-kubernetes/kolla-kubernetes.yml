@@ -58,8 +58,8 @@ cinder_scheduler_replicas: "1"
 nova_consoleauth_replicas: "1"
 nova_novncproxy_replicas: "1"
 
-enable_openvswitch_tcp: "no"
-enable_libvirt_tcp: "no"
+enable_openvswitch_tcp: "yes"
+enable_libvirt_tcp: "yes"
 
 #################################
 # Kubernetes Cluster DNS setting
@@ -211,3 +211,16 @@ storage_interface: "eth0"
 ########################
 horizon_http_nodeport: "30080"
 horizon_https_nodeport: "30433"
+
+########################
+# Workaround variables
+########################
+kolla_kubernetes_ovs_setup_bridge: "yes"
+enable_resolve_conf_net_host_workaround: "yes"
+
+########################
+# Workaround variables
+########################
+kolla_kubernetes_ovs_setup_bridge: "yes"
+kolla_kubernetes_ovs_add_port: "yes"
+enable_resolve_conf_net_host_workaround: "yes"
