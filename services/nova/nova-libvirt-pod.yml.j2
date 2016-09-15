@@ -9,7 +9,6 @@ metadata:
 spec:
   template:
     metadata:
-      name: nova-libvirt
       labels:
         component: nova
         system: nova-libvirt
@@ -22,9 +21,8 @@ spec:
                  "sh",
                  "-c",
                  "cp -a /config/..data/* /nova/;
-                  ip=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'');
 {%- if enable_libvirt_tcp == "yes" %}
-                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"''${ip%/*}''\"|g'' /nova/libvirtd.conf;
+                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
 {%- endif %}
              "],
              "volumeMounts": [
@@ -49,7 +47,7 @@ spec:
       hostIPC: True
 {%- endif %}
       containers:
-        - name: nova-libvirt
+        - name: main 
           image: "{{ nova_libvirt_image_full }}"
           securityContext:
             privileged: true
