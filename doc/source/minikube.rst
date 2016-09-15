@@ -82,7 +82,7 @@ wait until you get a prompt...
     done
     for x in mariadb memcached keystone-admin keystone-public rabbitmq \
              rabbitmq-management nova-api glance-api glance-registry \
-             neutron-server; \
+             neutron-server nova-metadata; \
     do
         kolla-kubernetes resource create svc $x
     done
@@ -218,10 +218,22 @@ for some tests:
         --allocation-pool start=172.18.1.65,end=172.18.1.254 \
         --name admin admin 172.18.1.0/24
     neutron router-interface-add admin admin
+    neutron security-group-rule-create --protocol icmp \
+        --direction ingress default
+    neutron security-group-rule-create --protocol tcp \
+        --port-range-min 22 --port-range-max 22 \
+        --direction ingress default
 
     openstack server create --flavor=m1.tiny --image CirrOS \
          --nic net-id=admin test
+    openstack server create --flavor=m1.tiny --image CirrOS \
+         --nic net-id=admin test2
+    FIP=$(openstack ip floating create external -f value -c ip)
+    FIP2=$(openstack ip floating create external -f value -c ip)
+    openstack ip floating add $FIP test
+    openstack ip floating add $FIP2 test2
 
+    ssh cirros@$FIP
 
 In another window, do 'minikube ssh' in and run the following command:
 
