@@ -211,3 +211,10 @@ storage_interface: "eth0"
 ########################
 horizon_http_nodeport: "30080"
 horizon_https_nodeport: "30433"
+
+########################
+# Workaround variables
+########################
+kolla_kubernetes_ovs_setup_bridge: "yes"
+kolla_kubernetes_ovs_add_port: "yes"
+enable_resolve_conf_net_host_workaround: "yes"
