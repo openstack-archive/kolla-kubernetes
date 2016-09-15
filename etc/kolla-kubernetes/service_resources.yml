@@ -105,8 +105,13 @@ kolla-kubernetes:
       svc:
       - name: keystone-admin
         template: services/keystone/keystone-service-admin.yml.j2
-      - name: keystone-public
-        template: services/keystone/keystone-service-public.yml.j2
+      - name: keystone-public 
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: keystone_public_port
+          service: keystone
+          type: api
+          name: keystone-public
       bootstrap:
       - name: keystone-create-db
         template: services/keystone/keystone-bootstrap-job-create-db.yml.j2
