@@ -59,7 +59,7 @@ spec:
             touch /var/lib/kolla-kubernetes/event/shutdown;
           readinessProbe:
             httpGet:
-              path: /
+              path: /vnc_auto.html
               port: {{ nova_novncproxy_port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
