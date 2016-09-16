@@ -30,7 +30,7 @@ spec:
                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
                   crudini --set /nova/nova.conf vnc novncproxy_base_url {{ novncproxy_base_url }};
 {%- if enable_libvirt_tcp == "yes" %}
-                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://''$IP''/system\"|g'' /nova/nova.conf;
+                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
 {%- endif %}
              "],
              "volumeMounts": [
