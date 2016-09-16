@@ -1,15 +1,14 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-apiVersion: v1
-kind: ReplicationController
+kind: PetSet
 spec:
-  replicas: {{ rabbitmq_replicas }}
-  selector:
-      service: rabbitmq
+  serviceName: "rabbitmq"
+  replicas: 1
   template:
     metadata:
       labels:
         service: rabbitmq
       annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
         pod.alpha.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
