@@ -274,7 +274,7 @@ kolla-kubernetes:
       - name: nova-novncproxy-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
-          configmap_name: novnc-proxy-haproxy
+          configmap_name: nova-novncproxy-haproxy
           port_name: nova_novncproxy_port
       secret:
       disk:
