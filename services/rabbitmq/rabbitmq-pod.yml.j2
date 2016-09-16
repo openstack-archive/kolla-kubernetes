@@ -9,6 +9,29 @@ spec:
     metadata:
       labels:
         service: rabbitmq
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                   sed -i ''/^export ERL_EPMD_ADDRESS=0.0.0.0$/d'' /srv/pod-main-config/rabbitmq-env.conf;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "rabbitmq-config",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          }
+      ]'
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_rabbit |
@@ -20,7 +43,7 @@ spec:
           name: main
           volumeMounts:
             - mountPath: {{ container_config_directory }}
-              name: rabbitmq-config
+              name: pod-main-config
             - mountPath: /var/lib/rabbitmq
               name: rabbitmq-persistent-storage
             - mountPath: /var/log/kolla
@@ -34,6 +57,8 @@ spec:
             - containerPort: {{ rabbitmq_management_port }}
               name: management
       volumes:
+        - name: pod-main-config
+          emptyDir: {}
         - name: rabbitmq-config
           configMap:
             name: rabbitmq
