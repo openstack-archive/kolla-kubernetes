@@ -37,7 +37,7 @@ technical_debt = {
 def unknown_technical_debt(args, selector):
     for i in technical_debt[selector]:
         if i[0] == args.resource_type and i[1] == args.service_name and \
-           i[2] == args.resource_name:
+           i[2] == args.resource_name[0]:
             return False
     return True
 
@@ -47,7 +47,7 @@ class argobj(object):
     def __init__(self, action, resource_type, service_name, resource_name):
         self.service_name = service_name
         self.resource_type = resource_type
-        self.resource_name = resource_name
+        self.resource_name = [resource_name]
         self.action = action
         self.print_jinja_keys_regex = None
         self.print_jinja_vars = False
@@ -150,7 +150,7 @@ class TestTemplatesTest(base.BaseTestCase):
                    y['metadata']['namespace'] != 'not_real_namespace' and \
                    unknown_technical_debt(args, 'namespaceHardCoded'):
                     raise Exception("namespace is hardcoded.")
-                if y['metadata']['name'] != args.resource_name and \
+                if y['metadata']['name'] != args.resource_name[0] and \
                    unknown_technical_debt(args, 'resourceNameObjNameNoMatch'):
                     raise Exception("Object name does not match the" +
                                     " resource_name.")
