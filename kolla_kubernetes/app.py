@@ -37,12 +37,12 @@ class KollaKubernetesApp(app.App):
             KollaKubernetesApp._singleton = KollaKubernetesApp()
         return KollaKubernetesApp._singleton
 
-    def __init__(self):
-        super(self.__class__, self).__init__(
+    def __init__(self, ty='kolla_kubernetes.cli'):
+        #super(self.__class__, self).__init__(
+        super(KollaKubernetesApp, self).__init__(
             description='Kolla-Kubernetes command-line interface',
             version=VERSION,
-            command_manager=commandmanager.CommandManager(
-                'kolla_kubernetes.cli'),
+            command_manager=commandmanager.CommandManager(ty),
             deferred_help=True)
 
     def _print_help(self):
@@ -100,8 +100,25 @@ class KollaKubernetesApp(app.App):
         return self.options
 
 
+class KollaKubeApp(KollaKubernetesApp):
+
+    _singleton = None
+    @staticmethod
+    def Get():
+        if KollaKubeApp._singleton is None:
+            KollaKubeApp._singleton = KollaKubeApp()
+        return KollaKubeApp._singleton
+
+    def __init__(self, ty='kolla_kube.cli'):
+        super(KollaKubeApp, self).__init__(ty)
+
+
 def main(argv=sys.argv[1:]):
     kks = KollaKubernetesApp().Get()
+    return kks.run(argv)
+
+def main_kube(argv=sys.argv[1:]):
+    kks = KollaKubeApp().Get()
     return kks.run(argv)
 
 if __name__ == '__main__':
