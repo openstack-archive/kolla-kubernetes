@@ -13,7 +13,6 @@
 from __future__ import print_function
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -37,13 +36,14 @@ KKR = KollaKubernetesResources.Get()
 class ResourceBase(KollaKubernetesBaseCommand):
     """Create, delete, or query status for kolla-kubernetes resources"""
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name, skip_action=False):
         parser = super(ResourceBase, self).get_parser(prog_name)
-        parser.add_argument(
-            "action",
-            metavar="<action>",
-            help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
-        )
+        if not skip_action:
+            parser.add_argument(
+                "action",
+                metavar="<action>",
+                help=("One of [%s]" % ("|".join(Service.VALID_ACTIONS)))
+            )
         parser.add_argument(
             "resource_type",
             metavar="<resource-type>",
@@ -51,8 +51,8 @@ class ResourceBase(KollaKubernetesBaseCommand):
         )
         return parser
 
-    def validate_args(self, args):
-        if args.action not in Service.VALID_ACTIONS:
+    def validate_args(self, args, skip_action=False):
+        if not skip_action and args.action not in Service.VALID_ACTIONS:
             msg = ("action [{}] not in valid actions [{}]".format(
                 args.action,
                 "|".join(Service.VALID_ACTIONS)))
@@ -75,11 +75,13 @@ class ResourceTemplate(ResourceBase):
     # disk create" or "gcloud disk delete" based on the CLI params.  Most
     # templates will not require this, but it is needed for some.
 
-    def get_parser(self, prog_name):
-        parser = super(ResourceTemplate, self).get_parser(prog_name)
+    def get_parser(self, prog_name, skip_action=False):
+        parser = super(ResourceTemplate, self).get_parser(prog_name,
+                                                          skip_action)
         parser.add_argument(
             "resource_name",
             metavar="<resource-name>",
+            nargs='+',
             help=("The unique resource-name under service->resource_type")
         )
         parser.add_argument(
@@ -122,95 +124,128 @@ class ResourceTemplate(ResourceBase):
     def take_action(self, args, skip_and_return=False):
         # Validate input arguments
         self.validate_args(args)
-        service_name = KKR.getServiceNameByResourceTypeName(args.resource_type,
-                                                            args.resource_name)
-        service = KKR.getServiceByName(service_name)
-        rt = service.getResourceTemplateByTypeAndName(
-            args.resource_type, args.resource_name)
+        multi = len(args.resource_name) != 1
+        multidoc = {
+            'apiVersion': 'v1',
+            'kind': 'List',
+            'items': []
+        }
+        for resource_name in args.resource_name:
+            service_name = KKR.getServiceNameByResourceTypeName(
+                args.resource_type,
+                resource_name)
+            service = KKR.getServiceByName(service_name)
+            rt = service.getResourceTemplateByTypeAndName(
+                args.resource_type, resource_name)
 
-        variables = KKR.GetJinjaDict(service_name, vars(args),
-                                     args.print_jinja_keys_regex)
+            variables = KKR.GetJinjaDict(service_name, vars(args),
+                                         args.print_jinja_keys_regex)
 
-        # Merge the template vars with the jinja vars before processing
-        variables['kolla_kubernetes'].update(
-            {"template": {"vars": rt.getVars()}})
+            # Merge the template vars with the jinja vars before processing
+            variables['kolla_kubernetes'].update(
+                {"template": {"vars": rt.getVars()}})
 
-        # handle the debug option --print-jinja-vars
-        if args.print_jinja_vars is True:
-            print(YamlUtils.yaml_dict_to_string(variables), file=sys.stderr)
+            # handle the debug option --print-jinja-vars
+            if args.print_jinja_vars is True:
+                print(YamlUtils.yaml_dict_to_string(variables),
+                      file=sys.stderr)
 
-        res = ""
-        if args.resource_type == 'configmap' and rt.getTemplate() == 'auto':
-            nsname = 'kolla_kubernetes_namespace'
-            cmd = "kubectl create configmap {} -o yaml --dry-run"
-            cmd = cmd.format(args.resource_name)
+            if args.resource_type == 'configmap' and \
+               rt.getTemplate() == 'auto':
+                nsname = 'kolla_kubernetes_namespace'
+                cmd = "kubectl create configmap {} -o yaml --dry-run"
+                cmd = cmd.format(resource_name)
 
-            # FIXME strip configmap out of name until its removed perminantly
-            short_name = re.sub('-configmap$', '', args.resource_name)
-            for f in PathFinder.find_config_files(short_name):
-                cmd += ' --from-file={}={}'.format(
-                    os.path.basename(f).replace("_", "-"), f)
+                for f in PathFinder.find_config_files(resource_name):
+                    cmd += ' --from-file={}={}'.format(
+                        os.path.basename(f).replace("_", "-"), f)
 
-            # Execute the command
-            out, err = ExecUtils.exec_command(cmd)
-            y = yaml.load(out)
-            y['metadata']['namespace'] = variables[nsname]
+                # Execute the command
+                out, err = ExecUtils.exec_command(cmd)
+                y = yaml.load(out)
+                y['metadata']['namespace'] = variables[nsname]
 
-            res = yaml.safe_dump(y)
-        else:
-            # process the template
-            res = JinjaUtils.render_jinja(
-                variables,
-                FileUtils.read_string_from_file(rt.getTemplatePath()))
+                res = y
+            else:
+                # process the template
+                raw_doc = JinjaUtils.render_jinja(
+                    variables,
+                    FileUtils.read_string_from_file(rt.getTemplatePath()))
+                res = yaml.load(raw_doc)
 
-        if args.debug_container is not None:
-            y = yaml.load(res)
-            kind = y['kind']
-            if kind not in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
-                            'ReplicationController', 'Pod'):
-                raise Exception("Template doesn't have containers.")
-            pod = y
-            if kind != 'Pod':
-                pod = y['spec']['template']
-            alpha_init_containers = None
-            annotation = 'pod.alpha.kubernetes.io/init-containers'
-            if 'metadata' in pod and 'annotations' in pod['metadata'] and \
-               annotation in pod['metadata']['annotations']:
-                j = json.loads(pod['metadata']['annotations'][annotation])
-                alpha_init_containers = {}
-                for c in j:
-                    alpha_init_containers[c['name']] = c
-            containers = {}
-            for c in pod['spec']['containers']:
-                containers[c['name']] = c
-            for c in args.debug_container:
-                found = False
-                if alpha_init_containers and c in alpha_init_containers:
-                    alpha_init_containers[c]['command'] = \
-                        ['/bin/bash', '-c', 'while true; do sleep 1000; done']
-                    found = True
-                if c in containers:
-                    containers[c]['command'] = \
-                        ['/bin/bash', '-c', 'while true; do sleep 1000; done']
-                    found = True
-
-                if not found:
-                    raise Exception("Failed to find container: %s" % c)
-
-            if alpha_init_containers:
+            if args.debug_container is not None:
+                y = res
+                kind = y['kind']
+                if kind not in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
+                                'ReplicationController', 'Pod'):
+                    raise Exception("Template doesn't have containers.")
+                pod = y
+                if kind != 'Pod':
+                    pod = y['spec']['template']
+                alpha_init_containers = None
                 annotation = 'pod.alpha.kubernetes.io/init-containers'
-                v = alpha_init_containers.values()
-                pod['metadata']['annotations'][annotation] = json.dumps(v)
+                if 'metadata' in pod and 'annotations' in pod['metadata'] and \
+                   annotation in pod['metadata']['annotations']:
+                    j = json.loads(pod['metadata']['annotations'][annotation])
+                    alpha_init_containers = {}
+                    for c in j:
+                        alpha_init_containers[c['name']] = c
+                containers = {}
+                for c in pod['spec']['containers']:
+                    containers[c['name']] = c
+                for c in args.debug_container:
+                    found = False
+                    if alpha_init_containers and c in alpha_init_containers:
+                        alpha_init_containers[c]['command'] = \
+                            ['/bin/bash', '-c',
+                             'while true; do sleep 1000; done']
+                        found = True
+                    if c in containers:
+                        containers[c]['command'] = \
+                            ['/bin/bash', '-c',
+                             'while true; do sleep 1000; done']
+                        found = True
 
-            res = yaml.safe_dump(y)
+                    if not found:
+                        raise Exception("Failed to find container: %s" % c)
+
+                if alpha_init_containers:
+                    annotation = 'pod.alpha.kubernetes.io/init-containers'
+                    v = alpha_init_containers.values()
+                    pod['metadata']['annotations'][annotation] = json.dumps(v)
+            multidoc['items'].append(res)
 
         if skip_and_return:
-            return res
+            if multi:
+                return yaml.safe_dump(multidoc)
+            else:
+                return yaml.safe_dump(res)
 
         if args.output == 'json':
-            res = json.dumps(yaml.load(res), indent=4)
+            if multi:
+                return json.dumps(multidoc, indent=4)
+            else:
+                return json.dumps(res, indent=4)
 
-        print(res)
+        if multi:
+            return yaml.safe_dump(multidoc)
+        else:
+            if args.debug_container is not None:
+                print(yaml.safe_dump(res))
+            else:
+                print(raw_doc)
+
+
+class Template(ResourceTemplate):
+    """Jinja process kolla-kubernetes resource template files"""
+
+    def get_parser(self, prog_name):
+        parser = super(Template, self).get_parser(prog_name,
+                                                  skip_action=True)
+        return parser
+
+    def validate_args(self, args):
+        super(Template, self).validate_args(args, skip_action=True)
 
 
 class Resource(ResourceTemplate):
@@ -223,10 +258,7 @@ class Resource(ResourceTemplate):
                 args.action))
             raise Exception(msg)
 
-    def take_action(self, args):
-        t = super(Resource, self).take_action(args, skip_and_return=True)
-        y = yaml.load(t)
-        kind = y['kind']
+    def _kind_to_cli(self, kind):
         kind_map = {
             'PetSet': 'petset',
             'Pod': 'pod',
@@ -242,29 +274,59 @@ class Resource(ResourceTemplate):
         if kind not in kind_map:
             msg = ("unknown template kind [{}].".format(kind))
             raise Exception(msg)
+        return kind_map[kind]
+
+    def _process_template(self, kind, namespace, template, names, action):
         nsflag = ""
-        if kind != 'PersistentVolume':
-            nsflag = " --namespace={}".format(
-                y['metadata']['namespace']
-            )
-        if args.action == 'create':
+        if kind != 'pv':
+            nsflag = " --namespace={}".format(namespace)
+        if action == 'create':
             with tempfile.NamedTemporaryFile() as tf:
-                tf.write(t)
+                tf.write(template)
                 tf.flush()
                 s = "kubectl {} -f {}{}".format(
-                    args.action, tf.name, nsflag)
+                    action, tf.name, nsflag)
                 subprocess.call(s, shell=True)
                 tf.close()
-        elif args.action == "delete":
+        elif action == "delete":
             s = "kubectl delete {} {}{}".format(
-                kind_map[kind], y['metadata']['name'],
-                nsflag)
+                kind, names, nsflag)
             subprocess.call(s, shell=True)
-        elif args.action == 'status':
+        elif action == 'status':
             s = "kubectl get {} {}{}".format(
-                kind_map[kind], y['metadata']['name'],
-                nsflag)
+                kind, names, nsflag)
             subprocess.call(s, shell=True)
+
+    def take_action(self, args):
+        t = super(Resource, self).take_action(args, skip_and_return=True)
+        y = yaml.load(t)
+        kind = y['kind']
+        if kind == 'List':
+            first_item = y['items'][0]
+            ns = first_item['metadata']['namespace']
+            type_map = {}
+            for item in y['items']:
+                if item['metadata']['namespace'] != ns:
+                    msg = "Bad template in list. Different namespaces."
+                    raise Exception(msg)
+                kind_cli = self._kind_to_cli(item['kind'])
+                t = type_map.get(kind_cli)
+                if t is None:
+                    type_map[kind_cli] = t = []
+                t.append(item['metadata']['name'])
+            if args.action in ('status', 'delete'):
+                for (kind_cli, names) in type_map.items():
+                    self._process_template(kind_cli, ns, t, ' '.join(names),
+                                           args.action)
+            else:
+                self._process_template(self._kind_to_cli(first_item['kind']),
+                                       ns, t, '', args.action)
+
+        else:
+            self._process_template(self._kind_to_cli(kind),
+                                   y['metadata']['namespace'],
+                                   t, y['metadata']['name'],
+                                   args.action)
 
 
 class ResourceMap(KollaKubernetesBaseCommand):
