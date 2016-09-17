@@ -51,6 +51,7 @@ class argobj(object):
         self.action = action
         self.print_jinja_keys_regex = None
         self.print_jinja_vars = False
+        self.debug_container = None
 
 
 def on_each_template(func):

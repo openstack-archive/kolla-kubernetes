@@ -99,6 +99,14 @@ class ResourceTemplate(ResourceBase):
                 "|".join(['yaml', 'json'])))
         ),
         parser.add_argument(
+            "-d",
+            "--debug-container",
+            metavar="container",
+            dest='debug_container',
+            action='append',
+            help=("Assist in the debugging of the specified container")
+        ),
+        parser.add_argument(
             '--print-jinja-keys-regex',
             metavar='<print-jinja-keys-regex>',
             type=str,
@@ -154,6 +162,54 @@ class ResourceTemplate(ResourceBase):
             res = JinjaUtils.render_jinja(
                 variables,
                 FileUtils.read_string_from_file(rt.getTemplatePath()))
+
+        if args.debug_container is not None:
+            y = yaml.load(res)
+            kind = y['kind']
+            if kind not in ('PetSet', 'Deployment', 'Job', 'DaemonSet',
+                            'ReplicationController', 'Pod'):
+                raise Exception("Template doesn't have containers.")
+            pod = y
+            if kind != 'Pod':
+                pod = y['spec']['template']
+            alpha_init_containers = None
+            annotation = 'pod.alpha.kubernetes.io/init-containers'
+            if 'metadata' in pod and 'annotations' in pod['metadata'] and \
+               annotation in pod['metadata']['annotations']:
+                j = json.loads(pod['metadata']['annotations'][annotation])
+                alpha_init_containers = {}
+                for c in j:
+                    alpha_init_containers[c['name']] = c
+            containers = {}
+            for c in pod['spec']['containers']:
+                containers[c['name']] = c
+            for c in args.debug_container:
+                found = False
+                warn_msg = "WARNING: container [{}] already has a command" + \
+                           " override."
+                warn_msg = warn_msg.format(c)
+                if alpha_init_containers and c in alpha_init_containers:
+                    if 'command' in alpha_init_containers[c]:
+                        print(warn_msg, file=sys.stderr)
+                    alpha_init_containers[c]['command'] = \
+                        ['/bin/bash', '-c', 'while true; do sleep 1000; done']
+                    found = True
+                if c in containers:
+                    if 'command' in containers[c]:
+                        print(warn_msg, file=sys.stderr)
+                    containers[c]['command'] = \
+                        ['/bin/bash', '-c', 'while true; do sleep 1000; done']
+                    found = True
+
+                if not found:
+                    raise Exception("Failed to find container: %s" % c)
+
+            if alpha_init_containers:
+                annotation = 'pod.alpha.kubernetes.io/init-containers'
+                v = alpha_init_containers.values()
+                pod['metadata']['annotations'][annotation] = json.dumps(v)
+
+            res = yaml.safe_dump(y)
 
         if skip_and_return:
             return res
