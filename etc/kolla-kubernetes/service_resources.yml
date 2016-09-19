@@ -525,8 +525,8 @@ kolla-kubernetes:
     pods:
     resources:
       configmap:
-      - name: openvswitch-iscsid
-      - name: openvswitch-tgtd
+      - name: iscsid
+      - name: tgtd
       secret:
       disk:
       pv:
