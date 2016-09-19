@@ -2,31 +2,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-   name: glance-api
+   name: nova-api
    namespace: {{ kolla_kubernetes_namespace }}
 spec:
-  replicas: {{ glance_api_replicas }}
+  replicas: {{ nova_api_replicas }}
   strategy:
-{% if glance_backend_ceph == "yes" %}
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
     type: RollingUpdate
-{% else %}
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 100%
-    type: RollingUpdate
-{% endif %}
   template:
     metadata:
       labels:
-        service: glance
+        service: nova
         type: api
       annotations:
-{% if glance_backend_ceph == "yes" %}
         kolla_upgrade: minor_rolling_safe
-{% endif %}
 #FIXME Once out of alpha, this should be converted to yaml.
 #FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
 # The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
@@ -39,9 +30,11 @@ spec:
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   CONF=/srv/pod-main-config/glance-api.conf;
-                   crudini --set $CONF DEFAULT bind_host 127.0.0.1;
-                   crudini --set $CONF DEFAULT bind_port 8080;"
+                   CONF=/srv/pod-main-config/nova.conf;
+                   crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
+                   crudini --set $CONF DEFAULT metadata_listen_port 8081;
+                   crudini --set $CONF DEFAULT osapi_compute_listen 127.0.0.1;
+                   crudini --set $CONF DEFAULT osapi_compute_listen_port 8080;"
               ],
               "volumeMounts": [
                   {
@@ -57,7 +50,7 @@ spec:
       ]'
     spec:
       nodeSelector:
-{%- set selector = kolla_kubernetes_hostlabel_glance_api |
+{%- set selector = kolla_kubernetes_hostlabel_nova_api |
                        default(kolla_kubernetes_hostlabel_controller)
 %}
           {{ selector.key }}: {{ selector.value }}
@@ -75,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /healthcheck
-              port: {{ glance_api_port }}
+              port: {{ nova_api_port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
           lifecycle:
@@ -103,10 +96,12 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
           ports:
-            - containerPort: {{ glance_api_port }}
-              name: glance-api
+            - containerPort: {{ nova_api_port }}
+              name: nova-api
+            - containerPort: {{ nova_metadata_port }}
+              name: nova-metadata
         - name: main
-          image: "{{ glance_api_image_full }}"
+          image: "{{ nova_api_image_full }}"
           lifecycle:
             preStop:
               exec:
@@ -119,17 +114,17 @@ spec:
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
-{% if glance_backend_ceph != "yes" %}
-            - mountPath: /var/lib/glance/
-              name: glance-persistent-storage
-{% endif %}
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
               name: etc-localtime
+            - mountPath: /lib/modules
+              name: lib-modules
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+          securityContext:
+            privileged: true
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -137,17 +132,15 @@ spec:
           emptyDir: {}
         - name: service-configmap
           configMap:
-            name: glance-api
+            name: nova-api
         - name: haproxy-config
           configMap:
-            name: glance-api-haproxy
-{% if glance_backend_ceph != "yes" %}
-        - name: glance-persistent-storage
-          persistentVolumeClaim:
-            claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
-{% endif %}
+            name: nova-api-haproxy
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
