@@ -115,6 +115,11 @@ spec:
               readOnly: true
             - mountPath: /var/log/kolla/
               name: kolla-logs
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+            - mountPath: /etc/resolv.conf
+              name: resolv-conf
+              subPath: resolv.conf
+{%- endif %}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -140,3 +145,8 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+        - name: resolv-conf
+          configMap:
+            name: resolv-conf
+{%- endif %}
