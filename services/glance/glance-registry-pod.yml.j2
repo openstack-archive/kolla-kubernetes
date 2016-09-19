@@ -30,12 +30,13 @@ spec:
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   crudini --set /srv/pod-main-config/glance-registry.conf DEFAULT bind_host 127.0.0.1;
-                   crudini --set /srv/pod-main-config/glance-registry.conf DEFAULT bind_port 8080;"
+                   CONF=/srv/pod-main-config/glance-registry.conf;
+                   crudini --set $CONF DEFAULT bind_host 127.0.0.1;
+                   crudini --set $CONF DEFAULT bind_port 8080;"
               ],
               "volumeMounts": [
                   {
-                      "name": "glance-registry-configmap",
+                      "name": "service-configmap",
                       "mountPath": "/srv/configmap"
                   },
                   {
@@ -84,7 +85,7 @@ spec:
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
-              name: glance-haproxy-config
+              name: haproxy-config
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
@@ -121,10 +122,10 @@ spec:
           emptyDir: {}
         - name: pod-main-config
           emptyDir: {}
-        - name: glance-registry-configmap
+        - name: service-configmap
           configMap:
             name: glance-registry
-        - name: glance-haproxy-config
+        - name: haproxy-config
           configMap:
             name: glance-registry-haproxy
         - name: etc-localtime
