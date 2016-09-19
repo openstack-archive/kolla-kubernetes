@@ -49,7 +49,7 @@ rabbitmq_replicas: "1"  # must == 1 even for multinode
 horizon_replicas: "1"  # may be > 1
 glance_api_replicas: "1"  # may be > 1
 glance_registry_replicas: "1"  # must == 1 even for multinode
-neutron_control_replicas: "1"  # may be > 1
+neutron_server_replicas: "1"  # may be > 1
 nova_api_replicas: "1"
 nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
