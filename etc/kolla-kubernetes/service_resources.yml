@@ -276,6 +276,11 @@ kolla-kubernetes:
         vars:
           configmap_name: nova-novncproxy-haproxy
           port_name: nova_novncproxy_port
+      - name: nova-api-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: nova-api-haproxy
+          port_name: nova_api_port
       secret:
       disk:
       pv:
@@ -315,7 +320,7 @@ kolla-kubernetes:
       - name: nova-libvirt
         template: services/nova/nova-libvirt-pod.yml.j2
       - name: nova-api
-        template: services/nova/nova-control-api-pod.yml.j2
+        template: services/nova/nova-api-pod.yml.j2
       - name: nova-conductor
         template: services/nova/nova-control-conductor-pod.yml.j2
       - name: nova-scheduler
@@ -382,6 +387,11 @@ kolla-kubernetes:
       - name: neutron-l3-agent
       - name: neutron-metadata-agent
       - name: neutron-openvswitch-agent
+      - name: neutron-server-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: neutron-server-haproxy
+          port_name: neutron_server_port
       secret:
       disk:
       pv:

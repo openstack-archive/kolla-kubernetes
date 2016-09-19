@@ -7,12 +7,17 @@ metadata:
 spec:
   replicas: {{ cinder_api_replicas }}
   strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
         service: cinder
         type: api
       annotations:
+        kolla_upgrade: minor_rolling_safe
 #FIXME Once out of alpha, this should be converted to yaml.
 #FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
 # The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
@@ -25,12 +30,13 @@ spec:
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   crudini --set /srv/pod-main-config/cinder.conf DEFAULT osapi_volume_listen 127.0.0.1;
-                   crudini --set /srv/pod-main-config/cinder.conf DEFAULT osapi_volume_listen_port 8080;"
+                   CONF=/srv/pod-main-config/cinder.conf;
+                   crudini --set $CONF DEFAULT osapi_volume_listen 127.0.0.1;
+                   crudini --set $CONF DEFAULT osapi_volume_listen_port 8080;"
               ],
               "volumeMounts": [
                   {
-                      "name": "cinder-api-configmap",
+                      "name": "service-configmap",
                       "mountPath": "/srv/configmap"
                   },
                   {
@@ -41,13 +47,13 @@ spec:
           }
       ]'
     spec:
-#You've got 2 days to drain or figure out why it won't.
-      terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_cinder_api |
                        default(kolla_kubernetes_hostlabel_controller)
 %}
           {{ selector.key }}: {{ selector.value }}
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
       containers:
         - name: haproxy
           image: "{{ haproxy_image_full }}"
@@ -79,7 +85,7 @@ spec:
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
-              name: cinder-haproxy-config
+              name: haproxy-config
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
@@ -116,10 +122,10 @@ spec:
           emptyDir: {}
         - name: pod-main-config
           emptyDir: {}
-        - name: cinder-api-configmap
+        - name: service-configmap
           configMap:
             name: cinder-api
-        - name: cinder-haproxy-config
+        - name: haproxy-config
           configMap:
             name: cinder-api-haproxy
         - name: etc-localtime
