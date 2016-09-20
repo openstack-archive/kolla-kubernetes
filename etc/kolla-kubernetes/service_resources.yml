@@ -25,6 +25,9 @@ kolla-kubernetes:
   - name: ceph
     pods:
     resources:
+      configmap:
+      - name: ceph-mon
+      - name: ceph-osd
       secret:
       - name: ceph
         template: services/ceph/ceph-secret.yml.j2
@@ -33,7 +36,13 @@ kolla-kubernetes:
       pvc:
       svc:
       bootstrap:
+      - name: ceph-bootstrap-initial-mon
+        template: services/ceph/ceph-bootstrap-initial-mon.yml.j2
       pod:
+      - name: ceph-bootstrap-osd
+        template: services/ceph/ceph-bootstrap-osd.yml.j2
+      - name: ceph-mon
+        template: services/ceph/ceph-mon-pod.yml.j2
   - name: mariadb
     pods:
     - name: mariadb
