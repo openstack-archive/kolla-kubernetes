@@ -39,6 +39,25 @@ To start up a fresh kolla-kubernetes deployment, do the following.
 
 Enter Password if requested.
 
+::
+
+    minikube ssh
+
+Wait for prompt...
+
+::
+    sudo su -
+    mkdir -p /data/kolla
+    dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=1 count=0 seek=3G
+    LOOP=$(losetup -f)
+    losetup $LOOP /data/kolla/ceph-osd0.img
+    parted $LOOP mklabel gpt
+    parted $LOOP mkpart 1 0% 512m
+    parted $LOOP mkpart 2 513m 100%
+    partprobe
+    exit
+    exit
+
 Kubernetes web ui
 =================
 ::
@@ -81,6 +100,7 @@ Run the folowing commands
     tools/kolla-ansible genconfig
     ~/stash_config.sh push
     crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
+    sed -i '/\[global\]/a osd pool default size = 1\nosd pool default min size = 1\n' /etc/kolla/ceph*/ceph.conf
     ../kolla-kubernetes/tools/secret-generator.py create
     ../kolla-kubernetes/tools/setup-resolv-conf.sh
 
@@ -94,10 +114,42 @@ Run the folowing commands
              nova-novncproxy-haproxy neutron-server-haproxy \
              nova-api-haproxy cinder-api cinder-api-haproxy \
              cinder-backup cinder-scheduler cinder-volume \
-             tgtd iscsid; \
+             ceph-mon ceph-osd; \
     do
         kolla-kubernetes resource create configmap $x
     done
+
+    kolla-kubernetes resource create bootstrap ceph-bootstrap-initial-mon
+    watch kubectl get jobs --namespace=kolla
+
+Wait for it...
+
+::
+
+    ../kolla-kubernetes/tools/setup-ceph-secrets.sh
+    kolla-kubernetes resource delete bootstrap ceph-bootstrap-initial-mon
+    kolla-kubernetes resource create pod ceph-mon
+    watch kubectl get pods --namespace=kolla
+
+Wait for it...
+
+::
+
+    kolla-kubernetes resource create pod ceph-bootstrap-osd
+    watch kubectl get pods ceph-bootstrap-osd --show-all --namespace=kolla
+
+Wait for it...
+
+::
+
+    kolla-kubernetes resource delete pod ceph-bootstrap-osd
+    kolla-kubernetes resource create pod ceph-osd
+    watch kubectl get pods ceph-osd --show-all --namespace=kolla
+
+Wait for it...
+
+::
+
     for x in mariadb rabbitmq glance; do
         kolla-kubernetes resource create pv $x
         kolla-kubernetes resource create pvc $x
@@ -282,7 +334,8 @@ NOTES
 
 petsets currently arn't deleted on delete...
 
-If you want to push your config into a configmap so you can delete your toolbox and get your configs back, you can do so like this
+If you want to push your config into a configmap so you can delete your
+toolbox and get your configs back, you can do so like this
 
 ::
 
