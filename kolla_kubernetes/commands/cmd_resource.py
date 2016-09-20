@@ -280,6 +280,7 @@ class Resource(ResourceTemplate):
             'Job': 'job',
             'Deployment': 'deployment',
             'ConfigMap': 'configmap',
+            'Secret': 'secret',
             'Service': 'svc',
             'PersistentVolume': 'pv',
             'PersistentVolumeClaim': 'pvc',
