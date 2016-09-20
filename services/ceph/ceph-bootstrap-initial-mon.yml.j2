@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-bootstrap-initial-mon
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      annotations:
+#FIXME Once out of alpha, this should be converted to yaml.
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  STORAGE_INTERFACE={{ storage_interface }};
+                  F=/var/lib/kolla-kubernetes/ceph-mon/storage_interface;
+                  [ -f $F ] && STORAGE_INTERFACE=$(<$F);
+                  IP=$(ip addr list {{ storage_interface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                  CONF=/srv/pod-main-config/ceph.conf;
+                  sed '/^mon host.*/d;/^mon host/d;/^mon addr/d' $CONF;
+                  sed '/^[global]/a mon host = '$IP $CONF;
+                  sed '/^[global]/a mon addr = '$IP':6789' $CONF;
+                  sed '/^[global]/a mon initial members = {{ storage_ceph.initial_mon }}' $CONF;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "service-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  },
+                  {
+                      "name": "ceph-mon",
+                      "mountPath": "/var/lib/ceph/mon"
+                  }
+              ]
+          }
+        ]'
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ storage_ceph.initial_mon }}
+      containers:
+        - image: "{{ ceph_mon_image_full }}"
+          name: main
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: service-config
+              readOnly: true
+            - mountPath: /var/log/kolla
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+            - mountPath: /var/lib/ceph/mon
+              name: /var/lib/ceph/mon
+      volumes:
+        - name: ceph-mon-config
+          configMap:
+            name: ceph-mon
+        - name: ceph-mon
+          hostPath:
+            path: /var/lib/kolla/volumes/ceph-mon
+        - name: etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
+      restartPolicy: OnFailure
