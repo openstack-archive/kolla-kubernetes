@@ -28,6 +28,10 @@ spec:
 {% if glance_backend_ceph != "yes" %}
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
+{% else %}
+            - mountPath: {{ container_config_directory}}/ceph.conf
+              name: ceph-conf
+              subDir: ceph.conf
 {% endif %}
             - mountPath: /var/log/kolla
               name: kolla-logs
@@ -41,6 +45,12 @@ spec:
         - name: glance-persistent-storage
           persistentVolumeClaim:
             claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
+{% else %}
+        - name: ceph-conf
+          configMap:
+            name: ceph-osd
+            item:
+              - ceph.conf
 {% endif %}
         - name: etc-localtime
           hostPath:
