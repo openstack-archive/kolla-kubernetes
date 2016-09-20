@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from __future__ import print_function
+import base64
 import copy
 import jinja2
 import os
@@ -133,6 +134,8 @@ class JinjaUtils(object):
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = TypeUtils.str_to_bool
         j2env.filters['min'] = min
+        j2env.filters['b64encode'] = base64.b64encode
+        j2env.filters['b64decode'] = base64.b64decode
         j2env.filters['to_nice_yaml'] = lambda x: \
             yaml.safe_dump(x, default_flow_style=False) if x else ''
 
