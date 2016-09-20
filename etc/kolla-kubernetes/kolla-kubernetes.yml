@@ -125,6 +125,7 @@ storage_ceph:
   key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
   # The ceph keyring file location on each kubernetes node's filesystem
   keyring: /etc/ceph/ceph.client.admin.keyring
+  initial_mon: minikube
 
 ################################
 # Persistent volumes sizes in GB

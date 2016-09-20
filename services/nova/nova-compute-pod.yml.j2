@@ -32,8 +32,22 @@ spec:
 {%- if enable_libvirt_tcp == "yes" %}
                   sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
 {%- endif %}
+{%- if enable_ceph == "yes" %}
+                  cp -a /secret/a/..data/ceph.client.nova.keyring /nova/ceph.client.nova.keyring;
+                  cp -a /config2/..data/ceph.conf /nova/ceph.conf;
+{%- endif %}
              "],
              "volumeMounts": [
+{%- if enable_ceph == "yes" %}
+                {
+                   "name": "ceph-conf",
+                   "mountPath": "/config2/"
+                },
+                {
+                   "name": "ceph-client-nova-keyring",
+                   "mountPath": "/secret/a/"
+                },
+{%- endif %}
                 {
                    "name": "kolla-logs",
                    "mountPath": "/var/log/kolla/"
@@ -135,6 +149,14 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{%- if enable_ceph == "yes" %}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-nova-keyring
+          secret:
+            secretName: ceph-client-nova-keyring
+{%- endif %}
 {%- if enable_resolve_conf_net_host_workaround == "yes" %}
         - name: resolv-conf
           configMap:
