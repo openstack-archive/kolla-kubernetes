@@ -57,6 +57,7 @@ cinder_api_replicas: "1"
 cinder_scheduler_replicas: "1"
 nova_consoleauth_replicas: "1"
 nova_novncproxy_replicas: "1"
+elasticsearch_replicas: "1"
 
 enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
