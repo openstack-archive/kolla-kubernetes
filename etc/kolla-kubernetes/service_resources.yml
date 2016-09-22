@@ -595,3 +595,70 @@ kolla-kubernetes:
         template: services/cinder/cinder-backup-pod.yml.j2
       - name: cinder-volume-lvm
         template: services/cinder/cinder-volume-lvm-pod.yml.j2
+  - name: elasticsearch
+    pods:
+    - name: elasticsearch
+      containers:
+      - name: elasticsearch
+    resources:
+      configmap:
+      - name: elasticsearch
+      secret:
+      disk:
+      - name: elasticsearch
+        template: services/common/common-disk.sh.j2
+        vars:
+          size_in_gb: 10
+      pv:
+      - name: elasticsearch
+        template: services/common/common-pv.yml.j2
+        vars:
+          name: elasticsearch
+          size_in_gb: 10
+      pvc:
+      - name: elasticsearch
+        template: services/common/common-pvc.yml.j2
+        vars:
+          name: elasticsearch
+          size_in_gb: 10
+      svc:
+      - name: elasticsearch
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: elasticsearch
+          type: elasticsearch
+          service: elasticsearch
+          name: elasticsearch
+      bootstrap:
+      pod:
+      - name: elasticsearch
+        template: services/elasticsearch/elasticsearch-pod.yml.j2
+  - name: kibana
+    pods:
+    - name: kibana
+      containers:
+      - name: kibana
+    resources:
+      configmap:
+      - name: kibana
+      - name: kibana-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: kibana-haproxy
+          port_name: kibana_server_port
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - name: kibana
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: kibana_server_port
+          service: kibana
+          type: kibana
+          name: kibana
+      bootstrap:
+      pod:
+      - name: kibana
+        template: services/kibana/kibana-pod.yml.j2
