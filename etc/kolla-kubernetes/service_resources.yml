@@ -595,3 +595,51 @@ kolla-kubernetes:
         template: services/cinder/cinder-backup-pod.yml.j2
       - name: cinder-volume-lvm
         template: services/cinder/cinder-volume-lvm-pod.yml.j2
+  - name: elasticsearch 
+    pods:
+    - name: elasticsearch
+      containers:
+      - name: elasticsearch
+    resources:
+      configmap:
+      - name: elasticsearch 
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - name: elasticsearch 
+        template: services/elasticsearch/elasticsearch-service.yml.j2
+        vars:
+          port_name: eleasticsearch_port
+          service: elasticsearch
+          type: server
+          name: elasticsearch-logging
+      bootstrap:
+      pod:
+      - name: elasticsearch 
+        template: services/elasticsearch/elasticsearch-pod.yml.j2
+  - name: kibana 
+    pods:
+    - name: kibana
+      containers:
+      - name: kibana
+    resources:
+      configmap:
+      - name: kibana
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      - name: central-logging-kibana
+        template: services/kibana/kibana-sercice.yml.j2
+        vars:
+          port_name: kibana_server_port 
+          service: kibana
+          type: server
+          name: kibana
+      bootstrap:
+      pod:
+      - name: kibana
+        template: services/kibana/kibana-pod.yml.j2
