@@ -57,6 +57,12 @@ cinder_api_replicas: "1"
 cinder_scheduler_replicas: "1"
 nova_consoleauth_replicas: "1"
 nova_novncproxy_replicas: "1"
+# !!!ALERT!!! Changing number of replicas for elasticsearch
+# might cause issues and possible data corruption as currenly
+# Kubernetes does no support mutli-write access. It might
+# change in future.
+elasticsearch_replicas: "1"
+kibana_replicas: "1"
 
 enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
