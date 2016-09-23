@@ -22,6 +22,8 @@ import yaml
 
 from oslo_log import log as logging
 
+from kolla_kubernetes import pathfinder
+
 LOG = logging.getLogger()
 
 # Disable yaml short-form printing of aliases and anchors
@@ -128,8 +130,20 @@ class JinjaUtils(object):
     def render_jinja(dict_, template_str):
         """Render dict onto jinja template and return the string result"""
         name = 'jvars'
+
+        def loader(n):
+            if n == name:
+                return template_str
+            else:
+                kkdir = pathfinder.PathFinder.find_kolla_kubernetes_dir()
+                path = os.path.join(kkdir, n)
+                f = open(path)
+                d = f.read()
+                f.close
+                return d
+
         j2env = jinja2.Environment(
-            loader=jinja2.DictLoader({name: template_str}))
+            loader=jinja2.FunctionLoader(loader))
 
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = TypeUtils.str_to_bool
