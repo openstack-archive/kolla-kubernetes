@@ -1,11 +1,24 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set replicas = global[kolla_kubernetes.template.vars.replicas] %}
+{%- set serviceName = kolla_kubernetes.template.vars.service_name %}
+{%- set serviceType = kolla_kubernetes.template.vars.service_type %}
+{%- set configFileName = kolla_kubernetes.template.vars.config_file_name %}
+{%- set configSectionName = kolla_kubernetes.template.vars.config_section_name %}
+{%- set configListenHostParameter = kolla_kubernetes.template.vars.config_listen_host_parameter %}
+{%- set configListenPortParameter = kolla_kubernetes.template.vars.config_listen_port_parameter %}
+{%- set port = global[kolla_kubernetes.template.vars.port] %}
+{%- set portName = kolla_kubernetes.template.vars.port_name %}
+{%- set image = global[kolla_kubernetes.template.vars.image] %}
+{%- set selector = global[kolla_kubernetes.template.vars.service_location] |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-   name: nova-novncproxy
+   name: {{ resourceName }}
    namespace: {{ kolla_kubernetes_namespace }}
 spec:
-  replicas: {{ nova_novncproxy_replicas }}
+  replicas: {{ replicas }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -14,8 +27,8 @@ spec:
   template:
     metadata:
       labels:
-        service: nova
-        type: novncproxy
+        service: {{ serviceName }}
+        type: {{ serviceType }}
       annotations:
         kolla_upgrade: minor_rolling_safe
 #FIXME Once out of alpha, this should be converted to yaml.
@@ -30,9 +43,9 @@ spec:
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   CONF=/srv/pod-main-config/nova.conf;
-                   crudini --set $CONF vnc novncproxy_host 127.0.0.1;
-                   crudini --set $CONF vnc novncproxy_port 8080"
+                   CONF=/srv/pod-main-config/{{ configFileName }};
+                   crudini --set $CONF {{ configSectionName }} {{ configListenHostParameter }} 127.0.0.1;
+                   crudini --set $CONF {{ configSectionName }} {{ configListenPortParameter }} 8080"
               ],
               "volumeMounts": [
                   {
@@ -50,9 +63,6 @@ spec:
 #You've got 2 days to drain or figure out why it won't.
       terminationGracePeriodSeconds: {{ 2 * 24 * 60 * 60 }}
       nodeSelector:
-{%- set selector = kolla_kubernetes_hostlabel_nova_novncproxy |
-                       default(kolla_kubernetes_hostlabel_controller)
-%}
           {{ selector.key }}: {{ selector.value }}
       containers:
         - name: haproxy
@@ -66,7 +76,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /vnc_auto.html
-              port: {{ nova_novncproxy_port }}
+              port: {{ port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
           lifecycle:
@@ -94,10 +104,10 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
           ports:
-            - containerPort: {{ nova_novncproxy_port }}
-              name: nova-novncproxy
+            - containerPort: {{ port }}
+              name: {{ portName }}
         - name: main
-          image: "{{ nova_novncproxy_image_full }}"
+          image: "{{ image }}"
           lifecycle:
             preStop:
               exec:
@@ -124,10 +134,10 @@ spec:
           emptyDir: {}
         - name: service-configmap
           configMap:
-            name: nova-novncproxy
+            name: {{ resourceName }}
         - name: haproxy-config
           configMap:
-            name: nova-novncproxy-haproxy
+            name: {{ resourceName}}-haproxy
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
