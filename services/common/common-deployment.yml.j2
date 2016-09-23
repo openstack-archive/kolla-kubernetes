@@ -12,6 +12,7 @@
 {%- set selector = global[kolla_kubernetes.template.vars.service_location] |
                        default(kolla_kubernetes_hostlabel_controller)
 %}
+{%- import "common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -127,6 +128,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -137,7 +141,10 @@ spec:
             name: {{ resourceName }}
         - name: haproxy-config
           configMap:
-            name: {{ resourceName}}-haproxy
+            name: {{ resourceName }}-haproxy
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
