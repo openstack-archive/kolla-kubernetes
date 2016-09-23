@@ -1,0 +1,20 @@
+{% macro fluentd_container() %}
+- name: logging
+  image: "{{ fluentd_image_full }}"
+  volumeMounts:
+    - mountPath: {{ container_config_directory }}
+      name: logging-config
+    - mountPath: /var/log/kolla/
+      name: kolla-logs
+    - mountPath: /etc/localtime
+      name: etc-localtime
+  env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: {{ config_strategy }}
+{% endmacro %}
+
+{% macro fluentd_volume() %}
+- name: logging-config
+  configMap:
+    name: {{ resourceName }}-logging
+{% endmacro %}
