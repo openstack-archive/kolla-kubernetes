@@ -567,6 +567,10 @@ kolla-kubernetes:
         vars:
           configmap_name: cinder-api-haproxy
           port_name: cinder_api_port
+      - name: cinder-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: cinder-api-logging
       secret:
       disk:
       pv:

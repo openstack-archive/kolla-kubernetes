@@ -117,6 +117,18 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+        - name: logging
+          image: "{{ fluentd_image_full }}"
+          volumeMounts:
+            - mountPath: {{ container_config_directory }}
+              name: logging-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: etc-localtime
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -128,6 +140,9 @@ spec:
         - name: haproxy-config
           configMap:
             name: cinder-api-haproxy
+        - name: logging-config
+          configMap:
+            name: cinder-api-logging
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
