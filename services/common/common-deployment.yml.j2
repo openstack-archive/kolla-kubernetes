@@ -1,3 +1,5 @@
+{% include "common-fluentd.yml.j2" %}
+
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set replicas = global[kolla_kubernetes.template.vars.replicas] %}
 {%- set serviceName = kolla_kubernetes.template.vars.service_name %}
@@ -127,6 +129,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -137,7 +142,10 @@ spec:
             name: {{ resourceName }}
         - name: haproxy-config
           configMap:
-            name: {{ resourceName}}-haproxy
+            name: {{ resourceName }}-haproxy
+{% if enable_fluentd == "yes" %}
+{{ fluentd_volume() | indent(8, true) }}
+{% endif %}
         - name: etc-localtime
           hostPath:
             path: /etc/localtime
