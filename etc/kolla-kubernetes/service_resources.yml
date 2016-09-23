@@ -328,7 +328,19 @@ kolla-kubernetes:
       - name: nova-consoleauth
         template: services/nova/nova-control-consoleauth-pod.yml.j2
       - name: nova-novncproxy
-        template: services/nova/nova-control-novncproxy-pod.yml.j2
+        template: services/common/common-deployment.yml.j2.yml.j2
+        vars:
+          replicas: nova_novncproxy_replicas  
+          service_name: "nova"
+          service_type: "novncproxy"
+          service_location: kolla_kubernetes_hostlabel_nova_novncproxy
+          config_file_name: "nova.conf"
+          config_section_name: "vnc"
+          config_listen_host_parameter: "novncproxy_host"
+          config_listen_port_parameter: "novncproxy_port"
+          port: nova_novncproxy_port
+          port_name: "nova-novncproxy"
+          image: nova_novncproxy_image_full
   - name: openvswitch
     pods:
     - name: openvswitch-ovsdb
