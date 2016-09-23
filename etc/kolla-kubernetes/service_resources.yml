@@ -195,11 +195,19 @@ kolla-kubernetes:
         vars:
           configmap_name: glance-api-haproxy
           port_name: glance_api_port
+      - name: glance-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: glance-api-logging
       - name: glance-registry-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
           configmap_name: glance-registry-haproxy
           port_name: glance_registry_port
+      - name: glance-registry-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: glance-registry-logging
       secret:
       disk:
       - name: glance
@@ -294,6 +302,10 @@ kolla-kubernetes:
         vars:
           configmap_name: nova-api-haproxy
           port_name: nova_api_port
+      - name: nova-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-api-logging
       secret:
       disk:
       pv:
@@ -439,6 +451,10 @@ kolla-kubernetes:
         vars:
           configmap_name: neutron-server-haproxy
           port_name: neutron_server_port
+      - name: neutron-server-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-server-logging
       secret:
       disk:
       pv:
@@ -639,6 +655,10 @@ kolla-kubernetes:
         vars:
           configmap_name: cinder-api-haproxy
           port_name: cinder_api_port
+      - name: cinder-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: cinder-api-logging
       secret:
       disk:
       pv:
@@ -731,6 +751,10 @@ kolla-kubernetes:
         vars:
           configmap_name: kibana-haproxy
           port_name: kibana_server_port
+      - name: kibana-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: kibana-logging
       secret:
       disk:
       pv:
