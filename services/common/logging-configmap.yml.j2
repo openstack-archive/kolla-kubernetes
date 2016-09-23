@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kolla_kubernetes.template.vars.configmap_name }}
+  namespace: {{ kolla_kubernetes_namespace }}
+data:
+  td-agent.conf: |
+    <match fluent.**>
+      type null
+    </match>
+    <source>
+      type tail 
+      path /var/log/kolla/*/*.log 
+      format /^(?<time>[^ ]* [^ ]*)\s*(?<pid>([0-9]+)?)\s*(?<level>[a-zA-Z]*)\s*(?<ident>[^ ]*)\s*(?<req_id>\[req-([0-9A-Fa-f]| *-)+\])?\s*(?<message>.*)$/ 
+      pos_file /var/log/kolla/openstack.log.pos
+      time_format %Y-%m-%d %H:%M:%S.%L
+      tag openstack-kolla 
+    </source>
+    <match **>
+      type elasticsearch
+      log_level debug 
+      include_tag_key true
+      host elasticsearch 
+      port {{ elasticsearch_port }} 
+      logstash_format true
+      # Set the chunk limit the same as for fluentd-gcp.
+      buffer_chunk_limit 8M
+      # Cap buffer memory usage to 2MiB/chunk * 32 chunks = 64 MiB
+      buffer_queue_limit 32
+      flush_interval 10s
+      # Never wait longer than 5 minutes between retries.
+      max_retry_wait 30
+      # Disable the limit on the number of retries (retry forever).
+      disable_retry_limit
+    </match>
+
+  config.json: |
+    {
+        "command": "/usr/sbin/td-agent",
+        "config_files": [{
+            "source": "{{ container_config_directory }}/td-agent.conf",
+            "dest": "/etc/td-agent/td-agent.conf",
+            "owner": "root",
+            "perm": "0644"
+        }]
+    }
