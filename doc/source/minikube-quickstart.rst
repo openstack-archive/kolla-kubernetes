@@ -1,8 +1,8 @@
-.. minikube:
+.. minikube_quickstart:
 
-==============================
-Kolla Kubernetes With Minikube
-==============================
+==========================================
+Kolla Kubernetes Minikube Quickstart Guide
+==========================================
 
 Install MiniKube
 ================

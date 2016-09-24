@@ -1,8 +1,13 @@
-.. kubernetes-all-in-one:
+.. kubernetes-setup:
 
-=================================
-Kolla Kubernetes All In One Guide
-=================================
+============================
+Kolla Kubernetes Setup Guide
+============================
+
+The most well tested setup guide for Kuberentes is the
+::doc:: `minikube-quickstart`.  It will walk through the entire setup
+including getting Kubernetes and OpenStack deployed.  This guide
+is an alternative method for starting Kubernetes.
 
 Single-node Kubernetes setup
 ============================
