@@ -9,9 +9,18 @@
 {%- set port = global[kolla_kubernetes.template.vars.port] %}
 {%- set portName = kolla_kubernetes.template.vars.port_name %}
 {%- set image = global[kolla_kubernetes.template.vars.image] %}
+{%- set checkPath = kolla_kubernetes.template.vars.check_path %}
+{%- if serviceType == 'neutron' %}
+{%- set selector = global[kolla_kubernetes.template.vars.service_location] |
+                   default(kolla_kubernetes_hostlabel_network |
+                     default(kolla_kubernetes_hostlabel_controller)
+                   )
+%}
+{%- else %}
 {%- set selector = global[kolla_kubernetes.template.vars.service_location] |
                        default(kolla_kubernetes_hostlabel_controller)
 %}
+{%- endif %}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -43,10 +52,22 @@ spec:
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{%- if resourceName == 'kibana' %}
+                   IP=\"127.0.0.1\";
+                   PORT=\"8080\";
+                   sed -i ''s|^elasticsearch.url:.*|elasticsearch.url: \"http://elasticsearch:9200\"|g'' /srv/pod-main-config/kibana.yml;
+                   sed -i ''s|^server.host:.*|server.host: \"''$IP''\"|g'' /srv/pod-main-config/kibana.yml;
+                   sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
+{%- else %}
                    CONF=/srv/pod-main-config/{{ configFileName }};
+{%- if resourceName == 'nova-api' %}
+                   crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
+                   crudini --set $CONF DEFAULT metadata_listen_port 8081;
+{%- endif %}
                    crudini --set $CONF {{ configSectionName }} {{ configListenHostParameter }} 127.0.0.1;
-                   crudini --set $CONF {{ configSectionName }} {{ configListenPortParameter }} 8080"
-              ],
+                   crudini --set $CONF {{ configSectionName }} {{ configListenPortParameter }} 8080;
+{%- endif %}
+              "],
               "volumeMounts": [
                   {
                       "name": "service-configmap",
@@ -75,7 +96,7 @@ spec:
             touch /var/lib/kolla-kubernetes/event/shutdown;
           readinessProbe:
             httpGet:
-              path: /vnc_auto.html
+              path: {{ checkPath }}
               port: {{ port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
@@ -106,6 +127,10 @@ spec:
           ports:
             - containerPort: {{ port }}
               name: {{ portName }}
+{%- if resourceName == 'nova-api' %}
+            - containerPort: {{ nova_metadata_port }}
+              name: nova-metadata
+{%- endif %}
         - name: main
           image: "{{ image }}"
           lifecycle:
@@ -124,6 +149,12 @@ spec:
               name: kolla-logs
             - mountPath: /etc/localtime
               name: etc-localtime
+{%- if resourceName == 'nova-api' %}
+            - mountPath: /lib/modules
+              name: lib-modules
+          securityContext:
+            privileged: true
+{%- endif %}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -135,6 +166,19 @@ spec:
         - name: service-configmap
           configMap:
             name: {{ resourceName }}
+{%- if resourceName == 'neutron-server' %}
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+            - key: neutron-lbaas.conf
+              path: neutron_lbaas.conf
+            - key: neutron-vpnaas.conf
+              path: neutron_vpnaas.conf
+{%- endif %}
         - name: haproxy-config
           configMap:
             name: {{ resourceName}}-haproxy
@@ -143,3 +187,8 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{%- if resourceName == 'nova-api' %}
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+{%- endif %}
