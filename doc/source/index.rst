@@ -13,11 +13,12 @@ Contents:
 
    contributing
    installation
-   kubernetes-all-in-one
-   quickstart
+   host-setup
+   kubernetes-setup
+   minikube-quickstart
+   general-quickstart
    multi-node
    private-registry
-   readme
    usage
    labels
 

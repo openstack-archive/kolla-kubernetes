@@ -4,165 +4,10 @@
 Kolla Kubernetes Quickstart Guide
 =================================
 
-Dependencies
-============
-
-=====================   ===========  ===========  =========================
-Component               Min Version  Max Version  Comment
-=====================   ===========  ===========  =========================
-Ansible                 2.00         none         On deployment host
-Docker                  1.10         none         On target nodes
-Docker Python           1.6.0        none         On target nodes
-Python Jinja2           2.8.0        none         On deployment host
-Kubernetes              1.3.0        none         On all hosts
-=====================   ===========  ===========  =========================
-
-.. NOTE:: Kolla (which provides the templating) is sensitive about the
-  Ansible version.  Mainline currently requires 2.0.x or above.
-
-Installing Docker
-=================
-
-Since Docker is required to build images as well as be present on all deployed
-targets, the Kolla community recommends installing the official Docker, Inc.
-packaged version of Docker for maximum stability and compatibility with the
-following command:
-
-.. NOTE:: Docker 1.11.0 is not compatible with Kubernetes due to some issues in
-  Docker. The below command will install the latest docker and revert back to
-  1.10.3.  For different Debian or Ubuntu distributions, you may need to use
-  ``apt-cache madison docker-engine`` to get the correct version.
-
-::
-
-    # Install Docker
-    curl -sSL https://get.docker.io | bash
-
-Setup Docker
-============
-
-Docker needs to run with the root filesystem as shared in order for
-Neutron to function in 'thin' containers. The reason for that is mount
-propogation.  Mounts need to be shared so the network namespaces are
-shared amoung the host and the Neutron containers.
-
-For CentOS and other systemd distros, change MountFlags from "slave"
-to "shared" and restart Docker.
-
-::
-
-   # CentOS (and other systemd distros)
-   cat > /etc/systemd/system/docker.service <<EOF
-   .include /usr/lib/systemd/system/docker.service
-   [Service]
-   MountFlags=shared
-   EOF
-
-   # Restart the Docker daemon
-   systemctl daemon-reload
-   systemctl start docker
-
-For Ubuntu 14.04 LTS, add a command to /etc/rc.local to mark the root
-filesystem as shared upon startup.
-
-::
-
-   # Ubuntu (and other non-systemd distros)
-   # Edit /etc/rc.local to add:
-   mount --make-shared /
-
-   # Ensure the mount is shared
-   sudo sh /etc/rc.local
-
-Kubernetes Setup
-================
-
-A user can show up with an already running Kubernetes or follow
-the :doc:`kubernetes-all-in-one` for help on getting Kubernetes
-setup.
-
-Installing Kolla and Kolla-Kubernetes
-=====================================
-
-Follow the instructions for a **full install** if you are not a developer.
-Choose a **development install** if you will frequently pull or contribute
-patches.  A development install allows you to ```git pull``` within the
-repository in order to use the latest code without having to re-install.  It
-also removes the need to copy files to system directories such as /etc/kolla,
-and allows you to use ```git diff``` to see all code or resource file changes
-that you or the system has made.
-
-Kolla-kubernetes depends on configuration files (and images) that are generated
-from kolla.  When fully installed, kolla default configuration files
-(globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
-configuration files are placed in the same directory.  Kolla's
-``generate_passwords.py`` creates a passwords.yml file which contains passwords
-and encryption keys.  Kolla's ``kolla-ansible genconfig`` will generate the
-config files for each kolla service container based on the contents of
-globals.yml and passwords.yml
-
-
-Full Install
-------------
-
-::
-
-    # Clone Kolla
-    git clone https://git.openstack.org/openstack/kolla
-
-    # Install Kolla
-    pushd kolla
-    sudo pip install .
-    sudo cp -r ./etc/kolla /etc
-    popd
-
-    # Clone Kolla-Kubernetes
-    git clone https://git.openstack.org/openstack/kolla-kubernetes
-
-    # Install Kolla-Kubernetes
-    pushd kolla-kubernetes
-    sudo pip install .
-    sudo cp -r ./etc/kolla-kubernetes /etc
-    popd
-
-
-Development Install
--------------------
-
-::
-
-    # Clone Kolla
-    git clone https://git.openstack.org/openstack/kolla
-
-    # Install Kolla
-    pushd kolla
-    sudo pip install --editable .
-    sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla path
-    popd
-
-    # Clone Kolla-Kubernetes
-    git clone https://git.openstack.org/openstack/kolla-kubernetes
-
-    # Install Kolla-Kubernetes
-    pushd kolla-kubernetes
-    sudo pip install --editable .
-    popd
-
-
-.. NOTE::
-  - Ansible commands (e.g. kolla-ansible) targeting the local machine require
-    sudo because ansible creates ```/etc/.ansible_*``` and
-    ```/etc/kolla/<service>``` files which require root permissions.
-  - Executing local versions of kolla tools ```./tools/kolla-ansible``` instead
-    of from the system path, will locate resource files from relative locations
-    instead of system locations.
-  - The development install will also work with Python virtual environments.
-
-
 Configure Kolla-Kubernetes
 ==========================
 
-Edit the file ```/etc/kolla/globals.yml``` to add these settings which
+Edit the file ``/etc/kolla/globals.yml`` to add these settings which
 are specific to kolla-kubernetes:
 
 ::
@@ -187,19 +32,10 @@ Then, generate the Kolla configuration files:
     sudo ./tools/kolla-ansible genconfig
     popd
 
+If using a virt setup, set nova to use qemu unless your environment has
+nested virt capabilities enabled::
 
-Building Kolla Containers
-=========================
-
-Kolla-kubernetes works against Kolla mainline's containers but it is the
-expected behavior that you build them locally.
-
-The Kolla documentation engine has a detailed `overview of building the
-containers <http://docs.openstack.org/developer/kolla/image-building.html>`_.
-
-The brief summary for horizon kolla dependencies is as follows::
-
-    kolla-build mariadb memcached kolla-toolbox keystone horizon
+    crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 
 Labeling Nodes
 ==============
@@ -210,7 +46,7 @@ following labels::
     kolla_compute=true
     kolla_controller=true
 
-example::
+Label you current node::
     ALLINONENODE=$(hostname)
     kubectl label node $ALLINONENODE kolla_compute=true
     kubectl label node $ALLINONENODE kolla_controller=true
@@ -227,14 +63,8 @@ Create the kubernetes namespace. By default it is 'kolla'.
 ::
     kubectl create namespace 'kolla'
 
-
 Generating Kubernetes Secrets
 =============================
-
-Secret for each service must be generated before attempting to bootstrap
-any services. PS https://review.openstack.org/#/c/354199/
-provides a script which can be used to generate or to remove Secrets.
-This is only a temporary solution which will be replaced in the near future.
 
 Before using this script, you MUST generate passwords by using
 generate_passwords.py (comes with kolla distribution), if there is no
@@ -248,21 +78,217 @@ Script accepts 1 parameter: "create" or "delete".
     # To delete Secrets for all services in passwords.yml run:
     secret-generator.py delete
 
-.. NOTE:: This script is a TEMPORARY solution. Check this doc again soon.
+Resolv.conf Workaround
+======================
 
+Kubernetes uses service discovery for all pods including the net=host pods.
+In the net=host pods, resolv.conf doesn't point at kube-dns. Kolla-kubernetes
+provides a workaround by creating a configmap called resolv-conf with a
+resolv.conf from a non net=host pod so that dns properly resolves.
+
+Create the resolv.conf configmap::
+
+  ./tools/setup-resolv-conf.sh
 
 Running Kolla-Kubernetes
 ========================
 
-The following commands will allow you to bootstrap a running Horizon instance,
-including all of its ordered dependencies.  Some kolla containers require
-bootstrapping, while others do not.::
+The following commands will walk through the deployment of the OpenStack
+services.  There will be pauses in between commands to sure they completed.
+In the future, this will be handled as a workflow::
 
-    kolla-kubernetes bootstrap mariadb
-    kolla-kubernetes run mariadb
-    kolla-kubernetes run memcached
-    kolla-kubernetes bootstrap keystone
-    kolla-kubernetes run keystone
-    kolla-kubernetes run horizon
+    for x in mariadb keystone horizon rabbitmq memcached nova-api \
+             nova-conductor nova-scheduler glance-api-haproxy \
+             glance-registry-haproxy glance-api glance-registry \
+             neutron-server neutron-dhcp-agent neutron-l3-agent \
+             neutron-metadata-agent neutron-openvswitch-agent \
+             openvswitch-db-server openvswitch-vswitchd nova-libvirt \
+             nova-compute nova-consoleauth nova-novncproxy \
+             nova-novncproxy-haproxy neutron-server-haproxy \
+             nova-api-haproxy cinder-api cinder-api-haproxy \
+             cinder-backup cinder-scheduler cinder-volume \
+             tgtd iscsid; \
+    do
+        kolla-kubernetes resource create configmap $x
+    done
+    for x in mariadb rabbitmq glance; do
+        kolla-kubernetes resource create pv $x
+        kolla-kubernetes resource create pvc $x
+    done
+    for x in mariadb memcached keystone-admin keystone-public rabbitmq \
+             rabbitmq-management nova-api glance-api glance-registry \
+             neutron-server nova-metadata nova-novncproxy horizon \
+             cinder-api; \
+    do
+        kolla-kubernetes resource create svc $x
+    done
 
-A similar pattern may be followed for Openstack services beyond horizon.
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
+
+wait for it....
+
+::
+
+    for x in mariadb-bootstrap rabbitmq-bootstrap; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
+    for x in mariadb memcached rabbitmq; do
+        kolla-kubernetes resource create pod $x
+    done
+    watch kubectl get pods --namespace kolla
+
+wait for it...
+
+::
+
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace kolla
+
+wait for it...
+
+::
+
+    for x in keystone-create-db keystone-endpoints keystone-manage-db; do
+        kolla-kubernetes resource delete bootstrap $x
+    done
+    kolla-kubernetes resource create pod keystone
+    watch kolla-kubernetes resource status pod keystone
+
+wait for it...
+
+::
+
+    for x in glance-create-db glance-endpoints glance-manage-db \
+             nova-create-api-db nova-create-endpoints nova-create-db \
+             neutron-create-db neutron-endpoints neutron-manage-db \
+             cinder-create-db cinder-create-endpoints cinder-manage-db; \
+    do
+        kolla-kubernetes resource create bootstrap $x
+    done
+    watch kubectl get jobs --namespace=kolla
+
+wait for it...
+
+::
+
+    for x in glance-create-db glance-endpoints glance-manage-db \
+             nova-create-api-db nova-create-endpoints nova-create-db \
+             neutron-create-db neutron-endpoints neutron-manage-db \
+             cinder-create-db cinder-create-endpoints cinder-manage-db; \
+    do
+         kolla-kubernetes resource delete bootstrap $x
+    done
+    for x in nova-api nova-conductor nova-scheduler glance-api \
+             glance-registry neutron-server horizon nova-consoleauth \
+             nova-novncproxy cinder-api cinder-scheduler; \
+    do
+        kolla-kubernetes resource create pod $x
+    done
+    watch kubectl get pods --namespace=kolla
+
+wait for it...
+
+::
+
+    for x in openvswitch-ovsdb-network openvswitch-vswitchd-network \
+             neutron-openvswitch-agent-network neutron-dhcp-agent \
+             neutron-metadata-agent-network neutron-l3-agent-network; \
+    do
+        kolla-kubernetes resource create pod $x
+    done
+
+    kolla-kubernetes resource create pod nova-libvirt
+    kolla-kubernetes resource create pod nova-compute
+    watch kubectl get pods --namespace=kolla
+
+wait for it...
+
+Services should be up now.
+
+If you want to simply access the web gui, see section `Web Access`_ below.
+
+Generate Credentials
+====================
+
+This will be automated by an created an "operator pod" in the future.
+Credentials can be generated by hand by looking in ``/etc/kolla/globals.yml``
+and filling in these variables::
+
+  export OS_PROJECT_DOMAIN_ID=default
+  export OS_USER_DOMAIN_ID=default
+  export OS_PROJECT_NAME=admin
+  export OS_USERNAME=admin
+  export OS_PASSWORD=<keystone_admin_password>
+  export OS_AUTH_URL=http://<kolla_internal_fqdn>:<keystone_admin_port>
+  export OS_IDENTITY_API_VERSION=3
+
+Testing OpenStack
+================
+
+After sourcing your credentials start using the services::
+
+    openstack catalog list
+
+    curl -o cirros.qcow2 \
+        http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    openstack image create --file cirros.qcow2 --disk-format qcow2 \
+         --container-format bare 'CirrOS'
+
+    neutron net-create --provider:physical_network=physnet1 \
+        --provider:network_type=flat external
+    neutron net-update --router:external=True external
+    neutron subnet-create --gateway 172.18.0.1 --disable-dhcp \
+        --allocation-pool start=172.18.0.65,end=172.18.0.254 \
+        --name external external 172.18.0.0/24
+    neutron router-create admin
+    neutron router-gateway-set admin external
+
+    neutron net-create admin
+    neutron subnet-create --gateway=172.18.1.1 \
+        --allocation-pool start=172.18.1.65,end=172.18.1.254 \
+        --name admin admin 172.18.1.0/24
+    neutron router-interface-add admin admin
+    neutron security-group-rule-create --protocol icmp \
+        --direction ingress default
+    neutron security-group-rule-create --protocol tcp \
+        --port-range-min 22 --port-range-max 22 \
+        --direction ingress default
+
+    openstack server create --flavor=m1.tiny --image CirrOS \
+         --nic net-id=admin test
+    openstack server create --flavor=m1.tiny --image CirrOS \
+         --nic net-id=admin test2
+    FIP=$(openstack ip floating create external -f value -c ip)
+    FIP2=$(openstack ip floating create external -f value -c ip)
+    openstack ip floating add $FIP test
+    openstack ip floating add $FIP2 test2
+
+    watch openstack server list
+
+wait for it...
+
+::
+
+    ssh cirros@$FIP curl 169.254.169.254
+
+.. _`Web Access`:
+
+Web Access
+==========
+If you want to access the horizon website, fetch the admin password from
+within the toolbox like:
+
+::
+    grep keystone_admin /etc/kolla/passwords.yml
+
+And paste in the ip address you noted earlier from 'minikube ip' into your
+web browser. The username is 'admin'.
+
+
+.. NOTE:: petsets currently arn't deleted on delete. The resources for it will
+have to be cleaned up by hand.
