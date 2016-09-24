@@ -133,6 +133,8 @@ class JinjaUtils(object):
         # Do not print type for bools "!!bool" on output
         j2env.filters['bool'] = TypeUtils.str_to_bool
         j2env.filters['min'] = min
+        j2env.filters['to_nice_yaml'] = lambda x: \
+            yaml.safe_dump(x, default_flow_style=False) if x else ''
 
         # Add a "raise" keyword for raising exceptions from within jinja
         def jinja_raise(message):
