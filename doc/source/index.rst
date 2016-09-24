@@ -20,6 +20,7 @@ Contents:
    readme
    usage
    labels
+   running-tests
 
 Kolla-Kubernetes Services
 =========================
