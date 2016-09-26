@@ -46,6 +46,7 @@ Enter Password if requested.
 Wait for prompt...
 
 ::
+
     sudo su -
     mkdir -p /data/kolla
     dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=1 count=0 seek=3G
@@ -60,6 +61,7 @@ Wait for prompt...
 
 Kubernetes web ui
 =================
+
 ::
 
     minikube dashboard
@@ -276,8 +278,17 @@ wait for it...
         kolla-kubernetes resource create pod $x
     done
 
+    kolla-kubernetes resource create bootstrap openvswitch-set-external-ip
     kolla-kubernetes resource create pod nova-libvirt
-    kolla-kubernetes resource create pod nova-compute
+    kolla-kubernetes resource create pod nova-compute 
+
+    watch kubectl get jobs --namespace=kolla
+
+wait for it...
+
+::
+
+    kolla-kubernetes resource delete bootstrap openvswitch-set-external-ip
     watch kubectl get pods --namespace=kolla
 
 wait for it...
@@ -360,6 +371,7 @@ If you want to access the horizon website, fetch the admin password from
 within the toolbox like:
 
 ::
+
     grep keystone_admin /etc/kolla/passwords.yml
 
 And paste in the ip address you noted earlier from 'minikube ip' into your

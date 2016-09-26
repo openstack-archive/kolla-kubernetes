@@ -4,6 +4,13 @@ spec:
   ports:
     - port: {{ rabbitmq_management_port }}
       name: management
+{%- if rabbitmq_management_nodeport is defined %}
+      nodePort: {{ rabbitmq_management_nodeport }}
+  type: NodePort
+{%- elif rabbitmq_management_external %}
+  externalIPs:
+    - {{ kolla_kubernetes_external_vip }}
+{%- endif %}
   selector:
     service: rabbitmq
 metadata:
