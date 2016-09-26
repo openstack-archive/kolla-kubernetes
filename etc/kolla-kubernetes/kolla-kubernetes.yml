@@ -55,6 +55,11 @@ nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
 cinder_api_replicas: "1"
 cinder_scheduler_replicas: "1"
+# !!!ALERT!!! Changing the number of replica's for the cinder
+# volume manager backed with ceph is not safe unless you are
+# running at least newton and have configured a lock manager.
+# This is not done out of the box currently.
+cinder_volume_ceph_replicas: "1"
 nova_consoleauth_replicas: "1"
 nova_novncproxy_replicas: "1"
 # !!!ALERT!!! Changing number of replicas for elasticsearch
@@ -125,6 +130,7 @@ storage_ceph:
   key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
   # The ceph keyring file location on each kubernetes node's filesystem
   keyring: /etc/ceph/ceph.client.admin.keyring
+  initial_mon: minikube
 
 ################################
 # Persistent volumes sizes in GB
@@ -224,3 +230,11 @@ horizon_https_nodeport: "30433"
 kolla_kubernetes_ovs_setup_bridge: "yes"
 kolla_kubernetes_ovs_add_port: "yes"
 enable_resolve_conf_net_host_workaround: "yes"
+
+########################
+# Ceph variables
+########################
+# WARNING! reminder, this ceph setup is only intended for testing.
+
+ceph_osd_journal_dev: "/dev/loop0p1"
+ceph_osd_data_dev: "/dev/loop0p2"

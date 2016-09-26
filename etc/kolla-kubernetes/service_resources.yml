@@ -25,6 +25,9 @@ kolla-kubernetes:
   - name: ceph
     pods:
     resources:
+      configmap:
+      - name: ceph-mon
+      - name: ceph-osd
       secret:
       - name: ceph
         template: services/ceph/ceph-secret.yml.j2
@@ -33,7 +36,15 @@ kolla-kubernetes:
       pvc:
       svc:
       bootstrap:
+      - name: ceph-bootstrap-initial-mon
+        template: services/ceph/ceph-bootstrap-initial-mon.yml.j2
       pod:
+      - name: ceph-bootstrap-osd
+        template: services/ceph/ceph-bootstrap-osd.yml.j2
+      - name: ceph-mon
+        template: services/ceph/ceph-mon-pod.yml.j2
+      - name: ceph-osd
+        template: services/ceph/ceph-osd-pod.yml.j2
   - name: mariadb
     pods:
     - name: mariadb
@@ -295,6 +306,8 @@ kolla-kubernetes:
           configmap_name: nova-api-haproxy
           port_name: nova_api_port
       secret:
+      - name: nova-libvirt
+        template: services/nova/nova-libvirt-secret.yml.j2
       disk:
       pv:
       pvc:
@@ -680,6 +693,8 @@ kolla-kubernetes:
         template: services/cinder/cinder-backup-pod.yml.j2
       - name: cinder-volume-lvm
         template: services/cinder/cinder-volume-lvm-pod.yml.j2
+      - name: cinder-volume-ceph
+        template: services/cinder/cinder-volume-ceph-pod.yml.j2
   - name: elasticsearch
     pods:
     - name: elasticsearch
