@@ -25,7 +25,7 @@
                        default(kolla_kubernetes_hostlabel_controller)
 %}
 {%- endif %}
-{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -162,8 +162,8 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_fluentd == "yes" %}
-{{ fluentd.fluentd_container() | indent(8, true) }}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
 {% endif %}
       volumes:
         - name: kolla-kubernetes-events
@@ -183,6 +183,6 @@ spec:
         - name: kolla-logs
           emptyDir: {}
 {{ extraVolume | indent(8, True) }}
-{% if enable_fluentd == "yes" %}
-{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
 {% endif %}

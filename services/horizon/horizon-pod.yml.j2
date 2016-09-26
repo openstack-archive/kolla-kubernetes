@@ -1,4 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -54,6 +55,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: pod-main-config
           emptyDir: {}
@@ -72,3 +76,6 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
+{% endif %}

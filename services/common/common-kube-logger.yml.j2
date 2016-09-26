@@ -1,6 +1,6 @@
-{% macro fluentd_container() %}
+{% macro kube_logger_container() %}
 - name: logging
-  image: "{{ fluentd_image_full }}"
+  image: "{{ kube_logger_image_full }}"
   volumeMounts:
     - mountPath: {{ container_config_directory }}
       name: logging-config
@@ -13,7 +13,7 @@
       value: {{ config_strategy }}
 {% endmacro %}
 
-{% macro fluentd_volume() %}
+{% macro kube_logger_volume() %}
 - name: logging-config
   configMap:
     name: {{ resourceName }}-logging
