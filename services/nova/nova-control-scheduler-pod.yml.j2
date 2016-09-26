@@ -1,3 +1,4 @@
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
@@ -53,6 +54,9 @@ spec:
               value: {{ config_strategy }}
           securityContext:
             privileged: true
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: nova-scheduler-config
           configMap:
@@ -67,6 +71,9 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: nova-scheduler
    namespace: {{ kolla_kubernetes_namespace }}

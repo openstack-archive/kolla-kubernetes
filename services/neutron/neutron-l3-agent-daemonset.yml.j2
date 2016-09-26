@@ -1,3 +1,4 @@
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -118,6 +119,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: pod-main-config
           emptyDir: {}
@@ -149,6 +153,9 @@ spec:
             path: /var/lib/neutron/kolla/metadata_proxy
         - name: kolla-logs
           emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
+{% endif %}
 {%- if enable_resolve_conf_net_host_workaround == "yes" %}
         - name: resolv-conf
           configMap:

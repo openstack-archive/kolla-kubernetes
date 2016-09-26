@@ -1,3 +1,4 @@
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: v1
 kind: ReplicationController
 spec:
@@ -33,12 +34,18 @@ spec:
               name: keystone-admin
             - containerPort: {{ keystone_public_port }}
               name: keystone-public
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: keystone-config
           configMap:
             name: keystone
         - name: kolla-logs
           emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: keystone
    namespace: {{ kolla_kubernetes_namespace }}
