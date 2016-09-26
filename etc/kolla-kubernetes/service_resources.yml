@@ -419,6 +419,8 @@ kolla-kubernetes:
       pvc:
       svc:
       bootstrap:
+      - name: openvswitch-set-external-ip
+        template: services/openvswitch/openvswitch-set-external-ip-job.yml.j2
       pod:
       - name: openvswitch-ovsdb-compute
         template: services/openvswitch/openvswitch-ovsdb-daemonset.yml.j2
