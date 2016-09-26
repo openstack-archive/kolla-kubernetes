@@ -1,0 +1,9 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: zhubingbing <1392607554@qq.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 26 Sep 2016 16:31:03 +0000
+Reviewed-on: https://review.openstack.org/375794
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
