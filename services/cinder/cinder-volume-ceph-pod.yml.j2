@@ -1,5 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 metadata:
@@ -90,6 +90,9 @@ spec:
               readOnly: true
             - mountPath: /var/log/kolla/
               name: kolla-logs
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: pod-main-config
           emptyDir: {}
@@ -101,6 +104,9 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
         - name: ceph-conf
           configMap:
             name: ceph-conf

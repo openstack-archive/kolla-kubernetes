@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -95,6 +96,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: nova-compute-persistent-storage
           hostPath:
@@ -124,6 +128,9 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
 {%- if enable_ceph == "yes" %}
         - name: ceph-conf
           configMap:

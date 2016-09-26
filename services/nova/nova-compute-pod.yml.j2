@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -123,6 +124,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: nova-compute-config
           configMap:
@@ -162,3 +166,6 @@ spec:
           configMap:
             name: resolv-conf
 {%- endif %}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}

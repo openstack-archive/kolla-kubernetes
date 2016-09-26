@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
@@ -53,6 +54,9 @@ spec:
               value: {{ config_strategy }}
           securityContext:
             privileged: true
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: nova-scheduler-config
           configMap:
@@ -67,6 +71,9 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: nova-scheduler
    namespace: {{ kolla_kubernetes_namespace }}

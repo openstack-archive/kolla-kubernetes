@@ -54,6 +54,11 @@ kolla-kubernetes:
       secret:
       configmap:
       - name: mariadb
+      - name: mariadb-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: mariadb-logging
+          log_format: 'mariadb'
       disk:
       - name: mariadb
         template: services/common/common-disk.sh.j2
@@ -109,6 +114,11 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: keystone
+      - name: keystone-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: keystone-logging
+          log_format: 'keystone'
       secret:
       disk:
       pv:
@@ -141,6 +151,11 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: horizon
+      - name: horizon-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: horizon-logging
+          log_format: 'horizon'
       secret:
       disk:
       pv:
@@ -160,6 +175,11 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: rabbitmq
+      - name: rabbitmq-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: rabbitmq-logging
+          log_format: 'rabbitmq'
       secret:
       disk:
       - name: rabbitmq
@@ -219,6 +239,7 @@ kolla-kubernetes:
         template: services/common/logging-configmap.yml.j2
         vars:
           configmap_name: glance-registry-logging
+          log_format: 'openstack'
       secret:
       disk:
       - name: glance
@@ -297,17 +318,6 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: nova-api
-      - name: nova-compute
-      - name: nova-conductor
-      - name: nova-libvirt
-      - name: nova-scheduler
-      - name: nova-consoleauth
-      - name: nova-novncproxy
-      - name: nova-novncproxy-haproxy
-        template: services/common/api-haproxy-configmap.yml.j2
-        vars:
-          configmap_name: nova-novncproxy-haproxy
-          port_name: nova_novncproxy_port
       - name: nova-api-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
@@ -317,6 +327,38 @@ kolla-kubernetes:
         template: services/common/logging-configmap.yml.j2
         vars:
           configmap_name: nova-api-logging
+          log_format: 'openstack'
+      - name: nova-compute
+      - name: nova-compute-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-compute-logging
+          log_format: 'openstack'
+      - name: nova-conductor
+      - name: nova-conductor-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-conductor-logging
+          log_format: 'openstack'
+      - name: nova-libvirt
+      - name: nova-libvirt-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-libvirt-logging
+          log_format: 'openstack'
+      - name: nova-scheduler
+      - name: nova-scheduler-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-scheduler-logging
+          log_format: 'openstack'
+      - name: nova-consoleauth
+      - name: nova-novncproxy
+      - name: nova-novncproxy-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: nova-novncproxy-haproxy
+          port_name: nova_novncproxy_port
       secret:
       - name: nova-libvirt
         template: services/nova/nova-libvirt-secret.yml.j2
@@ -455,10 +497,6 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: neutron-server
-      - name: neutron-dhcp-agent
-      - name: neutron-l3-agent
-      - name: neutron-metadata-agent
-      - name: neutron-openvswitch-agent
       - name: neutron-server-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
@@ -468,6 +506,26 @@ kolla-kubernetes:
         template: services/common/logging-configmap.yml.j2
         vars:
           configmap_name: neutron-server-logging
+          log_format: 'openstack'
+      - name: neutron-dhcp-agent
+      - name: neutron-l3-agent
+      - name: neutron-l3-agent-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-l3-agent-logging
+          log_format: 'openstack'
+      - name: neutron-metadata-agent
+      - name: neutron-metadata-agent-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-metadata-agent-logging
+          log_format: 'openstack'
+      - name: neutron-openvswitch-agent
+      - name: neutron-openvswitch-agent-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-openvswitch-agent-logging
+          log_format: 'openstack'
       secret:
       disk:
       pv:
@@ -660,9 +718,6 @@ kolla-kubernetes:
     resources:
       configmap:
       - name: cinder-api
-      - name: cinder-backup
-      - name: cinder-scheduler
-      - name: cinder-volume
       - name: cinder-api-haproxy
         template: services/common/api-haproxy-configmap.yml.j2
         vars:
@@ -672,6 +727,25 @@ kolla-kubernetes:
         template: services/common/logging-configmap.yml.j2
         vars:
           configmap_name: cinder-api-logging
+          log_format: 'openstack'
+      - name: cinder-backup
+      - name: cinder-backup-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: cinder-backup-logging
+          log_format: 'openstack'
+      - name: cinder-scheduler
+      - name: cinder-scheduler-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: cinder-scheduler-logging
+          log_format: 'openstack'
+      - name: cinder-volume
+      - name: cinder-volume-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: cinder-volume-logging
+          log_format: 'openstack'
       secret:
       disk:
       pv:

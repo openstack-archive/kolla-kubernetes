@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 apiVersion: apps/v1alpha1
 kind: PetSet
@@ -35,6 +36,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -46,3 +50,6 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}

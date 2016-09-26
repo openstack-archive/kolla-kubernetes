@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
@@ -51,6 +52,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: nova-conductor-config
           configMap:
@@ -65,6 +69,9 @@ spec:
           emptyDir: {}
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: nova-conductor
    namespace: {{ kolla_kubernetes_namespace }}

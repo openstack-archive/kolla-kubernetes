@@ -1,5 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -120,6 +120,9 @@ spec:
               name: resolv-conf
               subPath: resolv.conf
 {%- endif %}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: kolla-kubernetes-events
           emptyDir: {}
@@ -145,6 +148,9 @@ spec:
             path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
 {%- if enable_resolve_conf_net_host_workaround == "yes" %}
         - name: resolv-conf
           configMap:

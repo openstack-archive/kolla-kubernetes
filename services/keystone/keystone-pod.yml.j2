@@ -1,3 +1,4 @@
+{%- import "services/common/common-fluentd.yml.j2" as fluentd with context %}
 apiVersion: v1
 kind: ReplicationController
 spec:
@@ -33,12 +34,18 @@ spec:
               name: keystone-admin
             - containerPort: {{ keystone_public_port }}
               name: keystone-public
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: keystone-config
           configMap:
             name: keystone
         - name: kolla-logs
           emptyDir: {}
+{% if enable_fluentd == "yes" %}
+{{ fluentd.fluentd_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: keystone
    namespace: {{ kolla_kubernetes_namespace }}
