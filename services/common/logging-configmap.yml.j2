@@ -1,3 +1,5 @@
+{%- set logFormat = kolla_kubernetes.template.vars.log_format %}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,9 +13,23 @@ data:
     <source>
       type tail
       path /var/log/kolla/*/*.log
+{%- if logFormat is not defined %}
+      format none
+{%- elif logFormat == 'openstack' %}
       format /^(?<time>[^ ]* [^ ]*)\s*(?<pid>([0-9]+)?)\s*(?<level>[a-zA-Z]*)\s*(?<ident>[^ ]*)\s*(?<req_id>\[req-([0-9A-Fa-f]| *-)+\])?\s*(?<message>.*)$/
-      pos_file /var/log/kolla/openstack.log.pos
       time_format %Y-%m-%d %H:%M:%S.%L
+{%- elif logFormat == 'mariadb' %}
+      format multiline
+      format_firstline /^\d{6} \d\d:\d\d:\d\d/
+      format1 /(?<time>\d{6} \d\d:\d\d:\d\d) (?<error_msg>.*)/
+      time_format %y%m%d %H:%M:%S
+{%- elif logFormat == 'keystone' %}
+      format /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\] \[pid (?<pid>[^\]]*)\] \[client (?<client>[^\]]*)\] (?<message>.*)$/
+      time_format %Y-%m-%d %H:%M:%S
+{%- else %}
+      format none
+{%- endif%}
+      pos_file /var/log/kolla/openstack.log.pos
       tag openstack-kolla
     </source>
     <match **>

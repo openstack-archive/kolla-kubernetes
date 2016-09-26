@@ -54,6 +54,11 @@ kolla-kubernetes:
       secret:
       configmap:
       - name: mariadb
+      - name: mariadb-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: mariadb-logging
+          log_format: 'mariadb'
       disk:
       - name: mariadb
         template: services/common/common-disk.sh.j2
