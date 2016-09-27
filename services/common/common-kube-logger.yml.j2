@@ -7,7 +7,7 @@
     - mountPath: /var/log/kolla/
       name: kolla-logs
     - mountPath: /etc/localtime
-      name: etc-localtime
+      name: host-etc-localtime
   env:
     - name: KOLLA_CONFIG_STRATEGY
       value: {{ config_strategy }}
@@ -16,5 +16,5 @@
 {% macro kube_logger_volume() %}
 - name: logging-config
   configMap:
-    name: {{ resourceName }}-logging
+    name: {{ loggerConfigmapName | default(resourceName) }}-logging
 {% endmacro %}

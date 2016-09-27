@@ -24,7 +24,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
       volumes:
         - name: neutron-server-config
           configMap:
@@ -40,7 +40,7 @@ spec:
               path: neutron_lbaas.conf
             - key: neutron-vpnaas.conf
               path: neutron_vpnaas.conf
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs

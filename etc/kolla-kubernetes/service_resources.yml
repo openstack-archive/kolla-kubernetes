@@ -359,6 +359,11 @@ kolla-kubernetes:
         vars:
           configmap_name: nova-novncproxy-haproxy
           port_name: nova_novncproxy_port
+      - name: nova-novncproxy-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: nova-novncproxy-logging
+          log_format: 'openstack'
       secret:
       - name: nova-libvirt
         template: services/nova/nova-libvirt-secret.yml.j2

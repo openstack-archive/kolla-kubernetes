@@ -26,6 +26,9 @@ spec:
             - mountPath: {{ container_config_directory }}
               name: keystone-config
               readOnly: true
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
             - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
@@ -42,7 +45,7 @@ spec:
         - name: keystone-config
           configMap:
             name: keystone
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs

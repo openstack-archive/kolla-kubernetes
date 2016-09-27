@@ -51,7 +51,7 @@ spec:
             - mountPath: /var/lib/elasticsearch/data
               name: elasticsearch-persistent-storage
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
@@ -64,7 +64,7 @@ spec:
         - name: elasticsearch-config
           configMap:
             name: elasticsearch
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: pod-main-config

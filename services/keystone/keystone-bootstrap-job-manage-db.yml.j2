@@ -20,7 +20,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -32,7 +32,7 @@ spec:
         - name: keystone-config
           configMap:
             name: keystone
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
