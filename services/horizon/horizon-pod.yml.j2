@@ -51,7 +51,7 @@ spec:
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -71,7 +71,7 @@ spec:
               path: config.json
             - key: local-settings
               path: local_settings
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
