@@ -44,7 +44,7 @@ spec:
             - mountPath: {{ container_config_directory }}
               name: nova-config
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /nova
               name: nova-config
             - mountPath: /var/log/kolla
@@ -61,7 +61,7 @@ spec:
         - name: nova-scheduler-config
           configMap:
             name: nova-scheduler
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: lib-modules
