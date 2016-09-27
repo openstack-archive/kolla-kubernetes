@@ -1,5 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-apiVersion: apps/v1alpha1 
+{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
   serviceName: "mariadb"
@@ -44,6 +45,9 @@ spec:
           ports:
             - containerPort: {{ mariadb_port }}
               name: mariadb
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{% endif %}
       volumes:
         - name: mariadb-config
           configMap:
@@ -53,6 +57,9 @@ spec:
             claimName: {{ resourceName }}
         - name: kolla-logs
           emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger.kube_logger_volume() | indent(8, true) }}
+{% endif %}
 metadata:
    name: mariadb
    namespace: {{ kolla_kubernetes_namespace }}
