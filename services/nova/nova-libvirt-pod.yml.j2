@@ -143,3 +143,8 @@ spec:
           secret:
             secretName: nova-libvirt-bin
 {%- endif %}
+{%- if enable_resolve_conf_net_host_workaround == "yes" %}
+        - name: resolv-conf
+          configMap:
+            name: resolv-conf
+{%- endif %}
