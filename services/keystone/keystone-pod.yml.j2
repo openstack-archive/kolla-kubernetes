@@ -11,6 +11,25 @@ spec:
       labels:
         service: keystone
         type: api
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-keystone-logs",
+             "image": "{{ keystone_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "mkdir /var/log/kolla/keystone ;
+                  chown -R keystone: /var/log/kolla/keystone;
+                  chmod 755 /var/log/kolla/keystone; "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          }
+        ]'
+
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_keystone |
@@ -26,7 +45,7 @@ spec:
             - mountPath: /etc/localtime
               name: host-etc-localtime
               readOnly: true
-            - mountPath: /var/log/kolla/keystone
+            - mountPath: /var/log/kolla
               name: kolla-logs
           env:
             - name: KOLLA_KUBERNETES
