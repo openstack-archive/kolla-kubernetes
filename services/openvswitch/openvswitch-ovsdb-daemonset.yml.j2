@@ -23,7 +23,7 @@ spec:
              "image": "{{ openvswitch_db_image_full }}",
              "command": [
                  "sh",
-                 "-c",
+                 "-xec",
                  "mkdir -p /var/log/kolla/openvswitch;
                   DB=/etc/openvswitch/conf.db;
                   /usr/bin/ovsdb-tool create $DB;
