@@ -511,22 +511,37 @@ kolla-kubernetes:
           log_format: 'openstack'
       - name: neutron-dhcp-agent
       - name: neutron-l3-agent
-      - name: neutron-l3-agent-logging
+      - name: neutron-l3-agent-network-logging
         template: services/common/logging-configmap.yml.j2
         vars:
-          configmap_name: neutron-l3-agent-logging
+          configmap_name: neutron-l3-agent-network-logging
+          log_format: 'openstack'
+      - name: neutron-l3-agent-compute-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-l3-agent-compute-logging
           log_format: 'openstack'
       - name: neutron-metadata-agent
-      - name: neutron-metadata-agent-logging
+      - name: neutron-metadata-agent-network-logging
         template: services/common/logging-configmap.yml.j2
         vars:
-          configmap_name: neutron-metadata-agent-logging
+          configmap_name: neutron-metadata-agent-network-logging
+          log_format: 'openstack'
+      - name: neutron-metadata-agent-compute-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-metadata-agent-compute-logging
           log_format: 'openstack'
       - name: neutron-openvswitch-agent
-      - name: neutron-openvswitch-agent-logging
+      - name: neutron-openvswitch-agent-network-logging
         template: services/common/logging-configmap.yml.j2
         vars:
-          configmap_name: neutron-openvswitch-agent-logging
+          configmap_name: neutron-openvswitch-agent-network-logging
+          log_format: 'openstack'
+      - name: neutron-openvswitch-agent-compute-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: neutron-openvswitch-agent-compute-logging
           log_format: 'openstack'
       secret:
       disk:
