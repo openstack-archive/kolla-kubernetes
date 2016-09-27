@@ -48,7 +48,7 @@ spec:
             - mountPath: {{ container_config_directory }}
               name: nova-config
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /var/log/kolla
               name: kolla-logs
           env:
@@ -58,7 +58,7 @@ spec:
         - name: nova-consoleauth-config
           configMap:
             name: nova-consoleauth
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: nova-config

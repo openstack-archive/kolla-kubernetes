@@ -69,7 +69,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /var/lib/ceph
               name: ceph-mon
       volumes:
@@ -81,7 +81,7 @@ spec:
         - name: ceph-mon
           hostPath:
             path: /var/lib/kolla/volumes/ceph-mon
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
