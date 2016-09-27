@@ -42,6 +42,18 @@ spec:
       containers:
         - image: "{{ rabbitmq_image_full }}"
           name: main
+          command:
+            - /bin/bash
+            - -c
+            - |
+              find /var/lib/rabbitmq;
+              id;
+              ls -l /var/lib/rabbitmq;
+              touch /var/lib/rabbitmq/bar;
+              echo hi >> /var/lib/rabbitmq/bar;
+              mkdir -p /var/lib/rabbitmq/foo;
+              mkdir -p /var/lib/rabbitmq/mnesia;
+              exit -1;
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
