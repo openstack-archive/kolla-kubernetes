@@ -118,7 +118,7 @@ kolla-kubernetes:
         template: services/common/logging-configmap.yml.j2
         vars:
           configmap_name: keystone-logging
-          log_format: 'keystone'
+          log_format: 'openstack'
       secret:
       disk:
       pv:
