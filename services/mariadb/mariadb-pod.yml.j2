@@ -30,6 +30,9 @@ spec:
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
             - mountPath: /var/log/kolla/
               name: kolla-logs
           env:
@@ -55,6 +58,9 @@ spec:
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
 {% if enable_kube_logger == "yes" %}

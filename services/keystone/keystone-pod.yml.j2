@@ -1,3 +1,4 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: v1
 kind: ReplicationController
@@ -22,6 +23,9 @@ spec:
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: keystone-config
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
             - mountPath: /var/log/kolla/keystone
               name: kolla-logs
           env:
@@ -41,6 +45,9 @@ spec:
         - name: keystone-config
           configMap:
             name: keystone
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
         - name: kolla-logs
           emptyDir: {}
 {% if enable_kube_logger == "yes" %}

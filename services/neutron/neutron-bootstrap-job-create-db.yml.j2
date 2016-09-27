@@ -16,7 +16,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           command: ["bash", "-c"]
           args:
             - ansible localhost -m mysql_db -a
@@ -41,7 +41,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           command: ["sh", "-c"]
           args:
             - ansible localhost -m mysql_user -a
@@ -70,7 +70,7 @@ spec:
                   name: neutron-database-password
                   key: password
       volumes:
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs

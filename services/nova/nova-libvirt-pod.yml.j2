@@ -80,7 +80,7 @@ spec:
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -109,7 +109,7 @@ spec:
         - name: nova-libvirt-persistent-storage
           hostPath:
             path: /var/lib/libvirt
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: lib-modules

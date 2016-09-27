@@ -19,7 +19,7 @@ spec:
         - mountPath: {{ swift_devices_mount_point }}
           name: swift-devices
         - mountPath: /etc/localtime
-          name: etc-localtime
+          name: host-etc-localtime
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
@@ -35,7 +35,7 @@ spec:
         - mountPath: {{ swift_devices_mount_point }}
           name: swift-devices
         - mountPath: /etc/localtime
-          name: etc-localtime
+          name: host-etc-localtime
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
@@ -51,7 +51,7 @@ spec:
         - mountPath: {{ swift_devices_mount_point }}
           name: swift-devices
         - mountPath: /etc/localtime
-          name: etc-localtime
+          name: host-etc-localtime
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
@@ -67,7 +67,7 @@ spec:
         - mountPath: {{ swift_devices_mount_point }}
           name: swift-devices
         - mountPath: /etc/localtime
-          name: etc-localtime
+          name: host-etc-localtime
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
@@ -83,7 +83,7 @@ spec:
         - mountPath: {{ swift_devices_mount_point }}
           name: swift-devices
         - mountPath: /etc/localtime
-          name: etc-localtime
+          name: host-etc-localtime
           readOnly: true
         - mountPath: /var/log/kolla/
           name: kolla-logs
@@ -109,7 +109,7 @@ spec:
     - name: swift-devices
       hostPath:
         path: {{ swift_devices_mount_point }}
-    - name: etc-localtime
+    - name: host-etc-localtime
       hostPath:
         path: /etc/localtime
     - name: kolla-logs

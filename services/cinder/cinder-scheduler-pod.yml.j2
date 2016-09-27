@@ -32,7 +32,7 @@ spec:
             - mountPath: /var/log/kolla/
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -45,7 +45,7 @@ spec:
         - name: cinder-scheduler-configmap
           configMap:
             name: cinder-scheduler
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs
