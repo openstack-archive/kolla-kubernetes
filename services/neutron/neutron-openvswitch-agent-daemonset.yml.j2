@@ -1,5 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set loggerConfigmapName = "neutron-openvswitch-agent" %}
+{%- set nethostContainer = "yes" %}
 {%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
