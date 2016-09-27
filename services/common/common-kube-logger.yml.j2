@@ -8,6 +8,11 @@
       name: kolla-logs
     - mountPath: /etc/localtime
       name: host-etc-localtime
+{%- if netHostTrue == "yes" and enable_resolve_conf_net_host_workaround == "yes" %}
+    - mountPath: /etc/resolv.conf
+      name: resolv-conf
+      subPath: resolv.conf
+{%- endif %}
   env:
     - name: KOLLA_CONFIG_STRATEGY
       value: {{ config_strategy }}
