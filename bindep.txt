@@ -1,0 +1,27 @@
+build-essential [platform:dpkg]
+curl [!platform:gentoo]
+net-misc/curl [platform:gentoo]
+dev-libs/cyrus-sasl [platform:gentoo]
+cyrus-sasl-devel [platform:rpm]
+gawk
+libcurl-devel [platform:rpm]
+libcurl4-gnutls-dev [platform:dpkg]
+libffi-dev [platform:dpkg]
+libffi-devel [platform:rpm]
+virtual/libffi [platform:gentoo]
+libsasl2-dev [platform:dpkg]
+pypy [platform:ubuntu !platform:ubuntu-precise]
+pypy-dev [platform:ubuntu !platform:ubuntu-precise]
+python-dev [platform:dpkg]
+python-devel [platform:rpm]
+dev-lang/python [platform:gentoo]
+# Note that python3-all-dev includes python3-all, added
+# both here for documentary purpose.
+python3-all [platform:dpkg !platform:ubuntu-precise]
+python3-all-dev [platform:dpkg !platform:ubuntu-precise]
+python3-devel [platform:fedora]
+python34-devel [platform:centos]
+crudini
+jq
+openssl-devel [platform:rpm]
+openssl-dev [platform:dpgk]
