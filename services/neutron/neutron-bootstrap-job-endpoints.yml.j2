@@ -57,7 +57,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -74,7 +74,7 @@ spec:
                   name: keystone-admin-password
                   key: password
       volumes:
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs

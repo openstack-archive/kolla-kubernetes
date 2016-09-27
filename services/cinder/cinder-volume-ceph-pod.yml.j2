@@ -1,4 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set loggerConfigmapName = "cinder-volume" %}
 {%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet

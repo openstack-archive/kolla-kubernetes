@@ -1,3 +1,4 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -80,7 +81,7 @@ spec:
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -109,7 +110,7 @@ spec:
         - name: nova-libvirt-persistent-storage
           hostPath:
             path: /var/lib/libvirt
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: lib-modules

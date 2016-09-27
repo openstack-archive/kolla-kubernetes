@@ -1,3 +1,5 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set loggerConfigmapName = "neutron-metadata-agent" %}
 {%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet

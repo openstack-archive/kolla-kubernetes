@@ -47,7 +47,7 @@ spec:
             - mountPath: /var/log/kolla
               name: kolla-logs
             - mountPath: /etc/localtime
-              name: etc-localtime
+              name: host-etc-localtime
       volumes:
         - name: glance-api-config
           configMap:
@@ -61,7 +61,7 @@ spec:
           configMap:
             name: ceph-conf
 {% endif %}
-        - name: etc-localtime
+        - name: host-etc-localtime
           hostPath:
             path: /etc/localtime
         - name: kolla-logs

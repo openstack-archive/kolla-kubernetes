@@ -20,6 +20,9 @@ spec:
           volumeMounts:
             - mountPath: {{ container_config_directory }}
               name: memcached-config
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -30,6 +33,10 @@ spec:
         - name: memcached-config
           configMap:
             name: memcached
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+
 metadata:
    name: memcached
    namespace: {{ kolla_kubernetes_namespace }}
