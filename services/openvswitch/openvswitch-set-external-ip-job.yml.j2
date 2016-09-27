@@ -19,7 +19,7 @@ spec:
             privileged: true
           command:
             - /bin/bash
-            - -ec
+            - -xec
             - |
               ip addr add {{ kolla_kubernetes_external_bridge_ip | default(kolla_kubernetes_external_vip) }}/{{ kolla_kubernetes_external_subnet | default("24") }} dev {{ neutron_bridge_name }};
               ip link set {{ neutron_bridge_name }} up;
