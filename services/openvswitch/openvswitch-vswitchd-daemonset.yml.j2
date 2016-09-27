@@ -23,7 +23,7 @@ spec:
              "image": "{{ openvswitch_vswitchd_image_full }}",
              "command": [
                  "sh",
-                 "-c",
+                 "-xec",
                  "mkdir -p /var/log/kolla/openvswitch;
 {%- if kolla_kubernetes_ovs_setup_bridge == "yes" %}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ neutron_bridge_name }} ;
@@ -79,9 +79,9 @@ spec:
             - mountPath: /lib/modules
               name: host-lib-modules
               readOnly: true
-          command: ["sh", "-c"]
+          command: ["sh", "-xec"]
           args:
-            - modprobe openvswitch;
+            - modprobe openvswitch || true;
               /usr/sbin/ovs-vswitchd
               unix:/var/run/openvswitch/db.sock
               -vconsole:emer
