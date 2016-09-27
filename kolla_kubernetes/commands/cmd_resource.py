@@ -140,7 +140,7 @@ class ResourceTemplate(ResourceBase):
                 args.resource_type, resource_name)
 
             tmpargs = copy.deepcopy(vars(args))
-            tmpargs['resource_name'] = tmpargs['resource_name'][0]
+            tmpargs['resource_name'] = resource_name
             variables = KKR.GetJinjaDict(service_name, tmpargs,
                                          args.print_jinja_keys_regex)
 
