@@ -1,0 +1,3 @@
+#!/bin/bash -xe
+echo Setting up the gate...
+curl -sS https://get.k8s.io | bash
