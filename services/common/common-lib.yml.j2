@@ -23,3 +23,19 @@
   configMap:
     name: {{ loggerConfigmapName | default(resourceName) }}-logging
 {% endmacro %}
+
+{% macro common_volumes() %}
+- name: host-etc-localtime
+  hostPath:
+    path: /etc/localtime
+- name: kolla-logs
+  emptyDir: {}
+{% if enable_kube_logger == "yes" %}
+{{ kube_logger_volume() }}
+{% endif %}
+{%- if netHostTrue == "yes" and enable_resolve_conf_net_host_workaround == "yes" %}
+- name: resolv-conf
+  configMap:
+    name: resolv-conf
+{%- endif %}
+{% endmacro %}

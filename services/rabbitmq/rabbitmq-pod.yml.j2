@@ -1,5 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
@@ -61,7 +61,7 @@ spec:
             - containerPort: {{ rabbitmq_management_port }}
               name: management
 {% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{{ common_lib.kube_logger_container() | indent(8, true) }}
 {% endif %}
       volumes:
         - name: pod-main-config
@@ -72,14 +72,7 @@ spec:
         - name: rabbitmq-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
-{% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_volume() | indent(8, true) }}
-{% endif %}
+{{ lib.common_volumes() | indent(8, true) }}
 metadata:
    name: rabbitmq
    namespace: {{ kolla_kubernetes_namespace }}
