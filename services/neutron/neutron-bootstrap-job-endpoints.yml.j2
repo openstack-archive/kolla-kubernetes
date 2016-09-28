@@ -1,3 +1,6 @@
+{%- set podTypeBootstrap = "yes" %}
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -54,10 +57,7 @@ spec:
                       auth={{ '{{ openstack_neutron_auth }}' }}"
                   -e "{'openstack_neutron_auth':{{ openstack_neutron_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -74,9 +74,5 @@ spec:
                   name: keystone-admin-password
                   key: password
       volumes:
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
+{{ lib.common_volumes(indent=8) }}
       restartPolicy: OnFailure

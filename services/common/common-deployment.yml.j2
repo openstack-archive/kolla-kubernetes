@@ -118,14 +118,11 @@ spec:
                   kill -USR1 $(</var/run/haproxy.pid);
                   while true; do sleep 1000; done
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
               name: haproxy-config
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -146,14 +143,11 @@ spec:
                 - -c
                 - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
 {{ extraVolumeMounts | indent(12, True) }}
 {%- if privileged %}
           securityContext:
@@ -162,10 +156,9 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: kolla-kubernetes-events
           emptyDir: {}
         - name: pod-main-config
@@ -177,5 +170,4 @@ spec:
         - name: haproxy-config
           configMap:
             name: {{ resourceName }}-haproxy
-{{ lib.common_volumes(indent=8) }}
 {{ extraVolume | indent(8, True) }}

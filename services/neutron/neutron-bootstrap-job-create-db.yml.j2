@@ -1,3 +1,6 @@
+{%- set podTypeBootstrap = "yes" %}
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,10 +16,7 @@ spec:
         - image: "{{ kolla_toolbox_image_full }}"
           name: main
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           command: ["bash", "-c"]
           args:
             - ansible localhost -m mysql_db -a
@@ -38,10 +38,7 @@ spec:
         - image: "{{ kolla_toolbox_image_full }}"
           name: creating-user-permissions
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           command: ["sh", "-c"]
           args:
             - ansible localhost -m mysql_user -a
@@ -70,9 +67,5 @@ spec:
                   name: neutron-database-password
                   key: password
       volumes:
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
+{{ lib.common_volumes(indent=8) }}
       restartPolicy: OnFailure
