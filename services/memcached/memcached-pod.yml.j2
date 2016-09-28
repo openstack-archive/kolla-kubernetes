@@ -18,6 +18,7 @@ spec:
         - image: "{{ memcached_image_full }}"
           name: main
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: memcached-config
             - mountPath: /etc/localtime
@@ -30,6 +31,7 @@ spec:
             - containerPort: {{ memcached_port }}
               name: memcached
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: memcached-config
           configMap:
             name: memcached
