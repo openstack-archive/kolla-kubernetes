@@ -46,19 +46,15 @@ spec:
         - name: main
           image: "{{ horizon_image_full }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: pod-main-config
           emptyDir: {}
         - name: horizon-configmap
@@ -71,4 +67,3 @@ spec:
               path: config.json
             - key: local-settings
               path: local_settings
-{{ lib.common_volumes(indent=8) }}

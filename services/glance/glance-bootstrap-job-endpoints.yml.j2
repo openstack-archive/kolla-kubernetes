@@ -1,4 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -29,10 +30,7 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -58,10 +56,7 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -87,10 +82,7 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -114,10 +106,7 @@ spec:
                auth={{ '{{' }} openstack_glance_auth {{ '}}' }}"
                "-e" "{'openstack_glance_auth':{{ openstack_glance_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -129,8 +118,4 @@ spec:
                   name: keystone-admin-password
                   key: password
       volumes:
-        - name: kolla-logs
-          emptyDir: {}
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
+{{ lib.common_volumes(indent=8) }}
