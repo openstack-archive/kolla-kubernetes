@@ -26,15 +26,11 @@ spec:
               exec:
                 command: ["mysqladmin -u {{ database_user }} -p$DATABASE_PASSWORD shutdown"]
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -48,17 +44,15 @@ spec:
           ports:
             - containerPort: {{ mariadb_port }}
               name: mariadb
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: mariadb-config
           configMap:
             name: mariadb
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
-{{ lib.common_volumes(indent=8) }}
 metadata:
    name: mariadb
    namespace: {{ kolla_kubernetes_namespace }}

@@ -1,3 +1,6 @@
+{%- set podTypeBootstrap = "yes" %}
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 spec:
@@ -12,31 +15,24 @@ spec:
         - image: "{{ nova_api_image_full }}"
           name: main
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: nova-api-config
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: nova-api-config
           configMap:
             name: nova-api
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        - name: kolla-logs
-          emptyDir: {}
       restartPolicy: OnFailure
 metadata:
   name: nova-create-api-db

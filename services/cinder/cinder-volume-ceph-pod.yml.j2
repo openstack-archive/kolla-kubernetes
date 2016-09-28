@@ -83,24 +83,18 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ALWAYS
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
               readOnly: true
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: pod-main-config
           emptyDir: {}
         - name: cinder-volume-configmap
           configMap:
             name: cinder-volume
-{{ lib.common_volumes(indent=8) }}
         - name: ceph-conf
           configMap:
             name: ceph-conf
