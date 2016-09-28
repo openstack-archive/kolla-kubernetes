@@ -36,6 +36,7 @@ spec:
           securityContext:
             privileged: true
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: neutron-metadata-agent-config
               readOnly: true
@@ -44,23 +45,12 @@ spec:
             - mountPath: /run/netns/
               name: host-run-netns
               # shared: true # This seems not support in K8s yet :(
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-{%- if enable_resolve_conf_net_host_workaround == "yes" %}
-            - mountPath: /etc/resolv.conf
-              name: resolv-conf
-              subPath: resolv.conf
-{%- endif %}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: neutron-metadata-agent-config
           configMap:
             name: neutron-metadata-agent
@@ -82,4 +72,3 @@ spec:
         - name: neutron-metadata-socket
           hostPath:
             path: /var/lib/neutron/kolla/metadata_proxy
-{{ lib.common_volumes(indent=8) }}

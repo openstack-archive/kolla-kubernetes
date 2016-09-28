@@ -1,3 +1,4 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
@@ -43,15 +44,11 @@ spec:
         - image: "{{ rabbitmq_image_full }}"
           name: main
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
             - mountPath: /var/lib/rabbitmq
               name: rabbitmq-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -60,10 +57,9 @@ spec:
               name: rabbitmq
             - containerPort: {{ rabbitmq_management_port }}
               name: management
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: pod-main-config
           emptyDir: {}
         - name: rabbitmq-config
@@ -72,7 +68,6 @@ spec:
         - name: rabbitmq-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
-{{ lib.common_volumes(indent=8) }}
 metadata:
    name: rabbitmq
    namespace: {{ kolla_kubernetes_namespace }}

@@ -1,4 +1,6 @@
+{%- set podTypeBootstrap = "yes" %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -22,6 +24,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
 {% if glance_backend_ceph != "yes" %}
             - mountPath: {{ container_config_directory }}
               name: glance-api-config
@@ -44,11 +47,8 @@ spec:
               name: ceph-conf
               subPath: ceph.conf
 {% endif %}
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: glance-api-config
           configMap:
             name: glance-api
@@ -61,8 +61,3 @@ spec:
           configMap:
             name: ceph-conf
 {% endif %}
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}

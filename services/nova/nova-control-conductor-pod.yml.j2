@@ -42,21 +42,17 @@ spec:
         - name: main
           image: "{{ nova_conductor_image_full }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: nova-config
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
             - mountPath: /nova
               name: nova-config
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: nova-conductor-config
           configMap:
             name: nova-conductor
@@ -65,7 +61,6 @@ spec:
             path: /lib/modules
         - name: nova-config
           emptyDir: {}
-{{ lib.common_volumes(indent=8) }}
 metadata:
    name: nova-conductor
    namespace: {{ kolla_kubernetes_namespace }}
