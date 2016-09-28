@@ -1,6 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set netHostTrue = "yes" %}
-{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -127,7 +127,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
 {% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{{ lib.kube_logger_container() | indent(8, true) }}
 {% endif %}
       volumes:
         - name: nova-compute-config
@@ -136,9 +136,6 @@ spec:
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: lib-modules
           hostPath:
             path: /lib/modules
@@ -153,8 +150,6 @@ spec:
             path: /sys/fs/cgroup
         - name: nova-config
           emptyDir: {}
-        - name: kolla-logs
-          emptyDir: {}
 {%- if enable_ceph == "yes" %}
         - name: ceph-conf
           configMap:
@@ -163,11 +158,4 @@ spec:
           secret:
             secretName: ceph-client-nova-keyring
 {%- endif %}
-{%- if enable_resolve_conf_net_host_workaround == "yes" %}
-        - name: resolv-conf
-          configMap:
-            name: resolv-conf
-{%- endif %}
-{% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_volume() | indent(8, true) }}
-{% endif %}
+{{ lib.common_volumes(indent=8) }}

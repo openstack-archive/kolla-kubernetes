@@ -1,5 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
-{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 metadata:
@@ -75,7 +75,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
 {% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{{ lib.kube_logger_container() | indent(8, true) }}
 {% endif %}
       volumes:
         - name: kolla-kubernetes-events
@@ -85,11 +85,4 @@ spec:
         - name: cinder-backup-configmap
           configMap:
             name: cinder-backup
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
-{% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_volume() | indent(8, true) }}
-{% endif %}
+{{ lib.common_volumes(indent=8) }}
