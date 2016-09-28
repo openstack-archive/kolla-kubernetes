@@ -245,3 +245,18 @@ rabbitmq_management_external: "no"
 #horizon_https_nodeport: "30433"
 #cinder_api_port_nodeport: "30877"
 #rabbitmq_management_nodeport: "30877"
+########################
+# List os PODs with disabled logging
+########################
+log_disable:
+- memcached
+- nova-consoleauth
+- openvswitch-ovsdb-compute
+- openvswitch-ovsdb-network
+- openvswitch-vswitchd-compute
+- openvswitch-vswitchd-network
+- neutron-dhcp-agent
+- kube-dns-v11
+- iscsi-iscsid
+- iscsi-tgtd
+- elasticsearch

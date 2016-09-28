@@ -75,14 +75,13 @@ spec:
           securityContext:
             privileged: true
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: nova-config
             - mountPath: /var/lib/libvirt
               name: nova-libvirt-persistent-storage
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -93,15 +92,12 @@ spec:
               name: sys-fs-cgroup
             - mountPath: /nova
               name: nova-config
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova
@@ -125,7 +121,6 @@ spec:
             path: /sys/fs/cgroup
         - name: nova-config
           emptyDir: {}
-{{ lib.common_volumes(indent=8) }}
 {%- if enable_ceph == "yes" %}
         - name: ceph-conf
           configMap:

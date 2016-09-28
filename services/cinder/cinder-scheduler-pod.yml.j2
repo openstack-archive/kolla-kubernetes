@@ -25,24 +25,19 @@ spec:
         - name: main
           image: "{{ cinder_scheduler_image_full }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
             - mountPath: {{ container_config_directory }}
               name: cinder-scheduler-configmap
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: kolla-kubernetes-events
           emptyDir: {}
         - name: cinder-scheduler-configmap
           configMap:
             name: cinder-scheduler
-{{ lib.common_volumes(indent=8) }}

@@ -1,3 +1,6 @@
+{%- set podTypeBootstrap = "yes" %}
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,7 +16,7 @@ spec:
       containers:
         - image: "{{ keystone_image_full }}"
           name: main
-          command: ["sh", "-c", "sudo -E kolla_set_configs;
+          command: ["sh", "-c", "mkdir -p /var/log/kolla/keystone; sudo -E kolla_set_configs;
                     kolla_keystone_bootstrap admin
                     $KEYSTONE_ADMIN_PASSWORD
                     admin
@@ -23,14 +26,10 @@ spec:
                     {{ keystone_public_url }}
                     {{ openstack_region_name }}"]
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: keystone-config
               readOnly: true
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/keystone
-              name: kolla-logs
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -42,11 +41,7 @@ spec:
                   name: keystone-admin-password
                   key: password
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: keystone-config
           configMap:
             name: keystone
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
