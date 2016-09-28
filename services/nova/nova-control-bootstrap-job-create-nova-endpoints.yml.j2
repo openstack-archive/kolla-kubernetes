@@ -1,3 +1,5 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 spec:
@@ -53,8 +55,7 @@ spec:
                       auth={{ '{{ openstack_nova_auth }}' }}"
                   -e "{'openstack_nova_auth':{{ openstack_nova_auth }}}"
           volumeMounts:
-            - mountPath: /var/log/kolla
-              name: kolla-logs
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: ANSIBLE_NOCOLOR
               value: "1"
@@ -71,17 +72,13 @@ spec:
                   name: nova-keystone-password
                   key: password
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: nova-api-config
           configMap:
             name: nova-api
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        - name: kolla-logs
-          emptyDir: {}
       restartPolicy: OnFailure
 metadata:
   name: nova-create-endpoints

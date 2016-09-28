@@ -49,6 +49,7 @@ spec:
         - -initial-cluster-token
         - skydns-etcd
         volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
         - name: etcd-storage
           mountPath: /var/etcd/data
       - name: kube2sky
@@ -122,6 +123,7 @@ spec:
         - containerPort: 8080
           protocol: TCP
       volumes:
+{{ lib.common_volumes(indent=8) }}
       - name: etcd-storage
         emptyDir: {}
       dnsPolicy: Default  # Don't use cluster DNS.

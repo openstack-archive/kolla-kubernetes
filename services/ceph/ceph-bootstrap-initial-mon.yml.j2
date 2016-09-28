@@ -1,3 +1,5 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -63,16 +65,14 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: "{{ config_strategy }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
               readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
             - mountPath: /var/lib/ceph
               name: ceph-mon
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: pod-main-config
           emptyDir: {}
         - name: ceph-mon-config
@@ -81,9 +81,4 @@ spec:
         - name: ceph-mon
           hostPath:
             path: /var/lib/kolla/volumes/ceph-mon
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
       restartPolicy: OnFailure
