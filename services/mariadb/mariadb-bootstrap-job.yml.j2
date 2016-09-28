@@ -1,4 +1,5 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,12 +16,11 @@ spec:
         - image: "{{ mariadb_image_full }}"
           name: main
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -31,11 +31,10 @@ spec:
             - name: DB_ROOT_PASSWORD
               value: "{{ database_password }}"
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: mariadb-config
           configMap:
             name: mariadb
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
             claimName: {{ kolla_kubernetes.template.vars.pvc_name }}
-        - name: kolla-logs
-          emptyDir: {}
