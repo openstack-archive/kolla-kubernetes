@@ -1,3 +1,4 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set netHostTrue = "yes" %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
@@ -100,12 +101,11 @@ spec:
           securityContext:
             privileged: true
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: nova-config
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -114,22 +114,12 @@ spec:
               name: dev
             - mountPath: /sys/fs/cgroup
               name: sys-fs-cgroup
-            - mountPath: /nova
-              name: nova-config
-            - mountPath: /var/log/kolla
-              name: kolla-logs
-{%- if enable_resolve_conf_net_host_workaround == "yes" %}
-            - mountPath: /etc/resolv.conf
-              name: resolv-conf
-              subPath: resolv.conf
-{%- endif %}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: nova-compute-config
           configMap:
             name: nova-compute
@@ -158,4 +148,3 @@ spec:
           secret:
             secretName: ceph-client-nova-keyring
 {%- endif %}
-{{ lib.common_volumes(indent=8) }}

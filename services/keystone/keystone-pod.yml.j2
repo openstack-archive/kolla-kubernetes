@@ -1,3 +1,4 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: v1
@@ -41,13 +42,9 @@ spec:
         - image: "{{ keystone_image_full }}"
           name: main
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: keystone-config
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -58,14 +55,12 @@ spec:
               name: keystone-admin
             - containerPort: {{ keystone_public_port }}
               name: keystone-public
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: keystone-config
           configMap:
             name: keystone
-{{ lib.common_volumes(indent=8) }}
 metadata:
    name: keystone
    namespace: {{ kolla_kubernetes_namespace }}

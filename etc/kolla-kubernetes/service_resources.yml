@@ -106,6 +106,8 @@ kolla-kubernetes:
       pod:
       - name: memcached
         template: services/memcached/memcached-pod.yml.j2
+        vars:
+          no_logging_pod: "yes"
   - name: keystone
     pods:
     - name: keystone
@@ -433,6 +435,8 @@ kolla-kubernetes:
         template: services/nova/nova-control-scheduler-pod.yml.j2
       - name: nova-consoleauth
         template: services/nova/nova-control-consoleauth-pod.yml.j2
+        vars:
+          no_logging_pod: "yes"
       - name: nova-novncproxy
         template: services/common/common-deployment.yml.j2
         vars:
@@ -473,18 +477,22 @@ kolla-kubernetes:
         template: services/openvswitch/openvswitch-ovsdb-daemonset.yml.j2
         vars:
           type: compute
+          no_logging_pod: "yes"
       - name: openvswitch-ovsdb-network
         template: services/openvswitch/openvswitch-ovsdb-daemonset.yml.j2
         vars:
           type: network
+          no_logging_pod: "yes"
       - name: openvswitch-vswitchd-compute
         template: services/openvswitch/openvswitch-vswitchd-daemonset.yml.j2
         vars:
           type: compute
+          no_logging_pod: "yes"
       - name: openvswitch-vswitchd-network
         template: services/openvswitch/openvswitch-vswitchd-daemonset.yml.j2
         vars:
           type: network
+          no_logging_pod: "yes"
   - name: neutron
     pods:
     - name: neutron-compute
@@ -590,6 +598,8 @@ kolla-kubernetes:
               path: neutron_vpnaas.conf
       - name: neutron-dhcp-agent
         template: services/neutron/neutron-dhcp-agent-daemonset.yml.j2
+        vars:
+          no_logging_pod: "yes"
       - name: neutron-l3-agent-network
         template: services/neutron/neutron-l3-agent-daemonset.yml.j2
         vars:
@@ -697,6 +707,8 @@ kolla-kubernetes:
       pod:
       - name: kube-dns-v11
         template: services/skydns/skydns-pod.yml.j2
+        vars:
+          no_logging_pod: "yes"
   - name: iscsi
     pods:
     resources:
@@ -712,8 +724,12 @@ kolla-kubernetes:
       pod:
       - name: iscsi-iscsid
         template: services/iscsi/iscsi-iscsid-daemonset.yml.j2
+        vars:
+          no_logging_pod: "yes"
       - name: iscsi-tgtd
         template: services/iscsi/iscsi-tgtd-daemonset.yml.j2
+        vars:
+          no_logging_pod: "yes"
   - name: cinder
     pods:
     - name: cinder
@@ -834,6 +850,8 @@ kolla-kubernetes:
       pod:
       - name: elasticsearch
         template: services/elasticsearch/elasticsearch-pod.yml.j2
+        vars:
+          no_logging_pod: "yes"
   - name: kibana
     pods:
     - name: kibana
