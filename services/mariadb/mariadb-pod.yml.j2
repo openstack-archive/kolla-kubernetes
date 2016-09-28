@@ -30,11 +30,7 @@ spec:
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
+{{ lib.common_volume_mounts(indent=12) }}
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -48,9 +44,7 @@ spec:
           ports:
             - containerPort: {{ mariadb_port }}
               name: mariadb
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
         - name: mariadb-config
           configMap:
