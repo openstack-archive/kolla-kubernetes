@@ -1,7 +1,7 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set loggerConfigmapName = "neutron-l3-agent" %}
 {%- set netHostTrue = "yes" %}
-{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -123,7 +123,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
 {% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_container() | indent(8, true) }}
+{{ lib.kube_logger_container() | indent(8, true) }}
 {% endif %}
       volumes:
         - name: pod-main-config
@@ -148,19 +148,7 @@ spec:
         - name: host-run
           hostPath:
             path: /var/run
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: neutron-metadata-socket
           hostPath:
             path: /var/lib/neutron/kolla/metadata_proxy
-        - name: kolla-logs
-          emptyDir: {}
-{% if enable_kube_logger == "yes" %}
-{{ kube_logger.kube_logger_volume() | indent(8, true) }}
-{% endif %}
-{%- if enable_resolve_conf_net_host_workaround == "yes" %}
-        - name: resolv-conf
-          configMap:
-            name: resolv-conf
-{%- endif %}
+{{ lib.common_volumes(indent=8) }}
