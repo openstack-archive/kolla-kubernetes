@@ -1,4 +1,6 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
 kind: PetSet
 spec:
@@ -46,14 +48,11 @@ spec:
         - name: main
           image: "{{ elasticsearch_image_full }}"
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
             - mountPath: /var/lib/elasticsearch/data
               name: elasticsearch-persistent-storage
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
@@ -61,19 +60,15 @@ spec:
             - containerPort: {{ elasticsearch_port }}
               name: elasticsearch
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: elasticsearch-config
           configMap:
             name: elasticsearch
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: pod-main-config
           emptyDir: {}
         - name: elasticsearch-persistent-storage
           persistentVolumeClaim:
             claimName: {{ resourceName }}
-        - name: kolla-logs
-          emptyDir: {}
 metadata:
    name: elasticsearch
    namespace: {{ kolla_kubernetes_namespace }}

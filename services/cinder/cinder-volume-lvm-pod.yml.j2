@@ -1,3 +1,4 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set loggerConfigmapName = "cinder-volume" %}
 {%- set netHostTrue = "yes" %}
@@ -101,6 +102,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ALWAYS
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
               readOnly: true
@@ -112,20 +114,9 @@ spec:
               name: cinder-volumes
             - mountPath: /etc/iscsi
               name: iscsi-info
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
-{%- if enable_resolve_conf_net_host_workaround == "yes" %}
-            - mountPath: /etc/resolv.conf
-              name: resolv-conf
-              subPath: resolv.conf
-{%- endif %}
-{% if enable_kube_logger == "yes" %}
-{{ lib.kube_logger_container() | indent(8, true) }}
-{% endif %}
+{{ lib.common_containers(indent=8) }}
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: kolla-kubernetes-events
           emptyDir: {}
         - name: pod-main-config
@@ -145,4 +136,3 @@ spec:
         - name: iscsi-info
           hostPath:
             path: /etc/iscsi
-{{ lib.common_volumes(indent=8) }}

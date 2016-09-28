@@ -1,5 +1,7 @@
+{%- set noLoggingPod = kolla_kubernetes.template.vars.no_logging_pod %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set netHostTrue = "yes" %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -52,6 +54,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ALWAYS
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: pod-main-config
               readOnly: true
@@ -65,12 +68,8 @@ spec:
               name: lib-modules
             - mountPath: /etc/iscsid
               name: iscsid-info
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla/
-              name: kolla-logs
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: kolla-kubernetes-events
           emptyDir: {}
         - name: pod-main-config
@@ -93,8 +92,3 @@ spec:
         - name: iscsid-info
           hostPath:
             path: /etc/iscsid
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
