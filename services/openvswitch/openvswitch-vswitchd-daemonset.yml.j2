@@ -1,4 +1,7 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set loggerConfigmapName = "openvswitch-vswitchd" %}
 {%- set netHostTrue = "yes" %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -65,6 +68,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: openvswitch-vswitchd-config
               readOnly: true
@@ -72,14 +76,9 @@ spec:
               name: openvswitch-run
             - mountPath: /dev
               name: host-dev
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
             - mountPath: /lib/modules
               name: host-lib-modules
               readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           command: ["sh", "-c"]
           args:
             - modprobe openvswitch;
@@ -91,6 +90,7 @@ spec:
               --mlockall
               --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: openvswitch-vswitchd-config
           configMap:
             name: openvswitch-vswitchd
@@ -100,11 +100,6 @@ spec:
         - name: host-dev
           hostPath:
             path: /dev
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
         - name: host-lib-modules
           hostPath:
             path: /lib/modules
-        - name: kolla-logs
-          emptyDir: {}
