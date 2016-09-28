@@ -1,6 +1,6 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- set netHostTrue = "yes" %}
-{%- import "services/common/common-kube-logger.yml.j2" as kube_logger with context %}
+{%- import "services/common/common-lib.yml.j2" as common_lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
