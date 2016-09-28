@@ -1,4 +1,7 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set loggerConfigmapName = "openvswitch-db-server" %}
 {%- set netHostTrue = "yes" %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -61,6 +64,7 @@ spec:
             - name: KOLLA_CONFIG_STRATEGY
               value: {{ config_strategy }}
           volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
             - mountPath: {{ container_config_directory }}
               name: openvswitch-db-config
               readOnly: true
@@ -70,11 +74,6 @@ spec:
               name: openvswitch-run
             - mountPath: /dev
               name: host-dev
-            - mountPath: /etc/localtime
-              name: host-etc-localtime
-              readOnly: true
-            - mountPath: /var/log/kolla
-              name: kolla-logs
           command: ["sh", "-c"]
           args:
             - /usr/sbin/ovsdb-server
@@ -86,6 +85,7 @@ spec:
               --remote=ptcp:6640:0.0.0.0
               --log-file=/var/log/kolla/openvswitch/ovsdb-server.log
       volumes:
+{{ lib.common_volumes(indent=8) }}
         - name: openvswitch-db-config
           configMap:
             name: openvswitch-db-server
@@ -97,8 +97,3 @@ spec:
         - name: host-dev
           hostPath:
             path: /dev
-        - name: host-etc-localtime
-          hostPath:
-            path: /etc/localtime
-        - name: kolla-logs
-          emptyDir: {}
