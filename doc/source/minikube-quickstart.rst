@@ -232,7 +232,7 @@ wait for it...
         kolla-kubernetes resource delete bootstrap $x
     done
     kolla-kubernetes resource create pod keystone
-    watch kolla-kubernetes resource status pod keystone
+    watch kubectl get pods --namespace=kolla
 
 wait for it...
 
