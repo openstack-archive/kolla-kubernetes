@@ -880,3 +880,23 @@ kolla-kubernetes:
           port_name: kibana
           image: kibana_image_full
           check_path: /
+  - name: keepalived 
+    pods:
+    - name: keepalived
+      containers:
+      - name: keepalived
+    - name: keepalived
+      containers:
+      - name: keepalived
+    resources:
+      configmap:
+      - name: keepalived
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
+      - name: keepalived 
+        template: services/keepalived/keepalived-daemonset.yml.j2
