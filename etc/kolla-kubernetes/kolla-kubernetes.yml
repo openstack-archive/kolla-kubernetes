@@ -260,3 +260,4 @@ log_disable:
 - iscsi-iscsid
 - iscsi-tgtd
 - elasticsearch
+- keepalived
