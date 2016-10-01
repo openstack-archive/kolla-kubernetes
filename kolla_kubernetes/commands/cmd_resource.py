@@ -130,6 +130,14 @@ class ResourceTemplate(ResourceBase):
             'kind': 'List',
             'items': []
         }
+
+        if args.resource_name[0] == 'all':
+            services = KKR.getServices()
+            for service in services.keys():
+                service_object = services.get(service)
+                service_object.do_apply(args.action, args.resource_type)
+            return
+
         for resource_name in args.resource_name:
             service_name = KKR.getServiceNameByResourceTypeName(
                 args.resource_type,
