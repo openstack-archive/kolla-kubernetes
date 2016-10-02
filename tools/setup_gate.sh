@@ -114,6 +114,8 @@ fi
 pushd kolla;
 pip install pip --upgrade
 pip install "ansible<2.1"
+pip install "python-openstackclient"
+pip install "python-neutronclient"
 pip install -r requirements.txt
 pip install pyyaml
 ./tools/generate_passwords.py
@@ -356,3 +358,65 @@ kollakube res delete bootstrap openvswitch-set-external-ip
 wait_for_pods kolla
 
 kubectl get pods --namespace=kolla
+
+KEYSTONE_CLUSTER_IP=`kubectl get svc keystone-public --namespace=kolla -o \
+    jsonpath='{.spec.clusterIP}'`
+KEYSTONE_ADMIN_PASSWD=`grep keystone_admin_password /etc/kolla/passwords.yml \
+    | cut -d':' -f2 | sed -e 's/ //'`
+
+cat > ~/keystonerc_admin <<EOF
+unset OS_SERVICE_TOKEN
+export OS_USERNAME=admin
+export OS_PASSWORD=$KEYSTONE_ADMIN_PASSWD
+export OS_AUTH_URL=http://$KEYSTONE_CLUSTER_IP:5000/v3
+export PS1='[\u@\h \W(keystone_admin)]$ '
+export OS_PROJECT_NAME=admin
+export OS_USER_DOMAIN_NAME=Default
+export OS_PROJECT_DOMAIN_NAME=Default
+export OS_IDENTITY_API_VERSION=3
+export OS_REGION_NAME=RegionOne
+EOF
+
+. ~/keystonerc_admin
+
+openstack catalog list
+
+curl -o cirros.qcow2 \
+    http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+openstack image create --file cirros.qcow2 --disk-format qcow2 \
+     --container-format bare 'CirrOS'
+
+neutron net-create --provider:physical_network=physnet1 \
+    --provider:network_type=flat external
+neutron net-update --router:external=True external
+neutron subnet-create --gateway 172.18.0.1 --disable-dhcp \
+    --allocation-pool start=172.18.0.65,end=172.18.0.254 \
+    --name external external 172.18.0.0/24
+neutron router-create admin
+neutron router-gateway-set admin external
+
+neutron net-create admin
+neutron subnet-create --gateway=172.18.1.1 \
+    --allocation-pool start=172.18.1.65,end=172.18.1.254 \
+    --name admin admin 172.18.1.0/24
+neutron router-interface-add admin admin
+neutron security-group-rule-create --protocol icmp \
+    --direction ingress default
+neutron security-group-rule-create --protocol tcp \
+    --port-range-min 22 --port-range-max 22 \
+    --direction ingress default
+
+openstack server create --flavor=m1.tiny --image CirrOS \
+     --nic net-id=admin test
+openstack server create --flavor=m1.tiny --image CirrOS \
+     --nic net-id=admin test2
+FIP=$(openstack ip floating create external -f value -c ip)
+FIP2=$(openstack ip floating create external -f value -c ip)
+
+openstack volume create --size 1 test
+openstack ip floating add $FIP test
+openstack ip floating add $FIP2 test2
+openstack server add volume test test
+
+openstack server list
+
