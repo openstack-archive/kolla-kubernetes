@@ -6,3 +6,6 @@ control
 
 [rabbitmq:children]
 control
+
+[keystone:children]
+control
