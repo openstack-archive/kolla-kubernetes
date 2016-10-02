@@ -1,0 +1,19 @@
+---
+- name: Bootstrapping Rabbitmq
+  command: kollakube resource create bootstrap rabbitmq-bootstrap
+
+- name: Waiting for the Rabbitmq bootstrap to complete
+  command: kubectl get jobs rabbitmq-bootstrap -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Rabbitmq failed to bootstrap. Check the logs of the rabbitmq-bootstrap container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Rabbitmq Bootstrap pod
+  command: kollakube resource delete bootstrap rabbitmq-bootstrap
