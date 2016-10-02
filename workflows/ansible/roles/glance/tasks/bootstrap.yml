@@ -1,0 +1,45 @@
+---
+- name: Bootstrapping Glance
+  command: kollakube resource create bootstrap glance-create-db glance-endpoints glance-manage-db
+
+- name: Waiting for the glance-create-db to complete
+  command: kubectl get jobs glance-create-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="glance-create-db bootstrap job failed. Check the logs of the glance-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the glance-manage-db to complete
+  command: kubectl get jobs glance-manage-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="glance-manage-db bootstrap job failed. Check the logs of the glance-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the glance-endpoints to complete
+  command: kubectl get jobs glance-endpoints -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="glance-endpoints bootstrap job failed. Check the logs of the glance-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Glance Bootstrap pods
+  command: kollakube resource delete bootstrap glance-create-db glance-endpoints glance-manage-db
