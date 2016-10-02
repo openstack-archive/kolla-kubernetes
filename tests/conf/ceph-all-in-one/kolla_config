@@ -1,5 +1,6 @@
 api_interface_address: 0.0.0.0
 orchestration_engine: KUBERNETES
+api_interface: "docker0"
 memcached_servers: "memcached"
 keystone_admin_url: "http://keystone-admin:35357/v3"
 keystone_internal_url: "http://keystone-public:5000/v3"
@@ -68,3 +69,4 @@ ceph_mon_tag: '2.0.2'
 ceph_osd_tag: '2.0.2'
 elasticsearch_tag: '2.0.2'
 kibana_tag: '2.0.2'
+keepalived_tag: '2.0.2'
