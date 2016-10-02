@@ -3,5 +3,6 @@
 enable_mariadb: "yes"
 enable_rabbitmq: "yes"
 enable_keystone: "yes"
+enable_glance: "yes"
 
 # Additional optional OpenStack features and services are specified here
