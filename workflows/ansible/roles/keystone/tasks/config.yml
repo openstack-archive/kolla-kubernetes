@@ -1,0 +1,8 @@
+---
+- name: Checking if Keystone config directory exists
+  stat: path=/etc/kolla/keystone
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating Keystone configmap
+  command: kollakube resource create configmap keystone

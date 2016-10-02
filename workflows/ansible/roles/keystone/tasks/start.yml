@@ -1,0 +1,14 @@
+---
+- name: Starting Keystone replication controller
+  command: kollakube resource create pod keystone
+
+- name: Checking if Keystone service is running
+  command: kubectl get rc keystone -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Keystone failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"

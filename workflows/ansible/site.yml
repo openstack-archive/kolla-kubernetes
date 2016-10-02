@@ -8,3 +8,8 @@
   roles:
     - { role: rabbitmq,
         when: enable_rabbitmq | bool }
+
+- hosts: keystone
+  roles:
+    - { role: keystone,
+        when: enable_keystone | bool }
