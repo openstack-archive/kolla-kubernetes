@@ -1,0 +1,54 @@
+{%- set podTypeBootstrap = "yes" %}
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set user = kolla_kubernetes.template.vars.user %}
+{%- set role = kolla_kubernetes.template.vars.role %}
+{%- set serviceAuth = kolla_kubernetes.template.vars.service_auth %}
+{%- set secret = kolla_kubernetes.template.vars.secret %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ user }}-create-keystone-user
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
+      containers:
+        - image: "{{ kolla_toolbox_image_full }}"
+          name: main
+          command: ["sh", "-xec"]
+          args:
+            - /usr/bin/ansible localhost -vvvv
+                  -m kolla_keystone_user
+                  -a "project=service
+                      user={{ user }}
+                      password=$KEYSTONE_PASSWORD
+                      role={{ role }}
+                      region_name={{ openstack_region_name }}
+                      auth={{ '{{ service_auth }}' }}"
+                  -e "{'service_auth':{{ global[serviceAuth] }}}"
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                  name: {{ secret }}
+                  key: password
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+      restartPolicy: OnFailure
