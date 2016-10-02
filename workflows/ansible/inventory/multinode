@@ -3,3 +3,6 @@ control01
 
 [mariadb:children]
 control
+
+[rabbitmq:children]
+control

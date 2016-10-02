@@ -1,0 +1,14 @@
+---
+- name: Checking if Rabbitmq config directory exists
+  stat: path=/etc/kolla/rabbitmq
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating Rabbitmq configmap
+  command: kollakube resource create configmap rabbitmq
+
+- name: Creating Rabbitmq pv
+  command: kollakube resource create pv rabbitmq
+
+- name: Creating Rabbitmq pvc
+  command: kollakube resource create pvc rabbitmq

@@ -1,5 +1,6 @@
 ---
 # Default OpenStack services
 enable_mariadb: "yes"
+enable_rabbitmq: "yes"
 
 # Additional optional OpenStack features and services are specified here

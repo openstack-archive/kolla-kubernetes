@@ -1,0 +1,14 @@
+---
+- name: Starting Rabbitmq replication controller
+  command: kollakube resource create pod rabbitmq
+
+- name: Checking if Rabbitmq service is running
+  command: kubectl get petsets rabbitmq -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Rabbitmq failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"

@@ -3,3 +3,8 @@
   roles:
     - { role: mariadb,
         when: enable_mariadb | bool }
+
+- hosts: rabbitmq
+  roles:
+    - { role: rabbitmq,
+        when: enable_rabbitmq | bool }
