@@ -14,7 +14,7 @@ spec:
       containers:
         - image: "{{ kolla_toolbox_image_full }}"
           name: main
-          command: ["sh", "-c"]
+          command: ["sh", "-xec"]
           args:
             - /usr/bin/ansible localhost -vvvv -m kolla_keystone_service
               -a "service_name=nova
@@ -24,8 +24,8 @@ spec:
                   url='{{ nova_admin_endpoint }}'
                   interface='admin'
                   region_name={{ openstack_region_name }}
-                  auth={{ '{{' }} openstack_nova_auth {{ '}}' }}"
-              -e "{'openstack_nova_auth':{{ openstack_nova_auth }}}" &&
+                  auth={{ '{{' }} service_auth {{ '}}' }}"
+              -e "{'service_auth':{{ openstack_nova_auth }}}" &&
               /usr/bin/ansible localhost -vvvv -m kolla_keystone_service
               -a "service_name=nova
                   service_type=compute
@@ -34,8 +34,8 @@ spec:
                   url='{{ nova_internal_endpoint }}'
                   interface='internal'
                   region_name={{ openstack_region_name }}
-                  auth={{ '{{ openstack_nova_auth }}' }}"
-              -e "{'openstack_nova_auth':{{ openstack_nova_auth }}}" &&
+                  auth={{ '{{ service__auth }}' }}"
+              -e "{'service_auth':{{ openstack_nova_auth }}}" &&
               /usr/bin/ansible localhost -vvvv -m kolla_keystone_service
               -a "service_name=nova
                   service_type=compute
@@ -44,8 +44,8 @@ spec:
                   url='{{ nova_public_endpoint }}'
                   interface='public'
                   region_name={{ openstack_region_name }}
-                  auth={{ '{{ openstack_nova_auth }}' }}"
-              -e "{'openstack_nova_auth':{{ openstack_nova_auth }}}" &&
+                  auth={{ '{{ service_auth }}' }}"
+              -e "{'service_auth':{{ openstack_nova_auth }}}" &&
               /usr/bin/ansible localhost -vvvv
                   -m kolla_keystone_user
                   -a "project=service
@@ -53,8 +53,8 @@ spec:
                       password=$NOVA_KEYSTONE_PASSWORD
                       role=admin
                       region_name={{ openstack_region_name }}
-                      auth={{ '{{ openstack_nova_auth }}' }}"
-                  -e "{'openstack_nova_auth':{{ openstack_nova_auth }}}"
+                      auth={{ '{{ service_auth }}' }}"
+                  -e "{'service_auth':{{ openstack_nova_auth }}}"
           volumeMounts:
 {{ lib.common_volume_mounts(indent=12) }}
           env:
@@ -77,9 +77,6 @@ spec:
         - name: nova-api-config
           configMap:
             name: nova-api
-        - name: lib-modules
-          hostPath:
-            path: /lib/modules
       restartPolicy: OnFailure
 metadata:
   name: nova-create-endpoints
