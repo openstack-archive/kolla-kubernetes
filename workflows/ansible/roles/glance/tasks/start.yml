@@ -1,0 +1,28 @@
+---
+- name: Starting Glance API deployments
+  command: kollakube resource create pod glance-api
+
+- name: Checking if Glance API service is running
+  command: kubectl get deployment glance-api -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Glance API failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Starting Glance Registry deployments
+  command: kollakube resource create pod glance-registry
+
+- name: Checking if Glance Registry service is running
+  command: kubectl get deployment glance-registry -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Glance Registry failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
