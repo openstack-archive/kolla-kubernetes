@@ -395,8 +395,40 @@ kolla-kubernetes:
       bootstrap:
       - name: nova-create-api-db
         template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
-      - name: nova-create-endpoints
-        template: services/nova/nova-control-bootstrap-job-create-nova-endpoints.yml.j2
+      - name: nova-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: public
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_public_endpoint
+      - name: nova-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: internal
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_internal_endpoint
+      - name: nova-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: admin
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_admin_endpoint
+      - name: nova-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: nova
+          role: admin
+          service_auth: openstack_nova_auth
+          secret: nova-keystone-password
       - name: nova-create-db
         template: services/nova/nova-control-bootstrap-job-create-nova-db.yml.j2
       pod:
