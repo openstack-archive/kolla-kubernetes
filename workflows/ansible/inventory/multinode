@@ -9,3 +9,9 @@ control
 
 [keystone:children]
 control
+
+[glance-registry:children]
+control
+
+[glance-api:children]
+control
