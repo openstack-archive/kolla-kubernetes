@@ -1,0 +1,13 @@
+---
+- name: Checking if Glance API config directory exists
+  stat: path=/etc/kolla/glance-api
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Glance Registry config directory exists
+  stat: path=/etc/kolla/glance-registry
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating Glance configmap
+  command: kollakube resource create configmap glance-api-haproxy glance-registry-haproxy glance-api glance-registry

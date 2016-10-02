@@ -13,3 +13,10 @@
   roles:
     - { role: keystone,
         when: enable_keystone | bool }
+
+- hosts:
+    - glance-api
+    - glance-registry
+  roles:
+    - { role: glance,
+        when: enable_glance | bool }
