@@ -1,0 +1,56 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ceph-admin
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  hostNetwork: True
+  hostPID: True
+  nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_ceph_admin |
+                   default(kolla_kubernetes_hostlabel_storage |
+                     default(kolla_kubernetes_hostlabel_controller)
+                   )
+%}
+    {{ selector.key }}: {{ selector.value }}
+  restartPolicy: Never
+  containers:
+    - image: "{{ ceph_mon_image_full }}"
+      name: main
+      command:
+        - /bin/bash
+        - -xec
+        - |
+          modprobe rbd;
+          while true; do sleep 1000; done
+      securityContext:
+        privileged: true
+      volumeMounts:
+{{ lib.common_volume_mounts(indent=8) }}
+        - mountPath: /etc/ceph/ceph.conf
+          name: ceph-conf
+          readOnly: true
+          subPath: ceph.conf
+        - mountPath: /etc/ceph/ceph.client.admin.keyring
+          subPath: data
+          name: ceph-client-admin-keyring
+        - mountPath: /dev
+          name: host-dev
+        - mountPath: /lib/modules
+          name: lib-modules
+  volumes:
+{{ lib.common_volumes(indent=4) }}
+    - name: ceph-conf
+      configMap:
+        name: ceph-conf
+    - name: host-dev
+      hostPath:
+        path: /dev
+    - name: ceph-client-admin-keyring
+      secret:
+        secretName: ceph-client-admin-keyring
+    - name: lib-modules
+      hostPath:
+        path: /lib/modules
