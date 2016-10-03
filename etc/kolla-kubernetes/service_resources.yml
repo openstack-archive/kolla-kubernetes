@@ -39,12 +39,28 @@ kolla-kubernetes:
       - name: ceph-bootstrap-initial-mon
         template: services/ceph/ceph-bootstrap-initial-mon.yml.j2
       pod:
-      - name: ceph-bootstrap-osd
+      - name: ceph-bootstrap-osd0
         template: services/ceph/ceph-bootstrap-osd.yml.j2
+        vars:
+          index: '0'
+      - name: ceph-bootstrap-osd1
+        template: services/ceph/ceph-bootstrap-osd.yml.j2
+        vars:
+          index: '1'
       - name: ceph-mon
         template: services/ceph/ceph-mon-pod.yml.j2
-      - name: ceph-osd
+      - name: ceph-osd0
         template: services/ceph/ceph-osd-pod.yml.j2
+        vars:
+          index: '0'
+      - name: ceph-osd1
+        template: services/ceph/ceph-osd-pod.yml.j2
+        vars:
+          index: '1'
+      - name: ceph-admin
+        template: services/ceph/ceph-admin-pod.yml.j2
+      - name: ceph-rbd
+        template: services/ceph/ceph-rbd-pod.yml.j2
   - name: mariadb
     pods:
     - name: mariadb
@@ -893,6 +909,36 @@ kolla-kubernetes:
           service_auth: openstack_cinder_auth
           description: Openstack Block Storage
           endpoint: cinder_admin_endpoint
+      - name: cinder-create-keystone-endpoint-publicv2
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: public
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_public_endpoint
+          postfix: v2
+      - name: cinder-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: internal
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_internal_endpoint
+          postfix: v2
+      - name: cinder-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: admin
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_admin_endpoint
+          postfix: v2
       - name: cinder-create-keystone-user
         template: services/common/common-create-keystone-user.yml.j2
         vars:
