@@ -6,11 +6,12 @@
 {%- set serviceAuth = kolla_kubernetes.template.vars.service_auth %}
 {%- set description = kolla_kubernetes.template.vars.description %}
 {%- set endpoint = kolla_kubernetes.template.vars.endpoint %}
+{%- set postfix = kolla_kubernetes.template.vars.postfix | default("") %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ serviceName }}-create-keystone-endpoint-{{ interface }}
+  name: {{ serviceName }}-create-keystone-endpoint-{{ interface }}{{ postfix }}
   namespace: {{ kolla_kubernetes_namespace }}
 spec:
   parallelism: 1
@@ -26,8 +27,8 @@ spec:
           command: ["sh", "-xec"]
           args:
             - /usr/bin/ansible localhost -vvvv -m kolla_keystone_service
-              -a "service_name={{ serviceName }}
-                  service_type={{ serviceType }}
+              -a "service_name={{ serviceName }}{{ postfix }}
+                  service_type={{ serviceType }}{{ postfix }}
                   description='{{ description }}'
                   endpoint_region={{ openstack_region_name }}
                   url='{{ global[endpoint] }}'
