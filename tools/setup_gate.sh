@@ -39,6 +39,7 @@ function wait_for_pods {
 function trap_error {
     set +xe
     mkdir -p $WORKSPACE/logs/pods
+    mkdir -p $WORKSPACE/logs/ceph
     sudo cp /var/log/messages $WORKSPACE/logs
     sudo cp /var/log/syslog $WORKSPACE/logs
     sudo cp -a /etc/kubernetes $WORKSPACE/logs
@@ -72,6 +73,26 @@ function trap_error {
         kubectl logs $line --namespace=kolla -c initialize-ovs-vswitchd >> \
             $WORKSPACE/logs/ovs-init.txt
     done
+    str="timeout 6s ceph -s"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+    sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet.txt
+    openstack catalog list > $WORKSPACE/logs/openstack-catalog.txt
+    str="timeout 6s ceph pg 1.1 query"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
+        > $WORKSPACE/logs/ceph/pg1.1.txt
+    str="timeout 6s ceph osd tree"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
+        > $WORKSPACE/logs/ceph/osdtree.txt
+    str="timeout 6s ceph health"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+    str="cat /var/log/kolla/ceph/*.log"
+    kubectl exec ceph-osd0 -c main --namespace=kolla -- /bin/bash -c "$str" \
+        > $WORKSPACE/logs/ceph/osd.txt
+    str="timeout 6s ceph pg dump"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
+        > $WORKSPACE/logs/ceph/pgdump.txt
+    df -h > $WORKSPACE/logs/df.txt
+    dmesg > $WORKSPACE/logs/dmesg
     exit -1
 }
 
@@ -91,7 +112,9 @@ sudo iptables -D INPUT $l
 
 ip a | sed '/^[^1-9]/d;' | awk '{print $2}' | sed 's/://' | \
     grep -v '^lo$' | while read line; do
-    sudo iptables -I INPUT 1 -i $line -j openstack-INPUT
+#FIXME testing
+echo testing
+#    sudo iptables -I INPUT 1 -i $line -j openstack-INPUT
 done
 
 virtualenv .venv
@@ -124,7 +147,7 @@ pip install .
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 sed -i \
-    '/\[global\]/a osd pool default size = 1\nosd pool default min size = 1\n'\
+    '/\[global\]/a osd pool default size = 1\nosd pool default min size = 1\nosd crush chooseleaf type = 0\ndebug default = 5\n'\
     /etc/kolla/ceph*/ceph.conf
 
 ./tools/fix-mitaka-config.py
@@ -156,9 +179,17 @@ EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
 mkdir -p /data/kolla
-dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=1 count=0 seek=3G
+df -h
+dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=5M count=1024
+dd if=/dev/zero of=/data/kolla/ceph-osd1.img bs=5M count=1024
 LOOP=$(losetup -f)
 losetup $LOOP /data/kolla/ceph-osd0.img
+parted $LOOP mklabel gpt
+parted $LOOP mkpart 1 0% 512m
+parted $LOOP mkpart 2 513m 100%
+dd if=/dev/zero of=/data/kolla/ceph-osd1.img bs=5M count=1024
+LOOP=$(losetup -f)
+losetup $LOOP /data/kolla/ceph-osd1.img
 parted $LOOP mklabel gpt
 parted $LOOP mkpart 1 0% 512m
 parted $LOOP mkpart 2 513m 100%
@@ -243,52 +274,98 @@ kollakube res create pod ceph-mon
 
 wait_for_pods kolla
 
-kollakube res create pod ceph-bootstrap-osd
+kollakube res create pod ceph-bootstrap-osd0
+pull_containers kolla
+
+wait_for_pods kolla
+#suspected need a little longer? its kind of a pod, kind of a job...
+sleep 10
+
+kollakube res create pod ceph-bootstrap-osd1
 
 mkdir -p $WORKSPACE/logs/
 
-pull_containers kolla
+wait_for_pods kolla
+#suspected need a little longer? its kind of a pod, kind of a job...
+sleep 10
+
+kollakube res delete pod ceph-bootstrap-osd0
+kollakube res delete pod ceph-bootstrap-osd1
+kollakube res create pod ceph-osd0
+kollakube res create pod ceph-osd1
+
 wait_for_pods kolla
 
-kollakube res delete pod ceph-bootstrap-osd
-kollakube res create pod ceph-osd
+kubectl exec ceph-osd0 -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.conf" > /tmp/$$
+kubectl create configmap ceph-conf --namespace=kolla \
+    --from-file=ceph.conf=/tmp/$$
+kubectl exec ceph-osd0 -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.client.admin.keyring" > /tmp/$$
+rm -f /tmp/$$
+kollakube res create pod ceph-admin ceph-rbd
 
 wait_for_pods kolla
 
-for x in images volumes vms; do
-    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash \
-    -c "ceph osd pool create $x 64"
+echo rbd script:
+cat /usr/bin/rbd
+
+#FIXME
+#for x in images volumes vms kollavolumes; do
+for x in kollavolumes; do
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
+    -c "ceph osd pool create $x 64; ceph osd pool set $x size 1; ceph osd pool set $x min_size 1"
 done
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
+    -c "ceph osd pool delete rbd rbd --yes-i-really-really-mean-it"
 str="ceph auth get-or-create client.glance mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-glance-keyring --namespace=kolla\
     --from-file=ceph.client.glance.keyring=/tmp/$$
 str="ceph auth get-or-create client.cinder mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=volumes'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-cinder-keyring --namespace=kolla\
     --from-file=ceph.client.cinder.keyring=/tmp/$$
-str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow "
+str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=volumes, "
 str="$str allow rwx pool=vms, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-nova-keyring --namespace=kolla \
     --from-file=ceph.client.nova.keyring=/tmp/$$
 kubectl create secret generic nova-libvirt-bin --namespace=kolla \
     --from-file=data=<(awk '{if($1 == "key"){print $3}}' /tmp/$$ |
     tr -d '\n')
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "cat /etc/ceph/ceph.conf" > /tmp/$$
-kubectl create configmap ceph-conf --namespace=kolla \
-    --from-file=ceph.conf=/tmp/$$
+str="ceph auth get-or-create client.kolla mon 'allow r' osd 'allow"
+str="$str class-read object_prefix rbd_children, allow rwx pool=kollavolumes'"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
+    "$str" | awk '{if($1 == "key"){print $3}}' > /tmp/$$
+kubectl create secret generic ceph-kolla --namespace=kolla \
+    --from-file=key=/tmp/$$
+#FIXME may need different flags for testing jewel
+str="cat /etc/ceph/ceph.conf"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+
+str="timeout 240s rbd create kollavolumes/mariadb --size 1024"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+str="timeout 60s rbd create kollavolumes/rabbitmq --size 1024"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+
+for volume in mariadb rabbitmq; do
+    str='DEV=$(rbd map --pool kollavolumes '$volume'); mkfs.xfs $DEV;'
+    str="$str rbd unmap "'$DEV;'
+    timeout 60s kubectl exec ceph-admin -c main --namespace=kolla -- \
+        /bin/bash -c "$str"
+done
+
 rm -f /tmp/$$
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq glance; do
+for x in mariadb rabbitmq; do
     kollakube res create pv $x
     kollakube res create pvc $x
 done
@@ -327,6 +404,10 @@ kollakube res create bootstrap glance-create-db glance-endpoints \
 
 pull_containers kolla
 wait_for_pods kolla
+
+mkdir -p $WORKSPACE/logs/
+kubectl get jobs -o json $WORKSPACE/logs/jobs-after-bootstrap.json \
+    --namespace=kolla
 
 kollakube res delete bootstrap glance-create-db glance-endpoints \
     glance-manage-db nova-create-api-db nova-create-endpoints nova-create-db \
