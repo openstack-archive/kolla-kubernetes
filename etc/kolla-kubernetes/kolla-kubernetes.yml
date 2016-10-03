@@ -82,6 +82,7 @@ dns_domain_name: "openstack.kolla"
 # Persistent Storage
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
+storage_provider_fstype: "ext4"
 storage_ceph:
   # - WARNING: These sample defaults configure ceph access using the
   #   ceph "admin" user/key, because it involves the least amount of
@@ -229,8 +230,13 @@ enable_resolve_conf_net_host_workaround: "yes"
 ########################
 # WARNING! reminder, this ceph setup is only intended for testing.
 
-ceph_osd_journal_dev: "/dev/loop0p1"
-ceph_osd_data_dev: "/dev/loop0p2"
+ceph_osd_journal_dev:
+- "/dev/loop0p1"
+- "/dev/loop1p1"
+
+ceph_osd_data_dev:
+- "/dev/loop0p2"
+- "/dev/loop1p2"
 
 ########################
 # Rabbitmq variables
