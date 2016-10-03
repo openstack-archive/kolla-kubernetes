@@ -18,7 +18,7 @@ spec:
 {%- elif storage_provider == "gce" %}
   gcePersistentDisk:
     pdName: {{ resourceName }}
-    fsType: ext4
+    fsType: {{ storage_provider_fstype }}
 
 {%- elif storage_provider == "ceph" %}
   rbd:
@@ -32,11 +32,11 @@ spec:
     {%- if storage_ceph.keyring is defined and storage_ceph.keyring|length>0 %}
     keyring: {{ storage_ceph.keyring }}
     {%- endif %}
-    {%- if storage_ceph.secretName is defined and storage_ceph.secretName|length>0 and storage_ceph.key is defined and storage_ceph.key|length>0 %}
+    {%- if storage_ceph.secretName is defined and storage_ceph.secretName|length>0 %}
     secretRef:
       name: {{ storage_ceph.secretName }}
     {%- endif %}
-    fsType: ext4
+    fsType: {{ storage_provider_fstype }}
     readOnly: false
 {%- endif %}
 
