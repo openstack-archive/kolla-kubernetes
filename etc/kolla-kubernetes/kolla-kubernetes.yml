@@ -82,6 +82,7 @@ dns_domain_name: "openstack.kolla"
 # Persistent Storage
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
+storage_provider_fstype: "ext4"
 storage_ceph:
   # - WARNING: These sample defaults configure ceph access using the
   #   ceph "admin" user/key, because it involves the least amount of
