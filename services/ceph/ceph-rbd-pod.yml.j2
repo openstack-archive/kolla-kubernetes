@@ -1,0 +1,82 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: ceph-rbd
+  labels:
+    component: ceph
+    system: rbd
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: ceph
+        system: rbd
+    spec:
+      hostNetwork: True
+      hostPID: True
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_ceph_rbd |
+                   default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
+      containers:
+        - image: "{{ ceph_mon_image_full }}"
+          name: main
+          securityContext:
+            privileged: true
+          command:
+            - /bin/bash
+            - -xec
+            - |
+              modprobe rbd;
+              if [ -x /host/rbd ]; then
+                  grep label=io.kubernetes.pod.namespace /host/rbd > /dev/null && rm -f /host/rbd
+              fi
+              if [ ! -x /host/rbd ]; then
+              echo IyEvYmluL2Jhc2gKCg== | base64 -d > /host/rbd;
+              echo 'ID=$(docker ps -q -f label=io.kubernetes.pod.namespace='$POD_NAMESPACE' -f label=io.kubernetes.pod.name='$POD_NAME' -f label=io.kubernetes.container.name=main);' >> /host/rbd;
+              echo 'docker exec --privileged -u 0 -i $ID /usr/bin/rbd "$@"' >> /host/rbd;
+              chmod +x /host/rbd;
+              fi;
+              while true; do sleep 1000; done
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: /host/
+              name: host-usr-bin
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /sys
+              name: host-sys
+            - mountPath: /etc
+              name: host-etc
+            - mountPath: /lib/modules
+              name: lib-modules
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: host-usr-bin
+          hostPath:
+            path: /usr/bin
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: host-sys
+          hostPath:
+            path: /sys
+        - name: host-etc
+          hostPath:
+            path: /etc
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
