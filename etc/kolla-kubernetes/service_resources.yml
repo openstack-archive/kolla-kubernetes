@@ -39,12 +39,28 @@ kolla-kubernetes:
       - name: ceph-bootstrap-initial-mon
         template: services/ceph/ceph-bootstrap-initial-mon.yml.j2
       pod:
-      - name: ceph-bootstrap-osd
+      - name: ceph-bootstrap-osd0
         template: services/ceph/ceph-bootstrap-osd.yml.j2
+        vars:
+          index: '0'
+      - name: ceph-bootstrap-osd1
+        template: services/ceph/ceph-bootstrap-osd.yml.j2
+        vars:
+          index: '1'
       - name: ceph-mon
         template: services/ceph/ceph-mon-pod.yml.j2
-      - name: ceph-osd
+      - name: ceph-osd0
         template: services/ceph/ceph-osd-pod.yml.j2
+        vars:
+          index: '0'
+      - name: ceph-osd1
+        template: services/ceph/ceph-osd-pod.yml.j2
+        vars:
+          index: '1'
+      - name: ceph-admin
+        template: services/ceph/ceph-admin-pod.yml.j2
+      - name: ceph-rbd
+        template: services/ceph/ceph-rbd-pod.yml.j2
   - name: mariadb
     pods:
     - name: mariadb
