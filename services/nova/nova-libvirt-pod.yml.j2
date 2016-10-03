@@ -22,7 +22,7 @@ spec:
              "image": "{{ nova_libvirt_image_full }}",
              "command": [
                  "sh",
-                 "-c",
+                 "-xec",
                  "cp -a /config/..data/* /nova/;
 {%- if enable_libvirt_tcp == "yes" %}
                   sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
@@ -72,6 +72,12 @@ spec:
       containers:
         - name: main
           image: "{{ nova_libvirt_image_full }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              cp -a {{ container_config_directory }}/secrets /etc/libvirt;
+              kolla_start
           securityContext:
             privileged: true
           volumeMounts:
