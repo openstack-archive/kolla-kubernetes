@@ -6,11 +6,13 @@ rabbitmq_management_external: "yes"
 kolla_kubernetes_external_bridge_ip: "172.18.0.1"
 kolla_kubernetes_external_subnet: "24"
 
+storage_provider: "ceph" 
+
 storage_interface: "docker0"
 storage_ceph:
   monitors:
   - 172.17.0.1
-  ssh_user: root
-  secretName: ceph-secret
-  key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
+  user: kolla
+  pool: kollavolumes
+  secretName: ceph-kolla
   initial_mon: minikube
