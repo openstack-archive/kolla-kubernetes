@@ -255,6 +255,17 @@ kollakube res create pod ceph-osd
 
 wait_for_pods kolla
 
+kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.conf" > /tmp/$$
+kubectl create configmap ceph-conf --namespace=kolla \
+    --from-file=ceph.conf=/tmp/$$
+kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.client.admin.keyring" > /tmp/$$
+rm -f /tmp/$$
+kollakube res create pod ceph-admin ceph-rbd
+
+wait_for_pods kolla
+
 for x in images volumes vms; do
     kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash \
     -c "ceph osd pool create $x 64"
@@ -281,10 +292,6 @@ kubectl create secret generic ceph-client-nova-keyring --namespace=kolla \
 kubectl create secret generic nova-libvirt-bin --namespace=kolla \
     --from-file=data=<(awk '{if($1 == "key"){print $3}}' /tmp/$$ |
     tr -d '\n')
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "cat /etc/ceph/ceph.conf" > /tmp/$$
-kubectl create configmap ceph-conf --namespace=kolla \
-    --from-file=ceph.conf=/tmp/$$
 rm -f /tmp/$$
 kollakube res create secret nova-libvirt
 

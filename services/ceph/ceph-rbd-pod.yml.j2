@@ -1,0 +1,54 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: ceph-rbd
+  labels:
+    component: ceph
+    system: rbd
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: ceph
+        system: rbd
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_ceph_rbd |
+                   default(kolla_kubernetes_hostlabel_controller)
+               )
+%}
+          {{ selector.key }}: {{ selector.value }}
+      securityContext:
+        privileged: true
+      containers:
+        - image: "{{ ceph_mon_image_full }}"
+          name: main
+          command:
+            - /bin/bash
+            - -xec
+            - |
+              modprobe rbd;
+              if [ ! -x /host/rbd ]; then
+              cat > /host/rbd <<"EOF"
+              docker run -it --rm -v /dev:/dev -v /etc/ceph:/etc/ceph {{ ceph_mon_image_full }} /usr/bin/rbd "$@"
+              EOF
+              chmod +x /host/rbd;
+              fi;
+              while true; do sleep 1000; done
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: /host/
+              name: host-usr-bin
+            - mountPath: /lib/modules
+              name: lib-modules
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: host-usr-bin
+          hostPath:
+            path: /usr/bin
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
