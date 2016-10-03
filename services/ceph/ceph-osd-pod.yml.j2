@@ -1,9 +1,10 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set index = kolla_kubernetes.template.vars.index %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ceph-osd
+  name: ceph-osd{{ index }}
   namespace: {{ kolla_kubernetes_namespace }}
   annotations:
 #FIXME Once out of alpha, this should be converted to yaml.
@@ -55,7 +56,7 @@ spec:
         - /bin/bash
         - -ec
         - |
-          mount {{ ceph_osd_data_dev }} /var/lib/ceph/osd/ceph-0
+          mount {{ ceph_osd_data_dev[index | int] }} /var/lib/ceph/osd/ceph-{{ index }}
           kolla_start
       securityContext:
         privileged: true
@@ -63,9 +64,9 @@ spec:
         - name: KOLLA_CONFIG_STRATEGY
           value: "{{ config_strategy }}"
         - name: OSD_ID
-          value: "0"
+          value: "{{ index }}"
         - name: JOURNAL_PARTITION
-          value: {{ ceph_osd_journal_dev }}
+          value: {{ ceph_osd_journal_dev[index | int] }}
         - name: HOSTNAME
           value: {{ storage_ceph.initial_mon }}
       volumeMounts:

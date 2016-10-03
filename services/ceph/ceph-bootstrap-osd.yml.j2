@@ -1,10 +1,11 @@
 {%- set podTypeBootstrap = "yes" %}
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set index = kolla_kubernetes.template.vars.index %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ceph-bootstrap-osd
+  name: ceph-bootstrap-osd{{ index }}
   namespace: {{ kolla_kubernetes_namespace }}
   annotations:
 #FIXME Once out of alpha, this should be converted to yaml.
@@ -61,17 +62,17 @@ spec:
         - name: USE_EXTERNAL_JOURNAL
           value: "True"
         - name: JOURNAL_DEV
-          value: "/dev/loop0"
+          value: "/dev/loop{{ index }}"
         - name: JOURNAL_PARTITION_NUM
           value: "1"
         - name: JOURNAL_PARTITION
-          value: "/dev/loop0p1"
+          value: "/dev/loop{{ index }}p1"
         - name: OSD_DEV
-          value: "/dev/loop0"
+          value: "/dev/loop{{ index }}"
         - name: OSD_PARTITION_NUM
           value: "2"
         - name: OSD_PARTITION
-          value: "/dev/loop0p2"
+          value: "/dev/loop{{ index }}p2"
         - name: OSD_INITIAL_WEIGHT
           value: "1"
         - name: OSD_FILESYSTEM
