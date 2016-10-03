@@ -18,7 +18,7 @@ spec:
 {%- elif storage_provider == "gce" %}
   gcePersistentDisk:
     pdName: {{ resourceName }}
-    fsType: ext4
+    fsType: {{ storage_provider_fstype }}
 
 {%- elif storage_provider == "ceph" %}
   rbd:
@@ -36,7 +36,7 @@ spec:
     secretRef:
       name: {{ storage_ceph.secretName }}
     {%- endif %}
-    fsType: ext4
+    fsType: {{ storage_provider_fstype }}
     readOnly: false
 {%- endif %}
 
