@@ -22,7 +22,7 @@ spec:
              "image": "{{ kolla_toolbox_image_full }}",
              "command": [
                  "sh",
-                 "-ec",
+                 "-xec",
                  "cp -a /config/..data/* /nova/;
                   IP=$(ip addr show dev {{ tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   mkdir -p /var/log/kolla/nova-init;
