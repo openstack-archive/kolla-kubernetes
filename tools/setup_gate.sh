@@ -72,6 +72,9 @@ function trap_error {
         kubectl logs $line --namespace=kolla -c initialize-ovs-vswitchd >> \
             $WORKSPACE/logs/ovs-init.txt
     done
+    str="timeout 60s ceph -s"
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+    journalctl -u kubelet > $WORKSPACE/logs/kubelet.txt
     exit -1
 }
 
@@ -255,40 +258,59 @@ kollakube res create pod ceph-osd
 
 wait_for_pods kolla
 
-for x in images volumes vms; do
-    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash \
+kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.conf" > /tmp/$$
+kubectl create configmap ceph-conf --namespace=kolla \
+    --from-file=ceph.conf=/tmp/$$
+kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+    "cat /etc/ceph/ceph.client.admin.keyring" > /tmp/$$
+rm -f /tmp/$$
+kollakube res create pod ceph-admin ceph-rbd
+
+wait_for_pods kolla
+
+for x in images volumes vms kollavolumes; do
+    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
     -c "ceph osd pool create $x 64"
 done
 str="ceph auth get-or-create client.glance mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-glance-keyring --namespace=kolla\
     --from-file=ceph.client.glance.keyring=/tmp/$$
 str="ceph auth get-or-create client.cinder mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=volumes'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-cinder-keyring --namespace=kolla\
     --from-file=ceph.client.cinder.keyring=/tmp/$$
-str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow "
+str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow"
 str="$str class-read object_prefix rbd_children, allow rwx pool=volumes, "
 str="$str allow rwx pool=vms, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
     "$str" > /tmp/$$
 kubectl create secret generic ceph-client-nova-keyring --namespace=kolla \
     --from-file=ceph.client.nova.keyring=/tmp/$$
 kubectl create secret generic nova-libvirt-bin --namespace=kolla \
     --from-file=data=<(awk '{if($1 == "key"){print $3}}' /tmp/$$ |
     tr -d '\n')
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "cat /etc/ceph/ceph.conf" > /tmp/$$
-kubectl create configmap ceph-conf --namespace=kolla \
-    --from-file=ceph.conf=/tmp/$$
+str="ceph auth get-or-create client.kolla mon 'allow r' osd 'allow"
+str="$str class-read object_prefix rbd_children, allow rwx pool=kollavolumes'"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
+    "$str" | awk '{if($1 == "key"){print $3}}' > /tmp/$$
+kubectl create secret generic ceph-kolla --namespace=kolla \
+    --from-file=key=/tmp/$$
+#FIXME may need different flags for testing jewel
+str="timeout 60s rbd create kollavolumes/mariadb --size 1024"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+str="timeout 60s rbd create kollavolumes/rabbitmq --size 1024"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+
 rm -f /tmp/$$
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq glance; do
+for x in mariadb rabbitmq; do
     kollakube res create pv $x
     kollakube res create pvc $x
 done
