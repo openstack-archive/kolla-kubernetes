@@ -29,7 +29,7 @@ spec:
                   TUNNEL_INTERFACE={{ tunnel_interface }};
                   F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
                   [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
-                  IP=$(ip addr list \"''$TUNNEL_INTERFACE''\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                  IP=$(ip addr list \"$TUNNEL_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
 {%- if enable_openvswitch_tcp == "yes" -%}
                   crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
 {%- endif -%}
