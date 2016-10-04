@@ -26,7 +26,7 @@ class KubeResourceTypeStatus(object):
 
         # Check input args
         if resource_type == 'disk':
-            LOG.warn('resource_type disk is not supported yet')
+            LOG.warning('resource_type disk is not supported yet')
             return
 
         # Initialize internal vars
@@ -80,8 +80,8 @@ class KubeResourceTypeStatus(object):
 
             # Skip unsupported script templates
             if file_.endswith('.sh.j2'):
-                LOG.warn('Shell templates are not supported yet. '
-                         'Skipping processing status of {}'.format(file_))
+                LOG.warning('Shell templates are not supported yet. '
+                            'Skipping processing status of {}'.format(file_))
                 continue
 
             krt = KubeResourceTemplateStatus(
