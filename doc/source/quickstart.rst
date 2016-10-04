@@ -63,6 +63,19 @@ Create the kubernetes namespace. By default it is 'kolla'.
 ::
     kubectl create namespace 'kolla'
 
+When the namespace is created, each kubectl command executed against
+the namespace requires adding --namespace=kolla keyword. The following
+sequence of commands allow setting up the default kubectl context
+with the right namespace and URL to kube-apiserver thus minimizing
+amount of typing one needs to do.
+
+::
+    kubectl config set-context kolla --namespace=kolla
+    # X.X.X.X ip address of kubernetes api server
+    kubectl config set-cluster kolla --server=http://X.X.X.X:8080
+    kubectl config set-context kolla --cluster=kolla
+    kubectl config use-context kolla
+
 Generating Kubernetes Secrets
 =============================
 
