@@ -209,7 +209,6 @@ sed -i "s@100.78.232.136@172.16.128.100@" /tmp/canal.yaml
 kubectl create -f /tmp/canal.yaml
 
 kubectl create namespace kolla
-tools/secret-generator.py create
 
 wait_for_pods kube-system
 
@@ -222,137 +221,174 @@ timeout 240s tools/setup-resolv-conf.sh
 kubectl get configmap resolv-conf --namespace=kolla -o yaml
 kubectl get pods --all-namespaces -o wide
 
-kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume ceph-mon ceph-osd;
+function wait_for_containers {
+    pull_containers kolla
+    wait_for_pods kolla
+}
 
-kollakube res create bootstrap ceph-bootstrap-initial-mon
+function create_secrets {
+    tools/secret-generator.py create
+    tools/setup-ceph-secrets.sh
+    kollakube res create secret nova-libvirt
+}
 
-pull_containers kolla
-wait_for_pods kolla
+function ceph_setup {
 
-tools/setup-ceph-secrets.sh
-kollakube res delete bootstrap ceph-bootstrap-initial-mon
-kollakube res create pod ceph-mon
+    kollakube res create bootstrap ceph-bootstrap-initial-mon
+    wait_for_containers
 
-wait_for_pods kolla
+    kollakube res delete bootstrap ceph-bootstrap-initial-mon
+    kollakube res create pod ceph-mon
+    kollakube res create pod ceph-bootstrap-osd
+    wait_for_containers
 
-kollakube res create pod ceph-bootstrap-osd
+    kollakube res delete pod ceph-bootstrap-osd
+    kollakube res create pod ceph-osd
+    wait_for_pods kolla
 
-mkdir -p $WORKSPACE/logs/
+    for x in images volumes vms; do
+       kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash \
+       -c "ceph osd pool create $x 64"
+    done
+    str="ceph auth get-or-create client.glance mon 'allow r' osd 'allow"
+    str="$str class-read object_prefix rbd_children, allow rwx pool=images'"
+    kubectl nexec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+       "$str" > /tmp/$$
+    kubectl create secret generic ceph-client-glance-keyring --namespace=kolla\
+       --from-file=ceph.client.glance.keyring=/tmp/$$
 
-pull_containers kolla
-wait_for_pods kolla
+    str="ceph auth get-or-create client.cinder mon 'allow r' osd 'allow"
+    str="$str class-read object_prefix rbd_children, allow rwx pool=volumes'"
+    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+      "$str" > /tmp/$$
+    kubectl create secret generic ceph-client-cinder-keyring --namespace=kolla\
+      --from-file=ceph.client.cinder.keyring=/tmp/$$
+    str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow "
+    str="$str class-read object_prefix rbd_children, allow rwx pool=volumes, "
+    str="$str allow rwx pool=vms, allow rwx pool=images'"
+    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+      "$str" > /tmp/$$
+    kubectl create secret generic ceph-client-nova-keyring --namespace=kolla \
+       --from-file=ceph.client.nova.keyring=/tmp/$$
+    kubectl create secret generic nova-libvirt-bin --namespace=kolla \
+       --from-file=data=<(awk '{if($1 == "key"){print $3}}' /tmp/$$ |
+       tr -d '\n')
+    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
+       "cat /etc/ceph/ceph.conf" > /tmp/$$
+    kubectl create configmap ceph-conf --namespace=kolla \
+       --from-file=ceph.conf=/tmp/$$
 
-kollakube res delete pod ceph-bootstrap-osd
-kollakube res create pod ceph-osd
+    rm -f /tmp/$$
+}
 
-wait_for_pods kolla
+function create_volumes {
+    for x in mariadb rabbitmq glance; do
+       kollakube res create pv $x
+       kollakube res create pvc $x
+    done
+}
 
-for x in images volumes vms; do
-    kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash \
-    -c "ceph osd pool create $x 64"
-done
-str="ceph auth get-or-create client.glance mon 'allow r' osd 'allow"
-str="$str class-read object_prefix rbd_children, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "$str" > /tmp/$$
-kubectl create secret generic ceph-client-glance-keyring --namespace=kolla\
-    --from-file=ceph.client.glance.keyring=/tmp/$$
-str="ceph auth get-or-create client.cinder mon 'allow r' osd 'allow"
-str="$str class-read object_prefix rbd_children, allow rwx pool=volumes'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "$str" > /tmp/$$
-kubectl create secret generic ceph-client-cinder-keyring --namespace=kolla\
-    --from-file=ceph.client.cinder.keyring=/tmp/$$
-str="ceph auth get-or-create client.nova mon 'allow r' osd 'allow "
-str="$str class-read object_prefix rbd_children, allow rwx pool=volumes, "
-str="$str allow rwx pool=vms, allow rwx pool=images'"
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "$str" > /tmp/$$
-kubectl create secret generic ceph-client-nova-keyring --namespace=kolla \
-    --from-file=ceph.client.nova.keyring=/tmp/$$
-kubectl create secret generic nova-libvirt-bin --namespace=kolla \
-    --from-file=data=<(awk '{if($1 == "key"){print $3}}' /tmp/$$ |
-    tr -d '\n')
-kubectl exec ceph-osd -c main --namespace=kolla -- /bin/bash -c \
-    "cat /etc/ceph/ceph.conf" > /tmp/$$
-kubectl create configmap ceph-conf --namespace=kolla \
-    --from-file=ceph.conf=/tmp/$$
-rm -f /tmp/$$
-kollakube res create secret nova-libvirt
+function create_sevices {
+    kollakube res create svc mariadb memcached keystone-admin keystone-public \
+       rabbitmq rabbitmq-management nova-api glance-api glance-registry \
+       neutron-server nova-metadata nova-novncproxy horizon cinder-api
 
-for x in mariadb rabbitmq glance; do
-    kollakube res create pv $x
-    kollakube res create pvc $x
-done
+    kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
+    pull_containers kolla
+    wait_for_pods kolla
+}
 
-kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    rabbitmq rabbitmq-management nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+function run_services {
+    kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
+    kollakube res create pod mariadb memcached rabbitmq
 
-kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
+    wait_for_pods kolla
 
-pull_containers kolla
-wait_for_pods kolla
+    kollakube resource create bootstrap keystone-create-db keystone-endpoints \
+       keystone-manage-db
 
-kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+    pull_containers kolla
+    wait_for_pods kolla
 
-wait_for_pods kolla
+    kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
+       keystone-manage-db
 
-kollakube resource create bootstrap keystone-create-db keystone-endpoints \
-    keystone-manage-db
+    kollakube res create pod keystone
 
-pull_containers kolla
-wait_for_pods kolla
+    wait_for_pods kolla
 
-kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
-    keystone-manage-db
+    kollakube res create bootstrap glance-create-db glance-endpoints \
+       glance-manage-db nova-create-api-db nova-create-endpoints nova-create-db \
+       neutron-create-db neutron-endpoints neutron-manage-db cinder-create-db \
+       cinder-create-endpoints cinder-manage-db
 
-kollakube res create pod keystone
+    pull_containers kolla
+    wait_for_pods kolla
 
-wait_for_pods kolla
+    kollakube res delete bootstrap glance-create-db glance-endpoints \
+       glance-manage-db nova-create-api-db nova-create-endpoints nova-create-db \
+       neutron-create-db neutron-endpoints neutron-manage-db cinder-create-db \
+       cinder-create-endpoints cinder-manage-db
 
-kollakube res create bootstrap glance-create-db glance-endpoints \
-    glance-manage-db nova-create-api-db nova-create-endpoints nova-create-db \
-    neutron-create-db neutron-endpoints neutron-manage-db cinder-create-db \
-    cinder-create-endpoints cinder-manage-db
+    kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
+       glance-registry neutron-server horizon nova-consoleauth nova-novncproxy \
+       cinder-api cinder-scheduler cinder-volume-ceph openvswitch-ovsdb-network \
+       openvswitch-vswitchd-network
 
-pull_containers kolla
-wait_for_pods kolla
+    pull_containers kolla
+    wait_for_pods kolla
 
-kollakube res delete bootstrap glance-create-db glance-endpoints \
-    glance-manage-db nova-create-api-db nova-create-endpoints nova-create-db \
-    neutron-create-db neutron-endpoints neutron-manage-db cinder-create-db \
-    cinder-create-endpoints cinder-manage-db
+    kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
+       neutron-openvswitch-agent-network neutron-metadata-agent-network
 
-kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
-    glance-registry neutron-server horizon nova-consoleauth nova-novncproxy \
-    cinder-api cinder-scheduler cinder-volume-ceph openvswitch-ovsdb-network \
-    openvswitch-vswitchd-network
+    kollakube res create bootstrap openvswitch-set-external-ip
+    kollakube res create pod nova-libvirt
+    kollakube res create pod nova-compute
 
-pull_containers kolla
-wait_for_pods kolla
+    pull_containers kolla
+    wait_for_pods kolla
 
-kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
-    neutron-openvswitch-agent-network neutron-metadata-agent-network
+    kollakube res delete bootstrap openvswitch-set-external-ip
 
-kollakube res create bootstrap openvswitch-set-external-ip
-kollakube res create pod nova-libvirt
-kollakube res create pod nova-compute
+    wait_for_pods kolla
 
-pull_containers kolla
-wait_for_pods kolla
+    kubectl get pods --namespace=kolla
+}
 
-kollakube res delete bootstrap openvswitch-set-external-ip
+function create_configmaps {
+    kollakube res create configmap \
+       mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
+       nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
+       glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
+       neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
+       openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
+       nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
+       nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
+       cinder-scheduler cinder-volume ceph-mon ceph-osd;
+}
 
-wait_for_pods kolla
+function setup_ansible {
+    sudo -H pip install -U "ansible>=2" "docker-py>=1.6.0" "python-openstackclient" "python-neutronclient"
+}
 
-kubectl get pods --namespace=kolla
+function run_gate {
+    mkdir -p $WORKSPACE/logs/
+    wait_for_containers
+
+    if [[ $GATE_TYPE == "ansible" ]]; then
+       setup_ansible
+       KOLLA_KUBERNETES_ANSIBLE_DIR=kolla-kubernetes/workflows/ansible
+       ansible-playbooks -i $KOLLA_KUBERNETES_ANSIBLE_DIR/inventory/all-in-one -e @/etc/kolla-kubernetes/kolla-kubernetes.yml $KOLLA_KUBERNETES_ANSIBLE_DIR/site.yml
+    else
+       create_configmaps
+       create_secrets
+       ceph_setup
+       create_volumes
+       create_services
+       run_services
+    fi
+}
+
+GATE_TYPE=$6
+
+run_gate
