@@ -280,8 +280,40 @@ kolla-kubernetes:
         template: services/glance/glance-bootstrap-job-manage-db.yml.j2
         vars:
           pvc_name: glance
-      - name: glance-endpoints
-        template: services/glance/glance-bootstrap-job-endpoints.yml.j2
+      - name: glance-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: glance
+          service_type: image
+          interface: public
+          service_auth: openstack_glance_auth
+          description: Openstack Image
+          endpoint: glance_public_endpoint
+      - name: glance-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: glance
+          service_type: image
+          interface: internal
+          service_auth: openstack_glance_auth
+          description: Openstack Image
+          endpoint: glance_internal_endpoint
+      - name: glance-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: glance
+          service_type: image
+          interface: admin
+          service_auth: openstack_glance_auth
+          description: Openstack Image
+          endpoint: glance_admin_endpoint
+      - name: glance-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: glance
+          role: admin
+          service_auth: openstack_glance_auth
+          secret: glance-keystone-password
       pod:
       - name: glance-api
         template: services/glance/glance-api-pod.yml.j2
@@ -290,7 +322,7 @@ kolla-kubernetes:
       - name: glance-registry
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: glance_registry_replicas  
+          replicas: glance_registry_replicas
           service_name: glance
           service_type: registry
           service_location: kolla_kubernetes_hostlabel_glance_registry
@@ -395,8 +427,40 @@ kolla-kubernetes:
       bootstrap:
       - name: nova-create-api-db
         template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
-      - name: nova-create-endpoints
-        template: services/nova/nova-control-bootstrap-job-create-nova-endpoints.yml.j2
+      - name: nova-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: public
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_public_endpoint
+      - name: nova-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: internal
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_internal_endpoint
+      - name: nova-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: nova
+          service_type: compute
+          interface: admin
+          service_auth: openstack_nova_auth
+          description: Openstack Compute
+          endpoint: nova_admin_endpoint
+      - name: nova-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: nova
+          role: admin
+          service_auth: openstack_nova_auth
+          secret: nova-keystone-password
       - name: nova-create-db
         template: services/nova/nova-control-bootstrap-job-create-nova-db.yml.j2
       pod:
@@ -550,8 +614,40 @@ kolla-kubernetes:
         template: services/neutron/neutron-bootstrap-job-create-db.yml.j2
       - name: neutron-manage-db
         template: services/neutron/neutron-bootstrap-job-manage-db.yml.j2
-      - name: neutron-endpoints
-        template: services/neutron/neutron-bootstrap-job-endpoints.yml.j2
+      - name: neutron-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: neutron
+          service_type: network
+          interface: public
+          service_auth: openstack_neutron_auth
+          description: Openstack Networking
+          endpoint: neutron_public_endpoint
+      - name: neutron-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: neutron
+          service_type: network
+          interface: internal
+          service_auth: openstack_neutron_auth
+          description: Openstack Block Storage
+          endpoint: neutron_internal_endpoint
+      - name: neutron-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: neutron
+          service_type: network
+          interface: admin
+          service_auth: openstack_neutron_auth
+          description: Openstack Networking
+          endpoint: neutron_admin_endpoint
+      - name: neutron-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: neutron
+          role: admin
+          service_auth: openstack_neutron_auth
+          secret: neutron-keystone-password
       pod:
       - name: neutron-openvswitch-agent-compute
         template: services/neutron/neutron-openvswitch-agent-daemonset.yml.j2
@@ -770,13 +866,45 @@ kolla-kubernetes:
         template: services/cinder/cinder-bootstrap-job-create-db.yml.j2
       - name: cinder-manage-db
         template: services/cinder/cinder-bootstrap-job-manage-db.yml.j2
-      - name: cinder-create-endpoints
-        template: services/cinder/cinder-bootstrap-job-endpoints.yml.j2
+      - name: cinder-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: public
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_public_endpoint
+      - name: cinder-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: internal
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_internal_endpoint
+      - name: cinder-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: cinder
+          service_type: volume
+          interface: admin
+          service_auth: openstack_cinder_auth
+          description: Openstack Block Storage
+          endpoint: cinder_admin_endpoint
+      - name: cinder-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: cinder
+          role: admin
+          service_auth: openstack_cinder_auth
+          secret: cinder-keystone-password
       pod:
       - name: cinder-api
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: cinder_api_replicas  
+          replicas: cinder_api_replicas
           service_name: cinder
           service_type: api
           service_location: kolla_kubernetes_hostlabel_cinder_api
