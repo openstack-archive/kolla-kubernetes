@@ -1,0 +1,10 @@
+---
+- name: Starting Horizon replication controller
+  command: kollakube resource create pod horizon
+
+- name: Checking if Horizon is running
+  command: kubectl get -o json pod horizon --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4

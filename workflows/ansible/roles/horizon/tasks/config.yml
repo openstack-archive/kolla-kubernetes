@@ -1,0 +1,11 @@
+---
+- name: Check if Horizon config directory exists
+  stat: path=/etc/kolla/horizon
+  register: result
+  failed_when: result.stat.isdir is not defined
+
+- name: Creat Horizon configmap
+  command: kollakube resource create configmap horizon
+
+- name: Creating Horizon svc 
+  command: kollakube resource create svc horizon

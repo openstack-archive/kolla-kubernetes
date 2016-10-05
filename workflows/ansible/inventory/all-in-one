@@ -15,3 +15,6 @@ control
 
 [glance-registry:children]
 control
+
+[horizon:children]
+control

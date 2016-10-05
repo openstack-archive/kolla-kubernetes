@@ -3,6 +3,7 @@
 enable_mariadb: "no"
 enable_rabbitmq: "no"
 enable_keystone: "no"
-enable_glance: "yes"
+enable_glance: "no"
+enable_horizon: "yes"
 
 # Additional optional OpenStack features and services are specified here
