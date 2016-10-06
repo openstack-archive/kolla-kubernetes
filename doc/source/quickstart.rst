@@ -47,29 +47,32 @@ following labels::
     kolla_controller=true
 
 Label you current node::
+
     ALLINONENODE=$(hostname)
     kubectl label node $ALLINONENODE kolla_compute=true
     kubectl label node $ALLINONENODE kolla_controller=true
 
 Alternately, you can override the default labeling used in the
-kolla-kubernetes.yml file. It is also possible to target specific
+``kolla-kubernetes.yml`` file. It is also possible to target specific
 services to specific pools of nodes with this mechanism.
 
 Setting Kubernetes Namespace
 =============================
 
-Create the kubernetes namespace. By default it is 'kolla'.
+Create the kubernetes namespace. By default it is ``kolla``.
 
 ::
+
     kubectl create namespace 'kolla'
 
 When the namespace is created, each kubectl command executed against
-the namespace requires adding --namespace=kolla keyword. The following
+the namespace requires adding ``--namespace=kolla`` keyword. The following
 sequence of commands allow setting up the default kubectl context
 with the right namespace and URL to kube-apiserver thus minimizing
 amount of typing one needs to do.
 
 ::
+
     kubectl config set-context kolla --namespace=kolla
     # X.X.X.X ip address of kubernetes api server
     kubectl config set-cluster kolla --server=http://X.X.X.X:8080
@@ -80,9 +83,9 @@ Generating Kubernetes Secrets
 =============================
 
 Before using this script, you MUST generate passwords by using
-generate_passwords.py (comes with kolla distribution), if there is no
-password.yml at /etc/kolla, the script will generate an error.
-Script accepts 1 parameter: "create" or "delete".
+``generate_passwords.py`` (comes with kolla distribution), if there is no
+``password.yml`` at ``/etc/kolla``, the script will generate an error.
+Script accepts 1 parameter: ``create`` or ``delete``.
 
 ::
 
@@ -94,10 +97,10 @@ Script accepts 1 parameter: "create" or "delete".
 Resolv.conf Workaround
 ======================
 
-Kubernetes uses service discovery for all pods including the net=host pods.
-In the net=host pods, resolv.conf doesn't point at kube-dns. Kolla-kubernetes
+Kubernetes uses service discovery for all pods including the ``net=host`` pods.
+In the ``net=host`` pods, ``resolv.conf`` doesn't point at kube-dns. Kolla-kubernetes
 provides a workaround by creating a configmap called resolv-conf with a
-resolv.conf from a non net=host pod so that dns properly resolves.
+``resolv.conf`` from a non ``net=host`` pod so that dns properly resolves.
 
 Create the resolv.conf configmap::
 
@@ -248,6 +251,7 @@ If you want to access the horizon website, fetch the admin password from
 within the toolbox like:
 
 ::
+
     grep keystone_admin /etc/kolla/passwords.yml
 
 .. NOTE:: petsets currently arn't deleted on delete. The resources for it will
