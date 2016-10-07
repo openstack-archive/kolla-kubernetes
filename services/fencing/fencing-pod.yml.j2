@@ -1,0 +1,94 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: fencing
+   namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  replicas: {{ fencing_replicas | default(1) }}
+  template:
+    metadata:
+      labels:
+        service: fencing
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
+
+      containers:
+        - name: main
+          image: "192.168.80.240:4000/kolla/centos-source-kubetoolbox:3.0.0"
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+            - mountPath: /tmp
+              name: pod-tmp
+          command: [
+             "sh","-c","
+{%- if storage_ceph['secretName'] is defined %}
+              modprobe rbd;
+              mkdir -p /etc/ceph;
+              echo $CEPH_PASSWORD >> {{ storage_ceph['keyring']  }};
+{% endif %}
+{%- if ipmi_secret is defined %}
+{% endif %}
+              while true; do
+                 kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type==\"Ready\" and .status==\"True\")) | .metadata.name' > /tmp/ready-node-names;
+                 for node in `cat /tmp/ready-node-names`;
+                 do
+                    rm -f /tmp/$node;
+                 done;
+                 echo 'Collecting currently NotReady nodes';
+                 kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type==\"Ready\" and .status!=\"True\")) | .metadata.name' > /tmp/notready-node-names;
+                 for node in `cat /tmp/notready-node-names`;
+                 do
+                   if [ ! -e '/tmp/'$node ]; then
+                      echo $node' - just has become NotReady, adding it to notready list';
+                      touch /tmp/$node;
+{%- if storage_ceph['secretName'] is defined %}
+{% endif %}
+{%- if ipmi_secret is defined %}
+{% endif %}
+                   fi;
+                 done;
+                 if [ $(wc -l < /tmp/notready-node-names) -gt 0 ]; then
+                    echo "There is a node in NotReady state, let's check for Terminating pods"
+                    kubectl get pods --namespace={{ kolla_kubernetes_namespace  }} | grep Terminating | awk '{print $1}' > /tmp/pods-names;
+                    while read pod; do
+                      echo 'Killing '$pod' since it is in Terminating state';
+                      kubectl delete pods $pod --now --namespace={{ kolla_kubernetes_namespace }};
+                    done < /tmp/pods-names;
+                 fi;
+                 echo  'Now sleep';
+                 sleep 5;
+              done;
+             "]
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+{%- if ipmi_secret is defined %}
+            - name: IPMI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ ipmiSecret }}
+                  key: password
+{% endif %}
+{%- if storage_ceph['secretName'] is defined %}
+            - name: CEPH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ storage_ceph['secretName']  }}
+                  key: key
+{% endif %}
+
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: service-configmap
+          configMap:
+            name: fencing
+        - name: pod-tmp
+          emptyDir: {}
