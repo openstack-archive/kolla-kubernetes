@@ -1029,3 +1029,28 @@ kolla-kubernetes:
       pod:
       - name: keepalived
         template: services/keepalived/keepalived-daemonset.yml.j2
+  - name: fencing
+    pods:
+    - name: fencing
+      containers:
+      - name: fencing
+    - name: fencing
+      containers:
+      - name: fencing
+    resources:
+      configmap:
+      - name: fencing
+        template: services/fencing/fencing-configmap.yml.j2
+      secret:
+      - name: fencing-ceph
+        template: services/fencing/ceph-secret.yml.j2
+      - name: fencing-impi 
+        template: services/fencing/ipmi-secret.yml.j2
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
+      - name: fencing
+        template: services/fencing/fencing-pod.yml.j2
