@@ -1,0 +1,135 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: fencing
+   namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  replicas: {{ fencing_replicas | default(1) }}
+  template:
+    metadata:
+      labels:
+        service: fencing
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_controller %}
+          {{ selector.key }}: {{ selector.value }}
+
+      containers:
+        - name: main
+          image: "{{ kubetoolbox_image_full }}"
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+            - mountPath: /tmp
+              name: pod-tmp
+          command: [
+             "sh","-c","
+{%- if storage_ceph['secretName'] is defined %}
+              mkdir -p /tmp/ceph;
+              touch /tmp/ceph/ceph.keyring;
+              echo '[client.admin]' >> /tmp/ceph/ceph.keyring;
+              echo 'key = '$CEPH_PASSWORD >> /tmp/ceph/ceph.keyring;
+              touch /tmp/ceph/ceph.conf;
+              echo '[global]' >> /tmp/ceph/ceph.conf;
+              echo 'auth cluster required = cephx' >> /tmp/ceph/ceph.conf;
+              echo 'auth service required = cephx' >> /tmp/ceph/ceph.conf;
+              echo 'auth client required = cephx' >> /tmp/ceph/ceph.conf;
+              echo 'mon_host = {%- for monitor in storage_ceph['monitors'] %} {{ monitor }} {% if not loop.last %},{% endif %}{% endfor %}' >> /tmp/ceph/ceph.conf;
+{% endif %}
+{%- if ipmi_secret is defined %}
+              echo 'IPMI is configured with username - '$IPMIPUSER' and password - '$IPMIPASS;
+{% endif %}
+              while true; do
+                 kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type==\"Ready\" and .status==\"True\")) | .metadata.name' > /tmp/ready-node-names; 
+                 for ready_node in `cat /tmp/ready-node-names`;
+                 do
+                    rm -f /tmp/$ready_node;
+                 done;
+                 kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type==\"Ready\" and .status!=\"True\")) | .metadata.name' > /tmp/notready-node-names;
+                 for notready_node in `cat /tmp/notready-node-names`;
+                 do
+                   if [ ! -e '/tmp/'$notready_node ]; then
+                      echo $notready_node' - just has become NotReady, adding it to notready list';
+                      touch /tmp/$notready_node;
+{%- if ipmi_secret is defined %}
+                      host_original=$notready_node;
+                      host_name=${host_original%%.*};
+                      host_suffics=${host_original#$host_name};
+                      host_ipmi=$host_name'-ipmi'$host_suffics;
+                      echo 'Killing power for - '$host_ipmi;
+                      ipmitool -H $host_ipmi -v -I lanplus -U $IPMIUSER -P $IPMIPASS chassis power off;
+                      if [ $? != 0 ]; then
+                         echo 'Failure to power off node - '$host_ipmi' error code -'$?;
+                         continue;
+                      else
+                         echo 'Node - '$host_ipmi' has been powered off';
+                      fi;
+{% endif %}
+{%- if storage_ceph['secretName'] is defined %}
+                      rbd --pool {{ storage_ceph['pool'] }} --conf /tmp/ceph/ceph.conf --keyring /tmp/ceph/ceph.keyring  ls >> /tmp/ceph/volumes;
+                      echo 'Checking volumes on the ceph cluster if failed node - ' $notready_node ' has kept lock for any'; 
+                      for volume in `cat /tmp/ceph/volumes`;
+                      do
+                        id=$(rbd --pool {{ storage_ceph['pool'] }} --conf /tmp/ceph/ceph.conf --keyring /tmp/ceph/ceph.keyring  lock ls $volume | grep client | awk '{print $2}');
+                        client=$(rbd --pool {{ storage_ceph['pool'] }} --conf /tmp/ceph/ceph.conf --keyring /tmp/ceph/ceph.keyring  lock ls $volume | grep client | awk '{print $1}');
+                        if [ $id != '' ]; then
+                           host_name=${id/#kubelet_lock_magic_/};
+                           echo 'Checking '$volume '---'$id' - '$client' - '$host_name' - '$notready_node;
+                           if [ $notready_node == $host_name ]; then
+                              echo 'Found lock held by failed node - '$notready_node;
+                              rbd --pool {{ storage_ceph['pool'] }} --conf /tmp/ceph/ceph.conf --keyring /tmp/ceph/ceph.keyring  lock remove $volume $id $client;
+                           else
+                              echo 'Mismatch between failed node name - '$notready_node' and locker id - '$host_name;
+                           fi;
+                        else
+                           echo 'Volume - '$volume' not locked by any node '$id' '$client;
+                        fi;
+                      done;
+{% endif %}
+                   fi;
+                 done;
+                 if [ $(wc -l < /tmp/notready-node-names) -gt 0 ]; then
+                    kubectl get pods --namespace={{ kolla_kubernetes_namespace  }} | grep Terminating | awk '{print $1}' > /tmp/pods-names;
+                    while read pod; do
+                      echo 'Killing '$pod' since it is in Terminating state';
+                      kubectl delete pods $pod --now --namespace={{ kolla_kubernetes_namespace }};
+                    done < /tmp/pods-names;
+                 fi;
+                 sleep 1;
+              done;
+             "]
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+{%- if ipmi_secret is defined %}
+            - name: IPMIUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ ipmi_secret }}
+                  key: user
+            - name: IPMIPASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ ipmi_secret }}
+                  key: password
+{% endif %}
+{%- if storage_ceph['secretName'] is defined %}
+            - name: CEPH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ storage_ceph['secretName'] }}
+                  key: key
+{% endif %}
+
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: service-configmap
+          configMap:
+            name: fencing
+        - name: pod-tmp
+          emptyDir: {}
