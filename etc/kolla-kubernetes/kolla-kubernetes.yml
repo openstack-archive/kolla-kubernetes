@@ -73,6 +73,12 @@ enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
 
 #################################
+# Fencing related variables
+#################################
+ipmi_secret: "ipmi-secret"
+ipmi_user: "admin"
+ipmi_password: "ipmipass"
+#################################
 # Kubernetes Cluster DNS setting
 #################################
 dns_replicas: "1"
@@ -115,12 +121,11 @@ storage_ceph:
   #
   # List of ceph monitor nodes
   monitors:
-  - x.x.x.x
-  - y.y.y.y
+  - 10.57.121.10 
   # Default ceph user for authenticated access
   user: admin
   # The default pool to locate ceph volumes
-  pool: rbd
+  pool: volumes
   # Default user to use in order to run remote SSH commands
   #   e.g. kolla-kubernetes may execute:
   #        ssh root@ceph-mon rbd create pool/resourceName --size 1024
@@ -267,3 +272,4 @@ log_disable:
 - iscsi-tgtd
 - elasticsearch
 - keepalived
+- fencing
