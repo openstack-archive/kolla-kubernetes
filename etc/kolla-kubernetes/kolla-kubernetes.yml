@@ -73,6 +73,10 @@ enable_openvswitch_tcp: "no"
 enable_libvirt_tcp: "no"
 
 #################################
+# Fencing related variables
+#################################
+#ipmi_secret:
+#################################
 # Kubernetes Cluster DNS setting
 #################################
 dns_replicas: "1"
@@ -261,3 +265,4 @@ log_disable:
 - iscsi-tgtd
 - elasticsearch
 - keepalived
+- fencing
