@@ -252,10 +252,7 @@ class ResourceTemplate(ResourceBase):
         elif multi:
             print(yaml.safe_dump(multidoc))
         else:
-            if args.debug_container is not None:
-                print(yaml.safe_dump(res), end="")
-            else:
-                print(raw_doc, end="")
+            print(yaml.safe_dump(res), end="")
 
 
 class Template(ResourceTemplate):
