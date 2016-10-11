@@ -1,0 +1,45 @@
+---
+- name: Bootstrapping Nova
+  command: kollakube resource create bootstrap nova-create-api-db nova-create-endpoints nova-create-db
+
+- name: Waiting for the nova-create-api-db to complete
+  command: kubectl get jobs nova-create-api-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="nova-create-api-db bootstrap job failed. Check the logs of the nova-create-api-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the nova-create-endpoints to complete
+  command: kubectl get jobs nova-create-endpoints -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="nova-create-endpoints bootstrap job failed. Check the logs of the nova-create-endpoints container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the nova-create-db to complete
+  command: kubectl get jobs nova-create-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="nova-create-db bootstrap job failed. Check the logs of the nova-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Nova Bootstrap pods
+  command: kollakube resource delete bootstrap nova-create-api-db nova-create-endpoints nova-create-db
