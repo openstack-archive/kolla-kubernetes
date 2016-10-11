@@ -1,0 +1,22 @@
+---
+- name: Checking if Nova config directory exists
+  stat: path={{ item }}
+  register: result
+  failed_when: result.stat.exists != true
+  with_items:
+    - /etc/kolla/nova-api
+    - /etc/kolla/nova-compute
+    - /etc/kolla/nova-compute-ironic
+    - /etc/kolla/nova-conductor
+    - /etc/kolla/nova-consoleauth
+    - /etc/kolla/nova-libvirt
+    - /etc/kolla/nova-novncproxy
+    - /etc/kolla/nova-scheduler
+    - /etc/kolla/nova-spicehtml5proxy
+    - /etc/kolla/nova-ssh
+
+- name: Creating Nova configmap
+  command: kollakube resource create configmap nova-api nova-conductor nova-scheduler
+
+- name: Creating Nova svc
+  command: kollakube resource create svc nova-api nova-metadata nova-novncproxy

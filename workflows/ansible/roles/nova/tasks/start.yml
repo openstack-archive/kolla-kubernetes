@@ -1,0 +1,29 @@
+---
+- name: Creating nova-libvirt pod
+  command: kollakube resource create pod nova-libvirt
+
+- name: Creating nova-compute pod
+  command: kollakube resource create pod nova-compute
+
+- name: Checking if nova-libvirt pod is running
+  command: kubectl get pod nava-libvirt -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="nova-libvirt failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if nova-compute pod is running
+  command: kubectl get pod nova-compute -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="nova-compute failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
