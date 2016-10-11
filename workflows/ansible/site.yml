@@ -20,3 +20,8 @@
   roles:
     - { role: glance,
         when: enable_glance | bool }
+
+- hosts: nova
+  roles:
+    - { role: nova,
+        when: enable_nova | bool }

@@ -15,3 +15,6 @@ control
 
 [glance-api:children]
 control
+
+[nova:children]
+control
