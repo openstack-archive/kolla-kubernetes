@@ -1,0 +1,41 @@
+---
+- name: Bootstrapping Nova
+  command: >
+    kollakube resource create bootstrap
+    nova-create-api-db
+    nova-create-keystone-endpoint-public
+    nova-create-keystone-endpoint-internal
+    nova-create-keystone-endpoint-admin
+    nova-create-keystone-user
+    nova-create-db
+
+- name: Waiting for bootstrap resource to complete
+  command: kubectl get jobs "{{ item }}" -o json --namespace {{ kolla_kubernetes_namespace }}
+  with_items:
+    - nova-create-api-db
+    - nova-create-keystone-endpoint-public
+    - nova-create-keystone-endpoint-internal
+    - nova-create-keystone-endpoint-admin
+    - nova-create-keystone-user
+    - nova-create-db
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- name: The bootstrap resource job failed
+  fail: msg="{{ item.cmd }} bootstrap job failed. Check the logs of the nova-create-api-db container."
+  when: "{{ (item.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Nova Bootstrap pods
+  command: >
+    kollakube resource delete bootstrap
+    nova-create-api-db
+    nova-create-keystone-endpoint-public
+    nova-create-keystone-endpoint-internal
+    nova-create-keystone-endpoint-admin
+    nova-create-keystone-user
+    nova-create-db
