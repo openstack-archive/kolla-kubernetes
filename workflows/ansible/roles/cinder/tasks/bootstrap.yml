@@ -1,0 +1,45 @@
+---
+- name: Bootstrapping Cinder
+  command: kollakube resource create bootstrap cinder-create-db cinder-endpoints cinder-manage-db
+
+- name: Waiting for the cinder-create-db to complete
+  command: kubectl get jobs cinder-create-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="cinder-create-db bootstrap job failed. Check the logs of the cinder-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the cinder-manage-db to complete
+  command: kubectl get jobs cinder-manage-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="cinder-manage-db bootstrap job failed. Check the logs of the cinder-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the cinder-endpoints to complete
+  command: kubectl get jobs cinder-endpoints -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="cinder-endpoints bootstrap job failed. Check the logs of the cinder-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Cinder Bootstrap pods
+  command: kollakube resource delete bootstrap cinder-create-db cinder-endpoints cinder-manage-db

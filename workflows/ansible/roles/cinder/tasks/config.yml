@@ -1,0 +1,23 @@
+---
+- name: Checking if Cinder API config directory exists
+  stat: path=/etc/kolla/cinder-api
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Cinder Backup config directory exists
+  stat: path=/etc/kolla/cinder-backup
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Cinder Volume config directory exists
+  stat: path=/etc/kolla/cinder-volume
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Cinder Scheduler config directory exists
+  stat: path=/etc/kolla/cinder-scheduler
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating Cinder configmap
+  command: kollakube resource create configmap cinder-api-haproxy cinder-api cinder-backup cinder-scheduler cinder-volume
