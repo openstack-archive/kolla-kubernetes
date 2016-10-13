@@ -1,0 +1,94 @@
+---
+- name: Starting Neutron Server deployments
+  command: kollakube resource create pod neutron-server
+
+- name: Checking if Neutron Server service is running
+  command: kubectl get deployment neutron-server -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron Server failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Starting Neutron DHCP agent deployments
+  command: kollakube resource create pod neutron-dhcp-agent
+
+- name: Checking if Neutron DHCP service is running
+  command: kubectl get deployment neutron-dhcp-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron DHCP agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron L3 service is running
+  command: kubectl get deployment neutron-l3-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron L3 agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron LBaaS service is running
+  command: kubectl get deployment neutron-lbaas-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron LBaaS agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron LinuxBridge service is running
+  command: kubectl get deployment neutron-linuxbridge-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron LinuxBridge agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron Metadata service is running
+  command: kubectl get deployment neutron-metadata-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron Metadata agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron OpenVSwitch service is running
+  command: kubectl get deployment neutron-openvswitch-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron VPNaaS agent failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Checking if Neutron VPNaaS service is running
+  command: kubectl get deployment neutron-vpnaas-agent -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Neutron VPNaaS failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"

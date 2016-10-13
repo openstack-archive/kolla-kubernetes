@@ -1,0 +1,45 @@
+---
+- name: Bootstrapping Neutron
+  command: kollakube resource create bootstrap neutron-create-db neutron-endpoints neutron-manage-db
+
+- name: Waiting for the neutron-create-db to complete
+  command: kubectl get jobs neutron-create-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="neutron-create-db bootstrap job failed. Check the logs of the neutron-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the neutron-manage-db to complete
+  command: kubectl get jobs neutron-manage-db -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="neutron-manage-db bootstrap job failed. Check the logs of the neutron-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Waiting for the neutron-endpoints to complete
+  command: kubectl get jobs neutron-endpoints -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until:
+    - "{{ (result.stdout | from_json).status.succeeded is defined }}"
+    - "{{ (result.stdout | from_json).status.succeeded }} == 1"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="neutron-endpoints bootstrap job failed. Check the logs of the neutron-create-db container."
+  when: "{{ (result.stdout | from_json).status.succeeded is undefined }}"
+
+- name: Cleanup Neutron Bootstrap pods
+  command: kollakube resource delete bootstrap neutron-create-db neutron-endpoints neutron-manage-db

@@ -4,5 +4,6 @@ enable_mariadb: "no"
 enable_rabbitmq: "no"
 enable_keystone: "no"
 enable_glance: "yes"
+enable_neutron: "yes"
 
 # Additional optional OpenStack features and services are specified here

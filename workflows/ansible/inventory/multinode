@@ -15,3 +15,27 @@ control
 
 [glance-api:children]
 control
+
+[neutron-server:children]
+control
+
+[neutron-dhcp-agent:children]
+control
+
+[neutron-l3-agent:children]
+control
+
+[neutron-lbaas-agent:children]
+control
+
+[neutron-linuxbridge-agent:children]
+control
+
+[neutron-metadata-agent:children]
+control
+
+[neutron-openvswitch-agent:children]
+control
+
+[neutron-vpnaas-agent:children]
+control

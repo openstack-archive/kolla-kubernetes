@@ -1,0 +1,44 @@
+---
+- name: Checking if Neutron Server config directory exists
+  stat: path=/etc/kolla/neutron-server
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron DHCP agent config directory exists
+  stat: path=/etc/kolla/neutron-dhcp-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron L3 agent config directory exists
+  stat: path=/etc/kolla/neutron-l3-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron LBAAS agent config directory exists
+  stat: path=/etc/kolla/neutron-lbaas-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron Linux Bridge agent config directory exists
+  stat: path=/etc/kolla/neutron-linuxbridge-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron Metadata agent config directory exists
+  stat: path=/etc/kolla/neutron-metadata-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron OpenVSwitch agent config directory exists
+  stat: path=/etc/kolla/neutron-openvswitch-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Checking if Neutron VPNaaS agent config directory exists
+  stat: path=/etc/kolla/neutron-vpnaas-agent
+  register: result
+  failed_when: result.stat.exists != true
+
+- name: Creating Neutron configmap
+  command: kollakube resource create configmap neutron-server-haproxy neutron-dhcp-agent neutron-server >
+    neutron-l3-agent neutron-lbaas-agent neutron-linuxbridge-agent neutron-metadata-agent neutron-openvswitch-agent neutron-vpnaas-agent
