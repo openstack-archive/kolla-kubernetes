@@ -20,3 +20,13 @@
   roles:
     - { role: glance,
         when: enable_glance | bool }
+
+- hosts:
+    - neutron-server
+    - neutron-dhcp-agent
+    - neutron-l3-agent
+    - neutron-metadata-agent
+    - neutron-openvswitch-agent
+  roles:
+    - { role: neutron,
+        when: enable_neutron | bool }
