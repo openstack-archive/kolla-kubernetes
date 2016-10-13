@@ -15,3 +15,18 @@ control
 
 [glance-registry:children]
 control
+
+[horizon:children]
+control
+
+[cinder-api:children]
+control
+
+[cinder-volume:children]
+control
+
+[cinder-scheduler:children]
+control
+
+[cinder-backup:children]
+control

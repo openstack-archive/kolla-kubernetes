@@ -1,0 +1,56 @@
+---
+- name: Starting Cinder API deployments
+  command: kollakube resource create pod cinder-api
+
+- name: Checking if Cinder API service is running
+  command: kubectl get deployment cinder-api -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Cinder API failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Starting Cinder Volume deployments
+  command: kollakube resource create pod cinder-volume
+
+- name: Checking if Cinder Volume service is running
+  command: kubectl get deployment cinder-volume -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Cinder Volume failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Starting Cinder Schduler deployments
+  command: kollakube resource create pod cinder-scheduler
+
+- name: Checking if Cinder Scheduler service is running
+  command: kubectl get deployment cinder-scheduler -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Cinder Scheduler failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"
+
+- name: Starting Cinder Backup deployments
+  command: kollakube resource create pod cinder-backup
+
+- name: Checking if Cinder Backup service is running
+  command: kubectl get deployment cinder-backup -o json --namespace {{ kolla_kubernetes_namespace }}
+  register: result
+  until: "{{ (result.stdout | from_json).status.replicas == 1 }}"
+  retries: 10
+  delay: 4
+  ignore_errors: True
+
+- fail: msg="Cinder Backup failed to start."
+  when: "{{ (result.stdout | from_json).status.replicas != 1 }}"

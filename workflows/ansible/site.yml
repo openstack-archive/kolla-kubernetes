@@ -20,3 +20,12 @@
   roles:
     - { role: glance,
         when: enable_glance | bool }
+
+- hosts:
+    - cinder-api
+    - cinder-volume
+    - cinder-scheduler
+    - cinder-backup
+  roles:
+    - { role: cinder,
+        when: enable_cinder | bool }
