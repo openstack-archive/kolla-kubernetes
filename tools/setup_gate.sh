@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+#FIXME trivial change to test the gate...
+
 function pull_containers {
     set +x
     #Watch all images get pulled.
