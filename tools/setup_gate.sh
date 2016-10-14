@@ -133,7 +133,7 @@ function trap_error {
             $WORKSPACE/logs/virsh-secret-list.txt
         echo $NAME | grep libvirt > /dev/null && \
         kubectl exec $NAME -c main --namespace $NAMESPACE \
-            -- /bin/bash -c "more /var/log/libvirt/qemu/* | cat" > \
+            -- /bin/bash -c "cat /var/log/libvirt/qemu/*" > \
             $WORKSPACE/logs/libvirt-vm-logs.txt
         kubectl exec $NAME -c main --namespace $NAMESPACE \
             -- /bin/bash -c "cat /var/log/kolla/*/*.log" > \
@@ -248,6 +248,7 @@ popd
 pip install -r requirements.txt
 pip install .
 
+crudini --set /etc/kolla/nova-compute/nova.conf cinder catalog_info volumev2:cinderv2:internalURL
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_user nova
 UUID=$(awk '{if($1 == "rbd_secret_uuid:"){print $2}}' /etc/kolla/passwords.yml)

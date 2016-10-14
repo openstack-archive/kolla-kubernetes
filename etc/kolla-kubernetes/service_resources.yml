@@ -917,7 +917,7 @@ kolla-kubernetes:
           interface: public
           service_auth: openstack_cinder_auth
           description: Openstack Block Storage
-          endpoint: cinder_public_endpoint
+          endpoint: cinder_public_endpointv2
           postfix: v2
       - name: cinder-create-keystone-endpoint-internalv2
         template: services/common/common-create-keystone-endpoint.yml.j2
@@ -927,7 +927,7 @@ kolla-kubernetes:
           interface: internal
           service_auth: openstack_cinder_auth
           description: Openstack Block Storage
-          endpoint: cinder_internal_endpoint
+          endpoint: cinder_internal_endpointv2
           postfix: v2
       - name: cinder-create-keystone-endpoint-adminv2
         template: services/common/common-create-keystone-endpoint.yml.j2
@@ -937,7 +937,7 @@ kolla-kubernetes:
           interface: admin
           service_auth: openstack_cinder_auth
           description: Openstack Block Storage
-          endpoint: cinder_admin_endpoint
+          endpoint: cinder_admin_endpointv2
           postfix: v2
       - name: cinder-create-keystone-user
         template: services/common/common-create-keystone-user.yml.j2
