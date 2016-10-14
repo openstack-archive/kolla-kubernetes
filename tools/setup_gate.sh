@@ -697,6 +697,7 @@ ssh_to_vm $FIP "/tmp/script"
 
 openstack server remove volume test test
 wait_for_cinder test in-use
+wait_for_cinder test detaching
 openstack server add volume test2 test
 wait_for_cinder test available
 
