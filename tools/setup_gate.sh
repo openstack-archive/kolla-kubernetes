@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+#FIXME trivial change to test the gate...
+
 function pull_containers {
     set +x
     #Watch all images get pulled.
@@ -133,7 +135,7 @@ function trap_error {
             $WORKSPACE/logs/virsh-secret-list.txt
         echo $NAME | grep libvirt > /dev/null && \
         kubectl exec $NAME -c main --namespace $NAMESPACE \
-            -- /bin/bash -c "more /var/log/libvirt/qemu/* | cat" > \
+            -- /bin/bash -c "cat /var/log/libvirt/qemu/*" > \
             $WORKSPACE/logs/libvirt-vm-logs.txt
         kubectl exec $NAME -c main --namespace $NAMESPACE \
             -- /bin/bash -c "cat /var/log/kolla/*/*.log" > \
