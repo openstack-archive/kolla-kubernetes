@@ -31,7 +31,7 @@ function wait_for_pods {
         sleep 1
         now=$(date +%s)
         [ $now -gt $end ] && echo containers failed to start. && \
-            kubectl get pods --namespace $1 && trap_error
+            kubectl get pods --namespace $1 && exit -1
     done
     set -x
 }
@@ -47,169 +47,20 @@ function wait_for_ceph_bootstrap {
         sleep 1
         now=$(date +%s)
         [ $now -gt $end ] && echo containers failed to start. && \
-            kubectl get pods --namespace $1 && trap_error
+            kubectl get pods --namespace $1 && exit -1
     done
-}
-
-function wait_for_vm {
-    set +x
-    count=0
-    while true; do
-        val=$(openstack server show $1 -f value -c OS-EXT-STS:vm_state)
-        [ $val == "active" ] && break
-        [ $val == "error" ] && openstack server show $1 && trap_error
-        sleep 1;
-        count=$((count+1))
-        [ $count -gt 30 ] && trap_error
-    done
-    set -x
-}
-
-function wait_for_vm_ssh {
-    set +ex
-    count=0
-    while true; do
-        sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
-            StrictHostKeyChecking=no cirros@$1 echo > /dev/null
-        [ $? -eq 0 ] && break
-        sleep 1;
-        count=$((count+1))
-        [ $count -gt 30 ] && echo failed to ssh. && trap_error
-    done
-    set -ex
-}
-
-function scp_to_vm {
-    sshpass -p 'cubswin:)' scp -o UserKnownHostsFile=/dev/null -o \
-        StrictHostKeyChecking=no "$2" cirros@$1:"$3"
-}
-
-function scp_from_vm {
-    sshpass -p 'cubswin:)' scp -o UserKnownHostsFile=/dev/null -o \
-        StrictHostKeyChecking=no cirros@$1:"$2" "$3"
-}
-
-function ssh_to_vm {
-    sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
-        StrictHostKeyChecking=no cirros@$1 "$2"
-}
-
-function wait_for_cinder {
-    count=0
-    while true; do
-        st=$(openstack volume show $1 -f value -c status)
-        [ $st != "$2" ] && break
-        sleep 1
-        count=$((count+1))
-        [ $count -gt 30 ] && echo Cinder volume failed. && trap_error
-    done
-}
-
-function trap_error {
-    set +xe
-    mkdir -p $WORKSPACE/logs/pods
-    mkdir -p $WORKSPACE/logs/svc
-    mkdir -p $WORKSPACE/logs/ceph
-    mkdir -p $WORKSPACE/logs/openstack
-    sudo cp /var/log/messages $WORKSPACE/logs
-    sudo cp /var/log/syslog $WORKSPACE/logs
-    sudo cp -a /etc/kubernetes $WORKSPACE/logs
-    sudo chmod 777 --recursive $WORKSPACE/logs/*
-    kubectl get nodes -o yaml > $WORKSPACE/logs/nodes.yaml
-    kubectl get pods --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
-    kubectl get jobs --all-namespaces -o yaml > $WORKSPACE/logs/jobs.yaml
-    kubectl get svc --all-namespaces -o yaml > $WORKSPACE/logs/svc.yaml
-    kubectl get deployments --all-namespaces -o yaml > \
-        $WORKSPACE/logs/deployments.yaml
-    kubectl describe node $(hostname -s) > $WORKSPACE/logs/node.txt
-    kubectl get pods --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
-    kubectl get pods --all-namespaces -o json | jq -r \
-        '.items[].metadata | .namespace + " " + .name' | while read line; do
-        NAMESPACE=$(echo $line | awk '{print $1}')
-        NAME=$(echo $line | awk '{print $2}')
-        echo $NAME | grep libvirt > /dev/null && \
-        kubectl exec $NAME -c main --namespace $NAMESPACE \
-            -- /bin/bash -c "virsh secret-list" > \
-            $WORKSPACE/logs/virsh-secret-list.txt
-        echo $NAME | grep libvirt > /dev/null && \
-        kubectl exec $NAME -c main --namespace $NAMESPACE \
-            -- /bin/bash -c "more /var/log/libvirt/qemu/* | cat" > \
-            $WORKSPACE/logs/libvirt-vm-logs.txt
-        kubectl exec $NAME -c main --namespace $NAMESPACE \
-            -- /bin/bash -c "cat /var/log/kolla/*/*.log" > \
-            $WORKSPACE/logs/openstack/$NAMESPACE-$NAME.txt
-        kubectl describe pod $NAME --namespace $NAMESPACE > \
-            $WORKSPACE/logs/pods/$NAMESPACE-$NAME.txt
-        kubectl get pod $NAME --namespace $NAMESPACE -o json | jq -r \
-            ".spec.containers[].name" | while read CON; do
-            kubectl logs $NAME -c $CON --namespace $NAMESPACE > \
-                $WORKSPACE/logs/pods/$NAMESPACE-$NAME-$CON.txt
-        done
-    done
-    kubectl get svc -o json --all-namespaces | jq -r \
-        '.items[].metadata | .namespace + " " + .name' | while read line; do
-        NAMESPACE=$(echo $line | awk '{print $1}')
-        NAME=$(echo $line | awk '{print $2}')
-        kubectl describe svc $NAME --namespace $NAMESPACE > \
-            $WORKSPACE/logs/svc/$NAMESPACE-$NAME.txt
-    done
-    sudo iptables-save > $WORKSPACE/logs/iptables.txt
-    sudo ip a > $WORKSPACE/logs/ip.txt
-    sudo route -n > $WORKSPACE/logs/routes.txt
-    cp /etc/kolla/passwords.yml $WORKSPACE/logs/
-    kubectl get pods -l system=openvswitch-vswitchd-network --namespace=kolla \
-        | while read line; do
-        kubectl logs $line --namespace=kolla -c initialize-ovs-vswitchd >> \
-            $WORKSPACE/logs/ovs-init.txt
-    done
-    openstack catalog list > $WORKSPACE/logs/openstack-catalog.txt
-    str="timeout 6s ceph -s"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
-    sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet.txt
-    str="timeout 6s ceph pg 1.1 query"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
-        > $WORKSPACE/logs/ceph/pg1.1.txt
-    str="timeout 6s ceph osd tree"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
-        > $WORKSPACE/logs/ceph/osdtree.txt
-    str="timeout 6s ceph health"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
-    str="cat /var/log/kolla/ceph/*.log"
-    kubectl exec ceph-osd0 -c main --namespace=kolla -- /bin/bash -c "$str" \
-        > $WORKSPACE/logs/ceph/osd.txt
-    str="timeout 6s ceph pg dump"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
-        > $WORKSPACE/logs/ceph/pgdump.txt
-    str="ceph osd crush tree"
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
-        > $WORKSPACE/logs/ceph/crushtree.txt
-    df -h > $WORKSPACE/logs/df.txt
-    dmesg > $WORKSPACE/logs/dmesg
-    kubectl get secret ceph-client-nova-keyring --namespace=kolla -o yaml
-    kubectl get secret nova-libvirt-bin --namespace=kolla -o yaml
-    openstack volume list > $WORKSPACE/logs/volumes.txt
-    cp -a /etc/kolla $WORKSPACE/logs/
-    exit -1
 }
 
 [ "x$4" == "xiscsi" ] && echo "iscsi support pending..." && exit 0
 
-trap 'trap_error "$?"' ERR
+trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 echo Setting up the gate...
 env
 echo Setting up the gate...
 
 sudo iptables-save
-
-l=$(sudo iptables -L INPUT --line-numbers | grep openstack-INPUT | \
-    awk '{print $1}')
-sudo iptables -D INPUT $l
-
-ip a | sed '/^[^1-9]/d;' | awk '{print $2}' | sed 's/://' | \
-    grep -v '^lo$' | while read line; do
-    sudo iptables -I INPUT 1 -i $line -j openstack-INPUT
-done
+tests/bin/fix_gate_iptables.sh
 
 virtualenv .venv
 . .venv/bin/activate
@@ -274,7 +125,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni sshpass
+yum install -y docker kubelet kubeadm kubectl kubernetes-cni
 systemctl start kubelet
 EOF
 else
@@ -283,10 +134,21 @@ apt-get install -y apt-transport-https
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni sshpass
+apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
+systemctl start docker
+kubeadm init --service-cidr 172.16.128.0/24
+sed -i 's/100.64.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+systemctl daemon-reload
+systemctl stop kubelet
+systemctl restart docker
+systemctl start kubelet
+EOF
+sudo bash /tmp/setup.$$
+
+cat > /tmp/setup.$$ <<"EOF"
 mkdir -p /data/kolla
 df -h
 dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=5M count=1024
@@ -303,15 +165,7 @@ parted $LOOP mklabel gpt
 parted $LOOP mkpart 1 0% 512m
 parted $LOOP mkpart 2 513m 100%
 partprobe
-systemctl start docker
-kubeadm init --service-cidr 172.16.128.0/24
-sed -i 's/100.64.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-systemctl daemon-reload
-systemctl stop kubelet
-systemctl restart docker
-systemctl start kubelet
 EOF
-
 sudo bash /tmp/setup.$$
 
 sudo docker ps -a
@@ -572,7 +426,7 @@ EOF
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
     openstack catalog list
-    trap_error
+    exit -1
 }
 
 OS_TOKEN=$(openstack token issue -f value -c id)
@@ -619,100 +473,4 @@ wait_for_pods kolla
 
 kubectl get pods --namespace=kolla
 
-curl -o cirros.qcow2 \
-    http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-echo testing cluster glance-api
-curl http://`kubectl get svc glance-api --namespace=kolla -o \
-    jsonpath='{.spec.clusterIP}'`:9292/
-echo testing external glance-api
-curl http://`kubectl get svc glance-api --namespace=kolla -o \
-    jsonpath='{.spec.externalIPs[0]}'`:9292/
-timeout 120s openstack image create --file cirros.qcow2 --disk-format qcow2 \
-     --container-format bare 'CirrOS'
-
-neutron net-create --provider:physical_network=physnet1 \
-    --provider:network_type=flat external
-neutron net-update --router:external=True external
-neutron subnet-create --gateway 172.18.0.1 --disable-dhcp \
-    --allocation-pool start=172.18.0.65,end=172.18.0.254 \
-    --name external external 172.18.0.0/24
-neutron router-create admin
-neutron router-gateway-set admin external
-
-neutron net-create admin
-neutron subnet-create --gateway=172.18.1.1 \
-    --allocation-pool start=172.18.1.65,end=172.18.1.254 \
-    --name admin admin 172.18.1.0/24
-neutron router-interface-add admin admin
-neutron security-group-rule-create --protocol icmp \
-    --direction ingress default
-neutron security-group-rule-create --protocol tcp \
-    --port-range-min 22 --port-range-max 22 \
-    --direction ingress default
-
-openstack server create --flavor=m1.tiny --image CirrOS \
-     --nic net-id=admin test
-openstack server create --flavor=m1.tiny --image CirrOS \
-     --nic net-id=admin test2
-
-wait_for_vm test
-wait_for_vm test2
-
-openstack volume create --size 1 test
-
-wait_for_cinder test creating
-
-openstack server add volume test test
-
-FIP=$(openstack floating ip create external -f value -c floating_ip_address)
-FIP2=$(openstack floating ip create external -f value -c floating_ip_address)
-
-openstack server add floating ip test $FIP
-openstack server add floating ip test2 $FIP2
-
-openstack server list
-
-wait_for_vm_ssh $FIP
-
-sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
-    StrictHostKeyChecking=no cirros@$FIP curl 169.254.169.254
-
-sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
-    StrictHostKeyChecking=no cirros@$FIP ping -c 4 $FIP2
-
-openstack volume show test -f value -c status
-TESTSTR=$(uuidgen)
-cat > /tmp/$$ <<EOF
-#!/bin/sh -xe
-mkdir /tmp/mnt
-sudo /sbin/mkfs.vfat /dev/vdb
-sudo mount /dev/vdb /tmp/mnt
-sudo /bin/sh -c 'echo $TESTSTR > /tmp/mnt/test.txt'
-sudo umount /tmp/mnt
-EOF
-chmod +x /tmp/$$
-
-scp_to_vm $FIP /tmp/$$ /tmp/script
-ssh_to_vm $FIP "/tmp/script"
-
-openstack server remove volume test test
-wait_for_cinder test in-use
-wait_for_cinder test detaching
-openstack server add volume test2 test
-wait_for_cinder test available
-
-cat > /tmp/$$ <<EOF
-#!/bin/sh -xe
-mkdir /tmp/mnt
-sudo mount /dev/vdb /tmp/mnt
-sudo cat /tmp/mnt/test.txt
-sudo cp /tmp/mnt/test.txt /tmp
-sudo chown cirros /tmp/test.txt
-EOF
-chmod +x /tmp/$$
-
-scp_to_vm $FIP2 /tmp/$$ /tmp/script
-ssh_to_vm $FIP2 "/tmp/script"
-scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
-
-diff -u <(echo $TESTSTR) /tmp/$$.2
+tests/bin/basic_tests.sh
