@@ -28,6 +28,7 @@ spec:
                   sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
 {%- endif %}
 {%- if enable_ceph == "yes" %}
+                  modprobe rbd;
                   mkdir -p /nova/secrets/;
                   cp -a /secret/a/..data/data /nova/secrets/{{ rbd_secret_uuid }}.xml;
                   cp -a /secret/b/..data/data /nova/secrets/{{ rbd_secret_uuid }}.base64;
