@@ -76,6 +76,8 @@ spec:
             - /bin/bash
             - -c
             - |
+              modprobe rbd;
+              rpm -e qemu-system-x86;
               cp -a {{ container_config_directory }}/secrets /etc/libvirt;
               kolla_start
           securityContext:
