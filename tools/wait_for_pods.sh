@@ -1,0 +1,23 @@
+#!/bin/bash -e
+set +x
+end=$(date +%s)
+end=$((end + 120))
+while true; do
+    kubectl get pods --namespace=kolla -o json | jq -r \
+        '.items[].status.phase' | grep Pending > /dev/null && \
+        PENDING=True || PENDING=False
+    query='.items[]|select(.status.phase=="Running")'
+    query="$query|.status.containerStatuses[].ready"
+    kubectl get pods --namespace=kolla -o json | jq -r "$query" | \
+        grep false > /dev/null && READY="False" || READY="True"
+    kubectl get jobs -o json --namespace=kolla | jq -r \
+        '.items[] | .spec.completions == .status.succeeded' | \
+        grep false > /dev/null && JOBR="False" || JOBR="True"
+    [ $PENDING == "False" -a $READY == "True" -a $JOBR == "True" ] && \
+        break || true
+    sleep 1
+    now=$(date +%s)
+    [ $now -gt $end ] && echo containers failed to start. && \
+        kubectl get pods --namespace kolla && exit -1
+done
+set -x
