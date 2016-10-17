@@ -24,6 +24,11 @@ spec:
                  "sh",
                  "-c",
                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  API_INTERFACE={{ api_interface }};
+                  F=/var/lib/kolla-kubernetes/keepalived/api_interface;
+                  [ -f $F ] && API_INTERFACE=$(<$F);
+                  sed -i ''s|interface.*|interface ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+                  sed -i ''s|\(dev*\).*|\1 ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
                  " ],
              "volumeMounts": [
                 {
