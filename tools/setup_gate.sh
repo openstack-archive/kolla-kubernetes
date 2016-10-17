@@ -214,7 +214,14 @@ done
 virtualenv .venv
 . .venv/bin/activate
 
+sudo yum install -y patch || sudo apt-get install -y patch
+
 git clone https://github.com/openstack/kolla.git
+
+cd kolla
+git fetch https://git.openstack.org/openstack/kolla refs/changes/36/387736/1 && git checkout FETCH_HEAD
+cd ..
+
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
@@ -570,6 +577,8 @@ EOF
 
 . ~/keystonerc_admin
 
+openstack catalog list > $WORKSPACE/logs/openstack-catalog-after-bootstrap.txt
+
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
     openstack catalog list
@@ -580,6 +589,9 @@ OS_TOKEN=$(openstack token issue -f value -c id)
 curl -H "X-Auth-Token:$OS_TOKEN" $OS_AUTH_URL/endpoints -o /tmp/$$
 jq -r '.endpoints[] | .service_id' /tmp/$$ | sort | uniq -c > /tmp/$$.1
 awk '{if($1 != 3){exit -1}}' /tmp/$$.1 || endpoints_dump_and_fail
+
+mkdir -p $WORKSPACE/logs
+sudo docker ps -a | awk '/cinder/{print $1}' | xargs -n1 sudo docker logs > $WORKSPACE/logs/dockercrash
 
 kollakube res delete bootstrap glance-create-db glance-manage-db \
     nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
