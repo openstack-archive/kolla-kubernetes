@@ -570,6 +570,8 @@ EOF
 
 . ~/keystonerc_admin
 
+openstack catalog list > $WORKSPACE/logs/openstack-catalog-after-bootstrap.txt
+
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
     openstack catalog list
