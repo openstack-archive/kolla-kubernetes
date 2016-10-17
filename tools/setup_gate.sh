@@ -215,6 +215,11 @@ virtualenv .venv
 . .venv/bin/activate
 
 git clone https://github.com/openstack/kolla.git
+
+cd kolla
+git checkout e29a09df239e36991f5210da3934ee291a47a4ec
+cd ..
+
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
@@ -569,6 +574,8 @@ export OS_REGION_NAME=RegionOne
 EOF
 
 . ~/keystonerc_admin
+
+openstack catalog list > $WORKSPACE/logs/openstack-catalog-after-bootstrap.txt
 
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
