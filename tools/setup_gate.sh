@@ -664,6 +664,8 @@ openstack volume create --size 1 test
 wait_for_cinder test creating
 
 openstack server add volume test test
+openstack volume show test
+openstack server show test
 
 FIP=$(openstack floating ip create external -f value -c floating_ip_address)
 FIP2=$(openstack floating ip create external -f value -c floating_ip_address)
