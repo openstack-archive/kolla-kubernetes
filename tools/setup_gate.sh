@@ -682,6 +682,7 @@ sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
     StrictHostKeyChecking=no cirros@$FIP ping -c 4 $FIP2
 
 openstack volume show test -f value -c status
+wait_for_cinder test in-use
 TESTSTR=$(uuidgen)
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
