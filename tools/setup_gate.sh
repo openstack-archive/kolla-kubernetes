@@ -5,6 +5,7 @@
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
+env > $WORKSPACE/logs/env
 
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
@@ -12,7 +13,18 @@ tests/bin/fix_gate_iptables.sh
 virtualenv .venv
 . .venv/bin/activate
 
+cat > /tmp/clonemap <<"EOF"
+clonemap:
+ - name: openstack/kolla
+   dest: kolla
+EOF
+
+[ -x /usr/zuul-env/bin/zuul-cloner ] && \
+/usr/zuul-env/bin/zuul-cloner -m /tmp/clonemap --workspace `pwd` \
+    --branch master --cache-dir /opt/git git://git.openstack.org \
+    openstack/kolla || \
 git clone https://github.com/openstack/kolla.git
+
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
@@ -38,13 +50,43 @@ tests/bin/setup_config.sh "$2"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh
+tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
 
+# Turn up kube-proxy logging
+#  | jq '.items[0].spec.template.spec.containers[0].command |= .+ ["--v=9"]' \
+kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
+  | sed 's/--v=4/--v=9/' \
+  | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
+
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        echo $line
+        scp tools/setup_kubernetes.sh $line:
+        scp /usr/bin/kubectl $line:kubectl
+#FIXME
+        ssh $line sudo iptables -F
+        ssh $line sudo setenforce 0
+        ssh $line sudo mv kubectl /usr/bin/
+        ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        ssh $line sudo sed -i "s@KUBELET_EXTRA_ARGS=@KUBELET_EXTRA_ARGS=--hostname-override=$line@" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        ssh $line sudo systemctl daemon-reload
+        ssh $line sudo systemctl restart kubelet
+        sleep 5
+        kubectl get nodes
+        kubectl label node $line kolla_compute=true
+    done
+fi
+
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true
-kubectl label node $NODE kolla_compute=true
+
+if [ "x$4" != "xceph-multi" ]; then
+    kubectl label node $NODE kolla_compute=true
+fi
+
+sleep 240
 
 tests/bin/setup_canal.sh
 
