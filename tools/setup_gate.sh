@@ -5,6 +5,16 @@
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
+env > $WORKSPACE/logs/env
+
+if [ "x$4" == "xceph-multi" ]; then
+  cat /etc/nodepool/sub_nodes_private | while read line; do
+    echo $line
+    ssh $line hostname
+  done
+fi
+
+[ "x$4" == "xceph-multi" ] && echo "ceph-multi support pending..." && exit 0
 
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
