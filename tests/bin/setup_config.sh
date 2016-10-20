@@ -24,6 +24,7 @@ crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_user nova
 UUID=$(awk '{if($1 == "rbd_secret_uuid:"){print $2}}' /etc/kolla/passwords.yml)
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_secret_uuid $UUID
+crudini --set /etc/kolla/keystone/keystone.conf cache enabled False
 
 sed -i 's/log_outputs = "3:/log_outputs = "1:/' /etc/kolla/nova-libvirt/libvirtd.conf
 sed -i 's/log_level = 3/log_level = 1/' /etc/kolla/nova-libvirt/libvirtd.conf
