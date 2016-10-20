@@ -27,7 +27,20 @@ EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
 systemctl start docker
-kubeadm init --service-cidr 172.16.128.0/24
+EOF
+if [ "$1" == "master" ]; then
+    cat >> /tmp/setup.$$ <<"EOF"
+kubeadm init --service-cidr 172.16.128.0/24 | tee /tmp/kubeout
+grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
+grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt
+rm -f /tmp/kubeout
+EOF
+else
+    cat >> /tmp/setup.$$ <<EOF
+kubeadm join --token "$3" "$4"
+EOF
+fi
+cat >> /tmp/setup.$$ <<"EOF"
 sed -i 's/100.64.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 systemctl daemon-reload
 systemctl stop kubelet
@@ -37,11 +50,12 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 
-count=0
-while true; do
-    kubectl get pods > /dev/null 2>&1 && break || true
-    sleep 1
-    count=$((count + 1))
-    [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
-done
-
+if [ "$1" == "master" ]; then
+    count=0
+    while true; do
+        kubectl get pods > /dev/null 2>&1 && break || true
+        sleep 1
+        count=$((count + 1))
+        [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
+    done
+fi
