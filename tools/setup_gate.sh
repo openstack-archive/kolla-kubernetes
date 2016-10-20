@@ -5,6 +5,7 @@
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
+env > $WORKSPACE/logs/env
 
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
@@ -38,13 +39,41 @@ tests/bin/setup_config.sh "$2"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh
+tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
 
+# Turn up kube-proxy logging
+kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
+  | jq '.items[0].spec.template.spec.containers[0].command |= .+ ["--v=9"]' \
+  | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
+
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        echo $line
+        NODE=$(ssh $line hostname)
+        echo $line $NODE | sudo tee -a /etc/hosts
+        scp tools/setup_kubernetes.sh $line:
+        scp /usr/bin/kubectl $line:kubectl
+#FIXME
+        ssh $line sudo iptables -F
+        ssh $line sudo setenforce 0
+        ssh $line sudo mv kubectl /usr/bin/
+        ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        sleep 5
+        ssh $line sudo awk '/server:/{print $2}' /etc/kubernetes/kubelet.conf > /tmp/foo
+        ssh $line curl -k $(cat /tmp/foo) | true
+        kubectl get nodes
+        kubectl label node $NODE kolla_compute=true
+    done
+fi
+
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true
-kubectl label node $NODE kolla_compute=true
+
+if [ "x$4" != "xceph-multi" ]; then
+    kubectl label node $NODE kolla_compute=true
+fi
 
 tests/bin/setup_canal.sh
 
