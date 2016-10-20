@@ -29,7 +29,7 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+kollakube res create pod mariadb rabbitmq memcached
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -119,6 +119,9 @@ $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
     neutron-openvswitch-agent-network neutron-metadata-agent-network
+
+[ "x$1" == "xceph-multi" ] && kollakube res \
+    create neutron-openvswitch-agent-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
 kollakube res create pod nova-libvirt
