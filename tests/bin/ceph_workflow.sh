@@ -29,7 +29,7 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+kollakube res create pod mariadb rabbitmq #memcached - Suspect keystone catalog invalidation isn't working.
 
 $DIR/tools/wait_for_pods.sh kolla
 
