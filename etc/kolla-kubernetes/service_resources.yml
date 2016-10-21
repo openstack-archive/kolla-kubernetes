@@ -1075,3 +1075,24 @@ kolla-kubernetes:
       pod:
       - name: keepalived
         template: services/keepalived/keepalived-daemonset.yml.j2
+  - name: networking-vpp
+    pods:
+    - name: networking-vpp
+      containers:
+      - name: networking-vpp
+    - name: networking-vpp
+      containers:
+      - name: networking-vpp 
+    resources:
+      configmap:
+      - name: networking-vpp 
+        template: services/networking-vpp/networking-vpp-configmap.yml.j2
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
+      - name: networking-vpp 
+        template: services/networking-vpp/networking-vpp-daemonset.yml.j2
