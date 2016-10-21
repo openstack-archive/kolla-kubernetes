@@ -40,6 +40,9 @@ kolla_kubernetes_hostlabel_compute:
 #  key: kolla_storage
 #  value: 'true'
 
+kolla_kubernetes_hostlabel_highperf_net:
+  key: kolla_highperf_network
+  value: 'true'
 ########################
 # Kubernetes Cluster
 ########################
@@ -270,3 +273,4 @@ log_disable:
 - iscsi-tgtd
 - elasticsearch
 - keepalived
+- networking-vpp

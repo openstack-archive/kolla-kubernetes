@@ -1,0 +1,94 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- set netHostTrue = "yes" %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: networking-vpp 
+  labels:
+    component: neutron
+    system: networking-vpp
+  namespace: {{ kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: neutron
+        system: networking-vpp 
+      annotations:
+#FIXME Once out of alpha, this should be converted to yaml.
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ kolla_toolbox_image_full }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              "],
+              "volumeMounts": [
+                  {
+                      "name": "networking-vpp-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  },
+                  {
+                      "name": "host-var-lib-kk",
+                      "mountPath": "/var/lib/kolla-kubernetes"
+                  }
+              ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_highperf_net %}
+          {{ selector.key }}: {{ selector.value }}
+      containers:
+        - image: "{{ networking_vpp_image_full }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ config_strategy }}
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: {{ container_config_directory }}
+              name: pod-main-config
+              readOnly: true
+            - mountPath: /var/run
+              name: host-run
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /sys
+              name: host-sys
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: true
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: networking-vpp-configmap
+          configMap:
+            name: networking-vpp
+        - name: pod-main-config
+          emptyDir: {}
+        - name: host-run
+          hostPath:
+            path: /var/run
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: host-sys
+          hostPath:
+            path: /sys
+        - name: host-var-lib-kk
+          hostPath:
+            path: /var/lib/kolla-kubernetes
