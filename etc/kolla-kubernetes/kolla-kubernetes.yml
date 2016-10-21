@@ -159,7 +159,7 @@ neutron_internal_endpoint: "http://neutron-server:{{ neutron_server_port }}"
 # Keystone variables
 ########################
 keystone_admin_url: "{{ admin_protocol }}://keystone-admin:{{ keystone_admin_port }}/v3"
-keystone_internal_url: "{{ internal_protocol }}://keystone-internal:{{ keystone_public_port }}/v3"
+keystone_internal_url: "{{ internal_protocol }}://keystone-admin:{{ keystone_admin_port }}/v3"
 keystone_public_url: "{{ public_protocol }}://{{ kolla_kubernetes_external_vip }}:{{ keystone_public_port }}/v3"
 keystone_database_address: "mariadb"
 
