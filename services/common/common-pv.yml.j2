@@ -1,6 +1,12 @@
 {%- set resourceName = kolla_kubernetes.template.vars.name %}
 
-{%- if storage_provider in ["host", "ceph", "gce"] -%}
+{% if resourceName == "glance" %}
+   {% set storage_provider = glance_storage_provider %}
+   {% set nfs_storage_server = glance_nfs_storage_server %}
+   {% set nfs_storage_server_path = glance_nfs_storage_server_path %}
+{% endif %}
+
+{%- if storage_provider in ["host", "ceph", "gce", "nfs"] -%}
 
 apiVersion: v1
 kind: PersistentVolume
@@ -14,6 +20,11 @@ spec:
 {%- if storage_provider == "host" %}
   hostPath:
     path: /var/lib/kolla/volumes/{{ resourceName }}
+
+{%- elif storage_provider == "nfs" %}
+    nfs:
+        server: {{ nfs_storage_server }}
+        path: {{ nfs_storage_server_path }}
 
 {%- elif storage_provider == "gce" %}
   gcePersistentDisk:
