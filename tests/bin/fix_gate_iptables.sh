@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 
 l=$(sudo iptables -L INPUT --line-numbers | grep openstack-INPUT | \
     awk '{print $1}')
