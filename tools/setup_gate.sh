@@ -101,6 +101,7 @@ fi
 tests/bin/setup_canal.sh
 
 kubectl create namespace kolla
+tools/prechecks.py
 tools/secret-generator.py create
 
 TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
