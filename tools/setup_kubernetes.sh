@@ -13,7 +13,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni
+yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
 systemctl start kubelet
 EOF
 else
@@ -30,14 +30,15 @@ systemctl start docker
 EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
-kubeadm init --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+[ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
+kubeadm init --skip-preflight --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
 EOF
 else
     cat >> /tmp/setup.$$ <<EOF
-kubeadm join --token "$2" "$3"
+kubeadm join --token "$2" "$3" --skip-preflight
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
