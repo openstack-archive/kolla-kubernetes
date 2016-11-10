@@ -1,0 +1,140 @@
+{{- define "main" }}
+{{- $restype := .Values.type }}
+
+{{- $l3AgentImageBuilt := printf "%s/%s/%s-%s-neutron-l3-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.l3_agent_image_tag }}
+{{- $l3AgentImageFull := .Values.l3_agent_image_full | default $l3AgentImageBuilt }}
+
+{{- $resourceName := printf "neutron-l3-agent-%s" $restype }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Common" .Common "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-l3-agent-{{ $restype }}
+  labels:
+    component: neutron
+    system: l3-agent-{{ $restype }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: neutron
+        system: l3-agent-{{ $restype }}
+      annotations:
+#FIXME Its unclear if ovsdb_connection, local_ip, and/or hostPID required. Try removing them once we have a working gate to test with.
+#FIXME Once out of alpha, this should be converted to yaml.
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": "{{ .Common.kollaToolboxImageFull }}",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{{- if .Values.enable_openvswitch_tcp }}
+                  TUNNEL_INTERFACE={{ .Values.tunnel_interface }};
+                  F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
+                  [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
+                  IP=$(ip addr list {{ .Values.tunnel_interface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                  crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
+{{- end }}
+                  crudini --set /srv/pod-main-config/ml2_conf.ini ovs local_ip $IP;
+{{- if eq $restype "compute" }}
+                  crudini --set /srv/pod-main-config/l3_agent.ini DEFAULT agent_mode dvr;
+                  crudini --set /srv/pod-main-config/l3_agent.ini DEFAULT handle_internal_only_routers false;
+{{- else }}
+                  crudini --set /srv/pod-main-config/l3_agent.ini DEFAULT handle_internal_only_routers true;
+{{- if .Values.enable_neutron_dvr }}
+                  crudini --set /srv/pod-main-config/l3_agent.ini DEFAULT agent_mode dvr_snat;
+{{- else }}
+                  crudini --set /srv/pod-main-config/l3_agent.ini DEFAULT agent_mode legacy;
+{{- end }}
+{{- end }}"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "neutron-l3-agent-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          },
+          {
+              "name": "update-permissions",
+              "image": {{ $l3AgentImageFull | quote }},
+              "securityContext": {
+                  "runAsUser": 0
+              },
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "chown --recursive neutron.kolla /var/log/kolla;
+                  echo FIXME check for ip6tables loaded;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "kolla-logs",
+                      "mountPath": "/var/log/kolla"
+                  }
+              ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      hostPID: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: {{ $l3AgentImageFull | quote }}
+          name: main
+          securityContext:
+            privileged: true
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+            - mountPath: /var/lib/neutron/kolla/
+              name: neutron-metadata-socket
+            - mountPath: /var/run
+              name: host-run
+            - mountPath: /run/netns/
+              name: host-run-netns
+              # shared: true # This seems not support in K8s yet :(
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: neutron-l3-agent-configmap
+          configMap:
+            name: neutron-l3-agent
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+            - key: fwaas-driver.ini
+              path: fwaas_driver.ini
+            - key: l3-agent.ini
+              path: l3_agent.ini
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
+        - name: host-run
+          hostPath:
+            path: /var/run
+        - name: neutron-metadata-socket
+          hostPath:
+            path: /var/lib/neutron/kolla/metadata_proxy
+{{- end }}
+{{- end }}
