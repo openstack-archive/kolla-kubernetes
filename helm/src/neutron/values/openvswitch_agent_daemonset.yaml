@@ -1,0 +1,9 @@
+type: network
+
+#Image overrides
+#openvswitch_agent_image_full:
+openvswitch_agent_image_tag: 2.0.2
+
+logger_configmap_name: neutron-openvswitch-agent-logger
+
+tunnel_interface: eth0
