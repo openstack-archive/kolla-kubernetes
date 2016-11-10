@@ -1,0 +1,11 @@
+{{- $kollaToolboxImageBuilt := printf "%s/%s/%s-%s-kolla-toolbox:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kolla_toolbox_image_tag }}
+{{- $kollaToolboxImageFull := .Values.kolla_toolbox_image_full | default $kollaToolboxImageBuilt }}
+
+{{- $fluentdImageBuilt := printf "%s/%s/%s-%s-fluentd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.fluentd_image_tag }}
+{{- $fluentdImageFull := .Values.kolla_toolbox_image_full | default $fluentdImageBuilt }}
+
+{{- $enableResolveConfNetHostWorkaround := .Values.enable_resolve_conf_net_host_workaround }}
+{{- $enableKubeLogger := .Values.enable_kube_logger }}
+{{- $common := dict "enableResolveConfNetHostWorkaround" $enableResolveConfNetHostWorkaround "fluentdImageFull" $fluentdImageFull "enableKubeLogger" $enableKubeLogger "kollaToolboxImageFull" $kollaToolboxImageFull "Values" .Values }}
+{{- $env := dict "Common" $common "Values" .Values }}
+{{- include "main" $env }}
