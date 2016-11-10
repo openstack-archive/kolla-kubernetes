@@ -53,6 +53,14 @@ tests/bin/setup_gate_loopback.sh
 
 tools/setup_kubernetes.sh master
 
+mkdir -p ~/.helm/repository/local
+sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
+tools/build_packages.py ~/.helm/repository/local
+helm serve &
+sleep 1
+helm repo update
+helm search
+
 kubectl taint nodes --all dedicated-
 
 # Turn up kube-proxy logging
