@@ -1,0 +1,11 @@
+selector_key: kolla_network
+selector_value: "true"
+
+docker_registry: docker.io
+docker_namespace: kolla
+kolla_base_distro: centos
+kolla_install_type: binary
+
+kolla_toolbox_image_full: centos-binary-kolla-toolbox/tags:3.0.1
+enable_resolve_conf_net_host_workaround: true
+container_config_directory: /var/lib/kolla/config_files
