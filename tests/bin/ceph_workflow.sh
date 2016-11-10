@@ -117,8 +117,11 @@ kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
-    neutron-openvswitch-agent-network neutron-metadata-agent-network
+kollakube res create pod neutron-dhcp-agent neutron-openvswitch-agent-network \
+    neutron-metadata-agent-network
+
+helm install kolla/openstack-neutron --version 2.0.2 \
+    --set resource=l3-agent-daemonset,type=network
 
 [ "x$1" == "xceph-multi" ] && kollakube res \
     create pod openvswitch-ovsdb-compute openvswitch-vswitchd-compute \
