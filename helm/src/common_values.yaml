@@ -1,0 +1,22 @@
+selector_key: kolla_controller
+selector_value: "true"
+
+docker_registry: docker.io
+docker_namespace: kolla
+kolla_base_distro: centos
+kolla_install_type: binary
+
+enable_resolve_conf_net_host_workaround: true
+enable_openvswitch_tcp: false
+enable_neutron_dvr: false
+
+container_config_directory: /var/lib/kolla/config_files
+
+#Common Image overrides
+#fluentd_image_full:
+#kolla_toolbox_image_tag:
+
+enable_kube_logger: true
+fluentd_image_tag: 3.0.1
+kolla_toolbox_image_tag: 3.0.1
+
