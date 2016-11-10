@@ -62,7 +62,8 @@ tools/setup_kubernetes.sh master
 
 mkdir -p ~/.helm/repository/local
 sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
-tools/build_packages.py ~/.helm/repository/local
+tools/helm_prebuild.py
+helm_build_microservices.py ~/.helm/repository/local
 helm serve &
 sleep 1
 helm repo update
