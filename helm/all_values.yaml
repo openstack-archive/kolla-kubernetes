@@ -1,0 +1,42 @@
+common:
+        selector_key: kolla_controller
+        selector_value: "true"
+
+        docker_registry: docker.io
+        docker_namespace: kolla
+        kolla_base_distro: centos
+        kolla_install_type: binary
+
+        enable_resolve_conf_net_host_workaround: true
+        enable_openvswitch_tcp: false
+        enable_neutron_dvr: false
+
+        container_config_directory: /var/lib/kolla/config_files
+
+        #Common Image overrides
+        #fluentd_image_full:
+        #kolla_toolbox_image_tag:
+
+        enable_kube_logger: true
+        fluentd_image_tag: 3.0.1
+        kolla_toolbox_image_tag: 3.0.1
+
+neutron-openvswitch-agent:
+        type: network
+
+        #Image overrides
+        #openvswitch_agent_image_full:
+        openvswitch_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-openvswitch-agent-logger
+
+        tunnel_interface: eth0
+
+neutron-l3-agent:
+        type: network
+
+        #Image overrides
+        #l3_agent_image_full:
+        l3_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-l3-agent-logger
