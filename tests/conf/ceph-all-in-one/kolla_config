@@ -1,4 +1,5 @@
 api_interface_address: 0.0.0.0
+tunnel_interface_address: 0.0.0.0
 orchestration_engine: KUBERNETES
 api_interface: "br-ex"
 tunnel_interface: "docker0"
