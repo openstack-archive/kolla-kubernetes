@@ -24,6 +24,7 @@ EOF
     --branch master --cache-dir /opt/git git://git.openstack.org \
     openstack/kolla || \
 git clone https://github.com/openstack/kolla.git
+sed -i 's/tunnel_interface_address:.*/tunnel_interface_address: "0.0.0.0"/' kolla/ansible/group_vars/all.yml
 
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla /usr/share/kolla
