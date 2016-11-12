@@ -46,6 +46,12 @@ popd
 pip install -r requirements.txt
 pip install .
 
+if [ "x$4" == "xexternal-ovs" ]; then
+    sudo rpm -Uvh https://repos.fedorapeople.org/openstack/openstack-newton/rdo-release-newton-4.noarch.rpm || true
+    sudo yum install -y openvswitch
+    sudo systemctl start openvswitch
+fi
+
 tests/bin/setup_config.sh "$2" "$4"
 
 tests/bin/setup_gate_loopback.sh
