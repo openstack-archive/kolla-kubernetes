@@ -111,14 +111,15 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
 
 kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
     glance-registry neutron-server horizon nova-consoleauth nova-novncproxy \
-    cinder-api cinder-scheduler cinder-volume-ceph openvswitch-ovsdb-network \
-    openvswitch-vswitchd-network
+    cinder-api cinder-scheduler cinder-volume-ceph
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
     neutron-openvswitch-agent-network neutron-metadata-agent-network
+[ "x$1" != "xexternal-ovs" ] && kollakube res \
+    create pod openvswitch-ovsdb-network openvswitch-vswitchd-network
 
 [ "x$1" == "xceph-multi" ] && kollakube res \
     create pod openvswitch-ovsdb-compute openvswitch-vswitchd-compute \
