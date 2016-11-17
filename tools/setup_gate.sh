@@ -22,8 +22,9 @@ EOF
 [ -x /usr/zuul-env/bin/zuul-cloner ] && \
 /usr/zuul-env/bin/zuul-cloner -m /tmp/clonemap --workspace `pwd` \
     --branch master --cache-dir /opt/git git://git.openstack.org \
-    openstack/kolla || \
-git clone https://github.com/openstack/kolla.git
+    openstack/kolla-ansible || \
+git clone https://github.com/openstack/kolla-ansible.git
+mv kolla-ansible kolla
 
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla /usr/share/kolla
