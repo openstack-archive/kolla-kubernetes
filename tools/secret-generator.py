@@ -37,7 +37,7 @@ if (command != 'create' and command != 'delete'):
 password_file = "/etc/kolla/passwords.yml"
 
 if not os.path.exists(password_file):
-    print ("You need to generate password file before using this script")
+    print("You need to generate password file before using this script")
     exit(3)
 
 with open(password_file, 'r') as stream:
