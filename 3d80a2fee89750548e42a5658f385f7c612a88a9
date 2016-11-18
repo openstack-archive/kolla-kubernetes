@@ -1,0 +1,13 @@
+Code-Review+1: Duong Ha-Quang <duonghq@vn.fujitsu.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Code-Review+1: venkatamahesh <Venkata.Kotha@infinite.com>
+Code-Review+2: Dave Walker <email@daviey.com>
+Code-Review+1: Steve Wilkerson <wilkers.steve@gmail.com>
+Code-Review+1: zhubingbing <1392607554@qq.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 18 Nov 2016 09:40:50 +0000
+Reviewed-on: https://review.openstack.org/368592
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
