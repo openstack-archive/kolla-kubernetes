@@ -1,0 +1,6 @@
+type: Operator
+template:
+  name: OpenStack Operator
+  operation: deploy
+  services:
+    - mariadb
