@@ -14,8 +14,7 @@ import re
 
 from oslo_log import log
 
-from kolla_kubernetes.utils import ExecUtils
-from kolla_kubernetes.utils import YamlUtils
+from kolla_kubernetes import utils
 
 LOG = log.getLogger(__name__)
 
@@ -145,7 +144,7 @@ class KubeResourceTemplateStatus(object):
             self.resource_template_obj.getName())
 
         # Execute the command to get the processed template output
-        template_out, err = ExecUtils.exec_command(cmd)
+        template_out, err = utils.ExecUtils.exec_command(cmd)
 
         # Skip templates which which produce no-ops (100% whitespace)
         #   (e.g. pv templates for AWS should not use persistent
@@ -184,7 +183,8 @@ class KubeResourceYamlStatus(object):
         assert len(kube_resource_definition_yaml) > 0
 
         # Initialize internal vars
-        self.y = YamlUtils.yaml_dict_from_string(kube_resource_definition_yaml)
+        self.y = utils.YamlUtils.yaml_dict_from_string(
+            kube_resource_definition_yaml)
         self.definition = kube_resource_definition_yaml
 
         self.errors = []
@@ -235,7 +235,7 @@ class KubeResourceYamlStatus(object):
         cmd = ('echo \'{}\' | kubectl describe -f -'.format(
             self.definition.replace("'", "'\\''")))  # escape for bash
 
-        out, err = ExecUtils.exec_command(cmd)
+        out, err = utils.ExecUtils.exec_command(cmd)
 
         # Check if kubectl returns non-zero exit status
         if err is not None:

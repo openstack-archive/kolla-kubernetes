@@ -12,11 +12,11 @@
 
 from cliff import command
 
-from kolla_kubernetes.app import KollaKubernetesApp
+from kolla_kubernetes import app
 
 
 class KollaKubernetesBaseCommand(command.Command):
 
     def get_global_args(self):
         """Provides a method to access global parsed options"""
-        return KollaKubernetesApp.Get().get_parsed_options()
+        return app.KollaKubernetesApp.Get().get_parsed_options()
