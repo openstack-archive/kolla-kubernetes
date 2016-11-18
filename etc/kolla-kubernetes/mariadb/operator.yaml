@@ -1,0 +1,4 @@
+type: ServiceOperator
+template:
+  name: MariaDB Operator
+  action: deploy
