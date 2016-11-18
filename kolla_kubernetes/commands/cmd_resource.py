@@ -19,8 +19,6 @@ import sys
 import tempfile
 import yaml
 
-from oslo_log import log
-
 from kolla_kubernetes.commands.base_command import KollaKubernetesBaseCommand
 from kolla_kubernetes.pathfinder import PathFinder
 from kolla_kubernetes.service_resources import KollaKubernetesResources
@@ -30,7 +28,6 @@ from kolla_kubernetes.utils import FileUtils
 from kolla_kubernetes.utils import JinjaUtils
 from kolla_kubernetes.utils import YamlUtils
 
-LOG = log.getLogger(__name__)
 KKR = KollaKubernetesResources.Get()
 
 
