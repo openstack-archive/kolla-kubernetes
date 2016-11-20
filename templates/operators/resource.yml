@@ -1,0 +1,7 @@
+apiVersion: extensions/v1beta1
+kind: ThirdPartyResource
+metadata:
+  name: service-operator.kolla.operators
+description: "Service Kubernetes Operator"
+versions:
+- name: v1

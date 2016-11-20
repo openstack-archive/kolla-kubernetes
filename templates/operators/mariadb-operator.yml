@@ -1,0 +1,5 @@
+apiVersion: "kolla.operators/v1"
+kind: ServiceOperator
+metadata:
+  name: mariadb-operator
+image: kolla-kubernetes/openstack-centos-mariadb-operator:latest
