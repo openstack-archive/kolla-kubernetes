@@ -1,0 +1,7 @@
+apiVersion: extensions/v1beta1
+kind: ThirdPartyResource
+metadata:
+  name: openstack-operator.kolla.operators
+description: "OpenStack Kubernetes Operator"
+versions:
+- name: v1

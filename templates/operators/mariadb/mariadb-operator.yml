@@ -1,0 +1,10 @@
+apiVersion: "kolla.operators/v1"
+kind: ServiceOperator
+metadata:
+  name: mariadb-operator
+image: kolla-kubernetes/openstack-centos-mariadb-operator:latest
+kollaSpec:
+  configFile: "/var/lib/kolla/configfiles/mariadb/galera.cnf"
+  action: deploy
+  dependencies: None
+  serviceName: mariadb
