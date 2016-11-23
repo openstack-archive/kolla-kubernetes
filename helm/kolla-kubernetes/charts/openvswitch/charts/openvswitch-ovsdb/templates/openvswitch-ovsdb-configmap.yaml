@@ -1,0 +1,17 @@
+###
+### This configmap is just a workaround, in final release external
+### configmap will be used.
+###
+{{- $extBridgeName := .Values.global.ext_bridge_name }}
+{{- $extInterfaceName := .Values.global.ext_interface_name }}
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "start-ovsdb-server 0.0.0.0  {{ $extBridgeName }} {{ $extInterfaceName }} ",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  name: openvswitch-db-server
+  namespace: kolla
