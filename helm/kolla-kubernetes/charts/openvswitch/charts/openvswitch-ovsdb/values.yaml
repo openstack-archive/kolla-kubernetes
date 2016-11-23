@@ -1,0 +1,12 @@
+# Default values for openvswitch-ovsdb.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+### Common variables
+selector_key: kolla_compute
+selector_value: "true"
+
+### OVSDB required variables
+type: compute
+openvswitch_ovsdb_image_tag: 3.0.0
+kolla_kubernetes_namespace: kolla
