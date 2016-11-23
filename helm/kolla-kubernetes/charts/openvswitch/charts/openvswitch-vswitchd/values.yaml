@@ -1,0 +1,13 @@
+# Default values for openvswitch-vswitchd.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+selector_key: kolla_compute
+selector_value: "true"
+
+### OVSDB required variables
+type: compute
+
+openvswitch_vswitchd_image_tag: 3.0.0
+kolla_kubernetes_ovs_setup_bridge: "yes"
+kolla_kubernetes_ovs_add_port: "yes"
