@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import os.path
+import six
 import subprocess
 import sys
 import yaml
@@ -46,7 +47,7 @@ with open(password_file, 'r') as stream:
     except yaml.YAMLError as exc:
         print(exc)
 for element in passwords:
-    if isinstance(passwords[element], basestring):
+    if isinstance(passwords[element], six.string_types):
         service_name = element.replace('_', '-')
         password_value = passwords[element]
         nsname = 'kolla_kubernetes_namespace'
