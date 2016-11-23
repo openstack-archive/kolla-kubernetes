@@ -1,0 +1,93 @@
+{{- $restype := .Values.type }}
+{{- $openvswitchDBImageBuilt := printf "%s/%s/%s-%s-openvswitch-db-server:%s" .Values.global.docker_registry .Values.global.docker_namespace .Values.global.kolla_base_distro .Values.global.kolla_install_type .Values.openvswitch_ovsdb_image_tag }}
+{{- $openvswitchDBFull := .Values.openvswitch_db_image_full | default $openvswitchDBImageBuilt }}
+{{- $resourceName := printf "openvswitch-db-server-%s" $restype }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Common" .Common "Values" .Values }}apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: openvswitch-ovsdb-{{ $restype }}
+  labels:
+    component: openvswitch
+    system: openvswitch-db-{{ $restype }}
+  namespace: {{ .Values.kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: openvswitch
+        system: openvswitch-db-{{ $restype }}
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-ovs-db",
+             "image": "{{ $openvswitchDBFull }}",
+             "command": [
+                 "sh",
+                 "-xec",
+                 "mkdir -p /var/log/kolla/openvswitch;
+                  DB=/etc/openvswitch/conf.db;
+                  /usr/bin/ovsdb-tool create $DB;
+                  echo $(date) >> /var/log/kolla/db-create.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "openvswitch-db",
+                   "mountPath": "/etc/openvswitch/"
+                },
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $openvswitchDBFull }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ .Values.global.config_strategy | quote }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.global.container_config_directory }}
+              name: openvswitch-db-config
+              readOnly: true
+            - mountPath: /etc/openvswitch
+              name: openvswitch-db
+            - mountPath: /var/run/openvswitch
+              name: openvswitch-run
+            - mountPath: /dev
+              name: host-dev
+          command: ["sh", "-c"]
+          args:
+            - /usr/sbin/ovsdb-server
+              /etc/openvswitch/conf.db
+              -vconsole:emer
+              -vsyslog:err
+              -vfile:info
+              --remote=punix:/var/run/openvswitch/db.sock
+              --remote=ptcp:6640:0.0.0.0
+              --log-file=/var/log/kolla/openvswitch/ovsdb-server.log
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: openvswitch-db-config
+          configMap:
+            name: openvswitch-db-server
+        - name: openvswitch-db
+          emptyDir: {}
+        - name: openvswitch-run
+          hostPath:
+            path: /var/run/openvswitch
+        - name: host-dev
+          hostPath:
+            path: /dev
+{{- end }}

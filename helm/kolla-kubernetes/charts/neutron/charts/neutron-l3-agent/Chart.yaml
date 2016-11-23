@@ -1,0 +1,11 @@
+version: 0.0.1
+description: neutron l3 agent specific layer
+name: kolla-kubernetes
+keywords:
+  - openstack
+  - neutron
+  - neutron-l3-agent
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl

@@ -1,0 +1,11 @@
+apiVersion: v1
+version: 0.0.1
+description: neutron service layer
+name: neutron
+keywords:
+  - openstack
+  - neutron
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
