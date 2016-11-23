@@ -1,0 +1,15 @@
+# Default values for kolla-kubernetes.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  docker_registry: 192.168.80.240:4000
+  docker_namespace: kolla
+  kolla_base_distro: centos
+  kolla_install_type: source
+  kolla_tag: 3.0.0
+  kolla_toolbox_image_full: kolla/centos-binary-kolla-toolbox:3.0.0
+  enable_resolve_conf_net_host_workaround: true
+  container_config_directory: /var/lib/kolla/config_files
+  kubernetes_entrypoint_image_tag: 3.0.0
+  kolla_kubernetes_namespace: kolla
