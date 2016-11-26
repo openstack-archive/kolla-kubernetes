@@ -1,0 +1,16 @@
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+1: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Code-Review+1: pprokop <piotr.prokop@intel.com>
+Code-Review+1: Daniel Tadrzak <daniel.tadrzak@intel.com>
+Code-Review+1: zhubingbing <1392607554@qq.com>
+Code-Review+1: Steve Wilkerson <wilkers.steve@gmail.com>
+Code-Review+1: Larry Rensing <lr699s@att.com>
+Code-Review+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Code-Review+1: Surya Prakash Singh <surya.singh@nectechnologies.in>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sat, 26 Nov 2016 16:55:43 +0000
+Reviewed-on: https://review.openstack.org/394405
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
