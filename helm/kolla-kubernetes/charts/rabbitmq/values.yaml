@@ -1,0 +1,6 @@
+# Default values for rabbitmq.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+   rabbitmq_port: 5672
+   rabbitmq_management_port: 15672

@@ -13,3 +13,4 @@ global:
   container_config_directory: /var/lib/kolla/config_files
   kubernetes_entrypoint_image_tag: 3.0.0
   kolla_kubernetes_namespace: kolla
+  size_in_gb: 10
