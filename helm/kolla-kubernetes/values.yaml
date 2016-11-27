@@ -8,8 +8,9 @@ global:
   kolla_base_distro: centos
   kolla_install_type: source
   kolla_tag: 3.0.0
-  kolla_toolbox_image_full: kolla/centos-binary-kolla-toolbox:3.0.0
   enable_resolve_conf_net_host_workaround: true
   container_config_directory: /var/lib/kolla/config_files
   kubernetes_entrypoint_image_tag: 3.0.0
+  kolla_tool_box_image_tag: 3.0.0
   kolla_kubernetes_namespace: kolla
+  size_in_gb: 10
