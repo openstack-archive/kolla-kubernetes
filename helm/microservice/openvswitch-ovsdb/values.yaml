@@ -1,0 +1,15 @@
+# This file is generated. Please edit all_values.yaml
+# and rerun tools/helm_prebuild.py
+container_config_directory: /var/lib/kolla/config_files
+docker_namespace: kolla
+docker_registry: docker.io
+enable_kube_logger: true
+enable_neutron_dvr: false
+enable_openvswitch_tcp: false
+enable_resolve_conf_net_host_workaround: true
+fluentd_image_tag: 3.0.1
+kolla_base_distro: centos
+kolla_install_type: binary
+kolla_toolbox_image_tag: 3.0.1
+selector_key: kolla_controller
+selector_value: 'true'
