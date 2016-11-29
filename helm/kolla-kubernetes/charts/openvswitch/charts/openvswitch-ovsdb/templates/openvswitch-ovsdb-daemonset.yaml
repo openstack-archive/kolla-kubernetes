@@ -1,0 +1,126 @@
+{{- $restype := .Values.type }}
+{{- $openvswitchDBImageBuilt := printf "%s/%s/%s-%s-openvswitch-db-server:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_ovsdb_image_tag }}
+{{- $openvswitchDBFull := .Values.openvswitch_db_image_full | default $openvswitchDBImageBuilt }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: openvswitch-ovsdb-{{ $restype }}
+  labels:
+    component: openvswitch
+    system: openvswitch-db-{{ $restype }}
+  namespace: {{ .Values.kolla_kubernetes_namespace }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: openvswitch
+        system: openvswitch-db-{{ $restype }}
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-ovs-db",
+             "image": "{{ $openvswitchDBFull }}",
+             "command": [
+                 "sh",
+                 "-xec",
+                 "mkdir -p /var/log/kolla/openvswitch;
+                  DB=/etc/openvswitch/conf.db;
+                  /usr/bin/ovsdb-tool create $DB;
+                  echo $(date) >> /var/log/kolla/db-create.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "openvswitch-db",
+                   "mountPath": "/etc/openvswitch/"
+                },
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $openvswitchDBFull }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          volumeMounts:
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+{{- if .Values.enableResolveConfNetHostWorkaround }}
+            - mountPath: /etc/resolv.conf
+              name: resolv-conf
+              subPath: resolv.conf
+{{- end }}
+            - mountPath: /etc/openvswitch
+              name: openvswitch-db
+            - mountPath: /var/run/openvswitch
+              name: openvswitch-run
+            - mountPath: /dev
+              name: host-dev
+###
+### Using command: directly instead of command defined in config.json is
+### an exception due to the nature of openvswitch.
+###
+          command: ["sh", "-c"]
+          args:
+            - /usr/sbin/ovsdb-server
+              /etc/openvswitch/conf.db
+              -vconsole:emer
+              -vsyslog:err
+              -vfile:info
+              --remote=punix:/var/run/openvswitch/db.sock
+              --remote=ptcp:6640:0.0.0.0
+              --log-file=/var/log/kolla/openvswitch/ovsdb-server.log
+{{- if .Values.enableKubeLogger }}
+        - name: logging
+          image: "{{ .Values.fluentdImageFull }}"
+          volumeMounts:
+            - mountPath: {{ .Values.container_config_directory }}
+              name: logging-config
+            - mountPath: /var/log/kolla/
+              name: kolla-logs
+            - mountPath: /etc/localtime
+              name: host-etc-localtime
+              readOnly: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+{{- end }}
+      volumes:
+        - name: host-etc-localtime
+          hostPath:
+            path: /etc/localtime
+        - name: kolla-logs
+          emptyDir: {}
+{{- if .Values.global.enableKubeLogger }}
+        - name: logging-config
+          configMap:
+{{- $loggerConfigmapNameDefault := printf "%s-logging" $resourceName }}
+            name: {{ .Values.logger_configmap_name | default $loggerConfigmapNameDefault }}
+{{- end }}
+{{- if .Values.global.enableResolveConfNetHostWorkaround }}
+        - name: resolv-conf
+          configMap:
+            name: resolv-conf
+{{- end }}
+        - name: openvswitch-db
+          emptyDir: {}
+        - name: openvswitch-run
+          hostPath:
+            path: /var/run/openvswitch
+        - name: host-dev
+          hostPath:
+            path: /dev
+{{- end }}
