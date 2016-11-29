@@ -117,12 +117,21 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
-    neutron-openvswitch-agent-network neutron-metadata-agent-network
-[ "x$1" != "xexternal-ovs" ] && kollakube res \
-    create pod openvswitch-ovsdb-network openvswitch-vswitchd-network
+    neutron-metadata-agent-network
+[ "x$1" != "xexternal-ovs" ] && 
+    helm install kolla/openvswitch-ovsdb --version 3.0.0 \
+    --set enable_kube_logger=false,type=network \
+    --namespace kolla --name openvswitch-ovsdb-network &&
+    kollakube res \
+    create pod openvswitch-vswitchd-network \
+    neutron-openvswitch-agent-network
 
-[ "x$1" == "xceph-multi" ] && kollakube res \
-    create pod openvswitch-ovsdb-compute openvswitch-vswitchd-compute \
+[ "x$1" == "xceph-multi" ] &&
+    helm install kolla/openvswitch-ovsdb --version 3.0.0 \
+    --set enable_kube_logger=false,type=compute \
+    --namespace kolla --name openvswitch-ovsdb-compute && 
+    kollakube res \
+    create pod openvswitch-vswitchd-compute \
     neutron-openvswitch-agent-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
