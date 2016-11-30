@@ -116,14 +116,22 @@ kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
-    neutron-openvswitch-agent-network neutron-metadata-agent-network
+kollakube res create pod neutron-dhcp-agent neutron-metadata-agent-network
+
+helm install kolla/neutron-l3-agent --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network \
+    --namespace kolla --name neutron-l3-agent-network
+helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network,tunnel_interface=docker0 \
+    --namespace kolla --name neutron-openvswitch-agent-network
+
 [ "x$1" != "xexternal-ovs" ] && kollakube res \
     create pod openvswitch-ovsdb-network openvswitch-vswitchd-network
-
 [ "x$1" == "xceph-multi" ] && kollakube res \
-    create pod openvswitch-ovsdb-compute openvswitch-vswitchd-compute \
-    neutron-openvswitch-agent-compute
+    create pod openvswitch-ovsdb-compute openvswitch-vswitchd-compute && \
+    helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
+        --set enable_kube_logger=false,type=compute,selector_key=kolla_compute,tunnel_interface=docker0 \
+        --namespace kolla --name neutron-openvswitch-agent-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
 kollakube res create pod nova-libvirt
