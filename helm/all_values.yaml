@@ -40,3 +40,7 @@ neutron-l3-agent:
         l3_agent_image_tag: 2.0.2
 
         logger_configmap_name: neutron-l3-agent-logger
+
+neutron-server:
+        replicas: 3
+        port: 9696
