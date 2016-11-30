@@ -30,3 +30,25 @@ neutron-server:
         image_tag: 2.0.2
         replicas: 3
         port: 9696
+
+neutron-openvswitch-agent:
+        type: network
+
+        #Image overrides
+        #openvswitch_agent_image_full:
+        openvswitch_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-openvswitch-agent-logger
+
+        tunnel_interface: eth0
+
+neutron-l3-agent:
+        type: network
+
+        #Image overrides
+        #l3_agent_image_full:
+        l3_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-l3-agent-logger
+
+        tunnel_interface: eth0
