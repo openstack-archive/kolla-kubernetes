@@ -2,6 +2,14 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
+tunnel_interface=docker0
+if [ "x$1" == "xceph-multi" ]; then
+    interface=$(netstat -ie | grep -B1 \
+        $(cat /etc/nodepool/primary_node_private) \
+        | head -n 1 | awk -F: '{print $1}')
+    tunnel_interface=$interface
+fi
+
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
     nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
@@ -116,8 +124,12 @@ kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
-    neutron-openvswitch-agent-network neutron-metadata-agent-network
+kollakube res create pod neutron-dhcp-agent neutron-metadata-agent-network
+
+helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network,tunnel_interface=$tunnel_interface \
+    --namespace kolla --name neutron-openvswitch-agent-network
+
 [ "x$1" != "xexternal-ovs" ] && 
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
@@ -128,10 +140,11 @@ kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
 [ "x$1" == "xceph-multi" ] &&
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
-    --namespace kolla --name openvswitch-ovsdb-compute && 
-    kollakube res \
-    create pod openvswitch-vswitchd-compute \
-    neutron-openvswitch-agent-compute
+    --namespace kolla --name openvswitch-ovsdb-compute &&
+    helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface \
+    --namespace kolla --name neutron-openvswitch-agent-compute &&
+    kollakube res create pod openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
 kollakube res create pod nova-libvirt
