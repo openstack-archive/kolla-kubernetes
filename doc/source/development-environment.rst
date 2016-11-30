@@ -1,0 +1,358 @@
+.. development_environment:
+
+==========================================
+Kolla Kubernetes Dev Environment
+==========================================
+
+Install Vagrant and Ansible
+================
+
+You can use Halycon-Vagrant-Kubernetes with the VirtualBox, Libvirt or OpenStack
+backends. The documentation here describes the Libvirt backend for Linux hosts,
+but VirtualBox is perfectly acceptable as well if prefered.
+
+.. note::
+
+   Currently, the following versions are tested and required:
+     * Vagrant <1.9.0
+     * Ansible >=2.2.0
+
+
+CentOS 7.2 with Libvirt
+----------
+
+Firstly install Vagrant:
+
+.. path .
+.. code-block:: console
+
+    sudo yum install -y \
+         https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.rpm
+
+.. end
+
+Then install the deps for vagrant libvirt and ensure git-review is present:
+
+.. path .
+.. code-block:: console
+
+    sudo yum install -y libvirt \
+                        libxslt-devel \
+                        libxml2-devel \
+                        libvirt-devel \
+                        libguestfs-tools-c \
+                        ruby-devel \
+                        gcc \
+                        git \
+                        git-review \
+                        gcc-c++
+
+.. end
+
+Now we can install the libvirt plugin itself:
+
+.. path .
+.. code-block:: console
+
+    vagrant plugin install vagrant-libvirt
+
+.. end
+
+Now you can setup Libvirt for use without requiring root privieleges:
+
+.. path .
+.. code-block:: console
+
+    sudo bash -c 'cat << EOF > /etc/polkit-1/rules.d/80-libvirt-manage.rules
+    polkit.addRule(function(action, subject) {
+    if (action.id == "org.libvirt.unix.manage" && subject.local && subject.active && subject.isInGroup("wheel")) {
+      return polkit.Result.YES;
+    }
+    });
+    EOF'
+
+    sudo usermod -aG libvirt $USER
+
+.. end
+
+Once Libvirt and Vagrant have been prepared, you can now start it:
+
+.. path .
+.. code-block:: console
+
+    sudo systemctl start libvirtd
+    sudo systemctl enable libvirtd
+
+.. end
+
+Finally install ansible to allow Halcyon Kubernetes to provision the cluster:
+
+.. path .
+.. code-block:: console
+
+    sudo yum install -y epel-release
+    sudo yum install -y ansible
+
+.. end
+
+Before continuing, log out and back in again for your session to have the correct
+permissions applied.
+
+Ubuntu 16.04 with Libvirt
+----------
+
+Firstly install Vagrant:
+
+.. path .
+.. code-block:: console
+
+    sudo apt-get update
+    # Note that theres is a packaging bug in ubuntu so the upstream package must
+    # be used: https://github.com/vagrant-libvirt/vagrant-libvirt/issues/575
+    curl -L https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb > /tmp/vagrant_1.8.1_x86_64.deb
+    sudo apt-get -y install /tmp/vagrant_1.8.1_x86_64.deb
+
+.. end
+
+Then install the dependencies for vagrant libvirt and ensure git-review is present:
+
+.. path .
+.. code-block:: console
+
+    sudo sed -i 's/^# deb-src/deb-src/g' /etc/apt/sources.list
+    sudo apt-get update
+    sudo apt-get -y build-dep vagrant ruby-libvirt
+    sudo apt-get install -y \
+                 qemu-kvm \
+                 libvirt-bin \
+                 ebtables \
+                 dnsmasq \
+                 libxslt-dev \
+                 libxml2-dev \
+                 libvirt-dev \
+                 zlib1g-dev \
+                 ruby-dev \
+                 git \
+                 git-review
+
+.. end
+
+Now we can install the libvirt plugin itself:
+
+.. path .
+.. code-block:: console
+
+    vagrant plugin install vagrant-libvirt
+
+.. end
+
+Now you can setup Libvirt for use without requiring root privieleges:
+
+.. path .
+.. code-block:: console
+
+    sudo adduser $USER libvirtd
+
+.. end
+
+Finally, install ansible to allow Halcyon Kubernetes to provision the cluster:
+
+.. path .
+.. code-block:: console
+
+    sudo apt-get install -y software-properties-common
+    sudo apt-add-repository -y ppa:ansible/ansible
+    sudo apt-get update
+    sudo apt-get install -y ansible
+
+.. end
+
+Before continuing, log out and back in again for your session to have the correct
+permissions applied.
+
+
+
+MacOS
+----------
+
+Install the CLI Developer tools by opening a terminal and running:
+
+.. path .
+.. code-block:: console
+
+    xcode-select --install
+
+.. end
+
+Download and install VirtualBox from:
+ * https://www.virtualbox.org/wiki/Downloads
+
+Download and install vagrant using the following url to obtain the package:
+ * https://releases.hashicorp.com/vagrant/1.8.7/vagrant_1.8.7.dmg
+There is a bug in Vagrant 1.8.7's embedded curl that prevents boxes being
+downloaded, as described in: https://github.com/mitchellh/vagrant/issues/7997.
+This can be resolved by running the following command:
+
+.. path .
+.. code-block:: console
+
+    sudo rm -f /opt/vagrant/embedded/bin/curl
+
+.. end
+
+
+If your version of MacOS doesn't not include git in the CLI Developer tools
+installed above, you can download and install git from:
+ * https://git-scm.com/download/mac
+
+Now we can install ansible:
+
+.. path .
+.. code-block:: console
+
+    easy_install --user pip
+    printf 'if [ -f ~/.bashrc ]; then\n  source ~/.bashrc\nfi\n' >> $HOME/.profile
+    printf 'export PATH=$PATH:$HOME/Library/Python/2.7/bin\n' >> $HOME/.bashrc
+    source $HOME/.profile
+    pip install --user --upgrade ansible
+    sudo mkdir /etc/ansible
+    sudo curl -L https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg -o /etc/ansible/ansible.cfg
+
+.. end
+
+
+Under MacOS, you may encounter an error during ``vagrant up`` later on, this
+can be resolved by running ``ulimit -n 4048`` from the CLI before bringing the
+environment up.
+
+
+
+Setup environment
+===========================
+
+Clone the repo containing the dev environment:
+
+.. path .
+.. code-block:: console
+
+    git clone https://github.com/att-comdev/halcyon-vagrant-kubernetes
+
+.. end
+
+
+Move into the ```halcyon-vagrant-kubernetes``` directory and run:
+
+.. path .
+.. code-block:: console
+
+    git submodule init
+    git submodule update
+
+.. end
+
+You can then setup Halcyon Vagrant for Kolla. Currently, it is recommended to use
+kubernetes v1.4.6, until https://github.com/kubernetes/helm/issues/1589 is
+fixed. You can select either 'centos' or 'ubuntu' as a guest operating system
+though currently Ubuntu only supports the Vagrant VirtualBox and OpenStack
+backends:
+
+.. path .
+.. code-block:: console
+
+    ./setup-halcyon.sh \
+        --k8s-config kolla \
+        --k8s-version v1.4.6 \
+        --guest-os centos
+
+.. end
+
+Managing and interacting with the environment
+===========================
+
+Once the environment's dependencies have been resolved and configuration
+completed, you can run the following commands to interact with it:
+
+.. path .
+.. code-block:: console
+
+    vagrant up         # To create and start your halcyon-kubernetes cluster
+
+    ./get-k8s-creds.sh # To get the k8s credentials for the cluster and setup
+                       # kubectl on your host to access it, if you have the helm
+                       # client installed on your host this script will also set
+                       # up the client to enable you to perform all development
+                       # outside of the cluster.
+
+   vagrant ssh kube1   # To ssh into the master node.
+
+   vagrant destroy     # To make it all go away.
+
+
+.. end
+
+
+Note that it will take a few minutes for everything to be operational, typically
+between 2-5 mins after vagrant/ansible has finished for all services to be
+online for my machine (Xeon E3-1240 v3, 32GB, SSD), primarily dependant on
+network performance. This is as it takes time for the images to be pulled, and
+CNI networking to come up, DNS being usually the last service to become active.
+
+
+Testing the deployed environment
+===========================
+
+You can test that everything is working by running, to start a container with an
+interactive terminal:
+
+.. path .
+.. code-block:: console
+
+    kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
+
+.. end
+
+Once that pod has started and your terminal has connected to it, you can then
+test the kubenetes DNS service (and by extension the CNI SDN layer) by running:
+
+.. path .
+.. code-block:: console
+
+    nslookup kubernetes
+
+.. end
+
+To test that helm is working you can run the following:
+
+.. path .
+.. code-block:: console
+
+    helm init --client-only
+    helm repo update
+    helm install stable/mysql
+    helm ls
+    # and to check via kubectl
+    kubectl get all
+
+.. end
+
+The pods in the above example will not provision and be shown as pending as
+there is no dynamic PVC creation within the cluster *yet*.
+
+
+Setting up kubernetes for kolla-k8s deployment
+===========================
+
+To set the cluster up for developing kolla-k8s: you will most likely want to run
+the following command:
+
+.. path .
+.. code-block:: console
+
+    hkubectl get nodes -L kubeadm.alpha.kubernetes.io/role --no-headers | awk '$NF ~ /^<none>/ { print $1}' | while read NODE ; do
+    kubectl label node $NODE --overwrite kolla_controller=true
+    kubectl label node $NODE --overwrite kolla_compute=true
+    done
+
+.. end
+
+This will mark all the workers as being available for both storage and API pods.
