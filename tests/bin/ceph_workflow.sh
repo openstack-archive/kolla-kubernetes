@@ -110,8 +110,12 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
     neutron-create-keystone-endpoint-admin
 
 kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
-    glance-registry neutron-server horizon nova-consoleauth nova-novncproxy \
+    glance-registry horizon nova-consoleauth nova-novncproxy \
     cinder-api cinder-scheduler cinder-volume-ceph
+
+helm install kolla/neutron-server --version 3.0.0-1 \
+    --set enable_kube_logger=false \
+    --namespace kolla --name neutron-server
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
