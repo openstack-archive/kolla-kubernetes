@@ -60,6 +60,8 @@ tests/bin/setup_gate_loopback.sh
 
 tools/setup_kubernetes.sh master
 
+kubectl taint nodes --all dedicated-
+
 mkdir -p ~/.helm/repository/local
 sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
 tools/helm_prebuild.py
@@ -69,7 +71,8 @@ sleep 1
 helm repo update
 helm search
 
-kubectl taint nodes --all dedicated-
+tools/pull_containers.sh kube-system
+tools/wait_for_pods.sh kube-system
 
 # Turn up kube-proxy logging
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
