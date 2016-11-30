@@ -12,10 +12,24 @@
 # limitations under the License.
 
 import copy
+import errno
 import os
-import shutil
+import subprocess
 import sys
 import yaml
+
+
+def helm_build_package(repodir, srcdir):
+    command_line = "cd %s; helm package %s" % (repodir, srcdir)
+    try:
+        res = subprocess.check_output(
+            command_line, shell=True,
+            executable='/bin/bash')
+        res = res.strip()  # strip whitespace
+        print(res)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        raise
 
 
 def _isdir(path, entry):
@@ -31,9 +45,13 @@ def main():
     values = yaml.load(open(os.path.join(srcdir, "all_values.yaml")))
 
     for package in [p for p in microservices if _isdir(microdir, p)]:
-        template = os.path.join("templates", "_common_lib.yaml")
-        shutil.copy(os.path.join(srcdir, "kolla-common", template),
-                    os.path.join(microdir, package, template))
+        pkgchartdir = os.path.join(microdir, package, "charts")
+        try:
+            os.makedirs(pkgchartdir)
+        except OSError, e:
+            if e.errno != errno.EEXIST:
+                raise
+        helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
         pkg_values = copy.deepcopy(values['common'])
         try:
             pkg_values.update(values[package])
