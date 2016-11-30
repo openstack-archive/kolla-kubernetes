@@ -4,6 +4,12 @@
 {{- $kollaToolboxImageFull -}}
 {{- end }}
 
+{{- define "haproxy_image_full" }}
+{{- $haproxyImageBuilt := printf "%s/%s/%s-%s-haproxy:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.haproxy_image_tag }}
+{{- $haproxyImageFull := .Values.haproxy_image_full | default $haproxyImageBuilt }}
+{{- $haproxyImageFull -}}
+{{- end }}
+
 {{- define "fluentd_image_full" }}
 {{- $fluentdImageBuilt := printf "%s/%s/%s-%s-fluentd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.fluentd_image_tag }}
 {{- $fluentdImageFull := .Values.kolla_toolbox_image_full | default $fluentdImageBuilt }}
