@@ -255,4 +255,4 @@ within the toolbox like:
     grep keystone_admin /etc/kolla/passwords.yml
 
 .. NOTE:: petsets currently arn't deleted on delete. The resources for it will
-have to be cleaned up by hand.
+          have to be cleaned up by hand.
