@@ -1,0 +1,152 @@
+{{- define "common_deployment" }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: {{ .resourceName }}
+spec:
+  replicas: {{ .Values.replicas }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        service: {{ .serviceName }}
+        type: {{ .serviceType }}
+      annotations:
+        kolla_upgrade: minor_rolling_safe
+#FIXME Once out of alpha, this should be converted to yaml.
+#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
+# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
+# other containers from directly accessing the service
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{{- if eq .resourceName "kibana" }}
+                   IP=\"127.0.0.1\";
+                   PORT=\"8080\";
+                   sed -i ''s|^elasticsearch.url:.*|elasticsearch.url: \"http://elasticsearch:9200\"|g'' /srv/pod-main-config/kibana.yml;
+                   sed -i ''s|^server.host:.*|server.host: \"''$IP''\"|g'' /srv/pod-main-config/kibana.yml;
+                   sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
+{{- else }}
+                   CONF=/srv/pod-main-config/{{ .configFileName }};
+{{- if eq .resourceName "nova-api" }}
+                   crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
+                   crudini --set $CONF DEFAULT metadata_listen_port 8081;
+{{- end }}
+                   crudini --set $CONF {{ .configSectionName }} {{ .configListenHostParameter }} 127.0.0.1;
+                   crudini --set $CONF {{ .configSectionName }} {{ .configListenPortParameter }} 8080;
+{{- end }}
+              "],
+              "volumeMounts": [
+                  {
+                      "name": "service-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          }
+      ]'
+    spec:
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: 172800
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value }}
+      containers:
+        - name: haproxy
+          image: {{ include "haproxy_image_full" . | quote }}
+          command:
+          - /bin/bash
+          - -c
+          - |
+            kolla_start;
+            touch /var/lib/kolla-kubernetes/event/shutdown;
+          readinessProbe:
+            httpGet:
+              path: {{ .checkPath }}
+              port: {{ .Values.port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+#NOTE this only works if you arn't doing a haproxy reconfigure too.
+#But shouldn't ever have to do that in a setup like this.
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  kill -USR1 $(</var/run/haproxy.pid);
+                  while true; do sleep 1000; done
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .containerConfigDirectory }}
+              name: haproxy-config
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          ports:
+            - containerPort: {{ .Values.port }}
+              name: {{ .portName }}
+{{- if eq .resourceName "nova-api" }}
+            - containerPort: {{ .Values.metadata_port }}
+              name: nova-metadata
+{{- end }}
+        - name: main
+          image: "{{ .imageFull }}"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+{{- if .extraVolumeMounts }}
+{{- include .extraVolumeMounts . | indent 12 }}
+{{- end }}
+{{- if .privileged }}
+          securityContext:
+            privileged: true
+{{- end }}
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: service-configmap
+          configMap:
+            name: {{ .resourceName }}
+{{- if .extraConfigmapConfig }}
+{{- include .extraConfigmapConfig . | indent 12 }}
+{{- end }}
+        - name: haproxy-config
+          configMap:
+            name: {{ .resourceName }}-haproxy
+{{- if .extraVolume }}
+{{- include .extraVolume . | indent 8 }}
+{{- end }}
+{{- end }}
