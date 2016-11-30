@@ -1,15 +1,3 @@
-{{- define "kolla_toolbox_image_full" }}
-{{- $kollaToolboxImageBuilt := printf "%s/%s/%s-%s-kolla-toolbox:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kolla_toolbox_image_tag }}
-{{- $kollaToolboxImageFull := .Values.kolla_toolbox_image_full | default $kollaToolboxImageBuilt }}
-{{- $kollaToolboxImageFull -}}
-{{ end }}
-
-{{- define "fluentd_image_full" }}
-{{- $fluentdImageBuilt := printf "%s/%s/%s-%s-fluentd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.fluentd_image_tag }}
-{{- $fluentdImageFull := .Values.kolla_toolbox_image_full | default $fluentdImageBuilt }}
-{{- $fluentdImageFull -}}
-{{ end }}
-
 {{- define "common_volume_mounts" }}
 - mountPath: /var/log/kolla/
   name: kolla-logs
