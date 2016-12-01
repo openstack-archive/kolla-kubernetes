@@ -27,7 +27,7 @@ Then, generate the Kolla configuration files:
 ::
 
     # Generate Kolla Configuration Files
-    pushd kolla
+    pushd kolla-ansible
     sudo ./tools/generate_passwords.py
     sudo ./tools/kolla-ansible genconfig
     popd

@@ -100,8 +100,8 @@ Generate Config File
 This operation is soon to be split out from the Kolla repo.
 
 Kolla-kubernetes depends on configuration files (and images) that are generated
-from kolla.  When fully installed, kolla default configuration files
-(globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
+from kolla-ansible (and kolla).  When fully installed, kolla default configuration
+files (globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
 configuration files are placed in the same directory.  Kolla's
 ``generate_passwords.py`` creates a passwords.yml file which contains passwords
 and encryption keys.
@@ -124,7 +124,7 @@ First, edit ``/etc/kolla/globals.yml`` and add the following::
 
 Then, generate the config files for all the services::
 
-  cd kolla
+  cd kolla-ansible
   ./tools/kolla-ansible genconfig
 
 Full Install
@@ -137,6 +137,15 @@ Full Install
 
     # Install Kolla
     pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+
+    # Install Kolla-ansible
+    pushd kolla-ansible
     sudo pip install .
     sudo cp -r ./etc/kolla /etc
     popd
@@ -161,6 +170,15 @@ Development Install
 
     # Install Kolla
     pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+
+    # Install Kolla-ansible
+    pushd kolla-ansible
     sudo pip install --editable .
     sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla path
     popd
