@@ -32,18 +32,48 @@ for x in mariadb rabbitmq; do
 done
 
 kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    rabbitmq rabbitmq-management nova-api glance-api glance-registry \
+    nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
 
-kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
+helm install kolla/rabbitmq-svc --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-svc --set name=rabbitmq
+
+kollakube res create bootstrap mariadb-bootstrap
+
+helm install kolla/rabbitmq-job --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-job --set name=rabbitmq
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+kollakube res delete bootstrap mariadb-bootstrap
 
+[ -d "$WORKSPACE/logs" ] &&
+kubectl get jobs --namespace=kolla >> $WORKSPACE/logs/rabbitmq-debug.log
+
+helm ls | grep rabbitmq-job | awk '{print "helm delete "$1}' | sh -l || true
+
+[ -d "$WORKSPACE/logs" ] &&
+kubectl get jobs --namespace=kolla >> $WORKSPACE/logs/rabbitmq-debug.log
+
+kubectl get job --namespace=kolla | grep rabbitmq | awk '{print "kubectl delete job "$1" --namespace=kolla"}' | sh -l
+
+[ -d "$WORKSPACE/logs" ] &&
+kubectl get jobs --namespace=kolla >> $WORKSPACE/logs/rabbitmq-debug.log
+
+kollakube res create pod mariadb memcached
+
+helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-pod --set "$common_vars,name=rabbitmq"
+
+$DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
+
+[ -d "$WORKSPACE/logs" ] &&
+kubectl get pods --namespace=kolla >> $WORKSPACE/logs/rabbitmq-debug.log
+
+[ -d "$WORKSPACE/logs" ] &&
+kubectl describe pod rabbitmq-0 --namespace=kolla || true >> $WORKSPACE/logs/rabbitmq-debug.log
 
 kollakube resource create bootstrap keystone-create-db keystone-endpoints \
     keystone-manage-db
