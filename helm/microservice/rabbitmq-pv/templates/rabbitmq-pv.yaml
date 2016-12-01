@@ -1,0 +1,42 @@
+{{- $storageProvider := .Values.storage_provider | default "host" }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.rabbitmq_pv_name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: {{ .Values.rabbitmq_volume_size_in_gb }}Gi
+{{- if eq $storageProvider "host" }}
+  hostPath:
+    path: /var/lib/kolla/volumes/{{ .Values.rabbitmq_pv_name }}
+
+{{- else if eq $storageProvider "gce" }}
+  gcePersistentDisk:
+    pdName: {{ .Values.rabbitmq_pv_name }}
+    fsType: {{ .Values.storage_provider_fstype | default "xfs" }}
+
+{{- else if eq $storageProvider "ceph" }}
+  rbd:
+    monitors:
+      {{- range .Values.ceph.monitors }}
+      - "{{ . }}:6789"
+      {{- end }}
+    pool: {{ .Values.ceph.pool }}
+    image: {{ .Values.rabbitmq_pv_name }}
+    user: {{ .Values.ceph.user }}
+    {{- if .Values.ceph.keyring }}
+    {{- if gt .Values.ceph.keyring|len  0 }}
+    keyring: {{ .Values.ceph.keyring }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.global.ceph.secretName }}
+    {{- if gt .Values.ceph.secretName|len 0 }}
+    secretRef:
+      name: {{ .Values.ceph.secretName }}
+    {{- end }}
+    {{- end }}
+    fsType: {{ .Values.storage_provider_fstype | default "xfs" }}
+    readOnly: false
+{{- end }}
