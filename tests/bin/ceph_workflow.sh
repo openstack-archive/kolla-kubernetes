@@ -32,8 +32,13 @@ for x in mariadb rabbitmq; do
 done
 
 kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    rabbitmq rabbitmq-management nova-api glance-api glance-registry \
+    nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
+
+helm ls
+
+helm install kolla/rabbitmq-svc --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq
 
 kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
 
