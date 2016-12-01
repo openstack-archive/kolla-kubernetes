@@ -1,7 +1,7 @@
 .. quickstart:
 
 =================================
-Kolla Kubernetes Quickstart Guide
+Kolla-Kubernetes Quickstart Guide
 =================================
 
 Configure Kolla-Kubernetes
@@ -22,12 +22,12 @@ are specific to kolla-kubernetes:
     keystone_public_url: "http://keystone-public:5000/v3"
     glance_registry_host: "glance"
 
-Then, generate the Kolla configuration files:
+Then, generate the Kolla-ansible configuration files:
 
 ::
 
-    # Generate Kolla Configuration Files
-    pushd kolla
+    # Generate Kolla-ansible Configuration Files
+    pushd kolla-ansible
     sudo ./tools/generate_passwords.py
     sudo ./tools/kolla-ansible genconfig
     popd
