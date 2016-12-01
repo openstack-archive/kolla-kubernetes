@@ -90,25 +90,90 @@ Follow the instructions for a **full install** if you are not a developer.
 Choose a **development install** if you will frequently pull or contribute
 patches.  A development install allows you to ```git pull``` within the
 repository in order to use the latest code without having to re-install.  It
-also removes the need to copy files to system directories such as /etc/kolla,
+also saves the trouble to copy files to system directories such as /etc/kolla,
 and allows you to use ```git diff``` to see all code or resource file changes
 that you or the system has made.
+
+Full Installation
+-----------------
+
+::
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+
+    # Install Kolla-ansible
+    pushd kolla-ansible
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla
+    git clone https://git.openstack.org/openstack/kolla
+
+    # Install Kolla
+    pushd kolla
+    sudo pip install .
+    popd
+
+    # Clone Kolla-Kubernetes
+    git clone https://git.openstack.org/openstack/kolla-kubernetes
+
+    # Install Kolla-Kubernetes
+    pushd kolla-kubernetes
+    sudo pip install .
+    sudo cp -r ./etc/kolla-kubernetes /etc
+    popd
+
+Development Installation
+------------------------
+
+::
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+    mv kolla-ansible kolla
+
+    # Install Kolla-ansible
+    pushd kolla
+    sudo pip install --editable .
+    sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla-ansible path
+    popd
+
+    # Clone Kolla-Kubernetes
+    git clone https://git.openstack.org/openstack/kolla-kubernetes
+
+    # Install Kolla-Kubernetes
+    pushd kolla-kubernetes
+    sudo pip install --editable .
+    sudo ln -sf `readlink -f ./etc/kolla-kubernetes` /etc/
+    popd
+
+.. NOTE::
+  - Ansible commands (e.g. kolla-ansible) targeting the local machine require
+    sudo because ansible creates ``/etc/.ansible_*`` and
+    ``/etc/kolla/<service>`` files which require root permissions.
+  - Executing local versions of kolla tools ``./tools/kolla-ansible`` instead
+    of from the system path, will locate resource files from relative locations
+    instead of system locations.
+  - The development install will also work with Python virtual environments.
 
 Generate Config File
 --------------------
 
-This operation is soon to be split out from the Kolla repo.
+This operation has been split out from the Kolla repo.
 
 Kolla-kubernetes depends on configuration files (and images) that are generated
-from kolla.  When fully installed, kolla default configuration files
-(globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
-configuration files are placed in the same directory.  Kolla's
-``generate_passwords.py`` creates a passwords.yml file which contains passwords
-and encryption keys.
+from kolla-ansible (and kolla).  When fully installed, kolla-ansible default
+configuration files (globals.yml and passwords.yml) are expected in ``/etc/kolla``.
+Newly generated configuration files are placed in the same directory.
+Kolla-ansible's ``generate_passwords.py`` generates passwords and populates the
+already existing passwords.yml file (copied from kolla-ansible/etc/kolla to
+/etc/kolla) which contains passwords and encryption keys.
 
-Kolla's ``kolla-ansible genconfig`` will generate the
+Kolla-ansible's ``kolla-ansible genconfig`` will generate the
 config files for each kolla service container based on the contents of
-globals.yml and passwords.yml
+globals.yml and passwords.yml.
 
 First, edit ``/etc/kolla/globals.yml`` and add the following::
 
@@ -124,65 +189,8 @@ First, edit ``/etc/kolla/globals.yml`` and add the following::
 
 Then, generate the config files for all the services::
 
-  cd kolla
+  cd kolla-ansible
   ./tools/kolla-ansible genconfig
-
-Full Install
-------------
-
-::
-
-    # Clone Kolla
-    git clone https://git.openstack.org/openstack/kolla
-
-    # Install Kolla
-    pushd kolla
-    sudo pip install .
-    sudo cp -r ./etc/kolla /etc
-    popd
-
-    # Clone Kolla-Kubernetes
-    git clone https://git.openstack.org/openstack/kolla-kubernetes
-
-    # Install Kolla-Kubernetes
-    pushd kolla-kubernetes
-    sudo pip install .
-    sudo cp -r ./etc/kolla-kubernetes /etc
-    popd
-
-
-Development Install
--------------------
-
-::
-
-    # Clone Kolla
-    git clone https://git.openstack.org/openstack/kolla
-
-    # Install Kolla
-    pushd kolla
-    sudo pip install --editable .
-    sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla path
-    popd
-
-    # Clone Kolla-Kubernetes
-    git clone https://git.openstack.org/openstack/kolla-kubernetes
-
-    # Install Kolla-Kubernetes
-    pushd kolla-kubernetes
-    sudo pip install --editable .
-    popd
-
-
-.. NOTE::
-  - Ansible commands (e.g. kolla-ansible) targeting the local machine require
-    sudo because ansible creates ``/etc/.ansible_*`` and
-    ``/etc/kolla/<service>`` files which require root permissions.
-  - Executing local versions of kolla tools ``./tools/kolla-ansible`` instead
-    of from the system path, will locate resource files from relative locations
-    instead of system locations.
-  - The development install will also work with Python virtual environments.
-
 
 Building Kolla Containers
 =========================
