@@ -1,7 +1,7 @@
 .. quickstart:
 
 =================================
-Kolla Kubernetes Quickstart Guide
+Kolla-Kubernetes Quickstart Guide
 =================================
 
 Configure Kolla-Kubernetes
@@ -27,7 +27,7 @@ Then, generate the Kolla configuration files:
 ::
 
     # Generate Kolla Configuration Files
-    pushd kolla
+    pushd kolla-ansible
     sudo ./tools/generate_passwords.py
     sudo ./tools/kolla-ansible genconfig
     popd
@@ -35,7 +35,7 @@ Then, generate the Kolla configuration files:
 If using a virt setup, set nova to use qemu unless your environment has
 nested virt capabilities enabled::
 
-    crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
+    crudini --set /etc/kolla/config/nova.conf libvirt virt_type qemu
 
 Labeling Nodes
 ==============

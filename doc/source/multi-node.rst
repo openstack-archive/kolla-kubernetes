@@ -70,7 +70,7 @@ the kolla images to your docker registry.
 ::
 
   # Generate the kolla configurations
-  pushd kolla
+  pushd kolla-ansible
   sudo ./tools/generate_passwords.py  # (Optional: will overwrite)
   sudo ./tools/kolla-ansible genconfig
   popd
