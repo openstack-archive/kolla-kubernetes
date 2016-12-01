@@ -71,8 +71,7 @@ the kolla images to your docker registry.
 
   # Generate the kolla configurations
   pushd kolla
-  sudo ./tools/generate_passwords.py  # (Optional: will overwrite)
-  sudo ./tools/kolla-ansible genconfig
+  oslo-config-generator --config-file etc/oslo-config-generator/kolla-build.conf
   popd
 
 
