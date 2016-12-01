@@ -1,0 +1,8 @@
+{{- $pvName := "rabbitmq" }}
+{{- $storageProvider := "ceph" }}
+{{- $storageProviderFStype := "xfs" }}
+{{- $volumeName := "rabbitmq"}}
+{{- $volumeSizeGB := 10 }}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pv" $env }}
+{{- end }}
