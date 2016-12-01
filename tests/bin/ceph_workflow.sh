@@ -66,9 +66,14 @@ $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap mariadb-bootstrap
 
+kollakube res create pod mariadb
+
 helm delete rabbitmq-job
 
-kollakube res create pod mariadb memcached
+helm install kolla/memcached --version 3.0.0-1 \
+    --set "enable_kube_logger=false,element_name=memcached" \
+    --namespace kolla --name memcached
+
 
 helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-pod --set "$common_vars,element_name=rabbitmq"
