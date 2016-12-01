@@ -1,0 +1,9 @@
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Code-Review+1: Steve Wilkerson <wilkers.steve@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 01 Dec 2016 16:56:22 +0000
+Reviewed-on: https://review.openstack.org/403959
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
