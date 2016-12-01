@@ -1,0 +1,41 @@
+{{- $rabbitmqImageBuilt := printf "%s/%s/%s-%s-rabbitmq:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.rabbitmq_image_tag | default .Values.kolla_tag }}
+{{- $rabbitmqImageFull := .Values.rabbitmq_image_full | default $rabbitmqImageBuilt }}
+{{- $resourceName := "rabbitmq-bootstrap" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $rabbitmqImageFull }}"
+          name: main
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: rabbitmq-config
+            - mountPath: /var/lib/rabbitmq
+              name: rabbitmq-persistent-storage
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+            - name: RABBITMQ_CLUSTER_COOKIE
+              value: {{ .Values.rabbitmq_cluster_cookie }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: rabbitmq-config
+          configMap:
+            name: {{ .Values.name }} 
+        - name: rabbitmq-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.rabbitmq_pvc_name }}
+      restartPolicy: OnFailure
+metadata:
+  name: {{ .Values.name }}-bootstrap
+{{- end }}
