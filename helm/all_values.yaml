@@ -30,3 +30,10 @@ neutron-server:
         image_tag: 2.0.2
         replicas: 3
         port: 9696
+
+openvswitch-vswitchd:
+        openvswitch_vswitchd_image_tag: 3.0.1
+        kolla_kubernetes_ovs_setup_bridge: true
+        kolla_kubernetes_ovs_add_port: true
+        ext_bridge_name: "br-ex"
+        ext_interface_name: "eth1"

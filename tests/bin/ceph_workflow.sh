@@ -128,15 +128,18 @@ kollakube res create pod neutron-dhcp-agent neutron-l3-agent-network \
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
     --namespace kolla --name openvswitch-ovsdb-network &&
-    kollakube res \
-    create pod openvswitch-vswitchd-network
+    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
+    --namespace kolla --name openvswitch-vswitchd-network 
 
 [ "x$1" == "xceph-multi" ] &&
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
-    --namespace kolla --name openvswitch-ovsdb-compute && 
-    kollakube res \
-    create pod openvswitch-vswitchd-compute \
+    --namespace kolla --name openvswitch-ovsdb-compute &&
+    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
+    --namespace kolla --name openvswitch-vswitchd-compute && 
+    kollakube res create pod \
     neutron-openvswitch-agent-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
