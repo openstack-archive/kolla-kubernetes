@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .Values.rabbitmq_port }}
+      name: rabbitmq
+  selector:
+    service: rabbitmq
+metadata:
+   name: rabbitmq
+---
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .Values.rabbitmq_management_port }}
+      name: management
+{{- if .Values.rabbitmq_management_nodeport }}
+      nodePort: {{ .Values.rabbitmq_management_nodeport }}
+  type: NodePort
+{{- else if  .Values.rabbitmq_management_external }}
+  externalIPs:
+    - {{ .Values.kolla_kubernetes_external_vip }}
+{{- end }}
+  selector:
+    service: rabbitmq
+metadata:
+   name: rabbitmq-management
