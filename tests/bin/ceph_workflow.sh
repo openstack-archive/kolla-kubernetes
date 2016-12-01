@@ -32,15 +32,23 @@ for x in mariadb rabbitmq; do
 done
 
 kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    rabbitmq rabbitmq-management nova-api glance-api glance-registry \
+    nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
 
-kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
+helm install kolla/rabbitmq-svc --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq --set name=rabbitmq
+
+kollakube res create bootstrap mariadb-bootstrap
+
+helm install kolla/rabbitmq-job --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq --set name=rabbitmq
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
+kollakube res delete bootstrap mariadb-bootstrap
+helm ls | grep rabbitmq | awk '{print "helm delete "$1}' | sh -l
+
 kollakube res create pod mariadb memcached rabbitmq
 
 $DIR/tools/wait_for_pods.sh kolla
