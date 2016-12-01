@@ -1,7 +1,7 @@
 .. quickstart:
 
 =================================
-Kolla Kubernetes Quickstart Guide
+Kolla-Kubernetes Quickstart Guide
 =================================
 
 Install Kolla-Ansible
