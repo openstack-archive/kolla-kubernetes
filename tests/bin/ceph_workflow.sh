@@ -41,7 +41,11 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+kollakube res create pod mariadb rabbitmq
+
+helm install kolla/memcached --version 3.0.0-1 \
+    --set enable_kube_logger=false \
+    --namespace kolla --name memcached
 
 $DIR/tools/wait_for_pods.sh kolla
 
