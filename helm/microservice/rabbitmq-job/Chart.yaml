@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 3.0.0-1 
+description: rabbitmq-job subservice layer
+name: rabbitmq-job
+keywords:
+  - openstack
+  - rabbitmq
+  - rabbitmq-job
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl

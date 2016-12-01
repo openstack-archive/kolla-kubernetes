@@ -1,0 +1,58 @@
+{{- define "kolla_toolbox_image_full" }}
+{{- $kollaToolboxImageBuilt := printf "%s/%s/%s-%s-kolla-toolbox:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kolla_toolbox_image_tag }}
+{{- $kollaToolboxImageFull := .Values.kolla_toolbox_image_full | default $kollaToolboxImageBuilt }}
+{{- $kollaToolboxImageFull -}}
+{{ end }}
+
+{{- define "fluentd_image_full" }}
+{{- $fluentdImageBuilt := printf "%s/%s/%s-%s-fluentd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.fluentd_image_tag }}
+{{- $fluentdImageFull := .Values.kolla_toolbox_image_full | default $fluentdImageBuilt }}
+{{- $fluentdImageFull -}}
+{{ end }}
+
+{{- define "common_volume_mounts" }}
+- mountPath: /var/log/kolla/
+  name: kolla-logs
+- mountPath: /etc/localtime
+  name: host-etc-localtime
+  readOnly: true
+{{- if and .netHostTrue .Values.enable_resolve_conf_net_host_workaround }}
+- mountPath: /etc/resolv.conf
+  name: resolv-conf
+  subPath: resolv.conf
+{{- end }}
+{{- end }}
+
+{{- define "common_containers" }}
+{{- if .Values.enable_kube_logger }}
+- name: logging
+  image: {{ include "fluentd_image_full" . | quote }}
+  volumeMounts:
+    - mountPath: {{ .Values.container_config_directory }}
+      name: logging-config
+{{- include "common_volume_mounts" . | indent 4 }}
+  env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ONCE
+{{- end }}
+{{- end }}
+
+{{- define "common_volumes" }}
+- name: host-etc-localtime
+  hostPath:
+    path: /etc/localtime
+- name: kolla-logs
+  emptyDir: {}
+{{- $podTypeNotBootstrap := not .podTypeBootstrap }}
+{{- if and .Values.enable_kube_logger $podTypeNotBootstrap }}
+- name: logging-config
+  configMap:
+{{- $loggerConfigmapNameDefault := printf "%s-logging" .resourceName }}
+    name: {{ .Values.logger_configmap_name | default $loggerConfigmapNameDefault }}
+{{- end }}
+{{- if and .netHostTrue .Values.enable_resolve_conf_net_host_workaround }}
+- name: resolv-conf
+  configMap:
+    name: resolv-conf
+{{- end }}
+{{- end }}
