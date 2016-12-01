@@ -90,7 +90,7 @@ Follow the instructions for a **full install** if you are not a developer.
 Choose a **development install** if you will frequently pull or contribute
 patches.  A development install allows you to ```git pull``` within the
 repository in order to use the latest code without having to re-install.  It
-also removes the need to copy files to system directories such as /etc/kolla,
+also saves the trouble to copy files to system directories such as /etc/kolla,
 and allows you to use ```git diff``` to see all code or resource file changes
 that you or the system has made.
 
@@ -100,15 +100,15 @@ Generate Config File
 This operation is soon to be split out from the Kolla repo.
 
 Kolla-kubernetes depends on configuration files (and images) that are generated
-from kolla.  When fully installed, kolla default configuration files
-(globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
+from kolla-ansible (and kolla).  When fully installed, kolla default configuration
+files (globals.yml) are expected in ``/etc/kolla`` (globals.yml).  Newly generated
 configuration files are placed in the same directory.  Kolla's
 ``generate_passwords.py`` creates a passwords.yml file which contains passwords
 and encryption keys.
 
 Kolla's ``kolla-ansible genconfig`` will generate the
 config files for each kolla service container based on the contents of
-globals.yml and passwords.yml
+globals.yml and passwords.yml.
 
 First, edit ``/etc/kolla/globals.yml`` and add the following::
 
@@ -124,11 +124,11 @@ First, edit ``/etc/kolla/globals.yml`` and add the following::
 
 Then, generate the config files for all the services::
 
-  cd kolla
+  cd kolla-ansible
   ./tools/kolla-ansible genconfig
 
-Full Install
-------------
+Full Installation
+-----------------
 
 ::
 
@@ -137,6 +137,15 @@ Full Install
 
     # Install Kolla
     pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+
+    # Install Kolla-ansible
+    pushd kolla-ansible
     sudo pip install .
     sudo cp -r ./etc/kolla /etc
     popd
@@ -151,8 +160,8 @@ Full Install
     popd
 
 
-Development Install
--------------------
+Development Installation
+------------------------
 
 ::
 
@@ -161,6 +170,15 @@ Development Install
 
     # Install Kolla
     pushd kolla
+    sudo pip install .
+    sudo cp -r ./etc/kolla /etc
+    popd
+
+    # Clone Kolla-ansible
+    git clone https://git.openstack.org/openstack/kolla-ansible
+
+    # Install Kolla-ansible
+    pushd kolla-ansible
     sudo pip install --editable .
     sudo ln -sf `readlink -f ./etc/kolla` /etc/  # link from hard-coded kolla path
     popd
