@@ -3,6 +3,10 @@
 # C extensions
 *.so
 
+# helm / chart
+values.yaml
+**/charts
+
 # Packages
 *.egg*
 *.egg-info
