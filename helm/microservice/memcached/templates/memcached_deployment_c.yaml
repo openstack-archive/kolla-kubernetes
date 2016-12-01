@@ -1,0 +1,23 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-memcahed-server:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "memached-server" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "memcached" }}
+{{- $serviceType := "server" }}
+{{- $configFileName := "memcached.conf" }}
+{{- $configSectionName := "DEFAULT" }}
+{{- $configListenHostParameter := "bind_host" }}
+{{- $configListenPortParameter := "bind_port" }}
+{{- $portName := "memcached-server" }}
+{{- $checkPath := "/" }}
+{{- $extraConfigmapConfig := "memcached_server_extra_configmap_config" }}
+{{- $privileged := false }}
+{{- define "memcached_server_extra_configmap_config" }}
+items:
+- key: memcached.conf
+  path: memcached.conf
+{{- end }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values }}
+{{- include "common_deployment" $env }}
+{{- end }}

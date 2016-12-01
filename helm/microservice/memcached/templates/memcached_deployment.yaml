@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: memcached
+   namespace: {{ .Values.kolla_kubernetes_namespace }}
+spec:
+  replicas: {{ .Values.memcached_replicas }}
+  selector:
+      service: memcached
+  template:
+    metadata:
+      labels:
+        service: memcached
+    spec:
+      nodeSelector:
+        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ .Values.memcached_image_full }}"
+          name: main
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: memcached-config
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: {{ .Values.config_strategy }}
+          ports:
+            - containerPort: {{ .Values.memcached_port }}
+              name: memcached
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: memcached-config
+          configMap:
+            name: memcached
+
