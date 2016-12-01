@@ -52,3 +52,10 @@ neutron-l3-agent:
         logger_configmap_name: neutron-l3-agent-logger
 
         tunnel_interface: eth0
+
+openvswitch-vswitchd:
+        openvswitch_vswitchd_image_tag: 2.0.2
+        kolla_kubernetes_ovs_setup_bridge: true
+        kolla_kubernetes_ovs_add_port: false 
+        ext_bridge_name: "br-ex"
+        ext_interface_name: "eth1"
