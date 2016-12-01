@@ -1,0 +1,117 @@
+{{- $restype := .Values.type }}
+{{- $openvswitchVswitchdImageBuilt := printf "%s/%s/%s-%s-openvswitch-vswitchd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_vswitchd_image_tag | default .Values.kolla_tag }}
+{{- $openvswitchVswitchdFull := .Values.openvswitch_vswitchd_image_full | default $openvswitchVswitchdImageBuilt }}
+{{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: openvswitch-vswitchd-{{ $restype}}
+  labels:
+    component: openvswitch
+    system: openvswitch-vswitchd-{{ $restype }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: openvswitch
+        system: openvswitch-vswitchd-{{ $restype }}
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-ovs-vswitchd",
+             "image": "{{ $openvswitchVswitchdFull }}",
+             "command": [
+                 "sh",
+                 "-xec",
+                 "mkdir -p /var/log/kolla/openvswitch;
+{{- if .Values.kolla_kubernetes_ovs_setup_bridge }}
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ .Values.ext_bridge_name }} ;
+{{- if .Values.kolla_kubernetes_ovs_add_port }}
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ .Values.ext_bridge_name }} {{ .Values.ext_interface_name }};
+{{- end }}
+{{- end }}
+                  echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "openvswitch-run",
+                   "mountPath": "/var/run/openvswitch/"
+                }
+             ]
+          },
+          {
+             "name": "dependencies",
+             "image": "{{ $kubernetesEntryPointImageFull }}",
+             "env": [
+                {
+                   "name": "DEPENDENCY_SOCKET",
+                   "value": "/var/run/openvswitch/db.sock"
+                },
+                {
+                   "name": "COMMAND",
+                   "value": "exit 0"
+                }
+             ],
+             "volumeMounts": [
+                {
+                   "name": "openvswitch-run",
+                   "mountPath": "/var/run/openvswitch/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $openvswitchVswitchdFull }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/run/openvswitch
+              name: openvswitch-run
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: true
+###
+### Using command: directly instead of command defined in config.json is
+### an exception due to the nature of openvswitch.
+###
+          command: ["sh", "-xec"]
+          args:
+            - modprobe openvswitch || true;
+              /usr/sbin/ovs-vswitchd
+              unix:/var/run/openvswitch/db.sock
+              -vconsole:emer
+              -vsyslog:err
+              -vfile:info
+              --mlockall
+              --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: openvswitch-run
+          hostPath:
+            path: /var/run/openvswitch
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+{{- end }}
