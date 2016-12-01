@@ -27,10 +27,12 @@ stateful-service:
         storage_provider: "host"
         storage_provider_fstype: "xfs"
         ceph:
-               monitors: []
-               pool: volumes
-               secret_name: ceph-secret
-
+               monitors:
+                       - 172.17.0.1:6789
+               pool: kollavolumes
+               secret_name: ceph-kolla
+               user: kolla
+ 
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
@@ -67,3 +69,27 @@ openvswitch-vswitchd:
         kolla_kubernetes_ovs_add_port: false
         ext_bridge_name: "br-ex"
         ext_interface_name: "eth1"
+
+rabbitmq-job:
+        rabbitmq_pvc_name: rabbitmq
+        rabbitmq_cluster_cookie: 67
+        rabbitmq_image_tag: 3.0.1
+
+rabbitmq-pod:
+        rabbitmq_port: 5672
+        rabbitmq_management_port: 15672
+        rabbitmq_pvc_name: rabbitmq
+        rabbitmq_image_tag: 3.0.1
+
+rabbitmq-pv:
+        rabbitmq_pv_name: rabbitmq
+        rabbitmq_volume_size_gb: 10
+
+rabbitmq-pvc:
+        rabbitmq_pvc_name: rabbitmq
+        rabbitmq_pv_name: rabbitmq
+        rabbitmq_volume_size_gb: 10
+
+rabbitmq-svc:
+        rabbitmq_port: 5672
+        rabbitmq_management_port: 15672

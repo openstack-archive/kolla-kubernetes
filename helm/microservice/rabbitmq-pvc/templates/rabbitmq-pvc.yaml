@@ -1,0 +1,6 @@
+{{- $pvcName := "rabbitmq" }}
+{{- $storageProvider := .Values.storage_provider | default "ceph" }}
+{{- $volumeSizeGB := .Values.rabbitmq_volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pvc" $env }}
+{{- end }}
