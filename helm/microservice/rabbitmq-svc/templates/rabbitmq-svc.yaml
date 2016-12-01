@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .Values.rabbitmq_port }}
+      name: {{ .Values.element_name | quote }}
+  selector:
+    service: {{ .Values.element_name }}
+metadata:
+   name:  {{ .Values.element_name | quote }}
