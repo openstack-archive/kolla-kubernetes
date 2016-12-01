@@ -144,12 +144,13 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-network
 
-[ "x$1" != "xexternal-ovs" ] && 
+[ "x$1" != "xexternal-ovs" ] &&
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set "$common_vars,type=network,selector_key=kolla_controller" \
     --namespace kolla --name openvswitch-ovsdb-network &&
-    kollakube res \
-    create pod openvswitch-vswitchd-network
+    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
+    --namespace kolla --name openvswitch-vswitchd-network
 
 [ "x$1" == "xceph-multi" ] &&
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
@@ -158,7 +159,9 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-compute &&
-    kollakube res create pod openvswitch-vswitchd-compute
+    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
+    --namespace kolla --name openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
 kollakube res create pod nova-libvirt
