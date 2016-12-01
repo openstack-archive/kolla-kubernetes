@@ -36,23 +36,43 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq; do
+for x in mariadb; do
     kollakube res create pv $x
     kollakube res create pvc $x
 done
 
+helm install kolla/rabbitmq-pv --debug --version 3.0.0-1 \
+    --name rabbitmq-pv --set "element_name=rabbitmq,storage_provider=ceph" \
+    --values <(ceph_values $1)
+
+helm install kolla/rabbitmq-pvc --debug --version 3.0.0-1 --namespace kolla \
+    --name rabbitmq-pvc --set "element_name=rabbitmq,storage_provider=ceph"
+
 kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    rabbitmq rabbitmq-management nova-api glance-api glance-registry \
+    nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
 
-kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
+helm install kolla/rabbitmq-svc --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+kollakube res create bootstrap mariadb-bootstrap
+
+helm install kolla/rabbitmq-job --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-job --set element_name=rabbitmq
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap rabbitmq-bootstrap
-kollakube res create pod mariadb memcached rabbitmq
+kollakube res delete bootstrap mariadb-bootstrap
 
+helm delete rabbitmq-job
+
+kollakube res create pod mariadb memcached
+
+helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-pod --set "$common_vars,element_name=rabbitmq"
+
+$DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube resource create bootstrap keystone-create-db keystone-endpoints \
