@@ -143,7 +143,7 @@ kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
 tools/setup_simple_ceph_users.sh
 tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
 
-tests/bin/ceph_workflow.sh "$4"
+tests/bin/ceph_workflow.sh "$4" "$2"
 . ~/keystonerc_admin
 
 kubectl get pods --namespace=kolla
