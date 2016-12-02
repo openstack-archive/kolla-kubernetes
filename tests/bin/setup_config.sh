@@ -24,11 +24,20 @@ if [ "x$TYPE" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
         $(cat /etc/nodepool/primary_node_private) \
         | head -n 1 | awk -F: '{print $1}')
+else
+    interface="eth1"
+fi
+
+if [ "x$TYPE" == "xceph-multi" -o "x$TYPE" == "xdev-env" ]; then
     echo "tunnel_interface: $interface" >> kolla-ansible/etc/kolla/globals.yml
     echo "storage_interface: $interface" >> \
         etc/kolla-kubernetes/kolla-kubernetes.yml
     sed -i "s/172.17.0.1/$(cat /etc/nodepool/primary_node_private)/" \
         etc/kolla-kubernetes/kolla-kubernetes.yml
+fi
+
+if [ "x$TYPE" == "xdev-env" ]; then
+    sed -i "s/$(hostname -s)/kube2/g" /etc/kolla-kubernetes/kolla-kubernetes.yml
 fi
 
 kolla-ansible/tools/generate_passwords.py
