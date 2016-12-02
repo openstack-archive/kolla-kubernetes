@@ -2,6 +2,12 @@
 
 VERSION=0.4.0-1
 
+function pull_containers {
+if [ "x$DISABLE_PULL" == "x" ]; then
+    $DIR/tools/pull_containers.sh kolla
+fi
+}
+
 function lvmbackend_values {
     echo "lvm_backends:"
     echo "  - '172.18.0.1': 'cinder-volumes'"
@@ -12,7 +18,11 @@ IP=172.18.0.1
 
 . "$DIR/tests/bin/setup_helm_entrypint_config.sh"
 
-tunnel_interface=docker0
+if [ "x$1" == "dev-env" ]; then
+    tunnel_interface=eth1
+else
+    tunnel_interface=docker0
+fi
 
 base_distro="$2"
 
@@ -95,7 +105,7 @@ helm install kolla/rabbitmq-init-element-job --version $VERSION \
     --namespace kolla --name rabbitmq-init-element-job \
     --set "$common_vars,element_name=rabbitmq,cookie=67"
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 for x in mariadb rabbitmq; do
@@ -112,7 +122,7 @@ helm install kolla/memcached-deployment --version $VERSION \
 helm install kolla/rabbitmq-statefulset --version $VERSION \
     --namespace kolla --name rabbitmq-statefulset --set "$common_vars,element_name=rabbitmq"
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install --debug kolla/keystone-create-db-job --version $VERSION \
@@ -121,7 +131,7 @@ helm install --debug kolla/keystone-create-db-job --version $VERSION \
     --name keystone-create-db \
     --set "$common_vars"
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-create-db
@@ -131,7 +141,7 @@ helm install --debug kolla/keystone-manage-db-job --version $VERSION \
     --name keystone-manage-db \
     --set "$common_vars"
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-manage-db
@@ -143,7 +153,7 @@ helm install --debug kolla/keystone-create-endpoints-job --version $VERSION \
     --set $common_vars,element_name=keystone,public_host=$IP \
     --name keystone-create-endpoints-job
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install --debug kolla/keystone-api-deployment --version $VERSION \
@@ -252,7 +262,7 @@ for x in nova nova-api neutron; do
         --name $x-create-db
 done
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 for x in nova-api neutron; do
@@ -261,17 +271,20 @@ for x in nova-api neutron; do
         --name $x-manage-db
 done
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
-[ -d "$WORKSPACE/logs" ] &&
-kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
-    --namespace=kolla || true
+if [ "x$OUTSIDE_GATE" == "x" ]; then
 
-$DIR/tests/bin/endpoint_test.sh
-
-[ -d "$WORKSPACE/logs" ] && openstack catalog list > \
-    $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
+    [ -d "$WORKSPACE/logs" ] &&
+    kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
+        --namespace=kolla || true
+    
+    $DIR/tests/bin/endpoint_test.sh
+    
+    [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
+        $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
+fi
 
 for x in nova nova-api cinder neutron glance; do
     helm delete --purge $x-create-db
@@ -334,7 +347,7 @@ helm install kolla/neutron-server-deployment --version $VERSION \
     --set "$common_vars" \
     --namespace kolla --name neutron-server
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/neutron-dhcp-agent-daemonset --version $VERSION \
@@ -381,7 +394,7 @@ helm install kolla/tgtd-daemonset --version $VERSION --debug\
 
 #kollakube res create pod keepalived
 
-$DIR/tools/pull_containers.sh kolla
+pull_containers
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap openvswitch-set-external-ip

@@ -3,7 +3,11 @@
 # C extensions
 *.so
 
+# kubectl
+.kube
+
 # helm / chart
+.helm
 values.yaml
 **/charts
 
