@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    contributing
+   development-environment
    installation
    host-setup
    kubernetes-setup
