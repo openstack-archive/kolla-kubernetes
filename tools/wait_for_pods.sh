@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set +x
 end=$(date +%s)
-end=$((end + 120))
+end=$((end + 180))
 while true; do
     kubectl get pods --namespace=$1 -o json | jq -r \
         '.items[].status.phase' | grep Pending > /dev/null && \
