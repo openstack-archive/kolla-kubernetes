@@ -1,0 +1,14 @@
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+1: Marcellin Fom Tchassem <mf6510@att.com>
+Code-Review+1: Steve Wilkerson <wilkers.steve@gmail.com>
+Code-Review+1: Qin Wang (qwang) <qin.wang@intel.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: Duong Ha-Quang <duonghq@vn.fujitsu.com>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Workflow+1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 02 Dec 2016 15:33:17 +0000
+Reviewed-on: https://review.openstack.org/404493
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
