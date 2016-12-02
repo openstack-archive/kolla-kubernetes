@@ -10,6 +10,10 @@ if [ "x$1" == "xceph-multi" ]; then
     tunnel_interface=$interface
 fi
 
+base_distro="$2"
+
+common_vars="enable_kube_logger=false,kolla_base_distro=$base_distro"
+
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
     nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
@@ -124,7 +128,7 @@ kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
 helm ls
 
 helm install kolla/neutron-server --version 3.0.0-1 \
-    --set enable_kube_logger=false \
+    --set "$common_vars" \
     --namespace kolla --name neutron-server
 
 $DIR/tools/pull_containers.sh kolla
@@ -133,26 +137,26 @@ $DIR/tools/wait_for_pods.sh kolla
 kollakube res create pod neutron-dhcp-agent neutron-metadata-agent-network
 
 helm install kolla/neutron-l3-agent --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=network,tunnel_interface=$tunnel_interface \
+    --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-l3-agent-network
 
 helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=network,tunnel_interface=$tunnel_interface \
+    --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-network
 
 [ "x$1" != "xexternal-ovs" ] && 
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
+    --set "$common_vars,type=network,selector_key=kolla_controller" \
     --namespace kolla --name openvswitch-ovsdb-network &&
     kollakube res \
     create pod openvswitch-vswitchd-network
 
 [ "x$1" == "xceph-multi" ] &&
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
+    --set "$common_vars,type=compute,selector_key=kolla_compute" \
     --namespace kolla --name openvswitch-ovsdb-compute &&
     helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface \
+    --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-compute &&
     kollakube res create pod openvswitch-vswitchd-compute
 
