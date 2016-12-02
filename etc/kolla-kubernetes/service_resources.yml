@@ -487,7 +487,7 @@ kolla-kubernetes:
       - name: nova-api
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: nova_api_replicas  
+          replicas: nova_api_replicas
           service_name: nova
           service_type: api
           service_location: kolla_kubernetes_hostlabel_nova_api
@@ -516,7 +516,7 @@ kolla-kubernetes:
       - name: nova-novncproxy
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: nova_novncproxy_replicas  
+          replicas: nova_novncproxy_replicas
           service_name: nova
           service_type: novncproxy
           service_location: kolla_kubernetes_hostlabel_nova_novncproxy
@@ -676,7 +676,7 @@ kolla-kubernetes:
       - name: neutron-server
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: neutron_server_replicas  
+          replicas: neutron_server_replicas
           service_name: neutron
           service_type: server
           service_location: kolla_kubernetes_hostlabel_neutron_server
@@ -1042,7 +1042,7 @@ kolla-kubernetes:
       - name: kibana
         template: services/common/common-deployment.yml.j2
         vars:
-          replicas: kibana_replicas  
+          replicas: kibana_replicas
           service_name: kibana
           service_type: kibana
           service_location: kolla_kubernetes_hostlabel_kibana
