@@ -10,7 +10,7 @@
 # kolla_internal_vip_address: "10.10.10.254"
 # This address is used in ALL public endpoints and it serves as an entry point
 # into kolla kubernetes cluster, needs to be changed by the operator.
-kolla_kubernetes_external_vip: "10.57.120.254"
+kolla_kubernetes_external_vip: '172.18.0.1'
 kolla_kubernetes_namespace: "kolla"
 
 ##############################
@@ -131,7 +131,7 @@ storage_ceph:
   key: EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE=
   # The ceph keyring file location on each kubernetes node's filesystem
   keyring: /etc/ceph/ceph.client.admin.keyring
-  initial_mon: minikube
+  initial_mon: 172.16.35.12
 
 ################################
 # Persistent volumes sizes in GB
@@ -270,3 +270,23 @@ log_disable:
 - iscsi-tgtd
 - elasticsearch
 - keepalived
+kolla_kubernetes_ovs_setup_bridge: "yes"
+kolla_kubernetes_ovs_add_port: "no"
+enable_resolve_conf_net_host_workaround: "yes"
+rabbitmq_management_external: "yes"
+
+kolla_kubernetes_external_bridge_ip: "172.18.0.1"
+kolla_kubernetes_external_subnet: "24"
+
+storage_provider: "ceph"
+storage_provider_fstype: "xfs"
+
+storage_interface: "docker0"
+storage_ceph:
+  monitors:
+  - 
+  user: kolla
+  pool: kollavolumes
+  secretName: ceph-kolla
+  initial_mon: 172.16.35.12
+storage_interface: 
