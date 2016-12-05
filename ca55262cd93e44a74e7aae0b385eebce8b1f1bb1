@@ -1,0 +1,10 @@
+Code-Review+1: Pete Birley <pete@port.direct>
+Code-Review+1: Duong Ha-Quang <duonghq@vn.fujitsu.com>
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Workflow+1: Steven Dake <stdake@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 05 Dec 2016 13:37:31 +0000
+Reviewed-on: https://review.openstack.org/406681
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
