@@ -17,34 +17,50 @@ function wait_for_ceph_bootstrap {
     done
 }
 
-kollakube res create configmap ceph-mon ceph-osd
+function kollakube_gate_debug {
+    CMD=$@
+    echo "***GATE_REVERSE_DEBUG***: START: kollakube $@"
+    kollakube template $@
+    echo "***GATE_REVERSE_DEBUG***: END: kollakube $@"
+    kollakube res create $@
+}
+function dump_config {
+    echo "***GATE_REVERSE_DEBUG***: Dumping config: $1"
+    cat $1
+    echo "***GATE_REVERSE_DEBUG***: Dumping config: $1"
+}
 
-kollakube res create bootstrap ceph-bootstrap-initial-mon
+dump_config /etc/kolla-kubernetes/kolla-kubernetes.yml
+dump_config /etc/kolla-kubernetes/service_resources.yml
+
+kollakube_gate_debug configmap ceph-mon ceph-osd
+
+kollakube_gate_debug bootstrap ceph-bootstrap-initial-mon
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
 kollakube res delete bootstrap ceph-bootstrap-initial-mon
-kollakube res create pod ceph-mon
+kollakube_gate_debug pod ceph-mon
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod ceph-bootstrap-osd0
+kollakube_gate_debug pod ceph-bootstrap-osd0
 $DIR/tools/pull_containers.sh kolla
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
-kollakube res create pod ceph-bootstrap-osd1
+kollakube_gate_debug pod ceph-bootstrap-osd1
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
 kollakube res delete pod ceph-bootstrap-osd0
 kollakube res delete pod ceph-bootstrap-osd1
-kollakube res create pod ceph-osd0
-kollakube res create pod ceph-osd1
+kollakube_gate_debug pod ceph-osd0
+kollakube_gate_debug pod ceph-osd1
 
 $DIR/tools/wait_for_pods.sh kolla
 
