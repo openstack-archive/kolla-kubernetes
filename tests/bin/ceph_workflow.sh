@@ -55,7 +55,9 @@ kollakube res create svc mariadb memcached keystone-admin keystone-public \
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
-kollakube res create bootstrap mariadb-bootstrap
+helm install kolla/mariadb-job --debug --version 3.0.0-1 \
+    --namespace kolla --name mariadb-job \
+    --set "element_name=mariadb"
 
 helm install kolla/rabbitmq-job --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-job \
@@ -64,7 +66,7 @@ helm install kolla/rabbitmq-job --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap
+helm delete mariadb-job
 
 helm delete rabbitmq-job
 
