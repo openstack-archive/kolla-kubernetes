@@ -36,26 +36,27 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb; do
-    kollakube res create pv $x
-    kollakube res create pvc $x
+for x in mariadb rabbitmq; do
+    helm install kolla/$x-pv --version 3.0.0-1 \
+        --name $x-pv --set "element_name=$x,storage_provider=ceph" \
+        --values <(ceph_values $1)
+    helm install kolla/$x-pvc --version 3.0.0-1 --namespace kolla \
+        --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
 
-helm install kolla/rabbitmq-pv --debug --version 3.0.0-1 \
-    --name rabbitmq-pv --set "element_name=rabbitmq,storage_provider=ceph" \
-    --values <(ceph_values $1)
-
-helm install kolla/rabbitmq-pvc --debug --version 3.0.0-1 --namespace kolla \
-    --name rabbitmq-pvc --set "element_name=rabbitmq,storage_provider=ceph"
-
-kollakube res create svc mariadb memcached keystone-admin keystone-public \
+kollakube res create svc memcached keystone-admin keystone-public \
     nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
+
+helm install kolla/mariadb-svc --version 3.0.0-1 \
+    --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
-kollakube res create bootstrap mariadb-bootstrap
+helm install kolla/mariadb-init-element --version 3.0.0-1 \
+    --namespace kolla --name mariadb-init-element \
+    --set "$common_vars,element_name=mariadb"
 
 helm install kolla/rabbitmq-job --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-job \
@@ -64,18 +65,18 @@ helm install kolla/rabbitmq-job --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap
+helm delete mariadb-init-element --purge
 
-helm delete rabbitmq-job
+helm delete rabbitmq-job --purge
 
-kollakube res create pod mariadb
+helm install kolla/mariadb-pod --version 3.0.0-1 \
+    --namespace kolla --name mariadb-pod --set "$common_vars,element_name=mariadb"
 
 helm install kolla/memcached --version 3.0.0-1 \
     --set "enable_kube_logger=false,element_name=memcached" \
     --namespace kolla --name memcached
 
-
-helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
+helm install kolla/rabbitmq-pod --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-pod --set "$common_vars,element_name=rabbitmq"
 
 $DIR/tools/pull_containers.sh kolla
