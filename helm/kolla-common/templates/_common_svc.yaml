@@ -1,0 +1,12 @@
+{{- define "common_svc" }}
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .element_port }}
+      name: {{ .element_name | quote }}
+  selector:
+    service: {{ .element_name | quote }}
+metadata:
+   name:  {{ .element_name | quote }}
+{{- end }}

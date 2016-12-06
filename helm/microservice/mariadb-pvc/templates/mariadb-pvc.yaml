@@ -1,0 +1,6 @@
+{{- $pvcName := "mariadb" }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $volumeSizeGB := .Values.mariadb_volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pvc" $env }}
+{{- end }}
