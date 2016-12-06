@@ -36,10 +36,12 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb; do
-    kollakube res create pv $x
-    kollakube res create pvc $x
-done
+helm install kolla/mariadb-pv --debug --version 3.0.0-1 \
+    --name mariadb-pv --set "element_name=mariadb,storage_provider=ceph" \
+    --values <(ceph_values $1)
+
+helm install kolla/mariadb-pvc --debug --version 3.0.0-1 --namespace kolla \
+    --name mariadb-pvc --set "element_name=mariadb,storage_provider=ceph"
 
 helm install kolla/rabbitmq-pv --debug --version 3.0.0-1 \
     --name rabbitmq-pv --set "element_name=rabbitmq,storage_provider=ceph" \
@@ -48,14 +50,23 @@ helm install kolla/rabbitmq-pv --debug --version 3.0.0-1 \
 helm install kolla/rabbitmq-pvc --debug --version 3.0.0-1 --namespace kolla \
     --name rabbitmq-pvc --set "element_name=rabbitmq,storage_provider=ceph"
 
-kollakube res create svc mariadb memcached keystone-admin keystone-public \
+kollakube res create svc memcached keystone-admin keystone-public \
     nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
+
+helm install kolla/mariadb-svc --version 3.0.0-1 \
+    --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
-kollakube res create bootstrap mariadb-bootstrap
+kubectl describe secret database-password --namespace kolla >> $WORKSPACE/logs/database_password.log
+
+helm install kolla/mariadb-job --debug --version 3.0.0-1 \
+    --namespace kolla --name mariadb-job \
+    --set "element_name=mariadb"
+
+docker ps | grep "mariadb-job\:" | awk '{print "docker inspect "$1}' | sh -l >> $WORKSPACE/logs/mariadb-job.log
 
 helm install kolla/rabbitmq-job --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-job \
@@ -64,7 +75,7 @@ helm install kolla/rabbitmq-job --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap mariadb-bootstrap
+helm delete mariadb-job
 
 helm delete rabbitmq-job
 
