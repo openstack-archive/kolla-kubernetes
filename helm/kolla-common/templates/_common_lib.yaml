@@ -44,3 +44,12 @@
     name: resolv-conf
 {{- end }}
 {{- end }}
+
+{{- define "common_bootstrap_vars" }}
+- name: KOLLA_KUBERNETES
+  value: ""
+- name: KOLLA_BOOTSTRAP
+  value: ""
+- name: KOLLA_CONFIG_STRATEGY
+  value: COPY_ONCE
+{{- end }}
