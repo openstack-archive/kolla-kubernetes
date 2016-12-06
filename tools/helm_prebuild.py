@@ -20,7 +20,8 @@ import yaml
 
 
 stateful_services = [
-    'rabbitmq-pv'
+    'rabbitmq-pv',
+    'mariadb-pv'
 ]
 
 
