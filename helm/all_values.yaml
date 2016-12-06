@@ -23,6 +23,14 @@ common:
         kubernetes_entrypoint_image_tag: 3.0.1
         haproxy_image_tag: 2.0.2
 
+stateful-service:
+        storage_provider: "host"
+        storage_provider_fstype: "xfs"
+        ceph:
+               monitors: []
+               pool: volumes
+               secret_name: ceph-secret
+
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
