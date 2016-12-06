@@ -1,0 +1,46 @@
+{{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
+{{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
+{{- $resourceName := "mariadb-bootstrap" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $mariadbImageFull }}"
+          name: main
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: mariadb-config
+            - mountPath: /var/lib/mariadb
+              name: mariadb-persistent-storage
+          env:
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+            - name: DB_ROOT_PASSWORD
+              value: '$DATABASE_PASSWORD' 
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: mariadb-config
+          configMap:
+            name: {{ .Values.element_name }}
+        - name: mariadb-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.element_name }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-password
+              key: password
+      restartPolicy: OnFailure
+metadata:
+  name: {{ .Values.element_name }}-bootstrap
+{{- end }}

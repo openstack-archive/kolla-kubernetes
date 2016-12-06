@@ -87,3 +87,19 @@ rabbitmq-pvc:
 rabbitmq-svc:
         rabbitmq_port: 5672
         rabbitmq_management_port: 15672
+
+mariadb-job:
+        mariadb_image_tag: 3.0.1
+
+mariadb-pod:
+        mariadb_port: 5672
+        mariadb_image_tag: 3.0.1
+
+mariadb-pv:
+        mariadb_volume_size_gb: 10
+
+mariadb-pvc:
+        mariadb_volume_size_gb: 10
+
+mariadb-svc:
+        mariadb_port: 3306
