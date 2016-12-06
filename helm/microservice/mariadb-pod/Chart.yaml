@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 3.0.0-1
+description: mariadb-pod subservice layer
+name: mariadb-pod
+keywords:
+  - openstack
+  - mariadb
+  - mariadb-pod
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
