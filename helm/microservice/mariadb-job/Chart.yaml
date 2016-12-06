@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 3.0.0-1
+description: mariadb-job subservice layer
+name: mariadb-job
+keywords:
+  - openstack
+  - mariadb
+  - mariadb-job
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
