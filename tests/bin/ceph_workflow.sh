@@ -2,6 +2,13 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
+function ceph_values {
+    NODE=$(hostname -s)
+    echo "ceph:"
+    echo "  monitors:"
+    echo "  - $NODE"
+}
+
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
