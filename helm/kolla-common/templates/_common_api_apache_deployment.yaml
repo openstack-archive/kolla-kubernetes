@@ -1,4 +1,4 @@
-{{- define "common_deployment" }}
+{{- define "common_api_apache_deployment" }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
