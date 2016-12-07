@@ -21,3 +21,5 @@
 {{- $kubernetesEntryPointImageFull := .Values.kubernetes_entrypoint_image_full | default $kubernetesEntryPointImageBuilt }}
 {{- $kubernetesEntryPointImageFull }}
 {{- end }}
+
+{{- $haproxy := .Values.haproxy | default true }}
