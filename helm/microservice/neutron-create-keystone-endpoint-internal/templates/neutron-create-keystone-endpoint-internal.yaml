@@ -1,0 +1,11 @@
+{{- $resourceName := "neutron-create-keystone-endpoint-internal" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "neutron" }}
+{{- $serviceType := "network" }}
+{{- $interface := "internal" }}
+{{- $neutronInternalEndpointBuilt := printf "http://%s:%1.f" .Values.neutron_internal_service .Values.neutron_server_port }}
+{{- $endpointURLFull := .Values.neutron_internal_endpoint | default $neutronInternalEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
