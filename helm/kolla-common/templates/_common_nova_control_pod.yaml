@@ -1,0 +1,62 @@
+{{- define "common_nova_control_pod" }}
+apiVersion: apps/v1alpha1
+kind: PetSet
+spec:
+  serviceName: {{ .serviceName | quote }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.element_name }}
+        type: {{ .serviceType }}
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "initialize-{{ .Values.element_name }}",
+              "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-ce",
+                  "cp -a /config/..data/* /nova/; "],
+              "volumeMounts": [
+                  {
+                      "name": "{{ .Values.element_name }}-config",
+                      "mountPath": "/config/"
+                  },
+                  {
+                      "name": "nova-config",
+                      "mountPath": "/nova/"
+                  }
+              ]
+          }
+      ]'
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - name: main
+          image: "{{ .imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" . | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: nova-config
+            - mountPath: /nova
+              name: nova-config
+          env:
+{{- include "common_env_vars" . | indent 12 }}
+{{- if .privileged }}
+          securityContext:
+            privileged: true
+{{- end }}
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: {{ .Values.element_name }}-config
+          configMap:
+            name: nova-{{ .serviceType }}
+        - name: nova-config
+          emptyDir: {}
+metadata:
+   name: {{ .Values.element_name }}
+{{- end }}

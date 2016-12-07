@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+IP=172.18.0.1
 
 function ceph_values {
     echo "ceph:"
@@ -45,14 +46,21 @@ for x in mariadb rabbitmq; do
 done
 
 kollakube res create svc memcached keystone-admin keystone-public \
-    nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+    glance-api glance-registry \
+    neutron-server horizon cinder-api
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-novncproxy-svc --set element_name=nova-novncproxy
+
+helm install kolla/nova-api-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-api-svc \
+    --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/mariadb-init-element --version 3.0.0-1 \
     --namespace kolla --name mariadb-init-element \
@@ -133,7 +141,7 @@ kollakube res delete bootstrap nova-create-keystone-user \
     neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
@@ -146,8 +154,27 @@ kollakube res create bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-adminv2 \
     neutron-create-keystone-endpoint-admin
 
+for x in nova nova-api; do
+    helm install kolla/$x-create-db --version 3.0.0-1 \
+        --set element_name=$x --namespace kolla \
+        --name $x-create-db
+done
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
+
+for x in nova nova-api; do
+    helm delete --purge $x-create-db
+done
+
+helm install kolla/nova-api-manage-db --version 3.0.0-1 \
+    --set element_name=nova-api --namespace kolla \
+    --name nova-api-manage-db
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+helm delete --purge nova-api-manage-db
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
@@ -162,7 +189,7 @@ $DIR/tests/bin/endpoint_test.sh
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
 kollakube res delete bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
@@ -175,15 +202,18 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-adminv2 \
     neutron-create-keystone-endpoint-admin
 
-kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
-    glance-registry horizon nova-consoleauth nova-novncproxy \
+kollakube res create pod glance-api \
+    glance-registry horizon \
     cinder-api cinder-scheduler cinder-volume-ceph
 
 helm ls
 
-helm install kolla/neutron-server --version 3.0.0-1 \
-    --set "$common_vars" \
-    --namespace kolla --name neutron-server
+for x in nova-api nova-conductor nova-scheduler nova-consoleauth \
+    nova-novncproxy neutron-server; do
+    helm install kolla/$x --version 3.0.0-1 \
+      --set "$common_vars,element_name=$x" \
+      --namespace kolla --name $x
+done
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -218,8 +248,14 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --namespace kolla --name openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
-kollakube res create pod nova-libvirt
-kollakube res create pod nova-compute
+
+helm install kolla/nova-libvirt --version 3.0.0-1 \
+    --set "$common_vars,element_name=nova-libvirt" \
+    --namespace kolla --name nova-libvirt
+helm install kolla/nova-compute --version 3.0.0-1 \
+    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
+    --namespace kolla --name nova-compute
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
