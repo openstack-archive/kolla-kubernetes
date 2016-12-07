@@ -41,9 +41,13 @@ for x in mariadb rabbitmq; do
     kollakube res create pvc $x
 done
 
-kollakube res create svc mariadb memcached keystone-admin keystone-public \
+kollakube res create svc mariadb memcached \
     rabbitmq rabbitmq-management nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
+
+helm install --debug kolla/keystone-svc --version 3.0.0-1 \
+    --set element_name=keystone \
+    --namespace kolla --name keystone-svc
 
 kollakube res create bootstrap mariadb-bootstrap rabbitmq-bootstrap
 
@@ -64,7 +68,11 @@ $DIR/tools/wait_for_pods.sh kolla
 kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
     keystone-manage-db
 
-kollakube res create pod keystone
+helm ls
+
+helm install --debug kolla/keystone-api --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -134,8 +142,6 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
 kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
     glance-registry horizon nova-consoleauth nova-novncproxy \
     cinder-api cinder-scheduler cinder-volume-ceph
-
-helm ls
 
 helm install kolla/neutron-server --version 3.0.0-1 \
     --set "$common_vars" \
