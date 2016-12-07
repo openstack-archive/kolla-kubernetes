@@ -89,14 +89,22 @@ kollakube res create pod keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
+$DIR/tools/build_local_admin_keystonerc.sh
+. ~/keystonerc_admin
+
+helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
+    --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
+
 kollakube res create bootstrap nova-create-keystone-user \
     glance-create-keystone-user cinder-create-keystone-user \
     neutron-create-keystone-user \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
-    cinder-create-keystone-endpoint-publicv2 \
-    neutron-create-keystone-endpoint-public
+    cinder-create-keystone-endpoint-publicv2
+
+helm install kolla/neutron-create-keystone-endpoint-public --version 3.0.0-1 \
+    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -106,8 +114,10 @@ kollakube res delete bootstrap nova-create-keystone-user \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
-    cinder-create-keystone-endpoint-publicv2 \
-    neutron-create-keystone-endpoint-public
+    cinder-create-keystone-endpoint-publicv2
+
+helm delete neutron-create-keystone-service
+helm delete neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
     nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
@@ -129,9 +139,6 @@ $DIR/tools/wait_for_pods.sh kolla
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
     --namespace=kolla || true
-
-$DIR/tools/build_local_admin_keystonerc.sh
-. ~/keystonerc_admin
 
 $DIR/tests/bin/endpoint_test.sh
 
