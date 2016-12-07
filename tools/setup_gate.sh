@@ -10,6 +10,22 @@ env > $WORKSPACE/logs/env
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
 
+if [ "x$2" == "xubuntu" ]; then
+    sudo apt-get update
+    sudo apt-get install -y bridge-utils
+    sudo brctl addbr dns0
+    sudo ifconfig dns0 172.19.0.1 netmask 255.255.255.0
+    (echo interface: 172.19.0.1; echo access-control: 172.19.0.1/24 allow) | \
+        sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
+    (echo interface: 172.19.0.1; echo access-control: 0.0.0.0/0 allow) | \
+        sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
+    sudo dpkg -l | grep -i resolv
+    sudo systemctl restart unbound
+    sudo netstat -pnl
+    sudo sed -i "s/127\.0\.0\.1/172.19.0.1/" /etc/resolv.conf
+    sudo cat /etc/resolv.conf
+fi
+
 virtualenv .venv
 . .venv/bin/activate
 
