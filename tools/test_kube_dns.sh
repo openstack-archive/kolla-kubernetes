@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
 TOOLBOX=$(kolla-kubernetes resource-template create bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
+
+#FIXME
+TOOLBOX=kolla/centos-binary-kolla-toolbox:3.0.1
 
 kubectl get nodes -o json | jq -r '.items[].metadata.name' | while read NODE; do
     RELEASE="test-dns-$NODE"
@@ -14,21 +17,42 @@ metadata:
   namespace: default
 spec:
   template:
+    metadata:
+      labels:
+        test: dns
     spec:
       nodeSelector:
           kubernetes.io/hostname: $NODE
       containers:
         - image: "$TOOLBOX"
           name: main
-          command: ["sh", "-xec"]
+          command: ["sh", "-xc"]
           args:
-            - python -c 'import socket; print socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default")'
+            - |
+                cat > /tmp/dns-test.py << "EOEF"
+                import socket
+                import sys
+                try:
+                  print(socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default"))
+                except:
+                  print "Failed to resolve."
+                  sys.exit(1)
+                EOEF
+                while true; do
+                    python /tmp/dns-test.py && echo Resolved && exit;
+                    sleep 1;
+                done
       restartPolicy: OnFailure
 EOF
 )
 done
 
 $DIR/wait_for_pods.sh default
+
+kubectl get pods -l test=dns -o json | jq -r '.items[].metadata.name' | while read pod; do
+    echo Pod: $pod
+    kubectl logs $pod
+done
 
 kubectl get nodes -o json | jq -r '.items[].metadata.name' | while read NODE; do
     RELEASE="test-dns-$NODE"
