@@ -1,0 +1,10 @@
+{{- $resourceName := "keystone-endpoints-creation" }}
+{{- $serviceName := "keystone" }}
+{{- $regionName := "RegionOne" }}
+{{- $adminUrl := "http://keystone-admin:35357/v3" }}
+{{- $internalUrl := "http://keystone-admin:5000/v3" }}
+#needs fixed
+{{- $publicUrl := "http://172.18.0.1:5000/v3" }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "$regionName" $regionName "$adminUrl" $adminUrl "$internalUrl" $internalUrl "$publicUrl" $publicUrl "Values"  .Values }}
+{{- include "common_endpoint_create_job" $env }}
+{{- end }}

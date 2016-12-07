@@ -21,3 +21,9 @@
 {{- $kubernetesEntryPointImageFull := .Values.kubernetes_entrypoint_image_full | default $kubernetesEntryPointImageBuilt }}
 {{- $kubernetesEntryPointImageFull }}
 {{- end }}
+
+{{- define "keystone_image_full" }}
+{{- $kubernetesKeystoneImageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kubernetes_Keystone_image_tag }}
+{{- $kubernetesKeystoneImageFull := .Values.kubernetes_Keystone_image_full | default $kubernetesKeystoneImageBuilt }}
+{{- $kubernetesKeystoneImageFull }}
+{{- end }}
