@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
@@ -20,9 +20,14 @@ spec:
       containers:
         - image: "$TOOLBOX"
           name: main
-          command: ["sh", "-xec"]
+          command: ["sh", "-xc"]
           args:
-            - python -c 'import socket; print socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default")'
+            - |
+                while true; do
+                    python -c 'import socket; print socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default")';
+                    [ $? -eq 0 ] && exit;
+                    sleep 1;
+                done
       restartPolicy: OnFailure
 EOF
 )
