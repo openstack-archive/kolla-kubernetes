@@ -1,0 +1,157 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-nova-compute:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "nova-compute" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "compute" }}
+{{- $privileged := true }}
+{{- $novncproxyHost := .Values.novncproxyHost | default "nova-novncproxy" }}
+{{- $novncproxyPort := .Values.novncproxyPort | default 6080 }}
+{{- $novncproxyBaseUrl := printf "http://%s:%d/vnc_auto.html" $novncproxyHost $novncproxyPort }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $resourceName }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ $resourceName }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ $resourceName }}
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-nova-compute",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/..data/* /nova/;
+                  IP=$(ip addr show dev {{ .Values.tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  mkdir -p /var/log/kolla/nova-init;
+                  echo Using $IP | tee /var/log/kolla/nova-init/ip.log;
+                  crudini --set /nova/nova.conf DEFAULT my_ip $IP;
+                  crudini --set /nova/nova.conf vnc novncproxy_host $IP;
+                  crudini --set /nova/nova.conf vnc vncserver_listen $IP;
+                  crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
+                  crudini --set /nova/nova.conf vnc novncproxy_base_url {{ $novncproxyBaseUrl }};
+{{- if .Values.libvirt_tcp }}
+                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
+{{- end }}
+{{- if .Values.nova_ceph }}
+                  cp -a /secret/a/..data/ceph.client.nova.keyring /nova/ceph.client.nova.keyring;
+                  cp -a /config2/..data/ceph.conf /nova/ceph.conf;
+{{- end }}
+             "],
+             "volumeMounts": [
+{{- if .Values.nova_ceph }}
+                {
+                   "name": "ceph-conf",
+                   "mountPath": "/config2/"
+                },
+                {
+                   "name": "ceph-client-nova-keyring",
+                   "mountPath": "/secret/a/"
+                },
+{{- end }}
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "nova-compute-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "nova-config",
+                   "mountPath": "/nova/"
+                }
+             ]
+          },
+          {
+             "name": "initialize-nova",
+             "image": "{{ $imageFull }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "[ ! -d /var/lib/nova/instances ] && mkdir -p /var/lib/nova/instances;
+                  chown nova: /var/lib/nova;
+                  chown nova: /var/lib/nova/instances;
+             "],
+             "securityContext": {
+                 "runAsUser": 0
+             },
+             "volumeMounts": [
+                {
+                   "name": "nova-compute-persistent-storage",
+                   "mountPath": "/var/lib/nova"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+{{- if not .Values.libvirt_tcp }}
+      hostIPC: True
+{{- end }}
+      containers:
+        - name: main
+          image: "{{ $imageFull }}"
+          securityContext:
+            privileged: true
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: nova-config
+            - mountPath: /var/lib/nova
+              name: nova-compute-persistent-storage
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: nova-compute-config
+          configMap:
+            name: {{ .resourceName }}
+        - name: nova-compute-persistent-storage
+          hostPath:
+            path: /var/lib/nova
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /var/run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: nova-config
+          emptyDir: {}
+{{- if .Values.nova_ceph }}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-nova-keyring
+          secret:
+            secretName: ceph-client-nova-keyring
+{{- end }}
+{{- end }}

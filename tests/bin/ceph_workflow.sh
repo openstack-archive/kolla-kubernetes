@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+IP=172.18.0.1
 
 function ceph_values {
     echo "ceph:"
@@ -49,11 +50,17 @@ helm install kolla/rabbitmq-pvc --debug --version 3.0.0-1 --namespace kolla \
     --name rabbitmq-pvc --set "element_name=rabbitmq,storage_provider=ceph"
 
 kollakube res create svc mariadb memcached keystone-admin keystone-public \
-    nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+    glance-api glance-registry \
+    neutron-server horizon cinder-api
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+helm install kolla/nova-api-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-api-svc --set element_name=nova
+
+helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-novncproxy-svc --set element_name=nova-novncproxy
 
 kollakube res create bootstrap mariadb-bootstrap
 
@@ -157,11 +164,31 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-adminv2 \
     neutron-create-keystone-endpoint-admin
 
-kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
-    glance-registry horizon nova-consoleauth nova-novncproxy \
+kollakube res create pod glance-api \
+    glance-registry horizon \
     cinder-api cinder-scheduler cinder-volume-ceph
 
 helm ls
+
+helm install kolla/nova-api --version 3.0.0-1 \
+    --set "$common_vars,nova_api_external=true,kolla_kubernetes_external_vip=$IP" \
+    --namespace kolla --name nova-api
+
+helm install kolla/nova-conductor --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name nova-conductor
+
+helm install kolla/nova-scheduler --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name nova-scheduler
+
+helm install kolla/nova-consoleauth --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name nova-consoleauth
+
+helm install kolla/nova-novncproxy --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name nova-novncproxy
 
 helm install kolla/neutron-server --version 3.0.0-1 \
     --set "$common_vars" \
@@ -200,8 +227,14 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --namespace kolla --name openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
-kollakube res create pod nova-libvirt
-kollakube res create pod nova-compute
+
+helm install kolla/nova-libvirt --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name nova-libvirt
+helm install kolla/nova-compute --version 3.0.0-1 \
+    --set "$common_vars,tunnel_interface=$tunnel_interface" \
+    --namespace kolla --name nova-compute
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
