@@ -64,7 +64,11 @@ $DIR/tools/wait_for_pods.sh kolla
 kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
     keystone-manage-db
 
-kollakube res create pod keystone
+helm ls
+
+helm install --debug kolla/keystone-api --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -134,8 +138,6 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
 kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
     glance-registry horizon nova-consoleauth nova-novncproxy \
     cinder-api cinder-scheduler cinder-volume-ceph
-
-helm ls
 
 helm install kolla/neutron-server --version 3.0.0-1 \
     --set "$common_vars" \

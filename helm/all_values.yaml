@@ -31,6 +31,11 @@ stateful-service:
                pool: volumes
                secret_name: ceph-secret
 
+keystone-api:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 5000
+
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
