@@ -32,6 +32,7 @@ $DIR/wait_for_pods.sh default
 
 kubectl get nodes -o json | jq -r '.items[].metadata.name' | while read NODE; do
     RELEASE="test-dns-$NODE"
+    kubectl logs $RELEASE
     kubectl delete job $RELEASE
 done
 
