@@ -23,6 +23,9 @@ stateful_services = [
     'rabbitmq-pv'
 ]
 
+pod_http_termination = [
+    'neutron-server'
+]
 
 def helm_build_package(repodir, srcdir):
     command_line = "cd %s; helm package %s" % (repodir, srcdir)
@@ -58,6 +61,12 @@ def main():
                 raise
         helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
         pkg_values = copy.deepcopy(values['common'])
+        if package in pod_http_termination:
+            pkg_values.update(values['pod-http-termination'])
+        try:
+            pkg_values.update(values[package])
+        except KeyError:
+            pass
         if package in stateful_services:
             pkg_values.update(values['stateful-service'])
         try:
