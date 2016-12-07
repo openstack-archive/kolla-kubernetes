@@ -23,6 +23,16 @@ common:
         kubernetes_entrypoint_image_tag: 3.0.1
         haproxy_image_tag: 2.0.2
 
+common-create-keystone-admin:
+        keystone_admin_protocol: http
+        keystone_admin_svcname: keystone
+        keystone_admin_port: 35357
+        keystone_admin_url:
+        keystone_admin_project: admin
+        keystone_admin_username: admin
+        keystone_admin_domain_name: default
+        region: RegionOne
+
 stateful-service:
         storage_provider: "host"
         storage_provider_fstype: "xfs"
@@ -61,6 +71,10 @@ neutron-l3-agent:
         logger_configmap_name: neutron-l3-agent-logger
 
         tunnel_interface: eth0
+
+neutron-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        neutron_server_port: 9696
 
 openvswitch-vswitchd:
         openvswitch_vswitchd_image_tag: 2.0.2

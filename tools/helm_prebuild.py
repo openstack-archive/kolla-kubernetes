@@ -23,6 +23,11 @@ stateful_services = [
     'rabbitmq-pv'
 ]
 
+common_create_keystone_admin = [
+    'neutron-create-keystone-service',
+    'neutron-create-keystone-endpoint-public'
+]
+
 
 def helm_build_package(repodir, srcdir):
     command_line = "cd %s; helm package %s" % (repodir, srcdir)
@@ -58,6 +63,8 @@ def main():
                 raise
         helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
         pkg_values = copy.deepcopy(values['common'])
+        if package in common_create_keystone_admin:
+            pkg_values.update(values['common-create-keystone-admin'])
         if package in stateful_services:
             pkg_values.update(values['stateful-service'])
         try:
