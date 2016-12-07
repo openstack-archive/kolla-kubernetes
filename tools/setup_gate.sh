@@ -10,6 +10,16 @@ env > $WORKSPACE/logs/env
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
 
+if [ "x$2" == "xubuntu" ]; then
+    echo TRUNCATE_NAMESERVER_LIST_AFTER_LOOPBACK_ADDRESS=no | sudo /bin/bash -c "cat >> /etc/default/resolvconf"
+    sudo systemctl
+    sudo systemctl stop unbound
+    sudo dpkg -l | grep -i resolv
+    sudo netstat -pnl
+    sudo cat /etc/resolv.conf
+    #sudo systemctl restart resolvconf
+fi
+
 virtualenv .venv
 . .venv/bin/activate
 
