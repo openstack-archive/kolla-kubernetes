@@ -89,6 +89,11 @@ kollakube res create pod keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
+helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
+    --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
+
+$DIR/tools/wait_for_pods.sh kolla
+
 kollakube res create bootstrap nova-create-keystone-user \
     glance-create-keystone-user cinder-create-keystone-user \
     neutron-create-keystone-user \
