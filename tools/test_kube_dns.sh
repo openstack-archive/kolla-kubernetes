@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
@@ -14,21 +14,34 @@ metadata:
   namespace: default
 spec:
   template:
+    metadata:
+      labels:
+        test: dns
     spec:
       nodeSelector:
           kubernetes.io/hostname: $NODE
       containers:
         - image: "$TOOLBOX"
           name: main
-          command: ["sh", "-xec"]
+          command: ["sh", "-xc"]
           args:
-            - python -c 'import socket; print socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default")'
+            - |
+                while true; do
+                    python -c 'import socket; print socket.gethostbyname("google.com"), socket.gethostbyname("kubernetes.default")';
+                    [ $? -eq 0 ] && exit;
+                    sleep 1;
+                done
       restartPolicy: OnFailure
 EOF
 )
 done
 
 $DIR/wait_for_pods.sh default
+
+kubectl get pods -l test=dns -o json | jq -r '.items[].metadata.name' | while read pod; do
+    echo Pod: $pod
+    kubectl logs $pod
+done
 
 kubectl get nodes -o json | jq -r '.items[].metadata.name' | while read NODE; do
     RELEASE="test-dns-$NODE"
