@@ -48,9 +48,13 @@ helm install kolla/rabbitmq-pv --debug --version 3.0.0-1 \
 helm install kolla/rabbitmq-pvc --debug --version 3.0.0-1 --namespace kolla \
     --name rabbitmq-pvc --set "element_name=rabbitmq,storage_provider=ceph"
 
-kollakube res create svc mariadb memcached keystone-admin keystone-public \
+kollakube res create svc mariadb memcached \
     nova-api glance-api glance-registry \
     neutron-server nova-metadata nova-novncproxy horizon cinder-api
+
+helm install --debug kolla/keystone-svc --version 3.0.0-1 \
+    --set element_name=keystone \
+    --namespace kolla --name keystone-svc
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
@@ -76,16 +80,42 @@ helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube resource create bootstrap keystone-create-db keystone-endpoints \
-    keystone-manage-db
+echo "DEBUG: dumping keystone create db template"
+kollakube template bootstrap keystone-create-db
+
+echo "DEBUG: helm keystone create db template"
+helm install --debug kolla/keystone-create-db --version 3.0.0-1 \
+    --set element_name=keystone \
+    --namespace kolla \
+    --name keystone-create-db
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
-    keystone-manage-db
+echo "DEBUG: kollakube keystone manage db template"
+kollakube template bootstrap keystone-manage-db
 
-kollakube res create pod keystone
+echo "DEBUG: dumping helm keystone manage db template"
+helm install --debug kolla/keystone-manage-db --version 3.0.0-1 \
+    --namespace kolla \
+    --name keystone-manage-db
+
+echo "DEBUG: dumping keystone endpoints template"
+kollakube template bootstrap keystone-endpoints
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+kollakube resource create bootstrap keystone-endpoints
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+kollakube resource delete bootstrap keystone-endpoints
+
+helm install --debug kolla/keystone-api --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla --name keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
