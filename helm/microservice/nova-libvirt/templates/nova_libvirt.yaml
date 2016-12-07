@@ -1,0 +1,147 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-nova-libvirt:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "nova-libvirt" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "libvirt" }}
+{{- $privileged := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.element_name }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ .Values.element_name }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ .Values.element_name }}
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-nova-libvirt",
+             "image": "{{ $imageFull }}",
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/..data/* /nova/;
+{{- if .Values.libvirt_tcp }}
+                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
+{{- end }}
+{{- if .Values.libvirt_ceph }}
+                  mkdir -p /nova/secrets/;
+                  RDB_SECRET_UUID=$(sed -n ''s|.*<uuid>\\(.*\\)</uuid>.*|\\1|p'' /secret/a/data);
+                  cp -a /secret/a/..data/data /nova/secrets/$RDB_SECRET_UUID.xml;
+                  cp -a /secret/b/..data/data /nova/secrets/$RDB_SECRET_UUID.base64;
+                  cp -a /config2/..data/ceph.conf /nova;
+{{- end }}
+             "],
+             "volumeMounts": [
+{{- if .Values.libvirt_ceph }}
+                {
+                   "name": "ceph-conf",
+                   "mountPath": "/config2"
+                },
+                {
+                   "name": "nova-libvirt-secret",
+                   "mountPath": "/secret/a/"
+                },
+                {
+                   "name": "nova-libvirt-bin-secret",
+                   "mountPath": "/secret/b/"
+                },
+{{- end }}
+                {
+                   "name": "nova-libvirt-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "nova-config",
+                   "mountPath": "/nova/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostPID: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+{{- if not .Values.libvirt_tcp }}
+      hostIPC: True
+{{- end }}
+      containers:
+        - name: main
+          image: "{{ $imageFull }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              modprobe rbd;
+              rpm -e qemu-system-x86;
+              cp -a {{ .Values.container_config_directory }}/secrets /etc/libvirt;
+              kolla_start
+          securityContext:
+            privileged: true
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: nova-config
+            - mountPath: /var/lib/libvirt
+              name: nova-libvirt-persistent-storage
+            - mountPath: /var/lib/nova
+              name: nova-compute-persistent-storage
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /nova
+              name: nova-config
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: nova-compute-persistent-storage
+          hostPath:
+            path: /var/lib/nova
+        - name: nova-libvirt-config
+          configMap:
+            name: {{ .Values.element_name }}
+        - name: nova-libvirt-persistent-storage
+          hostPath:
+            path: /var/lib/libvirt
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /var/run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: nova-config
+          emptyDir: {}
+{{- if .Values.libvirt_ceph }}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: nova-libvirt-secret
+          secret:
+            secretName: nova-libvirt
+        - name: nova-libvirt-bin-secret
+          secret:
+            secretName: nova-libvirt-bin
+{{- end }}
+{{- end }}
