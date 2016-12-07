@@ -1,0 +1,43 @@
+{{- define "common_endpoint_create_job" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .resourceName }}
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: {{ include "haproxy_image_full" . | quote }}
+          name: {{ .resourceName | quote }}
+          command: ["sh", "-c", "mkdir -p /var/log/kolla/keystone; sudo -E kolla_set_configs;
+                    kolla_keystone_bootstrap admin
+                    $KEYSTONE_ADMIN_PASSWORD
+                    admin
+                    admin
+                    {{ .adminUrl }}
+                    {{ .internalUrl }}
+                    {{ .publicUrl }}
+                    {{ .regionName }}"]
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: /var/lib/kolla/config_files
+              name: keystone-config
+              readOnly: true
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ALWAYS"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+{{ include "common_volume_mounts" . | indent 12 }}
+        - name: keystone-config
+          configMap:
+            name: keystone
