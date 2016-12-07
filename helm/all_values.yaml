@@ -21,6 +21,9 @@ common:
         fluentd_image_tag: 3.0.1
         kolla_toolbox_image_tag: 3.0.1
         kubernetes_entrypoint_image_tag: 3.0.1
+
+pod-http-termination:
+        haproxy_python_termination: true
         haproxy_image_tag: 2.0.2
 
 stateful-service:
