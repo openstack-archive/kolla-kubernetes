@@ -1,0 +1,68 @@
+{{- define "common_create_db_job" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .resourceName }}
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          name: "creating-{{ .serviceName }}-database"
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_db -a
+              "login_host='{{ .Values.database_host }}'
+               login_port='{{ .Values.database_post }}'
+               login_user='root'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ .Values.database_name }}'"
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
+        - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          name: "creating-{{ .serviceName }}-user-and-permissions"
+          command: ["sh", "-c"]
+          args:
+            - ansible localhost -m mysql_user -a
+              "login_host='{{ .Values.database_host }}'
+               login_port='{{ .Values.database_port }}'
+               login_user='root'
+               login_password='$DATABASE_PASSWORD'
+               name='{{ .Values.database_user }}'
+               password='${{ .serviceName | upper }}_DATABASE_PASSWORD'
+               host='%'
+               priv='{{ .Values.database_name }}.*:ALL'
+               append_privs='yes'"
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
+            - name: "{{ .serviceName | upper }}_DATABASE_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .serviceName }}-database-password"
+                  key: password
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+{{- end }}
