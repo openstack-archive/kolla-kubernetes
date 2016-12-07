@@ -31,9 +31,16 @@ stateful-service:
                pool: kollavolumes
                secret_name: ceph-kolla
                user: kolla
- 
-openvswitch-ovsdb:
-        openvswitch_ovsdb_image_tag: 2.0.2
+
+keystone-api:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 5000
+        admin_port: 35357
+
+keystone-svc:
+        port: 5000
+        admin_port: 35357
 
 neutron-server:
         image_tag: 2.0.2
@@ -61,6 +68,9 @@ neutron-l3-agent:
         logger_configmap_name: neutron-l3-agent-logger
 
         tunnel_interface: eth0
+
+openvswitch-ovsdb:
+        openvswitch_ovsdb_image_tag: 2.0.2
 
 openvswitch-vswitchd:
         openvswitch_vswitchd_image_tag: 2.0.2

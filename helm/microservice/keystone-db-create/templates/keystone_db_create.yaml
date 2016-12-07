@@ -1,0 +1,5 @@
+{{- $resourceName := "keystone" }}
+{{- $serviceName := "keystone" }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "Values" .Values }}
+{{- include "common_db_create_job" $env }}
+{{- end }}
