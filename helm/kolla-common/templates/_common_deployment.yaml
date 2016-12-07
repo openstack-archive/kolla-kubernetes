@@ -37,12 +37,14 @@ spec:
                    sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
 {{- else }}
                    CONF=/srv/pod-main-config/{{ .configFileName }};
+{{- if .haproxy }}
 {{- if eq .resourceName "nova-api" }}
                    crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
                    crudini --set $CONF DEFAULT metadata_listen_port 8081;
 {{- end }}
                    crudini --set $CONF {{ .configSectionName }} {{ .configListenHostParameter }} 127.0.0.1;
                    crudini --set $CONF {{ .configSectionName }} {{ .configListenPortParameter }} 8080;
+{{- end }}
 {{- end }}
               "],
               "volumeMounts": [
@@ -63,6 +65,7 @@ spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
       containers:
+{{- if .haproxy }}
         - name: haproxy
           image: {{ include "haproxy_image_full" . | quote }}
           command:
@@ -101,9 +104,14 @@ spec:
           ports:
             - containerPort: {{ .Values.port }}
               name: {{ .portName }}
+{{- if eq .resourceName "keystone-api" }}
+            - containerPort: {{ .Values.admin_port }}
+              name: keystone-admin
+{{- end }}
 {{- if eq .resourceName "nova-api" }}
             - containerPort: {{ .Values.metadata_port }}
               name: nova-metadata
+{{- end }}
 {{- end }}
         - name: main
           image: "{{ .imageFull }}"
@@ -130,6 +138,19 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
+{{- if not .haproxy }}
+          ports:
+            - containerPort: {{ .Values.port }}
+              name: {{ .portName }}
+{{- if eq .resourceName "keystone-api" }}
+            - containerPort: {{ .Values.admin_port }}
+              name: keystone-admin
+{{- end }}
+{{- if eq .resourceName "nova-api" }}
+            - containerPort: {{ .Values.metadata_port }}
+              name: nova-metadata
+{{- end }}
+{{- end }}
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
@@ -143,9 +164,11 @@ spec:
 {{- if .extraConfigmapConfig }}
 {{- include .extraConfigmapConfig . | indent 12 }}
 {{- end }}
+{{- if .haproxy }}
         - name: haproxy-config
           configMap:
             name: {{ .resourceName }}-haproxy
+{{- end }}
 {{- if .extraVolume }}
 {{- include .extraVolume . | indent 8 }}
 {{- end }}

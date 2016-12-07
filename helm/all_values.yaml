@@ -31,12 +31,19 @@ stateful-service:
                pool: volumes
                secret_name: ceph-secret
 
+keystone-api:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 5000
+        admin_port: 35357
+
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
 neutron-server:
         image_tag: 2.0.2
         replicas: 3
+        haproxy: true
         port: 9696
 
 neutron-openvswitch-agent:
