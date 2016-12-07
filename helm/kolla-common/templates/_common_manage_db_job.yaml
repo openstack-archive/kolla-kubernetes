@@ -1,0 +1,32 @@
+{{- define "common_manage_db_job" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .resourceName }}-manage-db"
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: {{ .imageFull | quote }}
+          name: "main"
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: service-configmap
+              readOnly: true
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ALWAYS"
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: service-configmap
+          configMap:
+            name: {{ .resourceName }}
+{{- end }}
