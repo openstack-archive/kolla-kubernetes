@@ -88,4 +88,5 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
     ssh $line sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet-$line.txt
     ssh $line ps ax > $WORKSPACE/logs/ps-$line.txt
 done
+journalctl -u unbound > $WORKSPACE/logs/unbound
 exit -1
