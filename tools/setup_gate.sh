@@ -10,6 +10,20 @@ env > $WORKSPACE/logs/env
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
 
+if [ "x$2" == "xubuntu" ]; then
+    echo TRUNCATE_NAMESERVER_LIST_AFTER_LOOPBACK_ADDRESS=no | sudo /bin/bash -c "cat >> /etc/default/resolvconf"
+    sudo systemctl
+    brctl addbr dns0
+    ifconfig dns0 172.19.0.1 netmask 255.255.255.0
+    (echo interface: 172.19.0.1; echo access-control: 172.19.0.1/24 allow) | \
+        sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
+    sudo dpkg -l | grep -i resolv
+    sudo systemctl restart unbound
+    sudo netstat -pnl
+    sudo sed -i "s/127\.0\.0\.1/172.19.0.1/" /etc/resolv.conf
+    sudo cat /etc/resolv.conf
+fi
+
 virtualenv .venv
 . .venv/bin/activate
 
