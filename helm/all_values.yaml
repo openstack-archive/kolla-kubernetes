@@ -121,3 +121,63 @@ mariadb-pvc:
 
 mariadb-svc:
         mariadb_port: 3306
+
+nova-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova"
+        database_user: "nova"
+
+nova-api-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova-api"
+        database_user: "nova-api"
+
+nova-api-manage-db:
+        image_tag: 2.0.2
+
+nova-api-svc:
+        port: 8774
+        metadata_port: 8775
+
+nova-api:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 8774
+        metadata_port: 8775
+        haproxy: true
+
+nova-conductor:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-scheduler:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-consoleauth:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-novncproxy-svc:
+        port: 6080
+
+nova-novncproxy:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 6080
+
+nova-libvirt:
+        image_tag: 2.0.2
+        selector_key: kolla_compute
+        selector_value: "true"
+        libvirt_tcp: false
+        libvirt_ceph: true
+
+nova-compute:
+        image_tag: 2.0.2
+        selector_key: kolla_compute
+        selector_value: "true"
+        libvirt_tcp: false
+        nova_ceph: true
