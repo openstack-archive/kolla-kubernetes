@@ -81,14 +81,18 @@ helm install kolla/rabbitmq-pod --debug --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube resource create bootstrap keystone-create-db keystone-endpoints \
+kollakube resource create bootstrap keystone-create-db \
     keystone-manage-db
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube resource delete bootstrap keystone-create-db keystone-endpoints \
+kollakube resource delete bootstrap keystone-create-db \
     keystone-manage-db
+
+helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
+    --set element_name=keystone,public_host=172.18.0.1 \
+    --name keystone-create-endpoints
 
 kollakube res create pod keystone
 

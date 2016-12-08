@@ -31,9 +31,15 @@ stateful-service:
                pool: kollavolumes
                secret_name: ceph-kolla
                user: kolla
- 
+
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
+
+keystone-create-endpoints:
+        image_tag: 2.0.2
+        port: 5000
+        admin_port: 35357
+        region: "RegionOne"
 
 neutron-server:
         image_tag: 2.0.2
