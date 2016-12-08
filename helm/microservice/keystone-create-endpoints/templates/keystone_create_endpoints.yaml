@@ -1,0 +1,51 @@
+{{- $ImageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag | default .Values.kolla_tag }}
+{{- $ImageFull := .Values.image_full | default $ImageBuilt }}
+{{- $resourceName := "keystone" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $defaultPublicHost := printf "%s-public" .Values.element_name }}
+{{- $publicHost := .Values.public_host | default $defaultPublicHost }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-endpoints
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: "{{ $ImageFull }}"
+          name: main
+          command: ["sh", "-c", "mkdir -p /var/log/kolla/keystone; sudo -E kolla_set_configs;
+                    kolla_keystone_bootstrap admin
+                    $KEYSTONE_ADMIN_PASSWORD
+                    admin
+                    admin
+                    http://{{ .Values.element_name }}-admin:{{ .Values.admin_port }}/v3
+                    http://{{ .Values.element_name }}-internal:{{ .Values.port }}/v3
+                    http://{{ $publicHost }}:{{ .Values.port }}/v3
+                    {{ .Values.region }}"]
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: service-configmap
+              readOnly: true
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ONCE"
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: service-configmap
+          configMap:
+            name: {{ .resourceName }}
+{{- end }}
