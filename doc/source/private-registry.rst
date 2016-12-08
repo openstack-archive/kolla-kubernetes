@@ -24,7 +24,7 @@ How It Works
 There are two steps:
 
 - Create an ImagePullSecret.  These instructions may differ based on
-  the docker registry provider.  The two types of registry providers
+  the Docker registry provider.  The two types of registry providers
   currently covered by this guide include:
 
   - Standard Docker Registry with Username/Password Authentication
@@ -34,20 +34,20 @@ There are two steps:
   the ImagePullSecret.  By default and unless configured otherwise,
   all Kubernetes pods are created under the default service-account.
   Pods under the default service-account use the ImagePullSecret
-  credentials to authenticate and access the private docker registry.
+  credentials to authenticate and access the private Docker registry.
 
 
 Create the ImagePullSecret
 ==========================
 
-Based on the docker registry provider, follow the appropriate section
+Based on the Docker registry provider, follow the appropriate section
 below to create the ImagePullSecret.
 
 
 Standard Docker Registry with Username/Password Authentication
 --------------------------------------------------------------
 
-A typical docker registry only requires only username/password
+A typical Docker registry only requires only username/password
 authentication, without any other API keys or tokens (e.g. Docker
 Hub).
 
@@ -106,7 +106,7 @@ Patch the Default Service-Account
 Patch the Kubernetes default service-account to add a reference to the
 ImagePullSecret, after which pods under the default service-account
 use the ImagePullSecret credentials to authenticate and access the
-private docker registry.
+private Docker registry.
 
 ::
 
@@ -114,5 +114,5 @@ private docker registry.
     #   ImagePullSecret
     kubectl patch serviceaccount default -p '{"imagePullSecrets":[{"name":"private-docker-registry-secret"}]}'
 
-Now, your kubernetes cluster should have access to the private docker registry.
+Now, your kubernetes cluster should have access to the private Docker registry.
 

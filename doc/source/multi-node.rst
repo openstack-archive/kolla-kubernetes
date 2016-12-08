@@ -49,13 +49,13 @@ absolutely required.
 Configure Kolla
 ===============
 
-For multi-node deployments, a docker registry is required since the
+For multi-node deployments, a Docker registry is required since the
 kubernetes nodes will not be able to find the kolla images that your
 development machine has built.  Thus, we must configure kolla to name
 the images correctly, so that we may easily push the images to the
-right docker registry.
+right Docker registry.
 
-Add your docker registry settings in the kolla configuration file
+Add your Docker registry settings in the kolla configuration file
 ```./etc/kolla/globals.yaml```.
 
 ::
@@ -65,7 +65,7 @@ Add your docker registry settings in the kolla configuration file
   docker_namespace: "<registry_namespace>  # e.g. "annular-reef-123"
 
 Generate the kolla configurations, build the kolla images, and push
-the kolla images to your docker registry.
+the kolla images to your Docker registry.
 
 ::
 
@@ -90,11 +90,11 @@ Build Kolla Images and Push to Docker Registry
   # Build the kolla containers
   kolla-build $KOLLA_CONTAINERS --registry $DOCKER_REGISTRY --namespace $DOCKER_NAMESPACE
 
-  # Authenticate with your docker registry
+  # Authenticate with your Docker registry
   #   This may not be necessary if you are using a cloud provider
   docker login
 
-  # Push the newly-built kolla containers to your docker registry
+  # Push the newly-built kolla containers to your Docker registry
   #   For GKE, change the command below to be "gcloud docker push"
   for i in $KOLLA_CONTAINERS; do
     docker push "$DOCKER_REGISTRY/$DOCKER_NAMESPACE/centos-binary-$i:$DOCKER_TAG"
