@@ -57,6 +57,12 @@ keystone-create-db:
 keystone-manage-db:
         image_tag: 2.0.2
 
+keystone-create-endpoints:
+        image_tag: 2.0.2
+        port: 5000
+        admin_port: 35357
+        region: RegionOne
+
 neutron-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         neutron_server_port: 9696
