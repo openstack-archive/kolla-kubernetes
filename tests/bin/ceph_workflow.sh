@@ -113,12 +113,15 @@ $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-manage-db
 
-kollakube resource create bootstrap keystone-endpoints
+kollakube template bootstrap keystone-endpoints
+
+helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
+    --namespace kolla \
+    --set element_name=keystone,public_host=$IP \
+    --name keystone-create-endpoints --dry-run
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
-
-kollakube resource delete bootstrap keystone-endpoints
 
 kollakube res create pod keystone
 
