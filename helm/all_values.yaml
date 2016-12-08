@@ -31,7 +31,7 @@ stateful-service:
                pool: kollavolumes
                secret_name: ceph-kolla
                user: kolla
- 
+
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
