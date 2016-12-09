@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .Values.port }}
+      targetPort: {{ .Values.port }}
+      # Note that this targets the public keystone port
+      # but only exposes the service internally
+      name: "{{ .Values.element_name }}-public"
+  selector:
+    service: {{ .Values.element_name | quote }}
+    type: api
+metadata:
+   name:  "{{ .Values.element_name }}-internal"

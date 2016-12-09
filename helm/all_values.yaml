@@ -44,6 +44,10 @@ keystone-create-db:
 keystone-manage-db:
         image_tag: 2.0.2
 
+keystone-svc:
+        port: 5000
+        admin_port: 35357
+
 neutron-server:
         image_tag: 2.0.2
         replicas: 3
