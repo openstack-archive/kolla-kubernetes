@@ -256,3 +256,12 @@ cinder-create-db:
 
 cinder-manage-db:
         image_tag: 2.0.2
+
+horizon-api:
+        horizon_image_tag: 2.0.2
+        replicas: 1
+        port: 80
+
+horizon-svc:
+        type: dashboard
+        port: 80
