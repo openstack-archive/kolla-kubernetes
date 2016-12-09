@@ -1,0 +1,16 @@
+{{- $resourceName := "cinder" }}
+{{- $serviceName := "cinder" }}
+
+{{- $userName := .Values.cinder_user  | default "cinder" }}
+{{- $userDomain := .Values.cinder_domain | default "Default" }}
+{{- $userProject := .Values.cinder_project | default "service" }}
+{{- $userProjectDomain := .Values.cinder_project_domain | default "Default" }}
+{{- $userRole := .Values.cinder_role | default "admin" }}
+
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}

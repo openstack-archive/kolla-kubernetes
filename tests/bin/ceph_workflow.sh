@@ -130,9 +130,20 @@ $DIR/tools/build_local_admin_keystonerc.sh
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
-kollakube res create bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
-    neutron-create-keystone-user \
+
+helm install kolla/glance-create-keystone-user --debug --version 3.0.0-1 \
+  --namespace kolla --name glance-create-keystone-user
+
+helm install kolla/cinder-create-keystone-user --debug --version 3.0.0-1 \
+  --namespace kolla --name cinder-create-keystone-user
+
+helm install kolla/nova-create-keystone-user --debug --version 3.0.0-1 \
+  --namespace kolla --name nova-create-keystone-user
+
+helm install kolla/neutron-create-keystone-user --debug --version 3.0.0-1 \
+  --namespace kolla --name neutron-create-keystone-user
+
+kollakube res create bootstrap \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
@@ -147,9 +158,8 @@ helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
-    neutron-create-keystone-user \
+
+kollakube res delete bootstrap \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \

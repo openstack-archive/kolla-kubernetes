@@ -36,6 +36,16 @@ pod-http-termination:
         haproxy_python_termination: true
         haproxy_image_tag: 2.0.2
 
+common-create-keystone-admin:
+        keystone_admin_protocol: http
+        keystone_admin_svcname: keystone-admin
+        keystone_admin_port: 35357
+        keystone_admin_url:
+        keystone_admin_project: admin
+        keystone_admin_username: admin
+        keystone_admin_domain_name: Default
+        region: RegionOne
+
 stateful-service:
         storage_provider: "host"
         storage_provider_fstype: "xfs"
