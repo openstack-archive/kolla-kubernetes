@@ -48,6 +48,15 @@ stateful-service:
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
+keystone-admin-svc:
+        port: 35357
+
+keystone-internal-svc:
+        port: 5000
+
+keystone-public-svc:
+        port: 5000
+
 keystone-create-db:
         database_host: "mariadb"
         database_port: 3306
@@ -56,6 +65,12 @@ keystone-create-db:
 
 keystone-manage-db:
         image_tag: 2.0.2
+
+keystone-create-endpoints:
+        image_tag: 2.0.2
+        port: 5000
+        admin_port: 35357
+        region: RegionOne
 
 neutron-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
@@ -153,6 +168,21 @@ nova-metadata-svc:
 nova-novncproxy-svc:
         port: 6080
 
+nova-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova"
+        database_user: "nova"
+
+nova-api-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova_api"
+        database_user: "nova_api"
+
+nova-api-manage-db:
+        image_tag: 2.0.2
+
 nova-api:
         image_tag: 2.0.2
         replicas: 3
@@ -195,3 +225,17 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+heat-api:
+        image_tag: 3.0.1
+        replicas: 1
+        port: 8004
+
+heat-api-cfn:
+        image_tag: 3.0.1
+        replicas: 1
+        port: 8000
+
+heat-engine:
+        image_tag: 3.0.1
+        replicas: 1

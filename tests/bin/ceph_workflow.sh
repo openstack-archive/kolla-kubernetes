@@ -45,7 +45,7 @@ for x in mariadb rabbitmq glance; do
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
 
-kollakube res create svc memcached keystone-admin keystone-public \
+kollakube res create svc memcached \
     glance-api glance-registry \
     neutron-server horizon cinder-api
 
@@ -54,6 +54,18 @@ helm install kolla/mariadb-svc --version 3.0.0-1 \
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+helm install kolla/keystone-admin-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-admin-svc \
+    --set "element_name=keystone-admin"
+
+helm install kolla/keystone-public-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-public-svc \
+    --set "element_name=keystone-public,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/keystone-internal-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-internal-svc \
+    --set "element_name=keystone-internal"
 
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
@@ -113,12 +125,15 @@ $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-manage-db
 
-kollakube resource create bootstrap keystone-endpoints
+kollakube template bootstrap keystone-endpoints
+
+helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
+    --namespace kolla \
+    --set element_name=keystone,public_host=$IP \
+    --name keystone-create-endpoints
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
-
-kollakube resource delete bootstrap keystone-endpoints
 
 kollakube res create pod keystone
 
@@ -130,9 +145,12 @@ $DIR/tools/build_local_admin_keystonerc.sh
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
-kollakube res create bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
-    neutron-create-keystone-user \
+for SERVICE in glance cinder nova neutron; do
+  helm install kolla/${SERVICE}-create-keystone-user --debug --version 3.0.0-1 \
+    --namespace kolla --name ${SERVICE}-create-keystone-user
+done
+
+kollakube res create bootstrap \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
@@ -147,9 +165,11 @@ helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
-    neutron-create-keystone-user \
+for SERVICE in glance cinder nova neutron; do
+  helm delete --purge ${SERVICE}-create-keystone-user
+done
+
+kollakube res delete bootstrap \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
@@ -159,7 +179,7 @@ helm delete --purge neutron-create-keystone-service
 helm delete --purge neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
@@ -170,8 +190,27 @@ kollakube res create bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-admin \
     cinder-create-keystone-endpoint-adminv2
 
+for x in nova nova-api; do
+    helm install kolla/$x-create-db --version 3.0.0-1 \
+        --set element_name=$x --namespace kolla \
+        --name $x-create-db
+done
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
+
+for x in nova nova-api; do
+    helm delete --purge $x-create-db
+done
+
+helm install kolla/nova-api-manage-db --version 3.0.0-1 \
+    --set element_name=nova-api --namespace kolla \
+    --name nova-api-manage-db
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+helm delete --purge nova-api-manage-db
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
@@ -183,7 +222,7 @@ $DIR/tests/bin/endpoint_test.sh
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
 kollakube res delete bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
