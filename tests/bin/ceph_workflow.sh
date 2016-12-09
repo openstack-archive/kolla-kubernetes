@@ -46,7 +46,10 @@ done
 
 kollakube res create svc memcached keystone-admin keystone-public \
     nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+    neutron-server nova-metadata nova-novncproxy horizon
+
+helm install kolla/cinder-api-svc --version 3.0.0-1 \
+    --namespace kolla --name cinder-api-svc --set element_name=cinder
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
@@ -133,9 +136,19 @@ kollakube res delete bootstrap nova-create-keystone-user \
     neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
-    cinder-create-db cinder-manage-db \
-    nova-create-keystone-endpoint-internal \
+    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db
+
+helm install --debug kolla/cinder-create-db --version 3.0.0-1 \
+    --set element_name=cinder \
+    --namespace kolla \
+    --name cinder-create-db
+
+helm install --debug kolla/cinder-manage-db --version 3.0.0-1 \
+    --set element_name=cinder \
+    --namespace kolla \
+    --name cinder-manage-db
+
+kollakube res create bootstrap nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
     cinder-create-keystone-endpoint-internal \
     cinder-create-keystone-endpoint-internalv2 \
@@ -162,9 +175,13 @@ $DIR/tests/bin/endpoint_test.sh
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
 kollakube res delete bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
-    cinder-create-db cinder-manage-db \
-    nova-create-keystone-endpoint-internal \
+    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db
+
+helm delete cinder-create-db --purge
+
+helm delete cinder-manage-db --purge
+
+kollakube res delete bootstrap nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
     cinder-create-keystone-endpoint-internal \
     cinder-create-keystone-endpoint-internalv2 \
@@ -176,8 +193,19 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
     neutron-create-keystone-endpoint-admin
 
 kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
-    glance-registry horizon nova-consoleauth nova-novncproxy \
-    cinder-api cinder-scheduler cinder-volume-ceph
+    glance-registry horizon nova-consoleauth nova-novncproxy
+
+helm install kolla/cinder-api --version 3.0.0-1 \
+    --namespace kolla --name cinder-api \
+    --set "$common_vars,element_name=cinder-api"
+    
+helm install kolla/cinder-scheduler --version 3.0.0-1 \
+    --namespace kolla --name cinder-scheduler \
+    --set "$common_vars,element_name=cinder-scheduler"
+
+helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
+    --namespace kolla --name cinder-volume-ceph \
+    --set "$common_vars,element_name=cinder-volume-ceph"
 
 helm ls
 
