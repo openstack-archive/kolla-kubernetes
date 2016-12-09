@@ -58,16 +58,16 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
     --namespace kolla --name mariadb-init-element \
     --set "$common_vars,element_name=mariadb"
 
-helm install kolla/rabbitmq-job --version 3.0.0-1 \
-    --namespace kolla --name rabbitmq-job \
+helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
+    --namespace kolla --name rabbitmq-init-element \
     --set "element_name=rabbitmq,rabbitmq_cluster_cookie=67"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm delete mariadb-init-element --purge
-
-helm delete rabbitmq-job --purge
+for x in mariadb rabbitmq; do
+    helm delete $x-init-element --purge
+done
 
 helm install kolla/mariadb-pod --version 3.0.0-1 \
     --namespace kolla --name mariadb-pod --set "$common_vars,element_name=mariadb"
