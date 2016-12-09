@@ -111,7 +111,14 @@ kollakube res create pod keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create bootstrap nova-create-keystone-user \
+
+kollakube template bootstrap nova-create-keystone-user
+helm install kolla/nova-create-keystone-user --debug --version 3.0.0-1 \
+  --namespace kolla --name nova-create-keystone-user
+
+$DIR/tools/wait_for_pods.sh kolla
+
+kollakube res create bootstrap \
     glance-create-keystone-user cinder-create-keystone-user \
     neutron-create-keystone-user \
     nova-create-keystone-endpoint-public \
@@ -122,7 +129,7 @@ kollakube res create bootstrap nova-create-keystone-user \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap nova-create-keystone-user \
+kollakube res delete bootstrap \
     glance-create-keystone-user cinder-create-keystone-user \
     neutron-create-keystone-user \
     nova-create-keystone-endpoint-public \
