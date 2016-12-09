@@ -3,6 +3,7 @@ common:
         selector_value: "true"
 
         docker_registry: docker.io
+        image_pullPolicy: Always
         docker_namespace: kolla
         kolla_base_distro: centos
         kolla_install_type: binary
@@ -121,3 +122,12 @@ mariadb-pvc:
 
 mariadb-svc:
         mariadb_port: 3306
+
+horizon-api:
+        horizon_image_tag: 2.0.2
+        replicas: 1
+        port: 8080
+
+horizon-svc:
+        type: dashboard
+        port: 8080
