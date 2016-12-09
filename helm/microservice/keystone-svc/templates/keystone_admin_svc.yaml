@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .Values.admin_port }}
+      targetPort: {{ .Values.admin_port }}
+      name: "{{ .Values.element_name }}-admin"
+{{- if .Values.keystone_admin_nodeport }}
+      nodePort: {{ .Values.keystone_admin__nodeport }}
+  type: NodePort
+{{- else if  .Values.keystone_admin__external }}
+  externalIPs:
+    - {{ .Values.kolla_kubernetes_external_vip }}
+{{- end }}
+  selector:
+    service: {{ .Values.element_name | quote }}
+    type: api
+metadata:
+   name:  "{{ .Values.element_name }}-admin"

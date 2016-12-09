@@ -48,6 +48,15 @@ stateful-service:
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
+keystone-admin-svc:
+        port: 35358
+
+keystone-internal-svc:
+        port: 5000
+
+keystone-public-svc:
+        port: 5000
+
 keystone-create-db:
         database_host: "mariadb"
         database_port: 3306
