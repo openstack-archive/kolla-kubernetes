@@ -38,6 +38,10 @@ EOF
     --branch master --cache-dir /opt/git git://git.openstack.org \
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
+#Debug
+cd kolla-ansible;
+git checkout d91ed21fec9e023cde2d9540f9c293849481da8e
+cd ..
 mv kolla-ansible kolla
 
 sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
