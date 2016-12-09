@@ -1,0 +1,16 @@
+{{- $resourceName := "glance" }}
+{{- $serviceName := "glance" }}
+
+{{- $userName := .Values.glance_user  | default "glance" }}
+{{- $userDomain := .Values.glance_domain | default "Default" }}
+{{- $userProject := .Values.glance_project | default "service" }}
+{{- $userProjectDomain := .Values.glance_project_domain | default "Default" }}
+{{- $userRole := .Values.glance_role | default "admin" }}
+
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}

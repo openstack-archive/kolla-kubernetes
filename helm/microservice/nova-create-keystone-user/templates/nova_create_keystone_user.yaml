@@ -1,0 +1,16 @@
+{{- $resourceName := "nova" }}
+{{- $serviceName := "nova" }}
+
+{{- $userName := .Values.nova_user  | default "nova" }}
+{{- $userDomain := .Values.nova_domain | default "Default" }}
+{{- $userProject := .Values.nova_project | default "service" }}
+{{- $userProjectDomain := .Values.nova_project_domain | default "Default" }}
+{{- $userRole := .Values.nova_role | default "admin" }}
+
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}
