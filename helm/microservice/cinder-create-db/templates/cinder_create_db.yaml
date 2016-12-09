@@ -1,0 +1,8 @@
+{{- $resourceName := "cinder" }}
+{{- $serviceName := "cinder" }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "Values" .Values }}
+{{- include "common_create_db_job" $env }}
+         - name: cinder-api-config
+           configMap:
+             name: cinder-api 
+{{- end }}

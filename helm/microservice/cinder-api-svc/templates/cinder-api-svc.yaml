@@ -1,0 +1,6 @@
+{{- $elementPort := .Values.cinder_api_port | default 8776 }}
+{{- $rootElementName := .Values.element_name | default "cinder" }}
+{{- $elementName := printf "%s-api" $rootElementName }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
