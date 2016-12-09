@@ -45,7 +45,7 @@ for x in mariadb rabbitmq glance; do
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
 
-kollakube res create svc memcached keystone-admin keystone-public \
+kollakube res create svc memcached \
     glance-api glance-registry \
     neutron-server horizon cinder-api
 
@@ -54,6 +54,18 @@ helm install kolla/mariadb-svc --version 3.0.0-1 \
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+helm install kolla/keystone-admin-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-admin-svc \
+    --set "element_name=keystone-admin"
+
+helm install kolla/keystone-public-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-public-svc \
+    --set "element_name=keystone-public,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/keystone-internal-svc --version 3.0.0-1 \
+    --namespace kolla --name keystone-internal-svc \
+    --set "element_name=keystone-internal"
 
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
