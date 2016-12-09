@@ -1,0 +1,11 @@
+name: keystone-svc
+version: 3.0.0-1 #FIXME make this changable
+description: keystone-svc subservice layer
+keywords:
+  - openstack
+  - keystone
+  - keystone-svc
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
