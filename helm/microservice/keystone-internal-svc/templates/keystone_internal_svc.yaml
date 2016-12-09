@@ -1,0 +1,9 @@
+{{- $elementPort := .Values.port | default 5000 }}
+{{- $elementSuffix := .Values.element_compoenent | default "internal" }}
+{{- $elementServiceType := .Values.element_service_type | default "api" }}
+{{- $elementService := .Values.element_service | default "keystone"  }}
+{{- $elementNameComp := printf "%s-%s" $elementService $elementSuffix }}
+{{- $elementName := .Values.element_name | default $elementNameComp }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
