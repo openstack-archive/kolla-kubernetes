@@ -62,15 +62,6 @@ tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
 
-mkdir -p ~/.helm/repository/local
-sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
-tools/helm_prebuild.py
-tools/helm_build_microservices.py ~/.helm/repository/local
-helm serve &
-sleep 1
-helm repo update
-helm search
-
 # Turn up kube-proxy logging
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
@@ -116,6 +107,15 @@ if [ "x$4" != "xceph-multi" ]; then
 fi
 
 tests/bin/setup_canal.sh
+
+mkdir -p ~/.helm/repository/local
+sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
+tools/helm_prebuild.py
+tools/helm_build_microservices.py ~/.helm/repository/local
+helm serve &
+sleep 1
+helm repo update
+helm search
 
 kubectl create namespace kolla
 tools/secret-generator.py create
