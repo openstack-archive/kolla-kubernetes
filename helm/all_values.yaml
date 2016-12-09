@@ -169,3 +169,12 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+horizon-api:
+        horizon_image_tag: 2.0.2
+        replicas: 1
+        port: 80
+
+horizon-svc:
+        type: dashboard
+        port: 80
