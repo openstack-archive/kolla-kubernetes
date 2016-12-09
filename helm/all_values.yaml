@@ -147,3 +147,32 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+cinder-api-svc:
+        cinder_api_port: 8776
+
+cinder-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "cinder"
+        database_user: "cinder"
+
+cinder-manage-db:
+        image_tag: 2.0.2
+
+cinder-api:
+        replicas: 1
+        image_tag: 2.0.2
+        port: 8776
+
+cinder-backup:
+        replicas: 1
+        image_tag: 2.0.2
+
+cinder-scheduler:
+        replicas: 1
+        image_tag: 2.0.2
+
+cinder-volume-ceph:
+        replicas: 1
+        image_tag: 2.0.2
