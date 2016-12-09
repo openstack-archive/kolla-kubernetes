@@ -54,7 +54,7 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
-kollakube res create svc neutron-server horizon
+kollakube res create svc neutron-server
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
@@ -96,6 +96,9 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
     --set "element_name=rabbitmq,rabbitmq_cluster_cookie=67"
+
+helm install kolla/horizon-svc --version 3.0.0-1 \
+    --namespace kolla --name horizon-svc --set element_name=horizon
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -267,7 +270,7 @@ kollakube res delete bootstrap \
     neutron-create-keystone-endpoint-admin
 
 kollakube res create pod glance-api \
-    glance-registry horizon \
+    glance-registry \
     cinder-api cinder-scheduler cinder-volume-ceph
 
 helm ls
@@ -278,6 +281,10 @@ for x in nova-api nova-conductor nova-scheduler nova-consoleauth \
       --set "$common_vars,element_name=$x" \
       --namespace kolla --name $x
 done
+
+helm install kolla/horizon-api --version 3.0.0-1 \
+    --set "$common_vars,element_name=horizon" \
+    --namespace kolla --name horizon-api
 
 helm install kolla/neutron-server --version 3.0.0-1 \
     --set "$common_vars" \
