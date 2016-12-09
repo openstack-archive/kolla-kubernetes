@@ -1,0 +1,45 @@
+{{- define "common_create_user_job" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .serviceName }}-create-keystone-user"
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          name: "main"
+          command: ["sh", "-c"]
+          args:
+            - /usr/bin/ansible localhost -vvvv
+                  -m kolla_keystone_user
+                  -a "project={{ .userProject }}
+                      user={{ .userName }}
+                      password=$KEYSTONE_PASSWORD
+                      role={{ .userRole }}
+                      region_name={{ .userRegion }}
+                      auth={{"{{"}} service_auth {{"}}"}}"
+                  -e "{'service_auth':{'auth_url':'http://{{ .keystoneAdminHost }}:{{ .keystoneAdminPort }}','username':'{{ .keystoneAdminUser }}','password':'$KEYSTONE_ADMIN_PASSWORD','project_name':'{{ .keystoneAdminProject }}','domain_name':'{{ .keystoneDomain }}'}}"
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+          env:
+            - name: ANSIBLE_NOCOLOR
+              value: "1"
+            - name: ANSIBLE_LIBRARY
+              value: "/usr/share/ansible"
+            - name: KEYSTONE_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                  name: {{ .resourceName }}-keystone-password
+                  key: password
+            - name: KEYSTONE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+{{- end }}

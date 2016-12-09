@@ -1,0 +1,20 @@
+{{- $resourceName := "nova" }}
+{{- $serviceName := "nova" }}
+
+{{- $userName := .Values.nova_user  | default "nova" }}
+{{- $userProject := .Values.nova_project | default "service" }}
+{{- $userRole := .Values.nova_role | default "admin" }}
+{{- $userRegion := .Values.region  | default "RegionOne" }}
+
+{{- $keystoneAdminHost := .Values.keystone_host | default "keystone-admin" }}
+{{- $keystoneAdminPort := .Values.keystone_port | default "35357" }}
+{{- $keystoneAdminUser := .Values.keystone_admin_user | default "admin" }}
+{{- $keystoneAdminProject := .Values.keystone_admin_project| default "admin" }}
+{{- $keystoneDomain := .Values.keystone_domain | default "default" }}
+
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userProject" $userProject "userRegion" $userRegion "userRole" $userRole "keystoneAdminHost" $keystoneAdminHost "keystoneAdminPort" $keystoneAdminPort "keystoneAdminUser" $keystoneAdminUser "keystoneAdminProject" $keystoneAdminProject "keystoneDomain" $keystoneDomain "Values" .Values }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}
