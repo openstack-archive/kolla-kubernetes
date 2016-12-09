@@ -136,3 +136,30 @@ nova-libvirt:
         libvirt_tcp: false
         libvirt_ceph: true
 
+cinder-api-svc:
+        cinder_api_port: 8776
+
+cinder-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "cinder"
+        database_user: "cinder"
+
+cinder-manage-db:
+        image_tag: 3.0.1
+
+cinder-api:
+        replicas: 1
+        image_tag: 3.0.1
+
+cinder-backup:
+        replicas: 1
+        image_tag: 3.0.1
+
+cinder-scheduler:
+        replicas: 1
+        image_tag: 3.0.1
+
+cinder-volume-ceph:
+        replicas: 1
+        image_tag: 3.0.1
