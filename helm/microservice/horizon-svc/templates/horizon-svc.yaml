@@ -1,0 +1,6 @@
+{{- $elementPort := .Values.port | default 80 }}
+{{- $elementName := printf "%s" .Values.element_name }}
+{{- $elementService := .Values.element_name | default "horizon" }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
