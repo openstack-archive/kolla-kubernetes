@@ -1,0 +1,39 @@
+{{- $horizonImageBuilt := printf "%s/%s/%s-%s-horizon:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.horizon_image_tag | default .Values.kolla_tag }}
+{{- $horizonImageFull := .Values.horizon_image_full | default $horizonImageBuilt }}
+{{- $resourceName := "horizon" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.element_name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      service: {{ .Values.element_name }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.element_name }}
+    spec:
+      nodeSelector:
+        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+      - name: main
+        image: "{{ $horizonImageFull }}"
+        volumeMounts:
+{{- include "common_volume_mounts" $env | indent 10 }}
+          - mountPath: {{ .Values.container_config_directory }}
+            name: horizon-config
+        env:
+{{- include "common_env_vars" $env | indent 10 }}
+{{- include "common_containers" $env | indent 6 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: horizon-config
+          configMap:
+            name: horizon
+{{- end }}
+
