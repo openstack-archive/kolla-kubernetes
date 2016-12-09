@@ -1,0 +1,18 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-cinder-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "cinder-api" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "api" }}
+{{- $configFileName := "cinder.conf" }}
+{{- $configSectionName := "DEFAULT" }}
+{{- $configListenHostParameter := "bind_host" }}
+{{- $configListenPortParameter := "bind_port" }}
+{{- $portName := "cinder-api" }}
+{{- $checkPath := "/" }}
+{{- $privileged := true }}
+{{- $haproxy := .Values.haproxy | default true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraVolumeMounts" $extraVolumeMounts "extraVolume" $extraVolumes "privileged" $privileged "haproxy" $haproxy "Values" .Values }}
+{{- include "common_api_python_deployment" $env }}
+{{- end }}
