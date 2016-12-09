@@ -50,8 +50,7 @@ spec:
             - mountPath: /var/lib/rabbitmq
               name: rabbitmq-persistent-storage
           env:
-            - name: KOLLA_CONFIG_STRATEGY
-              value: COPY_ONCE
+{{- include "common_env_vars" . | indent 12 }}
           ports:
             - containerPort: {{ .Values.rabbitmq_port | default 5672 }}
               name: {{ .Values.element_name }}
