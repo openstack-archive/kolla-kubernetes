@@ -1,0 +1,83 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-cinder-backup:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "cinder-backup" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "backup" }}
+{{- $privileged := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+  name: {{ .Values.element_name }}
+spec:
+  serviceName: {{ .Values.element_name }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.element_name }}
+        type: {{ $serviceType }}
+      annotations:
+         pod.alpha.kubernetes.io/initialized: "true"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-cinder-volume",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
+             "volumeMounts": [
+                {
+                   "name": "cinder-backup-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          },
+          {
+             "name": "initialize-cinder-logs",
+             "image": "{{ cinder_backup_image_full }}",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "mkdir /var/log/kolla/cinder ;
+                  chown -R cinder: /var/log/kolla/cinder "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          }
+        ]'
+    spec: 
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - name: main
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDirt: {}
+        - name: cinder-backup-configmap
+          configMap:
+            name: {{ .Values.element_name }}
+{{- end }}
