@@ -1,0 +1,5 @@
+{{- $elementPort := .Values.port | default 6080 }}
+{{- $elementName := .Values.element_name | default "nova_novncproxy" }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}

@@ -1,0 +1,6 @@
+{{- $elementPort := .Values.port | default 8775 }}
+{{- $rootElementName := .Values.element_name | default "nova" }}
+{{- $elementName := printf "%s-metadata" $rootElementName }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName  "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
