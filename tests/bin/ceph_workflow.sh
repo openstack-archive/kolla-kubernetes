@@ -159,7 +159,7 @@ helm delete --purge neutron-create-keystone-service
 helm delete --purge neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
@@ -170,8 +170,27 @@ kollakube res create bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-admin \
     cinder-create-keystone-endpoint-adminv2
 
+for x in nova nova-api; do
+    helm install kolla/$x-create-db --version 3.0.0-1 \
+        --set element_name=$x --namespace kolla \
+        --name $x-create-db
+done
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
+
+for x in nova nova-api; do
+    helm delete --purge $x-create-db
+done
+
+helm install kolla/nova-api-manage-db --version 3.0.0-1 \
+    --set element_name=nova-api --namespace kolla \
+    --name nova-api-manage-db
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+helm delete --purge nova-api-manage-db
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
@@ -183,7 +202,7 @@ $DIR/tests/bin/endpoint_test.sh
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
 kollakube res delete bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
