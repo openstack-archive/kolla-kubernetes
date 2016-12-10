@@ -121,3 +121,11 @@ mariadb-pvc:
 
 mariadb-svc:
         mariadb_port: 3306
+
+nova-api-svc:
+        port: 8774
+        metadata_port: 8775
+
+nova-novncproxy-svc:
+        port: 6080
+
