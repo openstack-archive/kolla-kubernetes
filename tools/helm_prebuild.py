@@ -25,7 +25,8 @@ stateful_services = [
 ]
 
 pod_http_termination = [
-    'neutron-server'
+    'neutron-server',
+    'nova-api'
 ]
 
 

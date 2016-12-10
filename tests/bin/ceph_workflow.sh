@@ -175,11 +175,15 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
     cinder-create-keystone-endpoint-adminv2 \
     neutron-create-keystone-endpoint-admin
 
-kollakube res create pod nova-api nova-conductor nova-scheduler glance-api \
+kollakube res create pod nova-conductor nova-scheduler glance-api \
     glance-registry horizon nova-consoleauth nova-novncproxy \
     cinder-api cinder-scheduler cinder-volume-ceph
 
 helm ls
+
+helm install kolla/nova-api --version 3.0.0-1 \
+    --set "$common_vars,element_name=nova-api " \
+    --namespace kolla --name nova-api
 
 helm install kolla/neutron-server --version 3.0.0-1 \
     --set "$common_vars" \
