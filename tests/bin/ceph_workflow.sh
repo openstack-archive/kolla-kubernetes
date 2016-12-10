@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+IP=172.18.0.1
 
 function ceph_values {
     echo "ceph:"
@@ -45,14 +46,25 @@ for x in mariadb rabbitmq glance; do
 done
 
 kollakube res create svc memcached keystone-admin keystone-public \
-    nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+    glance-api glance-registry \
+    neutron-server horizon cinder-api
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+
+helm install kolla/nova-api-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-api-svc \
+    --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/nova-metadata-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-metadata-svc \
+    --set "element_name=nova"
+
+helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
+    --namespace kolla --name nova-novncproxy-svc --set element_name=nova
 
 helm install kolla/mariadb-init-element --version 3.0.0-1 \
     --namespace kolla --name mariadb-init-element \

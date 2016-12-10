@@ -144,6 +144,15 @@ mariadb-pvc:
 mariadb-svc:
         mariadb_port: 3306
 
+nova-api-svc:
+        port: 8774
+
+nova-metadata-svc:
+        port: 8775
+
+nova-novncproxy-svc:
+        port: 6080
+
 nova-api:
         image_tag: 2.0.2
         replicas: 3
