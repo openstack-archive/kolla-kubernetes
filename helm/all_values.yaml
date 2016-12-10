@@ -121,3 +121,18 @@ mariadb-pvc:
 
 mariadb-svc:
         mariadb_port: 3306
+
+nova-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova"
+        database_user: "nova"
+
+nova-api-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "nova_api"
+        database_user: "nova_api"
+
+nova-api-manage-db:
+        image_tag: 2.0.2
