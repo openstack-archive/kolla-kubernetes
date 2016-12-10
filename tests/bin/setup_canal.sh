@@ -15,3 +15,5 @@ kubectl create -f /tmp/canal.yaml
 
 $DIR/tools/pull_containers.sh kube-system
 $DIR/tools/wait_for_pods.sh kube-system
+
+$DIR/tools/test_kube_dns.sh
