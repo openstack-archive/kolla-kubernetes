@@ -1,4 +1,5 @@
 {{- define "common_create_db_job" }}
+{{ $serviceNameUpper := .serviceName | upper | replace "-" "_" }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -42,7 +43,7 @@ spec:
                login_user='root'
                login_password='$DATABASE_PASSWORD'
                name='{{ .Values.database_user }}'
-               password='${{ .serviceName | upper }}_DATABASE_PASSWORD'
+               password='${{ $serviceNameUpper }}_DATABASE_PASSWORD'
                host='%'
                priv='{{ .Values.database_name }}.*:ALL'
                append_privs='yes'"
@@ -58,7 +59,7 @@ spec:
                 secretKeyRef:
                   name: database-password
                   key: password
-            - name: "{{ .serviceName | upper }}_DATABASE_PASSWORD"
+            - name: "{{ $serviceNameUpper }}_DATABASE_PASSWORD"
               valueFrom:
                 secretKeyRef:
                   name: "{{ .serviceName }}-database-password"
