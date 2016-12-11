@@ -128,3 +128,12 @@ nova-compute:
         selector_value: "true"
         libvirt_tcp: false
         nova_ceph: true
+
+glance-create-db:
+      database_host: "mariadb"
+      database_port: 3306
+      database_name: "glance"
+      database_user: "glance"
+
+glance-manage-db:
+      image_tag: 3.0.1
