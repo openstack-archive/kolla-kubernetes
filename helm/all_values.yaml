@@ -195,3 +195,11 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+glance-api-svc:
+        glance_api_port: 9292
+        type: "api"
+
+glance-registry-svc:
+        glance_registry_port: 9191
+        type: "registry"

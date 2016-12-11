@@ -1,0 +1,7 @@
+{{- $elementPort := .Values.glance_registry_port | default 9191 }}
+{{- $elementService := .Values.element_name | default "glance" }}
+{{- $elementName := printf "%s-registry" $elementService }}
+{{- $elementType := .Values.type }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_type" $elementType "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
