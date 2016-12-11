@@ -122,6 +122,12 @@ mariadb-pvc:
 mariadb-svc:
         mariadb_port: 3306
 
+nova-api:
+        image_tag: 2.0.2
+        replicas: 3
+        port: 8774
+        metadata_port: 8775
+
 nova-compute:
         image_tag: 2.0.2
         selector_key: kolla_compute
