@@ -13,7 +13,7 @@ spec:
     - {{ .kolla_kubernetes_external_vip }}
 {{- end }}
   selector:
-    service: {{ .element_name | quote }}
+    service: {{ .element_service | quote }}
 metadata:
    name:  {{ .element_name | quote }}
 {{- end }}
