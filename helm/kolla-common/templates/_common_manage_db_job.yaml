@@ -28,5 +28,5 @@ spec:
 {{- include "common_volumes" . | indent 8 }}
         - name: service-configmap
           configMap:
-            name: {{ .resourceName }}
+            name: {{ .serviceName }}
 {{- end }}
