@@ -1,0 +1,60 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "glance" }}
+{{- $serviceName := "glance-api" }}
+{{- $podTypeBootstrap := true }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-manage-db
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: {{ $imageFull | quote }}
+          name: main
+          env:
+{{- include "common_bootstrap_env_vars" $env | indent 12 }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+{{- if ne .Values.ceph_backend true  }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: glance-api-config
+              readOnly: true
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+{{- else }}
+            - mountPath: {{ .Values.container_config_directory }}/config.json
+              name: glance-api-config
+              readOnly: true
+              subPath: config.json
+            - mountPath: {{ .Values.container_config_directory }}/glance-api.conf
+              name: glance-api-config
+              readOnly: true
+              subPath: glance-api.conf
+            - mountPath: {{ .Values.container_config_directory }}/ceph.conf
+              name: ceph-conf
+              subPath: ceph.conf
+            - mountPath: {{ .Values.container_config_directory }}/ceph.client.glance.keyring
+              name: ceph-conf
+              subPath: ceph.conf
+{{- end }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: glance-api-config
+          configMap:
+            name: glance-api
+{{- if ne .Values.ceph_backend true }}
+        - name: glance-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc_name }}
+{{- else }}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+{{- end }}
+{{- end }}
