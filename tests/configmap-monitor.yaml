@@ -1,0 +1,104 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+   name: configmap-updater
+   namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        component: configmap-monitor 
+        system: kube 
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "copy-config",
+              "image": "docker.io/port/centos-binary-kolla-kube-toolbox:3.0.1",
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /tmp/main-process-configmap/..data/* /tmp/pod-main-config/;
+                   kubectl get configmap main-process-configmap -o json | jq -r ''.metadata.resourceVersion '' > /tmp/configmap-monitor/configmap-version.txt; "
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/tmp/pod-main-config"
+                  },
+                  {
+                      "name": "configmap-monitor",
+                      "mountPath": "/tmp/configmap-monitor"
+                  },
+                  {
+                      "name": "main-process-configmap",
+                      "mountPath": "/tmp/main-process-configmap"
+                  }
+              ]
+          }
+        ]'
+    spec:
+      containers:
+        - image: docker.io/port/centos-binary-kolla-kube-toolbox:3.0.1
+          name: main
+          command:
+            - /bin/bash
+            - -c
+            - |
+               config_value=$(cat /tmp/main-process-config/config.json | jq -r '.variable ');
+               while true; 
+                 do 
+                    echo $config_value; 
+                    sleep 10; 
+               done;
+          volumeMounts:
+            - mountPath: /tmp/main-process-config 
+              name: pod-main-config
+        - image: docker.io/port/centos-binary-kolla-kube-toolbox:3.0.1
+          name: configmap-monitor
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - |
+                 original_version=$(</tmp/configmap-monitor/configmap-version.txt);
+                 current_version=$(kubectl get configmap main-process-configmap -o json | jq -r '.metadata.resourceVersion ')
+                 echo "Original version - $original_version, Current version - $current_version";
+                 if [ $original_version != $current_version ]; then
+                    echo 'Configmap got changed need to restart POD';
+                    exit 1;
+                 fi;
+                 exit 0;
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          command:
+            - /bin/bash
+            - -c
+            - |
+               while true; 
+                 do
+                    sleep 100; 
+               done;
+          volumeMounts:
+            - mountPath: /tmp/configmap-monitor
+              name: configmap-monitor
+      volumes:
+        - name: pod-main-config
+          emptyDir: {}
+        - name: configmap-monitor
+          emptyDir: {}
+        - name: main-process-configmap
+          configMap:
+            name: main-process-configmap
+---
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "variable": "old"
+    }
+kind: ConfigMap
+metadata:
+  name: main-process-configmap
+  namespace: default
