@@ -36,7 +36,7 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq; do
+for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
         --values <(ceph_values $1)

@@ -21,7 +21,8 @@ import yaml
 
 stateful_services = [
     'rabbitmq-pv',
-    'mariadb-pv'
+    'mariadb-pv',
+    'glance-pv'
 ]
 
 pod_http_termination = [
