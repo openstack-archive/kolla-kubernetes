@@ -14,6 +14,9 @@ spec:
 {{- end }}
   selector:
     service: {{ .element_service | quote }}
+{{- if .element_service_type }}
+    type: {{ .element_service_type | quote }}
+{{- end }}
 metadata:
    name:  {{ .element_name | quote }}
 {{- end }}
