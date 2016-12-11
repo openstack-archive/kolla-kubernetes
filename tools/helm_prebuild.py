@@ -28,6 +28,13 @@ pod_http_termination = [
     'neutron-server'
 ]
 
+common_create_keystone_admin = [
+    'neutron-create-keystone-service',
+    'neutron-create-keystone-endpoint-public',
+    'neutron-create-keystone-endpoint-internal',
+    'neutron-create-keystone-endpoint-admin'
+]
+
 
 def helm_build_package(repodir, srcdir):
     command_line = "cd %s; helm package %s" % (repodir, srcdir)
@@ -63,6 +70,8 @@ def main():
                 raise
         helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
         pkg_values = copy.deepcopy(values['common'])
+        if package in common_create_keystone_admin:
+            pkg_values.update(values['common-create-keystone-admin'])
         if package in pod_http_termination:
             pkg_values.update(values['pod-http-termination'])
         if package in stateful_services:
