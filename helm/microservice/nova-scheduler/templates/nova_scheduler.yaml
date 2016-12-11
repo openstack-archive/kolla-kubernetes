@@ -1,0 +1,11 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-nova-scheduler:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "nova-scheduler" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "scheduler" }}
+{{- $privileged := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+{{- include "common_statefulset" $env }}
+{{- end }}

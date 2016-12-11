@@ -122,6 +122,23 @@ mariadb-pvc:
 mariadb-svc:
         mariadb_port: 3306
 
+nova-conductor:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-scheduler:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-consoleauth:
+        image_tag: 2.0.2
+        replicas: 1
+
+nova-novncproxy:
+        image_tag: 2.0.2
+        replicas: 1
+        port: 6080
+
 nova-compute:
         image_tag: 2.0.2
         selector_key: kolla_compute
@@ -135,4 +152,3 @@ nova-libvirt:
         selector_value: "true"
         libvirt_tcp: false
         libvirt_ceph: true
-
