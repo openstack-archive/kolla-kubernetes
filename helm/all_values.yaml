@@ -121,3 +121,9 @@ mariadb-pvc:
 
 mariadb-svc:
         mariadb_port: 3306
+
+glance-api-svc:
+        glance_api_port: 9292
+
+glance-registry-svc:
+        glance_registry_port: 9191
