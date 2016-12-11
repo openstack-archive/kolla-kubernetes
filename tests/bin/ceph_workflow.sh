@@ -132,8 +132,18 @@ kollakube res delete bootstrap nova-create-keystone-user \
     cinder-create-keystone-endpoint-publicv2 \
     neutron-create-keystone-endpoint-public
 
-kollakube res create bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+helm install --debug kolla/glance-create-db --version 3.0.0-1 \
+    --set element_name=glance \
+    --namespace kolla \
+    --name glance-create-db
+
+helm install --debug kolla/glance-manage-db --version 3.0.0-1 \
+    --set element_name=glance \
+    --namespace kolla \
+    --name glance-manage-db
+
+kollakube res create bootstrap nova-create-api-db nova-create-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
@@ -161,8 +171,12 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-kollakube res delete bootstrap glance-create-db glance-manage-db \
-    nova-create-api-db nova-create-db neutron-create-db neutron-manage-db \
+helm delete glance-create-db --purge
+ 
+helm delete glance-manage-db --purge
+
+kollakube res delete bootstrap nova-create-api-db nova-create-db \
+    neutron-create-db neutron-manage-db \
     cinder-create-db cinder-manage-db \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
