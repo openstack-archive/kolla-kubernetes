@@ -128,3 +128,9 @@ nova-compute:
         selector_value: "true"
         libvirt_tcp: false
         nova_ceph: true
+
+glance-api-svc:
+        glance_api_port: 9292
+
+glance-registry-svc:
+        glance_registry_port: 9191

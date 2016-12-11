@@ -45,8 +45,16 @@ for x in mariadb rabbitmq; do
 done
 
 kollakube res create svc memcached keystone-admin keystone-public \
-    nova-api glance-api glance-registry \
-    neutron-server nova-metadata nova-novncproxy horizon cinder-api
+    nova-api 
+
+helm install kolla/glance-api-svc --version 3.0.0-1 \
+    --namespace kolla --name glance-api-svc --set element_name=glance
+
+helm install kolla/glance-registry-svc --version 3.0.0-1 \
+    --namespace kolla --name glance-registry-svc --set element_name=glance
+    
+kollakube res create svc neutron-server nova-metadata nova-novncproxy horizon \
+    cinder-api
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
