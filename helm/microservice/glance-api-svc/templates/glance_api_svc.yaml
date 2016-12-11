@@ -1,0 +1,5 @@
+{{- $elementPort := .Values.glance_api_port | default 9292 }}
+{{- $elementName := printf "%s-api" .Values.element_name }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
