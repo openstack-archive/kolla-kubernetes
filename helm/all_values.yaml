@@ -128,3 +128,9 @@ nova-compute:
         selector_value: "true"
         libvirt_tcp: false
         nova_ceph: true
+
+glance-pv:
+        glance_volume_size_gb: 10
+
+glance-pvc:
+        glance_volume_size_gb: 10
