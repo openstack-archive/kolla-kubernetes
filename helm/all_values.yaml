@@ -136,3 +136,10 @@ nova-libvirt:
         libvirt_tcp: false
         libvirt_ceph: true
 
+glance-api-svc:
+        glance_api_port: 9292
+        type: "api"
+
+glance-registry-svc:
+        glance_registry_port: 9191
+        type: "registry"
