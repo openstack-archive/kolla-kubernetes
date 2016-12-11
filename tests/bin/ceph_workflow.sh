@@ -219,7 +219,10 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
 
 kollakube res create bootstrap openvswitch-set-external-ip
 kollakube res create pod nova-libvirt
-kollakube res create pod nova-compute
+helm install kolla/nova-compute --version 3.0.0-1 \
+    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
+    --namespace kolla --name nova-compute
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
