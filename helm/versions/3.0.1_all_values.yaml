@@ -1,0 +1,50 @@
+common:
+        fluentd_image_tag: 3.0.1
+        kolla_toolbox_image_tag: 3.0.1
+        kubernetes_entrypoint_image_tag: 3.0.1
+
+pod-http-termination:
+        haproxy_image_tag: 3.0.1
+
+openvswitch-ovsdb:
+        openvswitch_ovsdb_image_tag: 3.0.1
+
+keystone-manage-db:
+        image_tag: 3.0.1
+
+neutron-server:
+        image_tag: 3.0.1
+
+neutron-openvswitch-agent:
+        openvswitch_agent_image_tag: 3.0.1
+
+neutron-l3-agent:
+        l3_agent_image_tag: 3.0.1
+
+openvswitch-vswitchd:
+        openvswitch_vswitchd_image_tag: 3.0.1
+
+rabbitmq-init-element:
+        rabbitmq_image_tag: 3.0.1
+
+rabbitmq-pod:
+        rabbitmq_image_tag: 3.0.1
+
+memcached:
+        memcached_image_tag: 3.0.1
+
+mariadb-init-element:
+        mariadb_image_tag: 3.0.1
+
+mariadb-pod:
+        mariadb_image_tag: 3.0.1
+
+nova-api:
+        image_tag: 3.0.1
+
+nova-compute:
+        image_tag: 3.0.1
+
+nova-libvirt:
+        image_tag: 3.0.1
+

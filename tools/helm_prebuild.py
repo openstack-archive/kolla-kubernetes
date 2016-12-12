@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cliff import argparse
+
 import copy
 import errno
 import os
@@ -45,7 +47,8 @@ def helm_build_package(repodir, srcdir):
             command_line, shell=True,
             executable='/bin/bash')
         res = res.strip()  # strip whitespace
-        print(res)
+        if res != "":
+            print(res)
     except subprocess.CalledProcessError as e:
         print(e)
         raise
@@ -55,15 +58,62 @@ def _isdir(path, entry):
     return os.path.isdir(os.path.join(path, entry))
 
 
+def _version_override(version, revisions, microdir, package):
+
+    chartfile = os.path.join(microdir, package, "Chart.yaml")
+    file = open(chartfile, 'r')
+    chart = yaml.load(file)
+    file.close()
+
+    revision = revisions.get(package, revisions['common'])
+    chart['version'] = "%s-%s" % (version, revision)
+
+    file = open(chartfile, 'w')
+    file.write("%s" % yaml.safe_dump(chart, default_flow_style=False))
+    file.close()
+
+
 def main():
     path = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+    parser = argparse.ArgumentParser(
+        description='',
+        add_help=True
+    )
+
+    version_override = False
+    parser.add_argument(
+        '-v',
+        '--version',
+        type=str,
+        help="Override the version to build"
+    )
+
+    options, remainder = parser.parse_known_args(sys.argv)
 
     srcdir = os.path.join(path, "..", "helm")
     microdir = os.path.join(srcdir, "microservice")
     microservices = os.listdir(microdir)
     values = yaml.load(open(os.path.join(srcdir, "all_values.yaml")))
 
+    revisions = {}
+    if options.version:
+        revisionsfile = open(os.path.join(srcdir, 'versions', "%s_revisions.yaml" % options.version), "r")
+        revisions = yaml.load(revisionsfile)
+        revisionsfile.close()
+
+        vervaluesfile = open(os.path.join(srcdir, 'versions', "%s_all_values.yaml" % options.version), "r")
+        vervalues = yaml.load(vervaluesfile)
+        vervaluesfile.close()
+
+        values.update(vervalues)
+
+    values = yaml.load(open(os.path.join(srcdir, "all_values.yaml")))
+
     for package in [p for p in microservices if _isdir(microdir, p)]:
+        if options.version:
+            _version_override(options.version, revisions, microdir, package)
+
         pkgchartdir = os.path.join(microdir, package, "charts")
         try:
             os.makedirs(pkgchartdir)
