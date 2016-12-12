@@ -1,0 +1,31 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-heat-engine:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "heat-engine" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "heat-engine" }}
+{{- $serviceType := "server" }}
+{{- $configFileName := "heat.conf" }}
+{{- $configSectionName := "DEFAULT" }}
+{{- $configListenHostParameter := "bind_host" }}
+{{- $configListenPortParameter := "bind_port" }}
+{{- $portName := "heat-engine" }}
+{{- $checkPath := "/" }}
+{{- $extraConfigmapConfig := "heat_engine_extra_configmap_config" }}
+{{- $privileged := false }}
+{{- define "heat_engine_extra_configmap_config" }}
+items:
+- key: heat.conf
+  path: heat.conf
+- key: policy.json
+  path: policy.json
+- key: api-paste.ini
+  path: api-paste.ini
+- key: templates
+  path: templates
+- key: environment.d
+  path: environment.d
+{{- end }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values }}
+{{- include "common_api_python_deployment" $env }}
+{{- end }}
