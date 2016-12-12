@@ -195,3 +195,17 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+heat-api:
+        image_tag: 3.0.1
+        replicas: 1
+        port: 8004
+
+heat-api-cfn:
+        image_tag: 3.0.1
+        replicas: 1
+        port: 8000
+
+heat-engine:
+        image_tag: 3.0.1
+        replicas: 1
