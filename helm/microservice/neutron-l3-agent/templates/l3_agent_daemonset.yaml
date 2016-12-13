@@ -23,10 +23,11 @@ spec:
       annotations:
 #FIXME Its unclear if ovsdb_connection, local_ip, and/or hostPID required. Try removing them once we have a working gate to test with.
 #FIXME Once out of alpha, this should be converted to yaml.
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
               "command": [
                   "/bin/sh",
                   "-c",
@@ -65,6 +66,7 @@ spec:
           {
               "name": "update-permissions",
               "image": {{ $l3AgentImageFull | quote }},
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
               "securityContext": {
                   "runAsUser": 0
               },
