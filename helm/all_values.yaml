@@ -22,6 +22,8 @@ common:
         kolla_toolbox_image_tag: 3.0.1
         kubernetes_entrypoint_image_tag: 3.0.1
 
+        orchestration_entrypoint: flase
+
 common-create-keystone-admin:
         keystone_admin_protocol: http
         keystone_admin_svcname: keystone-admin
