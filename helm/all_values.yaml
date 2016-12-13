@@ -225,3 +225,6 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+cinder-api-svc:
+        port: 8776
