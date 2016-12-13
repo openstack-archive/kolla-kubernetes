@@ -4,8 +4,8 @@
 *.so
 
 # helm / chart
-values.yaml
-**/charts
+**microservice/*values.yaml
+**microservice/*charts
 
 # Packages
 *.egg*

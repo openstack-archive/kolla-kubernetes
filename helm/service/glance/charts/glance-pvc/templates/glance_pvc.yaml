@@ -1,0 +1,6 @@
+{{- $pvcName := .Values.pvc_name | default "glance" }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $volumeSizeGB := .Values.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pvc" $env }}
+{{- end }}

@@ -1,0 +1,35 @@
+global:
+
+glance-pv:
+    storage_provider: "ceph"
+    glance_volume_size_gb: 11
+    storage_provider_fstype: "xfs"
+    pv_name: "glance-test"
+    orchestration_entrypoint: true
+
+glance-pvc:
+    storage_provider: "ceph"
+    glance_volume_size_gb: 11
+    storage_provider_fstype: "xfs"
+    pvc_name: "glance-test"
+    orchestration_entrypoint: true
+
+glance-api-svc:
+   glance_api_port: 9292
+   type: "api"
+   orchestration_entrypoint: true
+
+glance-registry-svc:
+   glance_registry_port: 9191
+   type: "registry"
+   orchestration_entrypoint: true
+
+glance-create-db:
+   namespace: "kolla"
+   orchestration_entrypoint: true
+   dependecies:
+      init:
+          jobs:
+             - mariadb
+          service:
+             - mariadb
