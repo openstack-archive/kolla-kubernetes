@@ -29,4 +29,7 @@ spec:
         - name: service-configmap
           configMap:
             name: {{ .serviceName }}
+{{- if .extraConfigmapConfig }}
+{{- include .extraConfigmapConfig . | indent 12 }}
+{{- end }}
 {{- end }}

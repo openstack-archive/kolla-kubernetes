@@ -195,7 +195,6 @@ helm delete --purge neutron-create-keystone-service
 helm delete --purge neutron-create-keystone-endpoint-public
 
 kollakube res create bootstrap glance-create-db glance-manage-db \
-    neutron-create-db neutron-manage-db \
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
     --set element_name=cinder \
@@ -216,7 +215,7 @@ kollakube res create bootstrap nova-create-keystone-endpoint-internal \
     cinder-create-keystone-endpoint-admin \
     cinder-create-keystone-endpoint-adminv2
 
-for x in nova nova-api; do
+for x in nova nova-api neutron; do
     helm install kolla/$x-create-db --version 3.0.0-1 \
         --set element_name=$x --namespace kolla \
         --name $x-create-db
@@ -225,18 +224,14 @@ done
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in nova nova-api; do
-    helm delete --purge $x-create-db
+for x in nova-api neutron; do
+    helm install kolla/$x-manage-db --version 3.0.0-1 \
+        --set element_name=$x --namespace kolla \
+        --name $x-manage-db
 done
-
-helm install kolla/nova-api-manage-db --version 3.0.0-1 \
-    --set element_name=nova-api --namespace kolla \
-    --name nova-api-manage-db
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
-
-helm delete --purge nova-api-manage-db
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
@@ -247,12 +242,15 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-kollakube res delete bootstrap glance-create-db glance-manage-db \
-    neutron-create-db neutron-manage-db
+kollakube res delete bootstrap glance-create-db glance-manage-db
 
-helm delete --purge cinder-create-db
+for x in nova nova-api cinder neutron; do
+    helm delete --purge $x-create-db
+done
 
-helm delete --purge cinder-manage-db
+for x in nova-api cinder neutron; do
+    helm delete --purge $x-manage-db
+done
     
 kollakube res delete bootstrap \
     nova-create-keystone-endpoint-internal \
@@ -269,8 +267,6 @@ kollakube res delete bootstrap \
 kollakube res create pod glance-api \
     glance-registry horizon \
     cinder-api cinder-scheduler cinder-volume-ceph
-
-helm ls
 
 for x in nova-api nova-conductor nova-scheduler nova-consoleauth \
     nova-novncproxy; do
