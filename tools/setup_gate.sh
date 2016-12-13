@@ -95,7 +95,8 @@ if [ "x$4" == "xceph-multi" ]; then
         ssh $line sudo setenforce 0
         ssh $line sudo mv kubectl /usr/bin/
         ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
-        ssh $line sudo sed -i "'s@KUBELET_EXTRA_ARGS=@KUBELET_EXTRA_ARGS=--hostname-override=$line @'" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        ssh $line more /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        ssh $line sudo sed -i "'s@KUBELET_DNS_ARGS=@KUBELET_DNS_ARGS=--hostname-override=$line @'" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
         ssh $line sudo systemctl daemon-reload
         ssh $line sudo systemctl restart kubelet
         set +xe

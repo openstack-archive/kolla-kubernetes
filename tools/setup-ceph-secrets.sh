@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 NAMESPACE=$(kolla-kubernetes resource-template create bootstrap ceph-bootstrap-initial-mon -o json | jq -r '.metadata.namespace')
 pods=$(kubectl get pods --selector=job-name=ceph-bootstrap-initial-mon --namespace=$NAMESPACE --output=jsonpath={.items..metadata.name})
 kubectl logs $pods --namespace=$NAMESPACE | grep FETCH_CEPH_KEYS | sed 's/^FETCH_CEPH_KEYS: //' > /tmp/$$
