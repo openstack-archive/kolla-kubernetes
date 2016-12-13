@@ -304,3 +304,4 @@ horizon-api:
 horizon-svc:
         type: dashboard
         port: 80
+
