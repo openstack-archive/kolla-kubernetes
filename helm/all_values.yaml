@@ -256,3 +256,6 @@ cinder-create-db:
 
 cinder-manage-db:
         image_tag: 2.0.2
+
+cinder-api-svc:
+        port: 8776
