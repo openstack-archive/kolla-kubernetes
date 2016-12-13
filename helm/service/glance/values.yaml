@@ -1,0 +1,7 @@
+global:
+    glance_pv:  true
+    glance_pvc: true
+
+    storage_provider: "ceph"
+    glance_volume_size_gb: 10
+    storage_provider_fstype: "xfs"

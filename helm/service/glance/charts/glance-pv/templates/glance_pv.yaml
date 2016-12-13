@@ -1,0 +1,17 @@
+{{- $volumeName := "glance"}}
+{{- $pvName := "glance" }}
+{{- if and .Values.global.glance_pv .Values.global.orchestration_entrypoint }}
+{{- $storageProvider := .Values.global.storage_provider }}
+{{- $storageProviderFStype := .Values.global.storage_provider_fstype | default "xfs" }}
+{{- $volumeSizeGB := .Values.global.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pv" $env }}
+{{- end }}
+{{- else }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $storageProviderFStype := .Values.storage_provider_fstype | default "xfs" }}
+{{- $volumeSizeGB := .Values.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pv" $env }}
+{{- end }}
+{{- end }}

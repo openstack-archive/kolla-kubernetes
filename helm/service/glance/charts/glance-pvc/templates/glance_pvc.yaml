@@ -1,0 +1,14 @@
+{{- $pvcName := "glance" }}
+{{- if and .Values.global.glance_pvc .Values.global.orchestration_entrypoint }}
+{{- $storageProvider := .Values.global.storage_provider }}
+{{- $volumeSizeGB := .Values.global.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pvc" $env }}
+{{- end }}
+{{- else }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $volumeSizeGB := .Values.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pvc" $env }}
+{{- end }}
+{{- end}}
