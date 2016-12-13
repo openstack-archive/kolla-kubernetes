@@ -1,0 +1,47 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-heat-engine:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.heat_engine_image_tag | default .Values.kolla_tag }}
+{{- $imageFull := .Values.heat_engine_image_full | default $imageBuilt }}
+{{- $resourceName := "heat-engine" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $name :=  .Release.Name }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.element_name }}
+spec:
+  replicas: {{ .Values.heat_engine_replicas }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.element_name }}
+    spec:
+      nodeSelector:
+        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      #terminationGracePeriodSeconds: 10
+      containers:
+      - image: "{{ $imageFull }}"
+        name: main
+        volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+          - mountPath: {{ .Values.container_config_directory }}
+            name: heat-config
+          - mountPath: {{ .Values.heat_engine_volume_path }}
+            name: heat-storage 
+        env:
+          - name: KOLLA_CONFIG_STRATEGY
+            value: COPY_ONCE
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}                          
+        - name: heat-config
+          configMap:
+            name: {{ .Values.element_name }}
+  volumeClaimTemplates:
+  - metadata:
+      name: heat-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.heat_engine_volume_size_gb }}
