@@ -1,7 +1,7 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 metadata:
    name: cinder-scheduler
    namespace: {{ kolla_kubernetes_namespace }}
@@ -14,7 +14,7 @@ spec:
         service: cinder
         type: scheduler
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
+        pod.beta.kubernetes.io/initialized: "true"
     spec:
       nodeSelector:
 {%- set selector = kolla_kubernetes_hostlabel_cinder_scheduler |

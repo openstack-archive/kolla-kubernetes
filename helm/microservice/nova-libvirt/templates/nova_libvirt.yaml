@@ -21,10 +21,11 @@ spec:
         component: {{ $serviceName }}
         system: {{ .Values.element_name }}
       annotations:
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-nova-libvirt",
              "image": "{{ $imageFull }}",
+             "imagePullPolicy", {{ .Values.image_pull_policy | quote }},
              "command": [
                  "sh",
                  "-xec",
