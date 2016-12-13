@@ -1,0 +1,93 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        glance:
+            create_db:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+            manage_db:
+                job:
+                    ceph_backend: true
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+                        JOBS:
+                        - glance-create-db
+            create_keystone_user:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        JOBS:
+                        - glance-create-keystone-service
+                        SERVICE:
+                        - keystone-admin
+            create_keystone_service:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        SERVICE:
+                        - keystone-admin
+            create_keystone_endpoint:
+                public:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            JOBS:
+                            - glance-create-keystone-service
+                            - glance-create-keystone-user
+                            - glance-create-keystone-endpoint-internal
+                            - glance-create-keystone-endpoint-admin
+                            SERVICE:
+                            - keystone-admin
+                internal:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            JOBS:
+                            - glance-create-keystone-service
+                            - glance-create-keystone-user
+                            - glance-create-keystone-endpoint-admin
+                            SERVICE:
+                            - keystone-admin
+                admin:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            JOBS:
+                            - glance-create-keystone-service
+                            - glance-create-keystone-user
+                            SERVICE:
+                            - keystone-admin
+            api:
+                all:
+                    ceph_backend: true
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        JOBS:
+                        - glance-create-keystone-endpoint-public
+                        - glance-create-keystone-endpoint-internal
+                        - glance-create-keystone-endpoint-admin
+                        - glance-create-db
+                        - glance-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin
+            registry:
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        JOBS:
+                        - glance-create-keystone-endpoint-public
+                        - glance-create-keystone-endpoint-internal
+                        - glance-create-keystone-endpoint-admin
+                        - glance-create-db
+                        - glance-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin
