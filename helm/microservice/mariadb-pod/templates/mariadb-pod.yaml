@@ -4,8 +4,8 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
-apiVersion: apps/v1alpha1
-kind: PetSet
+apiVersion: apps/v1beta1
+kind: StatefulSet
 spec:
   serviceName: {{ .Values.element_name }}
   replicas: 1
@@ -13,8 +13,6 @@ spec:
     metadata:
       labels:
         service: {{ .Values.element_name }}
-      annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}

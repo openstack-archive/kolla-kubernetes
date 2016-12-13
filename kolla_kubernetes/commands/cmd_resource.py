@@ -275,6 +275,7 @@ class Resource(ResourceTemplate):
     def _kind_to_cli(self, kind):
         kind_map = {
             'PetSet': 'petset',
+            'StatefulSet': 'statefulset',
             'Pod': 'pod',
             'ReplicationController': 'rc',
             'DaemonSet': 'daemonset',

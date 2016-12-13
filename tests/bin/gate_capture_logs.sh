@@ -24,8 +24,8 @@ kubectl get svc --all-namespaces -o yaml > $WORKSPACE/logs/svc.yaml
 kubectl get deployments --all-namespaces -o yaml > \
     $WORKSPACE/logs/deployments.yaml
 kubectl describe node $(hostname -s) > $WORKSPACE/logs/node.txt
-kubectl get pods --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
-kubectl get pods --all-namespaces -o json | jq -r \
+kubectl get pods -a --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
+kubectl get pods -a --all-namespaces -o json | jq -r \
     '.items[].metadata | .namespace + " " + .name' | while read line; do
     NAMESPACE=$(echo $line | awk '{print $1}')
     NAME=$(echo $line | awk '{print $2}')
