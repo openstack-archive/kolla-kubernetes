@@ -1,6 +1,6 @@
 {{- define "common_statefulset" }}
-apiVersion: apps/v1alpha1
-kind: PetSet
+apiVersion: apps/v1beta1
+kind: StatefulSet
 spec:
   serviceName: {{ .serviceName | quote }}
   replicas: {{ .Values.replicas }}
@@ -10,11 +10,11 @@ spec:
         service: {{ .Values.element_name }}
         type: {{ .serviceType }}
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "initialize-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
               "command": [
                   "/bin/sh",
                   "-ce",
