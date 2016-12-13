@@ -229,7 +229,7 @@ for x in cinder glance neutron nova; do
     helm delete --purge $x-create-keystone-user
 done
 
-helm install kolla/glance-create-db --version 3.0.0-1 \
+helm install --debug kolla/glance-create-db --version 3.0.0-1 \
     --namespace kolla --name glance-create-db
 
 helm install kolla/glance-manage-db --version 3.0.0-1 \

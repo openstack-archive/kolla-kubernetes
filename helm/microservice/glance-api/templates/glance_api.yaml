@@ -11,7 +11,7 @@
 {{- $checkPath := "/healthcheck" }}
 {{- $privileged := false }}
 {{- $gracePeriodSeconds := 172800 }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -40,6 +40,7 @@ spec:
         kolla_upgrade: minor_rolling_safe
 {{- end }}
         pod.alpha.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
