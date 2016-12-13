@@ -2,7 +2,7 @@
 {%- set loggerConfigmapName = "cinder-volume" %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 metadata:
   name: cinder-volume-ceph
   namespace: {{ kolla_kubernetes_namespace }}
@@ -18,11 +18,12 @@ spec:
         component: cinder-volume-ceph
         system: cinder-volume-ceph
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/initialized: "true"
+        pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-config",
              "image": "{{ kolla_toolbox_image_full }}",
+             "imagePullPolicy": "IfNotPresent",
              "command": [
                  "bash",
                  "-ec",

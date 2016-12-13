@@ -5,7 +5,7 @@
 {{- $podTypeBootstrap := false }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 spec:
   serviceName: {{ .Values.element_name }}
   replicas: 1
@@ -14,11 +14,12 @@ spec:
       labels:
         service: {{ .Values.element_name }}
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/initialized: "true"
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": "{{ include "kolla_toolbox_image_full" . }}",
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
               "command": [
                   "/bin/sh",
                   "-c",
