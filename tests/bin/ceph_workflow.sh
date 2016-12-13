@@ -257,7 +257,7 @@ done
 helm install kolla/glance-create-db-job --version $VERSION \
     --namespace kolla --name glance-create-db --set "$common_vars"
 
-helm install kolla/glance-manage-db-job --version $VERSION \
+helm install kolla/glance-manage-db-job --debug --version $VERSION \
     --namespace kolla --name glance-manage-db --set "$common_vars,ceph_backend=true"
 
 helm install kolla/cinder-create-db-job --version $VERSION \
