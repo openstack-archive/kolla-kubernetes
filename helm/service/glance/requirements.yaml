@@ -1,0 +1,34 @@
+dependencies:
+  - name: glance-pv
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-pvc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-api-svc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-registry-svc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-create-db
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-manage-db
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-create-keystone-endpoint-public
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-create-keystone-endpoint-internal
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-create-keystone-endpoint-admin
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-registry
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: glance-api
+    repository: http://localhost:10191
+    version: 3.0.0-1
