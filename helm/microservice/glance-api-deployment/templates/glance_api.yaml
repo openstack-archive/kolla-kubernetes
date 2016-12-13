@@ -56,6 +56,7 @@ spec:
         kolla_upgrade: minor_rolling_safe
 {{- end }}
         pod.alpha.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
