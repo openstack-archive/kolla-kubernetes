@@ -9,7 +9,7 @@ common:
                     install_type: binary
                     container_config_directory: /var/lib/kolla/config_files
                     image_tag: 2.0.2
-                    fluentd_image_tag: 3.0.1
+                    fluentd_image_tag: 3.0.2
                     kolla_toolbox_image_tag: 3.0.1
                     kubernetes_entrypoint_image_tag: 3.0.1
 #FIXME remove once 3.0.2 is released

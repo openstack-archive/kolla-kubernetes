@@ -1,0 +1,32 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        glance:
+            create_db:
+                job:
+                    kubernetes_entrypoint: true
+            manage_db:
+                job:
+                    kubernetes_entrypoint: true
+            create_keystone_user:
+                job:
+                    kubernetes_entrypoint: true
+            create_keystone_service:
+                job:
+                    kubernetes_entrypoint: true
+            create_keystone_endpoint_public:
+                job:
+                    kubernetes_entrypoint: true
+           create_keystone_internal_public:
+                job:
+                    kubernetes_entrypoint: true
+           create_keystone_admin_public:
+                job:
+                    kubernetes_entrypoint: true
+           api:
+                deployment:
+                    kubernetes_entrypoint: true
+           registry:
+                deployment:
+                    kubernetes_entrypoint: true
