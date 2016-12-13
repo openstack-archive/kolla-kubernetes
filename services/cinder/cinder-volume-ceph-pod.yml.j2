@@ -2,7 +2,7 @@
 {%- set loggerConfigmapName = "cinder-volume" %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 metadata:
   name: cinder-volume-ceph
   namespace: {{ kolla_kubernetes_namespace }}

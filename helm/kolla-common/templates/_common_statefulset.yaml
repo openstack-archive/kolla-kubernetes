@@ -1,6 +1,6 @@
 {{- define "common_statefulset" }}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 spec:
   serviceName: {{ .serviceName | quote }}
   replicas: {{ .Values.replicas }}
