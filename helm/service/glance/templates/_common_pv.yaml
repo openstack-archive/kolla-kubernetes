@@ -1,0 +1,43 @@
+{{- define "common_pv" }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .pvName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: {{ .volumeSizeGB }}Gi
+{{- if eq .storageProvider "host" }}
+  hostPath:
+    path: /var/lib/kolla/volumes/{{ .pvName }}
+
+{{- else if eq .storageProvider "gce" }}
+  gcePersistentDisk:
+    pdName: {{ .pvName }}
+    fsType: {{ .storageProviderFStype | default "xfs" }}
+
+{{- else if eq .storageProvider "ceph" }}
+  rbd:
+    monitors:
+      {{- range .Values.ceph.monitors }}
+      - {{ if contains ":" . }} {{ . | quote}} {{ else }} {{ printf "%s:6789" . | quote }} {{ end }}
+      {{- end }}
+    pool: {{ .Values.ceph.pool }}
+    image: {{ .volumeName }}
+    user: {{ .Values.ceph.user }}
+    {{- if .Values.ceph.keyring }}
+    {{- if gt (.Values.ceph.keyring|len)  0 }}
+    keyring: {{ .Values.ceph.keyring }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.ceph.secret_name }}
+    {{- if gt (.Values.ceph.secret_name|len) 0 }}
+    secretRef:
+      name: {{ .Values.ceph.secret_name }}
+    {{- end }}
+    {{- end }}
+    fsType: {{ .storageProviderFStype | default "xfs" }}
+    readOnly: false
+{{- end }}
+{{- end }}
