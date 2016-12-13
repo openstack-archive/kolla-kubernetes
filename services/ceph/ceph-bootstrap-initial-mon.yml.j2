@@ -11,10 +11,11 @@ spec:
     metadata:
       annotations:
 #FIXME Once out of alpha, this should be converted to yaml.
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": "{{ kolla_toolbox_image_full }}",
+              "imagePullPolicy": "IfNotPresent",
               "command": [
                   "/bin/sh",
                   "-c",
