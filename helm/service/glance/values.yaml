@@ -1,0 +1,15 @@
+global:
+
+glance-pv:
+    storage_provider: "ceph"
+    glance_volume_size_gb: 11
+    storage_provider_fstype: "xfs"
+    pv_name: "glance-test"
+    orchestration_entrypoint: true
+
+glance-pvc:
+    storage_provider: "ceph"
+    glance_volume_size_gb: 11
+    storage_provider_fstype: "xfs"
+    pv_name: "glance-test"
+    orchestration_entrypoint: true
