@@ -17,8 +17,10 @@ str="timeout 60s rbd create kollavolumes/rabbitmq $RBD_ARGS --size 1024"
 kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
 str="timeout 60s rbd create kollavolumes/helm-repo $RBD_ARGS --size 1024"
 kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+str="timeout 60s rbd create kollavolumes/glance --size 1024"
 
-for volume in mariadb rabbitmq helm-repo; do
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
+for volume in mariadb rabbitmq glance helm-repo; do
     str='DEV=$(rbd map --pool kollavolumes '$volume'); mkfs.xfs $DEV;'
     str="$str rbd unmap "'$DEV;'
     timeout 60s kubectl exec ceph-admin -c main --namespace=kolla -- \
