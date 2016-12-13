@@ -3,13 +3,16 @@
 {{- $resourceName := "glance" }}
 {{- $serviceName := "glance-api" }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: glance-manage-db
 spec:
   template:
+{{- include "init_container_header" . | indent 4 }}
+{{- include "common_dependency_container_single" $env | indent 10 }}
+{{- include "init_container_tail" . | indent 2 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
