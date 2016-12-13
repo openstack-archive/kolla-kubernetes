@@ -190,9 +190,9 @@ if [ "x$4" == "xhelm-entrypoint" ]; then
    tests/bin/ceph_workflow_service.sh "$4" "$2"
 else
    tests/bin/ceph_workflow.sh "$4" "$2"
-    . ~/keystonerc_admin
-
-    kubectl get pods --namespace=kolla
-
-    tests/bin/basic_tests.sh
 fi
+
+. ~/keystonerc_admin
+kubectl get pods --namespace=kolla
+kubectl get svc --namespace=kolla
+tests/bin/basic_tests.sh
