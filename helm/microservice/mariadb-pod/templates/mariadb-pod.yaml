@@ -5,7 +5,7 @@
 {{- $podTypeBootstrap := false }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 spec:
   serviceName: {{ .Values.element_name }}
   replicas: 1

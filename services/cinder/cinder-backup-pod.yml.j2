@@ -1,7 +1,7 @@
 {%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
 {%- import "services/common/common-lib.yml.j2" as lib with context %}
 apiVersion: apps/v1alpha1
-kind: PetSet
+kind: StatefulSet
 metadata:
    name: cinder-backup
    namespace: {{ kolla_kubernetes_namespace }}
@@ -14,11 +14,12 @@ spec:
         service: cinder-backup
         type: backup
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/initialized: "true"
+        pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-cinder-volume",
              "image": "{{ kolla_toolbox_image_full }}",
+             "imagePullPolicy": "IfNotPresent",
              "command": [
                  "sh",
                  "-ce",
