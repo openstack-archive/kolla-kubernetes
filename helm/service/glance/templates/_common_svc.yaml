@@ -1,0 +1,22 @@
+{{- define "common_svc" }}
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ .element_port }}
+      name: {{ .element_name | quote }}
+{{- if .element_nodeport }}
+      nodePort: {{ .element_port_nodeport }}
+  type: NodePort
+{{- else if  .element_port_external }}
+  externalIPs:
+    - {{ .kolla_kubernetes_external_vip }}
+{{- end }}
+  selector:
+    service: {{ .element_service | quote }}
+{{- if .element_service_type }}
+    type: {{ .element_service_type | quote }}
+{{- end }}
+metadata:
+   name:  {{ .element_name | quote }}
+{{- end }}

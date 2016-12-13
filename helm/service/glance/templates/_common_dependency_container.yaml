@@ -1,0 +1,27 @@
+{{- define "common_dependency_container" }}
+{{- $serviceContext := index .Values .serviceName }}
+metadata:
+  annotations:
+    pod.beta.kubernetes.io/init-containers: '[
+      {
+         "name": "{{ .serviceName }}-dependencies",
+         "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
+         "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+         "env": [
+           {
+             "name": "NAMESPACE",
+             "value": "{{ .Release.Namespace }}"
+           },
+           {
+             "name": "DEPENDENCY_SERVICE",
+             "value": "{{  include "joinListWithColon" $serviceContext.dependencies.init.service }}"
+           },
+           {
+             "name": "COMMAND",
+             "value": "exit 0"
+           }
+         ]
+      }
+    ]'
+{{- end }}
+ 
