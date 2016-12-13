@@ -1,0 +1,9 @@
+{{- $pvName := "glance" }}
+{{- $microserviceName := "glance_pv" }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $storageProviderFStype := .Values.storage_provider_fstype | default "xfs" }}
+{{- $volumeName := "glance"}}
+{{- $volumeSizeGB := .Values.glance_volume_size_gb | default 10 }}
+{{- with $env := dict "microserviceName" $microserviceName "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values }}
+{{- include "common_pv" $env }}
+{{- end }}
