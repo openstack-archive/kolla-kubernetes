@@ -47,6 +47,28 @@ done
 
 }
 
+function helm_entrypoint_glance {
+
+    echo "glance-pv:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   mariadb_volume_size_gb: 10"
+    echo "   ceph:"
+    echo "      monitors:"
+    addr=172.17.0.1
+    if [ "x$1" == "xceph-multi" ]; then
+        addr=$(cat /etc/nodepool/primary_node_private)
+    fi
+    echo "          - $addr"
+    echo "      pool: kollavolumes"
+    echo "      secret_name: ceph-kolla"
+    echo "      user: kolla"
+    echo "glance-pvc:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   mariadb_volume_size_gb: 10"
+
+}
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
@@ -70,6 +92,9 @@ kollakube res create configmap \
     cinder-scheduler cinder-volume keepalived;
 
 kollakube res create secret nova-libvirt
+
+helm install kolla/glance --debug --dry-run --version 3.0.0-1 \
+    --namespace kolla --name glance --set element_name=glance --values <(helm_entrypoint_glance $1)
 
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
