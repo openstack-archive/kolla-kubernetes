@@ -19,10 +19,11 @@ spec:
         component: openvswitch
         system: openvswitch-db-{{ $restype }}
       annotations:
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-ovs-db",
              "image": "{{ $openvswitchDBFull }}",
+             "imagePullPolicy", {{ .Values.image_pull_policy | quote }},
              "command": [
                  "sh",
                  "-xec",
