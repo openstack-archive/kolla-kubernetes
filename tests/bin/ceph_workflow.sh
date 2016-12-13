@@ -39,6 +39,9 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
+kubectl get secrets -o yaml --namespace=kolla >> $WORKSPACE/logs/secrets.yaml
+kubectl get configmaps -o yaml --namespace=kolla >> $WORKSPACE/logs/configmaps.yaml
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
@@ -184,7 +187,7 @@ fi
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
-helm install kolla/glance-create-keystone-service --version 3.0.0-1 \
+helm install kolla/glance-create-keystone-service --debug --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-service --set "$common_vars"
 
 helm install kolla/cinder-create-keystone-service --version 3.0.0-1 \
@@ -209,16 +212,16 @@ kollakube res create bootstrap \
     cinder-create-keystone-endpoint-publicv2
 
 helm install kolla/cinder-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=$IP"
 
-helm install kolla/glance-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+helm install kolla/glance-create-keystone-endpoint-public --debug --version 3.0.0-1 \
+    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/nova-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/neutron-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=$IP"
 helm install kolla/neutron-create-keystone-endpoint-internal --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-endpoint-internal --set "$common_vars"
 helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \
@@ -233,10 +236,10 @@ for x in cinder glance neutron nova; do
     helm delete --purge $x-create-keystone-user
 done
 
-helm install kolla/glance-create-db --version 3.0.0-1 \
+helm install kolla/glance-create-db --debug --version 3.0.0-1 \
     --namespace kolla --name glance-create-db
 
-helm install kolla/glance-manage-db --version 3.0.0-1 \
+helm install kolla/glance-manage-db --debug --version 3.0.0-1 \
     --namespace kolla --name glance-manage-db
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
@@ -259,10 +262,10 @@ helm install kolla/cinder-create-keystone-endpoint-internal --version 3.0.0-1 \
 helm install kolla/cinder-create-keystone-endpoint-admin --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-endpoint-admin --set "$common_vars"
 
-helm install kolla/glance-create-keystone-endpoint-internal --version 3.0.0-1 \
+helm install kolla/glance-create-keystone-endpoint-internal --debug --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-endpoint-internal --set "$common_vars"
 
-helm install kolla/glance-create-keystone-endpoint-admin --version 3.0.0-1 \
+helm install kolla/glance-create-keystone-endpoint-admin --debug --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-endpoint-admin --set "$common_vars"
 
 helm install kolla/nova-create-keystone-endpoint-internal --version 3.0.0-1 \
@@ -329,11 +332,11 @@ helm install kolla/cinder-scheduler --version 3.0.0-1 \
     --set "$common_vars,element_name=cinder-scheduler" \
     --namespace kolla --name cinder-scheduler
 
-helm install kolla/glance-api --version 3.0.0-1 \
+helm install kolla/glance-api --debug --version 3.0.0-1 \
     --set "$common_vars,ceph_backend=true" \
     --namespace kolla --name glance-api
 
-helm install kolla/glance-registry --version 3.0.0-1 \
+helm install kolla/glance-registry --debug --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
     --name glance-registry
 
