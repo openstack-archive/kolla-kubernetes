@@ -246,6 +246,14 @@ glance-pv:
 glance-pvc:
         glance_volume_size_gb: 10
 
+glance-api-svc:
+        glance_api_port: 9292
+        type: "api"
+
+glance-registry-svc:
+        glance_registry_port: 9191
+        type: "registry"
+
 heat-api:
         image_tag: 3.0.1
         replicas: 1
@@ -258,15 +266,8 @@ heat-api-cfn:
 
 heat-engine:
         image_tag: 3.0.1
-        replicas: 1
-
-glance-api-svc:
-        glance_api_port: 9292
-        type: "api"
-
-glance-registry-svc:
-        glance_registry_port: 9191
-        type: "registry"
+        heat_engine_replicas: 1
+        heat_engine_volume_size_gb: 10
 
 cinder-create-db:
         database_host: "mariadb"
@@ -299,3 +300,4 @@ glance-manage-db:
       image_tag: 2.0.2
       ceph_backend: true
       pvc_name: "glance"
+
