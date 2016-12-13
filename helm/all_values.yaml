@@ -336,23 +336,45 @@ glance-create-db:
         database_port: 3306
         database_name: "glance"
         database_user: "glance"
+        dependencies:
+            DEPENDENCY_SERVICE:
+            - mariadb
 
-glance-manage-db:
+glance-managedb:
         image_tag: 2.0.2
         ceph_backend: true
-        pvc_name: "glance"
+        pvc_name: ""
+        dependencies:
+            DEPENDENCY_JOBS:
+            - glance-create-db
+            DEPENDENCY_SERVICE:
+            - mariadb
 
 glance-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         glance_api_port: 9292
+        dependecies:
+            DEPENDENCY_JOBS:
+            - glance-create-keystone-endpoint-internal
+            - glance-create-keystone-endpoint-admin
+            DEPENDENCY_SERVICE:
+            - mariadb
 
 glance-create-keystone-endpoint-internal:
         glance_internal_service: glance-api
         glance_api_port: 9292
+        dependecies:
+            DEPENDENCY_JOBS:
+            - glance-create-keystone-endpoint-admin
+            DEPENDENCY_SERVICE:
+            - keystone
 
 glance-create-keystone-endpoint-admin:
         glance_admin_service: glance-api
         glance_api_port: 9292
+        dependecies:
+            DEPENDENCY_SERVICE:
+            - keystone
 
 glance-api:
         image_tag: 2.0.2
@@ -360,11 +382,31 @@ glance-api:
         ceph_backend: false
         port: 9292
         pvc_name: "glance"
+        dependecies:
+            DEPENDENCY_JOBS:
+            - glance-create-keystone-endpoint-public
+            - glance-create-keystone-endpoint-internal
+            - glance-create-keystone-endpoint-admin
+            - glance-create-db
+            - glance-managedb
+            DEPENDENCY_SERVICE:
+            - mariadb
+            - keystone
 
 glance-registry:
         image_tag: 2.0.2
         port: 9191
         replicas: 1
+        dependecies:
+            DEPENDENCY_JOBS:
+            - glance-create-keystone-endpoint-public
+            - glance-create-keystone-endpoint-internal
+            - glance-create-keystone-endpoint-admin
+            - glance-create-db
+            - glance-managedb
+            DEPENDENCY_SERVICE:
+            - mariadb
+            - keystone
 
 cinder-create-keystone-endpoint-admin:
         cinder_admin_service: cinder-api
