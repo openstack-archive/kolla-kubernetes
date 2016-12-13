@@ -6,6 +6,6 @@
 {{- $interface := "admin" }}
 {{- $glanceAdminEndpointBuilt := printf "http://%s:%1.f" .Values.glance_admin_service .Values.glance_api_port }}
 {{- $endpointURLFull := .Values.glance_admin_endpoint | default $glanceAdminEndpointBuilt }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}
