@@ -49,10 +49,11 @@ spec:
 #FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
 # The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
 # other containers from directly accessing the service
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": "{{ kolla_toolbox_image_full }}",
+              "imagePullPolicy": "IfNotPresent",
               "command": [
                   "/bin/sh",
                   "-c",

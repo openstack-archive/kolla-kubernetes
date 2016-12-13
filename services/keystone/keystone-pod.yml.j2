@@ -12,10 +12,11 @@ spec:
         service: keystone
         type: api
       annotations:
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-keystone-logs",
              "image": "{{ keystone_image_full }}",
+             "imagePullPolicy": "IfNotPresent",
              "command": [
                  "sh",
                  "-ce",

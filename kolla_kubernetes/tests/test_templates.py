@@ -96,7 +96,8 @@ class TestTemplatesTest(base.BaseTestCase):
                         if part.lower() in ('petset', 'deployment', 'job',
                                             'replicationcontroller', 'pod',
                                             'daemonset', 'configmap',
-                                            'secret', 'configmap'
+                                            'secret', 'configmap',
+                                            'statefulset',
                                             'ps', 'pv', 'pvc', 'disk',
                                             'ds', 'persistentvolume',
                                             'persistentvolumeclaim') and \

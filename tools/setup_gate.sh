@@ -90,14 +90,12 @@ if [ "x$4" == "xceph-multi" ]; then
         scp tools/setup_kubernetes.sh $line:
         scp tests/bin/fix_gate_iptables.sh $line:
         scp /usr/bin/kubectl $line:kubectl
+        NODENAME=$(ssh $line hostname)
         ssh $line bash fix_gate_iptables.sh
         ssh $line sudo iptables-save > $WORKSPACE/logs/iptables-$line.txt
         ssh $line sudo setenforce 0
         ssh $line sudo mv kubectl /usr/bin/
         ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
-        ssh $line sudo sed -i "'s@KUBELET_EXTRA_ARGS=@KUBELET_EXTRA_ARGS=--hostname-override=$line @'" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-        ssh $line sudo systemctl daemon-reload
-        ssh $line sudo systemctl restart kubelet
         set +xe
         count=0
         while true; do
@@ -110,7 +108,7 @@ if [ "x$4" == "xceph-multi" ]; then
         [ $count -gt 30 ] && echo Node failed to join. && exit -1
         set -xe
         kubectl get nodes
-        kubectl label node $line kolla_compute=true
+        kubectl label node $NODENAME kolla_compute=true
     done
 fi
 

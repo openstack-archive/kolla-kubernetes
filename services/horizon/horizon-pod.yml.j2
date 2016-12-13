@@ -14,10 +14,11 @@ spec:
         service: horizon
         type: api
       annotations:
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": "{{ kolla_toolbox_image_full }}",
+              "imagePullPolicy": "IfNotPresent",
               "command": [
                   "/bin/sh",
                   "-c",
