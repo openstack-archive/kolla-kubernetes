@@ -53,8 +53,12 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
-    
-kollakube res create svc neutron-server horizon cinder-api
+
+kollakube res create svc neutron-server horizon
+
+helm install kolla/cinder-api-svc --version 3.0.0-1 \
+    --namespace kolla --name cinder-api-svc \
+    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb

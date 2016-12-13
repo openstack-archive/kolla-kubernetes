@@ -247,3 +247,6 @@ glance-api-svc:
 glance-registry-svc:
         glance_registry_port: 9191
         type: "registry"
+
+cinder-api-svc:
+        port: 8776
