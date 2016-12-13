@@ -1,0 +1,8 @@
+{{- $elementPort := .Values.port | default 8776 }}
+{{- $rootElementName := .Values.element_name | default "cinder" }}
+{{- $elementServiceType := .Values.element_service_type | default "api" }}
+{{- $elementService := $rootElementName }}
+{{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "Values" .Values }}
+{{- include "common_svc" $env }}
+{{- end }}
