@@ -50,6 +50,80 @@ done
 
 }
 
+function helm_entrypoint_glance {
+
+    echo "glance-create-db:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    database_name: glance"
+    echo "    database_user: glance"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-manage-db:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-create-keystone-endpoint-public:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    glance_api_port: 9292"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+    echo "    kolla_kubernetes_external_vip: $IP"
+
+    echo "glance-create-keystone-endpoint-internal:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    glance_internal_service: glance-api"
+    echo "    glance_api_port: 9292"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-create-keystone-endpoint-admin:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    glance_admin_service: glance-api"
+    echo "    glance_api_port: 9292"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-api:"
+    echo "    ceph_backend: true"
+    echo "    kubernetes_entrypoint: true"
+    echo "    pvc_name: glance"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-registry:"
+    echo "    kubernetes_entrypoint: true"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+
+    echo "glance-pv:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   glance_volume_size_gb: 10"
+    echo "   ceph:"
+    echo "      monitors:"
+    addr=172.17.0.1
+    if [ "x$1" == "xceph-multi" ]; then
+        addr=$(cat /etc/nodepool/primary_node_private)
+    fi
+    echo "          - $addr"
+    echo "      pool: kollavolumes"
+    echo "      secret_name: ceph-kolla"
+    echo "      user: kolla"
+    echo "glance-pvc:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   glance_volume_size_gb: 10"
+
+}
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
@@ -74,7 +148,7 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq glance; do
+for x in mariadb rabbitmq; do
     helm install kolla/$x-pv --version 3.0.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
         --values <(ceph_values $1)
@@ -179,7 +253,7 @@ helm install --debug kolla/keystone-manage-db-job --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm delete keystone-manage-db
+helm delete keystone-manage-db --purge
 
 kollakube template bootstrap keystone-endpoints
 
@@ -248,7 +322,7 @@ $DIR/tools/wait_for_pods.sh kolla
 kollakube res delete bootstrap \
     nova-create-keystone-endpoint-public
 
-for x in cinder glance neutron nova; do
+for x in cinder neutron nova; do
     helm delete --purge $x-create-keystone-user
 done
 
@@ -316,11 +390,11 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-for x in nova nova-api cinder neutron glance; do
+for x in nova nova-api cinder neutron; do
     helm delete --purge $x-create-db
 done
 
-for x in nova-api cinder neutron glance; do
+for x in nova-api cinder neutron; do
     helm delete --purge $x-manage-db
 done
 
@@ -328,7 +402,7 @@ kollakube res delete bootstrap \
     nova-create-keystone-endpoint-internal \
     nova-create-keystone-endpoint-admin \
 
-for x in glance neutron cinder; do
+for x in neutron cinder; do
     helm delete --purge $x-create-keystone-service
     helm delete --purge $x-create-keystone-endpoint-public
     helm delete --purge $x-create-keystone-endpoint-internal
