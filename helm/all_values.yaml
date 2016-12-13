@@ -225,3 +225,9 @@ glance-pv:
 
 glance-pvc:
         glance_volume_size_gb: 10
+
+heat-engine:
+        heat_engine_replicas: 1
+        heat_engine_volume_path: 
+        heat_engine_volume_size_gb: 10
+
