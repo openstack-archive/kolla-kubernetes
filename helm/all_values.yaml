@@ -362,3 +362,15 @@ glance-registry:
         image_tag: 2.0.2
         port: 9191
         replicas: 1
+
+cinder-create-keystone-endpoint-admin:
+        cinder_admin_service: cinder-api
+        cinder_api_port: 8776
+
+cinder-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        cinder_api_port: 8776
+
+cinder-create-keystone-endpoint-internal:
+        cinder_internal_service: cinder-api
+        cinder_api_port: 8776

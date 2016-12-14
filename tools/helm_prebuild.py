@@ -48,7 +48,11 @@ common_create_keystone_admin = [
     'glance-create-keystone-endpoint-internal',
     'glance-create-keystone-endpoint-admin',
     'neutron-create-keystone-user',
-    'nova-create-keystone-user'
+    'nova-create-keystone-user',
+    'cinder-create-keystone-service',
+    'cinder-create-keystone-endpoint-public',
+    'cinder-create-keystone-endpoint-internal',
+    'cinder-create-keystone-endpoint-admin'
 ]
 
 

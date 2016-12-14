@@ -1,0 +1,11 @@
+{{- $resourceName := "cinder-create-keystone-endpoint-admin" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "volume" }}
+{{- $interface := "admin" }}
+{{- $cinderAdminEndpointBuilt := printf "http://%s:%1.f/v1/%%(tenant_id)s" .Values.cinder_admin_service .Values.cinder_api_port }}
+{{- $endpointURLFull := .Values.cinder_admin_endpoint | default $cinderAdminEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
