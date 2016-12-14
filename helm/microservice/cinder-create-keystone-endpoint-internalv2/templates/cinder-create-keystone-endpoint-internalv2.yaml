@@ -1,0 +1,13 @@
+{{- $resourceName := "cinder-create-keystone-endpoint-internalv2" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "volume" }}
+{{- $interface := "internal" }}
+{{- $cinderInternalEndpointBuilt := printf "http://%s:%1.f/v2/%(tenant_id)s" .Values.cinder_internal_service .Values.cinder_api_port }}
+{{- $endpointURLFull := .Values.cinder_internal_endpoint | default $cinderInternalEndpointBuilt }}
+{{- $postfix := "v2" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "postfix" $postfix "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
+
