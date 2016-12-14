@@ -19,6 +19,7 @@ if [ "x$2" == "xubuntu" ]; then
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
     sudo dpkg -l | grep -i resolv
     sudo systemctl restart unbound
+    sudo systemctl status unbound
     sudo netstat -pnl
     sudo sed -i "s/127\.0\.0\.1/172.19.0.1/" /etc/resolv.conf
     sudo cat /etc/resolv.conf
