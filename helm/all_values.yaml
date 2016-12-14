@@ -22,6 +22,7 @@ common:
         enable_kube_logger: true
         fluentd_image_tag: 3.0.1
         kolla_toolbox_image_tag: 3.0.1
+        haproxy_image_tag: 2.0.2
         kubernetes_entrypoint_image_tag: 3.0.1
         kubernetes_entrypoint: false
 
@@ -283,17 +284,6 @@ glance-registry-svc:
         glance_registry_port: 9191
         type: "registry"
 
-glance-create-db:
-        database_host: "mariadb"
-        database_port: 3306
-        database_name: "glance"
-        database_user: "glance"
-
-glance-manage-db:
-        image_tag: 2.0.2
-        ceph_backend: true
-        pvc_name: "glance"
-
 glance-pv:
         glance_volume_size_gb: 10
 
@@ -360,3 +350,10 @@ glance-create-keystone-endpoint-internal:
 glance-create-keystone-endpoint-admin:
         glance_admin_service: glance-api
         glance_api_port: 9292
+
+glance-api:
+        image_tag: 2.0.2
+        replicas: 1
+        ceph_backend: false
+        port: 9292
+        pvc_name: "glance"
