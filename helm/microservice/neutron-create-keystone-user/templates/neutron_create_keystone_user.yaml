@@ -1,0 +1,16 @@
+{{- $resourceName := "neutron" }}
+{{- $serviceName := "neutron" }}
+
+{{- $userName := .Values.neutron_user  | default "neutron" }}
+{{- $userDomain := .Values.neutron_domain | default "Default" }}
+{{- $userProject := .Values.neutron_project | default "service" }}
+{{- $userProjectDomain := .Values.neutron_project_domain | default "Default" }}
+{{- $userRole := .Values.neutron_role | default "admin" }}
+
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}

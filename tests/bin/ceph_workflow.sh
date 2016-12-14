@@ -158,8 +158,10 @@ helm install kolla/cinder-create-keystone-user --debug --version 3.0.0-1 \
 helm install kolla/glance-create-keystone-user --debug --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-user
 
+helm install kolla/neutron-create-keystone-user --debug --version 3.0.0-1 \
+    --namespace kolla --name neutron-create-keystone-user
+
 kollakube res create bootstrap nova-create-keystone-user \
-    neutron-create-keystone-user \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
