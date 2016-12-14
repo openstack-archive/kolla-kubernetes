@@ -1,0 +1,174 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "glance-api" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "glance" }}
+{{- $serviceType := "api" }}
+{{- $configListenHostParameter := "bind_host" }}
+{{- $configListenPortParameter := "bind_port" }}
+{{- $portName := "glance-api" }}
+{{- $checkPath := "/healthcheck" }}
+{{- $privileged := false }}
+{{- $gracePeriodSeconds := 172800 }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: {{ $resourceName }}
+spec:
+  replicas: {{ .Values.replicas }}
+  strategy:
+{{- if eq .Values.ceph_backend true }}
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+{{- else }}
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+{{- end }}
+  template:
+    metadata:
+      labels:
+        service: {{ $serviceName }}
+        type: {{ $serviceType }}
+      annotations:
+{{- if eq .Values.ceph_backend true }}
+        kolla_upgrade: minor_rolling_safe
+{{- end }}
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{{- if eq .Values.ceph_backend true }}
+                   cp -a /srv/ceph.conf /srv/pod-main-config/;
+                   cp -a /srv/ceph.client.glance.keyring /srv/pod-main-config/;
+{{- end }}
+                   CONF=/srv/pod-main-config/glance-api.conf;
+                   crudini --set $CONF DEFAULT bind_host 127.0.0.1;
+                   crudini --set $CONF DEFAULT bind_port 8080;"
+              ],
+              "volumeMounts": [
+{{- if eq .Values.ceph_backend true }}
+                  {
+                      "name": "ceph-conf",
+                      "mountPath": "/srv/ceph.conf",
+                      "subPath": "ceph.conf"
+                  },
+                  {
+                      "name": "ceph-client-glance-keyring",
+                      "mountPath": "/srv/ceph.client.glance.keyring",
+                      "subPath": "ceph.client.glance.keyring"
+                  },
+{{- end }}
+                  {
+                      "name": "service-configmap",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          }
+      ]'
+    spec:
+{{- if eq .Values.ceph_backend true }}
+      hostPID: True
+{{- end }}
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
+      containers:
+        - name: haproxy
+          image: {{ include "haproxy_image_full" . | quote }}
+          command:
+          - /bin/bash
+          - -c
+          - |
+            kolla_start;
+            touch /var/lib/kolla-kubernetes/event/shutdown;
+          readinessProbe:
+            httpGet:
+              path: {{ $checkPath }}
+              port: {{ .Values.port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+#FIXME move script into haproxy container
+#NOTE this only works if you arn't doing a haproxy reconfigure too.
+#But shouldn't ever have to do that in a setup like this.
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  kill -USR1 $(</var/run/haproxy.pid);
+                  while true; do sleep 1000; done
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: haproxy-config
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          ports:
+            - containerPort: {{ .Values.port }}
+              name: {{ $portName }}
+        - name: main
+          image: "{{ $imageFull }}"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+{{- if ne .Values.ceph_backend true }}
+            - mountPath: /var/lib/glance/
+              name: glance-persistent-storage
+{{- end }}
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: service-configmap
+          configMap:
+            name: {{ $resourceName }}
+        - name: haproxy-config
+          configMap:
+            name: glance-api-haproxy
+{{- if ne .Values.ceph_backend true }}
+        - name: glance-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc_name }}
+{{- else }}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-glance-keyring
+          secret:
+            secretName: ceph-client-glance-keyring
+{{- end }}
+{{- end }}
