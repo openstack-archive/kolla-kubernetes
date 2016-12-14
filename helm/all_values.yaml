@@ -55,6 +55,10 @@ stateful-service:
                         secret_name: ceph-kolla
                         user: kolla
 
+ceph-initial-mon:
+        image_tag: 2.0.2
+        storage_interface: eth0
+
 keystone-admin-svc:
         global:
             kolla:

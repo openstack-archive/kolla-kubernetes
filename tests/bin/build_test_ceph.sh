@@ -19,13 +19,18 @@ function wait_for_ceph_bootstrap {
 
 kollakube res create configmap ceph-mon ceph-osd
 
-kollakube res create bootstrap ceph-bootstrap-initial-mon
+kollakube template bootstrap ceph-bootstrap-initial-mon
+
+helm install kolla/ceph-initial-mon --version 3.0.0-1 \
+    --namespace kolla \
+    --name ceph-initial-mon \
+    --set "node=$(hostname -s)" \
+    --debug
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
-kollakube res delete bootstrap ceph-bootstrap-initial-mon
 kollakube res create pod ceph-mon
 
 $DIR/tools/wait_for_pods.sh kolla
