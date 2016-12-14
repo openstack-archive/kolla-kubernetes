@@ -48,6 +48,10 @@ stateful-service:
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
+ceph-initial-mon:
+        image_tag: 2.0.2
+        storage_interface: eth1
+
 keystone-admin-svc:
         port: 35357
 
