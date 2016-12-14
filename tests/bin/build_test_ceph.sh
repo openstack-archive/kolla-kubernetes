@@ -41,6 +41,11 @@ $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/setup-ceph-secrets.sh
 kollakube res create pod ceph-mon
 
+helm install kolla/test-ceph-mon-daemonset --version 0.5.0-1 \
+    --namespace kolla \
+    --name test-ceph-mon-daemonset \
+    --set "node=$(hostname -s),storage_interface=docker0"
+
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res create pod ceph-bootstrap-osd0
