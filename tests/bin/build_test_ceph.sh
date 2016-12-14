@@ -1,6 +1,16 @@
 #!/bin/bash -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+IP="$3"
+base_distro="$2"
+gate_job="$1"
+tunnel_interface="$4"
+
+. "$DIR/tests/bin/common_workflow_config.sh"
+
+function general_config {
+    common_workflow_config $IP $base_distro $tunnel_interface
+}
 
 function wait_for_ceph_bootstrap {
     set +x
@@ -19,13 +29,16 @@ function wait_for_ceph_bootstrap {
 
 kollakube res create configmap ceph-mon ceph-osd
 
-kollakube res create bootstrap ceph-bootstrap-initial-mon
+helm install kolla/test-ceph-init-mon-job --version 0.5.0-1 \
+    --namespace kolla \
+    --name test-ceph-init-mon-job \
+    --set "node=$(hostname -s),storage_interface=$tunnel_interface" \
+    --values <(general_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
-kollakube res delete bootstrap ceph-bootstrap-initial-mon
 kollakube res create pod ceph-mon
 
 $DIR/tools/wait_for_pods.sh kolla
