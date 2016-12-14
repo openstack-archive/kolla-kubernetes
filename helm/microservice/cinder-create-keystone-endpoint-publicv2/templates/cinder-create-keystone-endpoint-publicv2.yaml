@@ -1,0 +1,13 @@
+{{- $resourceName := "cinder-create-keystone-endpoint-public" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "volume" }}
+{{- $interface := "public" }}
+{{- $cinderPublicEndpointBuilt := printf "http://%s:%1.f" .Values.kolla_kubernetes_external_vip .Values.cinder_api_port }}
+{{- $endpointURLFull := .Values.cinder_public_endpoint | default $cinderPublicEndpointBuilt }}
+{{- $postfix := "v2" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "postfix" $postfix "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
+
