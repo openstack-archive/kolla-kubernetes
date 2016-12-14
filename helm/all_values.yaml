@@ -270,3 +270,7 @@ horizon-api:
 horizon-svc:
         type: dashboard
         port: 80
+
+cinder-scheduler:
+        replicas: 1
+        image_tag: 2.0.2
