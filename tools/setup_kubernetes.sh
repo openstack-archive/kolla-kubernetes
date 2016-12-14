@@ -1,4 +1,6 @@
 #!/bin/bash -e
+KUBE_API_VERISON=v1.5.0-beta.1
+HELM_VERISON=v2.1.0
 
 if [ -f /etc/redhat-release ]; then
     cat > /tmp/setup.$$ <<"EOF"
@@ -13,7 +15,17 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
+    cat <<"EOEF" > /etc/yum.repos.d/docker.repo
+[docker]
+name=Docker
+baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOEF
+
+yum install -y docker-engine kubelet kubeadm kubectl kubernetes-cni ebtables
 systemctl start kubelet
 EOF
 else
@@ -31,7 +43,7 @@ EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+kubeadm init --use-kubernetes-version ${KUBE_API_VERISON} --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
@@ -59,8 +71,10 @@ if [ "$1" == "master" ]; then
         count=$((count + 1))
         [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
     done
-    curl http://storage.googleapis.com/kubernetes-helm/helm-v2.0.1-linux-amd64.tar.gz | sudo tar --strip-components 1 -C /usr/bin linux-amd64/helm -zxf -
+    curl http://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERISON}-linux-amd64.tar.gz | sudo tar --strip-components 1 -C /usr/bin linux-amd64/helm -zxf -
     mkdir -p ~/.kube
     sudo cat /etc/kubernetes/kubelet.conf > ~/.kube/config
     helm init
+    #Patch controllermanager for CephPVC support
+    sed -i "s|gcr.io/google_containers/kube-controller-manager-amd64:${KUBE_API_VERISON}|quay.io/attcomdev/kube-controller-manager:v1.5.0-beta.1|g" /etc/kubernetes/manifests/kube-controller-manager.json
 fi
