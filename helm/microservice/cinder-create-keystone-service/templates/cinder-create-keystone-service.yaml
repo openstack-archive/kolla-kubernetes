@@ -1,0 +1,9 @@
+{{- $resourceName := "cinder-create-keystone-service" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "volume" }}
+{{- $description := "Openstack Block Storage" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "Values" .Values }}
+{{- include "common_create_keystone_service" $env }}
+{{- end }}
