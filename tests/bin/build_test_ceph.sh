@@ -16,6 +16,8 @@ function ceph_config {
   echo "node: $(hostname -s)"
   echo "storage_interface: $tunnel_interface"
   echo "initial_member: $(hostname -s)"
+  echo "ceph:"
+  echo "  monitors: $tunnel_interface"
 }
 
 general_config > /tmp/general_config.yaml
@@ -48,7 +50,11 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
-kollakube res create pod ceph-mon
+
+helm install kolla/test-ceph-mon-daemonset --version 0.6.0-1 \
+    --namespace kolla \
+    --name test-ceph-mon-daemonset \
+    --values /tmp/ceph_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
