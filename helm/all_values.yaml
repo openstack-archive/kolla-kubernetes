@@ -61,7 +61,13 @@ stateful-service:
                         secret_name: ceph-kolla
                         user: kolla
 
-test-ceph-initial-mon:
+test-ceph-initial-mon-job:
+        global:
+            kolla:
+                all:
+                    storage_interface: eth0
+
+test-ceph-mon-daemonset:
         global:
             kolla:
                 all:

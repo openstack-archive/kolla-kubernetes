@@ -39,7 +39,12 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
-kollakube res create pod ceph-mon
+
+helm install kolla/test-ceph-mon-daemonset --version 0.5.0-1 \
+    --namespace kolla \
+    --name test-ceph-mon-daemonset \
+    --set "node=$(hostname -s),storage_interface=$tunnel_interface" \
+    --values <(general_config)
 
 $DIR/tools/wait_for_pods.sh kolla
 
