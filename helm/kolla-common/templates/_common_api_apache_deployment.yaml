@@ -1,0 +1,73 @@
+{{- define "common_api_apache_deployment" }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: {{ .resourceName }}
+spec:
+  replicas: {{ .Values.replicas }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        service: {{ .serviceName }}
+        type: {{ .serviceType }}
+      annotations:
+        kolla_upgrade: minor_rolling_safe
+{{- if .extraAnnotations }}
+{{- include .extraAnnotations . | indent 8 }}
+{{- end }}
+    spec:
+#You've got 2 days to drain or figure out why it won't.
+      terminationGracePeriodSeconds: 172800
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - name: main
+          image: {{ .imageFull | quote }}
+          imagePullPolicy: {{ .Values.image_pull_policy | quote }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - apachectl -k graceful-stop
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: service-configmap
+{{- if .extraVolumeMounts }}
+{{- include .extraVolumeMounts . | indent 12 }}
+{{- end }}
+{{- if .privileged }}
+          securityContext:
+            privileged: true
+{{- end }}
+          env:
+{{ include "common_env_vars" . | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.port }}
+              name: {{ .portName }}
+{{- if eq .resourceName "keystone" }}
+            - containerPort: {{ .Values.admin_port }}
+              name: keystone-admin
+{{- end }}
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: service-configmap
+          configMap:
+            name: {{ .resourceName }}
+{{- if .extraConfigmapConfig }}
+{{- include .extraConfigmapConfig . | indent 12 }}
+{{- end }}
+{{- if .extraVolume }}
+{{- include .extraVolume . | indent 8 }}
+{{- end }}
+{{- end }}
