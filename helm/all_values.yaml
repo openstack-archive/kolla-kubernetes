@@ -279,17 +279,6 @@ glance-registry-svc:
         glance_registry_port: 9191
         type: "registry"
 
-glance-create-db:
-        database_host: "mariadb"
-        database_port: 3306
-        database_name: "glance"
-        database_user: "glance"
-
-glance-manage-db:
-        image_tag: 2.0.2
-        ceph_backend: true
-        pvc_name: "glance"
-
 glance-pv:
         glance_volume_size_gb: 10
 
@@ -348,3 +337,15 @@ glance-create-keystone-endpoint-internal:
 glance-create-keystone-endpoint-admin:
         glance_admin_service: glance-api
         glance_api_port: 9292
+
+glance-api:
+        image_tag: 2.0.2
+        replicas: 1
+        ceph_backend: false
+        port: 9292
+        pvc_name: "glance"
+
+glance-registry:
+        image_tag: 2.0.2
+        port: 9191
+        replicas: 1

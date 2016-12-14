@@ -288,8 +288,7 @@ kollakube res delete bootstrap \
 helm delete --purge glance-create-keystone-endpoint-internal
 helm delete --purge glance-create-keystone-endpoint-admin
 
-kollakube res create pod glance-api \
-    glance-registry cinder-volume-ceph
+kollakube res create cinder-volume-ceph
 
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
@@ -298,6 +297,14 @@ helm install kolla/cinder-api --version 3.0.0-1 \
 helm install kolla/cinder-scheduler --version 3.0.0-1 \
     --set "$common_vars,element_name=cinder-scheduler" \
     --namespace kolla --name cinder-scheduler
+
+helm install kolla/glance-api --version 3.0.0-1 \
+    --set "$common_vars,ceph_backend=true" \
+    --namespace kolla --name glance-api
+
+helm install kolla/glance-registry --version 3.0.0-1 \
+    --set "$common_vars" --namespace kolla \
+    --name glance-registry
 
 helm ls
 
