@@ -247,3 +247,7 @@ glance-api-svc:
 glance-registry-svc:
         glance_registry_port: 9191
         type: "registry"
+
+cinder-scheduler:
+        replicas: 1
+        image_tag: 2.0.2
