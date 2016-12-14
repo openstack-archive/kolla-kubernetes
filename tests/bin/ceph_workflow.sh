@@ -53,7 +53,7 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
-    
+
 kollakube res create svc neutron-server horizon cinder-api
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
@@ -152,8 +152,11 @@ $DIR/tools/build_local_admin_keystonerc.sh
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
+helm install kolla/cinder-create-keystone-user --debug --version 3.0.0-1 \
+    --namespace kolla --name cinder-create-keystone-user
+
 kollakube res create bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
+    glance-create-keystone-user \
     neutron-create-keystone-user \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
