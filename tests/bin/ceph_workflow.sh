@@ -239,7 +239,12 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
 
 kollakube res create pod glance-api \
     glance-registry horizon \
-    cinder-api cinder-scheduler cinder-volume-ceph
+    cinder-api 
+
+helm install kolla/cinder-scheduler --version 3.0.0-1 \
+    --set "$common_vars" --namespace kolla --name=cinder-scheduler 
+
+kollakube res create pod cinder-volume-ceph
 
 helm ls
 

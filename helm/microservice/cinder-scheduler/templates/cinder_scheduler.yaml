@@ -1,0 +1,47 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-cinder-scheduler:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $elementName := .Values.element_name | default "cinder-scheduler" }}
+{{- $resourceName := "cinder-scheduler" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "scheduler" }}
+{{- $privileged := true }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+apiVersion: apps/v1alpha1
+kind: PetSet
+metadata:
+  name: {{ .Values.element_name }}
+spec:
+  serviceName: {{ .Values.element_name }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        service: {{ $serviceName }}
+        type: {{ $serviceType }}
+      annotations:
+        pod.alpha.kubernetes.io/initialized: "true"
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - name: main
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/lib/kolla-kubernetes/event
+              name: kolla-kubernetes-events
+            - mountPath: {{ .Values.container_config_directory }}
+              name: cinder-scheduler-configmap
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: cinder-scheduler-configmap
+          configMap:
+            name: {{ .Values.element_name }}
+{{- end }}
