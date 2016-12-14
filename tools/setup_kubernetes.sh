@@ -13,7 +13,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
+yum install -y docker kubelet-1.4.4-3 kubeadm-1.5.0-3.alpha.2.421.a6bea3d79b8bba kubectl-1.4.4-3 kubernetes-cni-0.3.0.1-3.07a8a2 ebtables
 systemctl start kubelet
 EOF
 else
