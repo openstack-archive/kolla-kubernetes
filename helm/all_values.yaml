@@ -247,3 +247,15 @@ glance-api-svc:
 glance-registry-svc:
         glance_registry_port: 9191
         type: "registry"
+
+glance-api:
+        image_tag: 2.0.2
+        replicas: 1
+        glance_backend_ceph: true
+        port: 9292
+        pvc_name: "glance"
+
+glance-registry:
+        image_tag: 2.0.2
+        port: 9191
+        replicas: 1

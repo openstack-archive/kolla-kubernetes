@@ -1,0 +1,18 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-glance-registry:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "glance-registry" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "glance-registry" }}
+{{- $serviceType := "registry" }}
+{{- $configFileName := "glance-registry.conf" }}
+{{- $configSectionName := "DEFAULT" }}
+{{- $configListenHostParameter := "bind_host" }}
+{{- $configListenPortParameter := "bind_port" }}
+{{- $portName := "glance-registry" }}
+{{- $checkPath := "/healthcheck" }}
+{{- $privileged := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "privileged" $privileged "Values" .Values }}
+{{- include "common_api_python_deployment" $env }}
+{{- end }}
+
