@@ -30,19 +30,24 @@ kollakube res create pod ceph-mon
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod ceph-bootstrap-osd0
-$DIR/tools/pull_containers.sh kolla
+helm install kolla/ceph-bootstrap-osd-job --version 3.0.0-1 \
+    --namespace kolla \
+    --name ceph-osd \
+    --debug \
+    --set "node=$(hostname -s),osd_number=0,osd_dev=/dev/loop0,osd_part_num=1,osd_journal_dev=/dev/loop0,osd_journal_part_num=2"
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
-kollakube res create pod ceph-bootstrap-osd1
+helm install kolla/ceph-bootstrap-osd-job --version 3.0.0-1 \
+    --namespace kolla \
+    --name ceph-osd \
+    --debug \
+    --set "node=$(hostname -s),osd_number=1,osd_dev=/dev/loop1,osd_part_num=1,osd_journal_dev=/dev/loop1,osd_journal_part_num=2"
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
-kollakube res delete pod ceph-bootstrap-osd0
-kollakube res delete pod ceph-bootstrap-osd1
 kollakube res create pod ceph-osd0
 kollakube res create pod ceph-osd1
 
