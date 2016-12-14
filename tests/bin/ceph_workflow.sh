@@ -53,7 +53,7 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
-    
+
 kollakube res create svc neutron-server horizon cinder-api
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
@@ -142,7 +142,12 @@ helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod keystone
+kollakube template pod keystone
+
+helm install --debug kolla/keystone-api --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla \
+    --name keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
