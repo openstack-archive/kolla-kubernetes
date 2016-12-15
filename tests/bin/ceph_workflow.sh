@@ -149,7 +149,10 @@ helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod keystone
+helm install --debug kolla/keystone-api --version 3.0.0-1 \
+    --set "$common_vars" \
+    --namespace kolla \
+    --name keystone
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -256,7 +259,7 @@ kollakube res delete bootstrap glance-create-db glance-manage-db \
 helm delete --purge cinder-create-db
 
 helm delete --purge cinder-manage-db
-    
+
 kollakube res delete bootstrap \
     nova-create-keystone-endpoint-internal \
     glance-create-keystone-endpoint-internal \
