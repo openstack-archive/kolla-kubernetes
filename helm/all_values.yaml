@@ -119,6 +119,23 @@ neutron-l3-agent:
 
         tunnel_interface: eth0
 
+neutron-dhcp-agent:
+        type: network
+
+        dhcp_agent_image_full:
+        dhcp_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-dhcp-agent-logger
+
+        tunnel_interface: eth0
+
+neutron-metadata-agent:
+
+        metadata_agent_image_full:
+        metadata_agent_image_tag: 2.0.2
+
+        logger_configmap_name: neutron-metadata-agent-logger
+
 openvswitch-vswitchd:
         openvswitch_vswitchd_image_tag: 2.0.2
         kolla_kubernetes_ovs_setup_bridge: true
