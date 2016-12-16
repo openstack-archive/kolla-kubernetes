@@ -191,13 +191,15 @@ helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap nova-create-keystone-user \
-    glance-create-keystone-user cinder-create-keystone-user \
-    neutron-create-keystone-user \
+kollakube res delete bootstrap \
     nova-create-keystone-endpoint-public \
     glance-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-public \
     cinder-create-keystone-endpoint-publicv2
+
+for x in cinder glance neutron nova; do
+    helm delete --purge $x-create-keystone-user
+done
 
 helm delete --purge neutron-create-keystone-service
 helm delete --purge neutron-create-keystone-endpoint-public
