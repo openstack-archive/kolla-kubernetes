@@ -280,15 +280,15 @@ glance-registry-svc:
         type: "registry"
 
 glance-create-db:
-      database_host: "mariadb"
-      database_port: 3306
-      database_name: "glance"
-      database_user: "glance"
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "glance"
+        database_user: "glance"
 
 glance-manage-db:
-      image_tag: 2.0.2
-      ceph_backend: true
-      pvc_name: "glance"
+        image_tag: 2.0.2
+        ceph_backend: true
+        pvc_name: "glance"
 
 glance-pv:
         glance_volume_size_gb: 10
@@ -325,3 +325,26 @@ horizon-svc:
 cinder-scheduler:
         replicas: 1
         image_tag: 2.0.2
+
+glance-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "glance"
+        database_user: "glance"
+
+glance-manage-db:
+        image_tag: 2.0.2
+        ceph_backend: true
+        pvc_name: "glance"
+
+glance-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        glance_api_port: 9292
+
+glance-create-keystone-endpoint-internal:
+        glance_internal_service: glance-api
+        glance_api_port: 9292
+
+glance-create-keystone-endpoint-admin:
+        glance_admin_service: glance-api
+        glance_api_port: 9292
