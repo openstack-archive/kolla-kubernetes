@@ -1,0 +1,69 @@
+{{- $restype := .Values.type }}
+
+{{- $metadataAgentImageBuilt := printf "%s/%s/%s-%s-neutron-metadata-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.metadata_agent_image_tag }}
+{{- $metadataAgentImageFull := .Values.metadata_agent_image_full | default $metadataAgentImageBuilt }}
+
+{{- $resourceName := printf "neutron-metadata-agent-%s" $restype }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: neutron-metadata-agent-{{ $restype }}
+  labels:
+    component: neutron
+    system: metadata-agent-{{ $restype }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: neutron
+        system: metadata-agent-{{ $restype }}
+    spec:
+      hostNetwork: True
+      nodeSelector:
+        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: {{ $metadataAgentImageFull | quote }}
+          imagePullPolicy: {{ .Values.image_pull_policy | quote }}
+          name: main
+          securityContext:
+            privileged: true
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: neutron-metadata-agent-config
+              readOnly: true
+            - mountPath: /var/lib/neutron/kolla/
+              name: neutron-metadata-socket
+            - mountPath: /run/netns/
+              name: host-run-netns
+              # shared: true # This seems not support in K8s yet :(
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: neutron-metadata-agent-config
+          configMap:
+            name: neutron-metadata-agent
+            items:
+            - key: neutron.conf
+              path: neutron.conf
+            - key: config.json
+              path: config.json
+            - key: ml2-conf.ini
+              path: ml2_conf.ini
+            - key: metadata-agent.ini
+              path: metadata_agent.ini
+        - name: host-run-netns
+          hostPath:
+            path: /run/netns
+        - name: host-run
+          hostPath:
+            path: /run
+        - name: neutron-metadata-socket
+          hostPath:
+            path: /var/lib/neutron/kolla/metadata_proxy
+{{- end }}
