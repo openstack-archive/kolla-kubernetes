@@ -277,7 +277,11 @@ kollakube res delete bootstrap \
     neutron-create-keystone-endpoint-admin
 
 kollakube res create pod glance-api \
-    glance-registry cinder-scheduler cinder-volume-ceph
+    glance-registry cinder-scheduler
+
+helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
+    --set "$common_vars,element_name=cinder" --namespace kolla \
+    --name cinder-volume-ceph
 
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
