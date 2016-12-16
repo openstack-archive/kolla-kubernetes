@@ -3,7 +3,7 @@
 {{- $resourceName := "rabbitmq" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 spec:
@@ -15,6 +15,7 @@ spec:
         service: {{ .Values.element_name }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container" $env | indent 10 }},
           {
               "name": "update-config",
               "image": "{{ include "kolla_toolbox_image_full" . }}",

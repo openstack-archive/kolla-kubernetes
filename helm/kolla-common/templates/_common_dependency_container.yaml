@@ -10,30 +10,34 @@ metadata:
 
 {{- define "common_dependency_container" }}
 {
-   "name": "{{ .serviceName }}-dependencies",
+{{- if .Values.kubernetes_entrypoint }}
+   "name": "dependencies",
    "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
    "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
    "env": [
      {
        "name": "NAMESPACE",
-       "value": "{{ .Values.namespace }}"
+       "value": "{{ .Release.Namespace }}"
      },
+{{- if .depsOverride }}
+{{- include "depsOverride" . }}
+{{- else }}
+{{- range $k, $v := .Values.dependencies }}
      {
-       "name": "DEPENDENCY_SERVICE",
-       "value": "{{  include "joinListWithColon" .Values.dependecies.service }}"
+       "name": {{ $k | quote }},
+       "value": {{  include "joinListWithColon" $v | quote }}
      },
-     {
-       "name": "DEPENDENCY_JOBS",
-       "value": "{{  include "joinListWithColon" .Values.dependencies.jobs }}"
-     },
+{{- end }}
+{{- end }}
      {
        "name": "COMMAND",
        "value": "exit 0"
      }
    ]
+{{- end }}
 }
 {{- end }}
 
 {{- define "init_contaner_tail" }}
 ]'
-}}
+{{- end }}
