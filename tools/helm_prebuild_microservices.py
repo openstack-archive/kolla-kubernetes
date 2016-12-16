@@ -53,7 +53,8 @@ def helm_build_package(repodir, srcdir):
             command_line, shell=True,
             executable='/bin/bash')
         res = res.strip()  # strip whitespace
-        print(res)
+        if res != "":
+            print(res)
     except subprocess.CalledProcessError as e:
         print(e)
         raise
