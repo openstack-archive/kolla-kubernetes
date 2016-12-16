@@ -1,0 +1,11 @@
+{{- $resourceName := "glance-create-keystone-endpoint-public" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "glance" }}
+{{- $serviceType := "image" }}
+{{- $interface := "public" }}
+{{- $glancePublicEndpointBuilt := printf "http://%s:%1.f" .Values.kolla_kubernetes_external_vip .Values.glance_api_port }}
+{{- $endpointURLFull := .Values.glance_public_endpoint | default $glancePublicEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}

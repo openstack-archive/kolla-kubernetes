@@ -1,0 +1,12 @@
+{{- $resourceName := "glance-create-keystone-endpoint-internal" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "glance" }}
+{{- $serviceType := "image" }}
+{{- $interface := "internal" }}
+{{- $glanceInternalEndpointBuilt := printf "http://%s:%1.f" .Values.glance_internal_service .Values.glance_api_port }}
+{{- $endpointURLFull := .Values.glance_admin_endpoint | default $glanceInternalEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
+
