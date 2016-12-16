@@ -123,10 +123,11 @@ tests/bin/setup_canal.sh
 
 mkdir -p ~/.helm/repository/local
 sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
-tools/helm_prebuild.py
-tools/helm_build_microservices.py ~/.helm/repository/local
+helm repo update ~/.helm/repository/repositories.yaml
 helm serve &
+helm update
 sleep 1
+tools/helm_build_all.sh ~/.helm/repository/local
 helm repo update
 helm search
 

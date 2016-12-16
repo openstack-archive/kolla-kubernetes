@@ -45,11 +45,11 @@ def main():
         sys.stderr.write("The specified repo directory does not exist.\n")
         sys.exit(-1)
 
-    microdir = os.path.join(srcdir, "microservice")
-    microservices = os.listdir(microdir)
+    svcdir = os.path.join(srcdir, "service")
+    services = os.listdir(svcdir)
 
-    for package in [p for p in microservices if _isdir(microdir, p)]:
-        helm_build_package(repodir, os.path.join(microdir, package))
+    for package in [p for p in services if _isdir(svcdir, p)]:
+        helm_build_package(repodir, os.path.join(svcdir, package))
 
 if __name__ == '__main__':
     sys.exit(main())
