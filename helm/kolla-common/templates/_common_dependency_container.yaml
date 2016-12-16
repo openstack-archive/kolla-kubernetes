@@ -1,0 +1,39 @@
+{{- define "joinListWithColon" -}}
+{{ range $k, $v := . }}{{ if $k }},{{ end }}{{ $v }}{{ end }}
+{{- end -}}
+
+{{- define "init_contaner_header" }}
+metadata:
+  annotations:
+    pod.beta.kubernetes.io/init-containers: '[
+{{- end }}
+
+{{- define "common_dependency_container" }}
+{
+   "name": "{{ .serviceName }}-dependencies",
+   "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
+   "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+   "env": [
+     {
+       "name": "NAMESPACE",
+       "value": "{{ .Values.namespace }}"
+     },
+     {
+       "name": "DEPENDENCY_SERVICE",
+       "value": "{{  include "joinListWithColon" .Values.dependecies.service }}"
+     },
+     {
+       "name": "DEPENDENCY_JOBS",
+       "value": "{{  include "joinListWithColon" .Values.dependencies.jobs }}"
+     },
+     {
+       "name": "COMMAND",
+       "value": "exit 0"
+     }
+   ]
+}
+{{- end }}
+
+{{- define "init_contaner_tail" }}
+]'
+}}
