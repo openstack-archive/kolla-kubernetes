@@ -280,6 +280,10 @@ cinder-manage-db:
 cinder-api-svc:
         port: 8776
 
+cinder-backup:
+        replicas: 1
+        image_tag: 2.0.2
+
 horizon-api:
         horizon_image_tag: 2.0.2
         replicas: 1
