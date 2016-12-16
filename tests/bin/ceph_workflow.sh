@@ -289,7 +289,11 @@ helm delete --purge glance-create-keystone-endpoint-internal
 helm delete --purge glance-create-keystone-endpoint-admin
 
 kollakube res create pod glance-api \
-    glance-registry cinder-volume-ceph
+    glance-registry
+
+helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
+    --set "$common_vars,element_name=cinder" --namespace kolla \
+    --name cinder-volume-ceph
 
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
