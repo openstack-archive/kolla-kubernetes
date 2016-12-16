@@ -45,7 +45,7 @@ def main():
         sys.stderr.write("The specified repo directory does not exist.\n")
         sys.exit(-1)
 
-    microdir = os.path.join(srcdir, "microservice")
+    microdir = os.path.join(srcdir, "service")
     microservices = os.listdir(microdir)
 
     for package in [p for p in microservices if _isdir(microdir, p)]:
