@@ -16,8 +16,8 @@ import subprocess
 import sys
 
 
-def helm_build_package(repodir, srcdir):
-    command_line = "cd %s; helm package %s" % (repodir, srcdir)
+def helm_dep_up(srcdir):
+    command_line = "cd %s; helm dep up" % (srcdir)
     try:
         res = subprocess.check_output(
             command_line, shell=True,
@@ -36,20 +36,14 @@ def _isdir(path, entry):
 
 def main():
     path = os.path.abspath(os.path.dirname(sys.argv[0]))
-    srcdir = os.path.join(path, "../helm")
-    if len(sys.argv) < 2:
-        sys.stderr.write("You must specify the repo directory to build in.\n")
-        sys.exit(-1)
-    repodir = sys.argv[1]
-    if not os.path.isdir(repodir):
-        sys.stderr.write("The specified repo directory does not exist.\n")
-        sys.exit(-1)
 
-    microdir = os.path.join(srcdir, "microservice")
-    microservices = os.listdir(microdir)
+    srcdir = os.path.join(path, "..", "helm")
+    svcdir = os.path.join(srcdir, "service")
+    services = os.listdir(svcdir)
 
-    for package in [p for p in microservices if _isdir(microdir, p)]:
-        helm_build_package(repodir, os.path.join(microdir, package))
+    for package in [p for p in services if _isdir(svcdir, p)]:
+        helm_dep_up(os.path.join(os.path.join(svcdir, package)))
+
 
 if __name__ == '__main__':
     sys.exit(main())
