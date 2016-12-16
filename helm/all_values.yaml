@@ -299,3 +299,15 @@ glance-manage-db:
       image_tag: 2.0.2
       ceph_backend: true
       pvc_name: "glance"
+
+glance-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        neutron_server_port: 9292
+
+glance-create-keystone-endpoint-internal:
+        glance_internal_service: glance-api
+        neutron_server_port: 9292
+
+glance-create-keystone-endpoint-admin:
+        glance_admin_service: glance-api
+        neutron_server_port: 9292
