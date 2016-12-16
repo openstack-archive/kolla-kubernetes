@@ -39,10 +39,9 @@ EOF
     --branch master --cache-dir /opt/git git://git.openstack.org \
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
-mv kolla-ansible kolla
 
-sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
-sudo ln -s `pwd`/kolla /usr/share/kolla
+sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
+sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 
 if [ -f /etc/redhat-release ]; then
@@ -51,7 +50,7 @@ else
     sudo apt-get update
     sudo apt-get install -y crudini jq sshpass
 fi
-pushd kolla;
+pushd kolla-ansible;
 pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
@@ -121,13 +120,10 @@ fi
 
 tests/bin/setup_canal.sh
 
-mkdir -p ~/.helm/repository/local
-sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
-tools/helm_prebuild.py
-tools/helm_build_microservices.py ~/.helm/repository/local
-helm serve &
-sleep 1
-helm repo update
+tools/helm_build_all.sh ~/.helm/repository/kolla
+helm repo remove kollabuild
+tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
+helm update
 helm search
 
 kubectl create namespace kolla
