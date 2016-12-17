@@ -4,7 +4,7 @@
 {{- $resourceName := printf "neutron-dhcp-agent" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -22,6 +22,7 @@ spec:
 #FIXME Its unclear if ovsdb_connection, local_ip, and/or hostPID required. Try removing them once we have a working gate to test with.
 #FIXME Once out of alpha, this should be converted to yaml.
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
             {
                 "name": "update-config",
                 "image": {{ include "kolla_toolbox_image_full" $env | quote }},
