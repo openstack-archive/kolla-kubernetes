@@ -4,6 +4,6 @@
 {{- $serviceName := "neutron" }}
 {{- $serviceType := "network" }}
 {{- $description := "Openstack Networking" }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "Values" .Values "Release" .Release }}
 {{- include "common_create_keystone_service" $env }}
 {{- end }}

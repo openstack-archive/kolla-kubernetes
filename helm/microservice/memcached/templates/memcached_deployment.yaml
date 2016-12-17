@@ -4,7 +4,25 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
+{{- $serviceName := "memcached" }}
+{{- $serviceType := "deployment" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := $serviceType }}
+{{- $elementNameValues := index .Values.global.kolla $elementName | default dict }}
+{{- $elementTypeValues := index $elementNameValues $elementType | default dict }}
+{{- $elementAllValues := index $elementNameValues "all" | default dict }}
+{{- $serviceNameValues := index .Values.global.kolla.all $serviceName | default dict }}
+{{- $serviceTypeValues := index $serviceNameValues $elementType | default dict }}
+{{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
+#a: {{- .Values.enabled }}
+#b: {{- index $elementTypeValues "enabled" }}
+#c: {{- index $elementAllValues "enabled" }}
+#d: {{- index $serviceTypeValues "enabled" }}
+#e: {{- index $serviceAllValues "enabled" }}
+#{- $enabled := .Values.enabled | default (index $elementTypeValues "enabled") | default (index $elementAllValues "enabled") | default (index $serviceTypeValues "enabled") | default (index $serviceAllValues "enable" }}
+{{- $enabled := true }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- if $enabled }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -37,4 +55,5 @@ spec:
         - name: memcached-config
           configMap:
             name: {{ .Values.element_name }}
+{{- end }}
 {{- end }}
