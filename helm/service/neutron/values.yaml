@@ -1,0 +1,38 @@
+neutron-create-db:
+    keystone_entrypoint: false
+
+neutron-server-svc:
+
+neutron-create-keystone-service:
+    keystone_entrypoint: false
+
+neutron-create-keystone-endpoint-admin:
+    keystone_entrypoint: true
+
+neutron-create-keystone-endpoint-internal:
+    keystone_entrypoint: true
+
+neutron-create-keystone-endpoint-public:
+    keystone_entrypoint: true
+
+neutron-create-keystone-user:
+    keystone_entrypoint: false
+
+neutron-manage-db:
+    keystone_entrypoint: true
+
+neutron-server:
+    keystone_entrypoint: true
+
+neutron-dhcp-agent:
+    keystone_entrypoint: true
+
+neutron-l3-agent:
+    keystone_entrypoint: true
+
+neutron-metadata-agent:
+    keystone_entrypoint: true
+
+neutron-openvswitch-agent:
+    keystone_entrypoint: true
+
