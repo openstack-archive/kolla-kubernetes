@@ -357,3 +357,8 @@ glance-api:
         ceph_backend: false
         port: 9292
         pvc_name: "glance"
+
+glance-registry:
+        image_tag: 2.0.2
+        port: 9191
+        replicas: 1
