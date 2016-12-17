@@ -174,8 +174,26 @@ $DIR/tools/build_local_admin_keystonerc.sh
 #FIXME temporary until enough service packages are around. then
 #they will get their own test file.
 if [ "x$1" == "xhelm-entrypoint" ]; then
+    helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
+    --set "$common_vars,type=network,selector_key=kolla_controller" \
+    --namespace kolla --name openvswitch-ovsdb-network &&
+    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
+    --namespace kolla --name openvswitch-vswitchd-network
 
-    echo Put test code here.
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    kollakube res create bootstrap openvswitch-set-external-ip
+
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    helm install --debug kolla/neutron --version 3.0.0-1 \
+        --namespace kolla --name neutron --values  <(helm_entrypoint_neutron)
+
+    neutron agent-list
+    neutron net-list
 
     exit 0
 fi
