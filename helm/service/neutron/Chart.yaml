@@ -1,5 +1,5 @@
 name: neutron
-version: 2.0.2-1 #FIXME make this changable
+version: 3.0.0-1 #FIXME make this changable
 description: FIXME
 keywords:
   - openstack
