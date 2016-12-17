@@ -36,4 +36,4 @@ metadata:
 
 {{- define "init_contaner_tail" }}
 ]'
-}}
+{{- end }}
