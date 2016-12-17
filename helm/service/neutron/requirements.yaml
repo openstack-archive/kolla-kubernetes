@@ -1,4 +1,40 @@
 dependencies:
+  - name: neutron-create-db
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-server-svc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-create-keystone-service
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-create-keystone-endpoint-admin
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-create-keystone-endpoint-internal
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-create-keystone-endpoint-public
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-create-keystone-user
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-manage-db
+    repository: http://localhost:10191
+    version: 3.0.0-1
   - name: neutron-server
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-dhcp-agent
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-l3-agent
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-metadata-agent
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: neutron-openvswitch-agent
     repository: http://localhost:10191
     version: 3.0.0-1
