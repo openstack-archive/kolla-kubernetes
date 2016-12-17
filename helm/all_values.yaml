@@ -360,3 +360,8 @@ glance-create-keystone-endpoint-internal:
 glance-create-keystone-endpoint-admin:
         glance_admin_service: glance-api
         glance_api_port: 9292
+
+glance-registry:
+        image_tag: 2.0.2
+        port: 9191
+        replicas: 1
