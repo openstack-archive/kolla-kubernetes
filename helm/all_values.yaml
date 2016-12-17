@@ -90,26 +90,68 @@ neutron-create-db:
         database_port: 3306
         database_name: "neutron"
         database_user: "neutron"
+        dependencies:
+            service:
+            - mariadb
 
 neutron-manage-db:
         image_tag: 2.0.2
+        dependencies:
+            jobs:
+            - neutron-create-db
+            service:
+            - keystone-admin
+
+neutron-create-keystone-service:
+        dependencies:
+            service:
+            - keystone-admin
 
 neutron-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         neutron_server_port: 9696
+        dependencies:
+            jobs:
+            - neutron-create-keystone-service
+            service:
+            - keystone-admin
 
 neutron-create-keystone-endpoint-internal:
         neutron_internal_service: neutron-server
         neutron_server_port: 9696
+        dependencies:
+            jobs:
+            - neutron-create-keystone-service
+            service:
+            - keystone-admin
 
 neutron-create-keystone-endpoint-admin:
         neutron_admin_service: neutron-server
         neutron_server_port: 9696
+        dependencies:
+            jobs:
+            - neutron-create-keystone-service
+            service:
+            - keystone-admin
+
+neutron-create-keystone-user:
+        dependencies:
+            service:
+            - keystone-admin
 
 neutron-server:
         image_tag: 2.0.2
         replicas: 3
         port: 9696
+        dependencies:
+            jobs:
+            - neutron-manage-db
+            - neutron-create-keystone-user
+            - neutron-create-keystone-endpoint-public
+            - neutron-create-keystone-endpoint-internal
+            - neutron-create-keystone-endpoint-admin
+            service:
+            - keystone-admin
 
 neutron-openvswitch-agent:
         type: network
@@ -122,6 +164,11 @@ neutron-openvswitch-agent:
 
         tunnel_interface: eth0
 
+        dependencies:
+            service:
+            - keystone-admin
+            - neutron-server
+
 neutron-l3-agent:
         type: network
 
@@ -133,6 +180,11 @@ neutron-l3-agent:
 
         tunnel_interface: eth0
 
+        dependencies:
+            service:
+            - keystone-admin
+            - neutron-server
+
 neutron-dhcp-agent:
         dhcp_agent_image_full:
         dhcp_agent_image_tag: 2.0.2
@@ -142,6 +194,11 @@ neutron-dhcp-agent:
 
         tunnel_interface: eth0
 
+        dependencies:
+            service:
+            - keystone-admin
+            - neutron-server
+
 neutron-metadata-agent:
         type: network
 
@@ -149,6 +206,11 @@ neutron-metadata-agent:
         metadata_agent_image_tag: 2.0.2
 
         logger_configmap_name: neutron-metadata-agent-logger
+
+        dependencies:
+            service:
+            - keystone-admin
+            - neutron-server
 
 openvswitch-vswitchd:
         openvswitch_vswitchd_image_tag: 2.0.2
@@ -166,7 +228,7 @@ rabbitmq-pod:
         rabbitmq_management_port: 15672
         rabbitmq_image_tag: 3.0.1
         dependencies:
-            DEPENDENCY_JOBS:
+            jobs:
               - rabbitmq-init-element
 
 rabbitmq-pv:

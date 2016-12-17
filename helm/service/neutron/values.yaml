@@ -1,0 +1,41 @@
+neutron-create-db:
+    kubernetes_entrypoint: false
+
+neutron-server-svc:
+
+neutron-create-keystone-service:
+    kubernetes_entrypoint: false
+
+neutron-create-keystone-endpoint-admin:
+    kubernetes_entrypoint: true
+
+neutron-create-keystone-endpoint-internal:
+    kubernetes_entrypoint: true
+
+neutron-create-keystone-endpoint-public:
+    kubernetes_entrypoint: true
+
+neutron-create-keystone-user:
+    kubernetes_entrypoint: false
+
+neutron-manage-db:
+    kubernetes_entrypoint: true
+
+neutron-server:
+    kubernetes_entrypoint: true
+
+neutron-dhcp-agent:
+    kubernetes_entrypoint: true
+
+neutron-l3-agent:
+    kubernetes_entrypoint: true
+    type: network
+
+neutron-metadata-agent:
+    kubernetes_entrypoint: true
+    type: network
+
+neutron-openvswitch-agent:
+    kubernetes_entrypoint: true
+    type: network
+
