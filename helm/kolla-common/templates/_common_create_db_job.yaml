@@ -6,6 +6,11 @@ metadata:
   name: "{{ .resourceName }}-create-db"
 spec:
   template:
+    metadata:
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" . | indent 10 }}
+        ]'
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
