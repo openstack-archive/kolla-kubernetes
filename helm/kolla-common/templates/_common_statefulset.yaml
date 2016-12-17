@@ -11,6 +11,7 @@ spec:
         type: {{ .serviceType }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" . | indent 10 }}
           {
               "name": "initialize-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},

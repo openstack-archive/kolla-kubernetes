@@ -10,6 +10,9 @@ spec:
   parallelism: 1
   completions: 1
   template:
+{{- include "init_container_header" . | indent 4 }}
+{{- include "common_dependency_container_single" . | indent 10 }}
+{{- include "init_container_tail" . | indent 4 }}
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
