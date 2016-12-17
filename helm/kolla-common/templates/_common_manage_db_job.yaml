@@ -5,6 +5,11 @@ metadata:
   name: "{{ .resourceName }}-manage-db"
 spec:
   template:
+    metadata:
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" $env | indent 10 }}
+        ]'
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}

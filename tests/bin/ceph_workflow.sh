@@ -13,6 +13,33 @@ function ceph_values {
     echo "  - $addr"
 }
 
+function helm_entrypoint_neutron {
+    for x in neutron-create-keystone-service neutron-create-keystone-user \
+    	 neutron-create-keystone-endpoint-internal 
+    	 neutron-create-keystone-endpoint-admin neutron-create-db \
+    	 neutron-manage-db neutron-server neutron-metadata-agent; \
+        do
+            echo "$x:"
+            echo "    enable_kube_logger: false"
+            echo "    kolla_base_distro: $base_distro"
+    done
+    for x in neutron-dhcp-agent neutron-l3-agent neutron-openvswitch-agent;
+        do
+            echo "    enable_kube_logger: false"
+            echo "    kolla_base_distro: $base_distro"
+            echo "tunnel_interface: $tunnel_interface"
+    done
+    echo "neutron-create-keystone-endpoint-public:"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kolla_kubernetes_external_vip: 172.18.0.1"
+    echo "neutron-server-svc:"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    element_port_external: true"
+    echo "    kolla_kubernetes_external_vip: 172.18.0.1"
+}
+
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
@@ -54,9 +81,10 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
-helm install kolla/neutron-server-svc --version 3.0.0-1 \
-    --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+[ "x$1" != "xhelm-entrypoint" ] \
+    helm install kolla/neutron-server-svc --version 3.0.0-1 \
+        --namespace kolla --name neutron-server-svc \
+        --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
@@ -160,6 +188,12 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
+
+if [ "x$1" == "xhelm-entrypoint" ]; then
+    helm install --debug --dry-run kolla/neutron --version 2.0.2-1 \
+        --namespace kolla --name neutron <(helm_entrypoint_neutron)
+    exit 0
+fi
 
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
