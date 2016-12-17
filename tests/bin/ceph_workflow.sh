@@ -175,7 +175,8 @@ $DIR/tools/build_local_admin_keystonerc.sh
 #they will get their own test file.
 if [ "x$1" == "xhelm-entrypoint" ]; then
 
-    echo Put test code here.
+    helm install --debug --dry-run kolla/neutron --version 2.0.2-1 \
+        --namespace kolla --name neutron --values  <(helm_entrypoint_neutron)
 
     exit 0
 fi
