@@ -25,6 +25,7 @@ spec:
 # The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
 # other containers from directly accessing the service
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
