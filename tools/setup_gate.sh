@@ -120,14 +120,9 @@ fi
 
 tests/bin/setup_canal.sh
 
-mkdir -p ~/.helm/repository/local
-sed -i 's/local/kolla/' ~/.helm/repository/repositories.yaml
-helm repo index ~/.helm/repository/local
-helm serve &
-sleep 1
-helm update
-tools/helm_build_all.sh ~/.helm/repository/local
+tools/helm_build_all.sh ~/.helm/repository/kolla
 helm repo remove kollabuild
+tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
 helm update
 helm search
 

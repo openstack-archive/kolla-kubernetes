@@ -6,6 +6,8 @@ REPODIR="$1"
 
 REPOPORT="$2"
 
+REPONAME="$3"
+
 if [ "x$REPODIR" == "x" ]; then
     echo You must specify a repo dir.
     exit 1
@@ -16,6 +18,10 @@ helm repo index "$REPODIR"
 
 if [ "x$REPOPORT" == "x" ]; then
     REPOPORT=10191
+fi
+
+if [ "x$REPONAME" == "x" ]; then
+    REPONAME=kollabuild
 fi
 
 helm serve --address "127.0.0.1:$REPOPORT" --repo-path "$REPODIR" &
@@ -33,6 +39,6 @@ while true; do
 done
 set -e
 
-helm repo add kollabuild http://localhost:"$REPOPORT"
+helm repo add "$REPONAME" http://localhost:"$REPOPORT"
 
 wait $PID
