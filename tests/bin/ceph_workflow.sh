@@ -54,9 +54,10 @@ helm install kolla/glance-api-svc --version 3.0.0-1 \
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
-helm install kolla/neutron-server-svc --version 3.0.0-1 \
-    --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+[ "x$1" != "xhelm-entrypoint" ] \
+    helm install kolla/neutron-server-svc --version 3.0.0-1 \
+        --namespace kolla --name neutron-server-svc \
+        --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
@@ -160,6 +161,12 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
+
+if [ "x$1" == "xhelm-entrypoint" ]; then
+    helm install --debug --dry-run kolla/neutron --version 2.0.2-1 \
+        --namespace kolla --name neutron
+    exit 0
+fi
 
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
