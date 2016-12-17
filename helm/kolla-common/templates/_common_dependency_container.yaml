@@ -15,10 +15,6 @@ metadata:
    "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
    "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
    "env": [
-     {
-       "name": "NAMESPACE",
-       "value": "{{ .Release.Namespace }}"
-     },
 {{- if .depsOverride }}
 {{- include "depsOverride" . }}
 {{- else }}
@@ -30,8 +26,8 @@ metadata:
 {{- end }}
 {{- end }}
      {
-       "name": "COMMAND",
-       "value": "exit 0"
+       "name": "NAMESPACE",
+       "value": "{{ .Release.Namespace }}"
      }
    ]
 {{- end }}
