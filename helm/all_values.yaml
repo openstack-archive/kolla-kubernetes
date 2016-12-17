@@ -89,26 +89,64 @@ neutron-create-db:
         database_port: 3306
         database_name: "neutron"
         database_user: "neutron"
+        dependencies:
+            DEPENDENCY_SERVICE:
+            - mariadb
 
 neutron-manage-db:
         image_tag: 2.0.2
+        dependencies:
+            DEPENDENCY_JOB:
+            - neutron-create-db
+            DEPENDENCY_SERVICE:
+            - keystone
+
+neutron-create-keystone-service:
+        dependencies:
+            DEPENDENCY_SERVICE:
+            - keystone
 
 neutron-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         neutron_server_port: 9696
+        dependencies:
+            DEPENDENCY_JOB:
+            - neutron-create-keystone-service
+            DEPENDENCY_SERVICE:
+            - keystone
 
 neutron-create-keystone-endpoint-internal:
         neutron_internal_service: neutron-server
         neutron_server_port: 9696
+        dependencies:
+            DEPENDENCY_JOB:
+            - neutron-create-keystone-service
+            DEPENDENCY_SERVICE:
+            - keystone
 
 neutron-create-keystone-endpoint-admin:
         neutron_admin_service: neutron-server
         neutron_server_port: 9696
+        dependencies:
+            DEPENDENCY_JOB:
+            - neutron-create-keystone-service
+            DEPENDENCY_SERVICE:
+            - keystone
+
+neutron-create-keystone-user:
+        dependencies:
+            DEPENDENCY_SERVICE:
+            - keystone
 
 neutron-server:
         image_tag: 2.0.2
         replicas: 3
         port: 9696
+        dependencies:
+            DEPENDENCY_JOB:
+            - neutron-manage-db
+            DEPENDENCY_SERVICE:
+            - keystone
 
 neutron-openvswitch-agent:
         type: network
