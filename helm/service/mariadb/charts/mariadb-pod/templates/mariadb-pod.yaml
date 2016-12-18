@@ -1,0 +1,57 @@
+{{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
+{{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
+{{- $resourceName := "mariadb" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+apiVersion: apps/v1beta1
+kind: StatefulSet
+spec:
+  serviceName: {{ .Values.element_name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.element_name }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" . | indent 10 }}
+{{- include "init_container_tail" . | indent 4 }}
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $mariadbImageFull }}"
+          name: main
+          lifecycle:
+            preStop:
+              exec:
+                command: ["mysqladmin -u {{ .Values.database_user }} -p$DATABASE_PASSWORD shutdown"]
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+            - mountPath: /var/lib/mysql
+              name: mariadb-persistent-storage
+          env:
+{{- include "common_env_vars" . | indent 12 }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: password
+          ports:
+            - containerPort: {{ .Values.mariadb_port | default 3306 }}
+              name: {{ .Values.element_name }}
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: pod-main-config
+          configMap:
+            name: {{ .Values.element_name }}
+        - name: mariadb-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.element_name }}
+metadata:
+   name: {{ .Values.element_name }}
+{{- end }}
