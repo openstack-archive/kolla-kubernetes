@@ -186,11 +186,19 @@ memcached:
 
 mariadb-init-element:
         mariadb_image_tag: 3.0.1
+        dependencies:
+            DEPENDENCY_SERVICE:
+            - mariadb
 
 mariadb-pod:
         database_user: root
         mariadb_port: 3306
         mariadb_image_tag: 3.0.1
+        dependencies:
+            DEPENDENCY_JOBS:
+            - mariadb-init-element
+            DEPENDENCY_SERVICE:
+            - mariadb
 
 mariadb-pv:
         mariadb_volume_size_gb: 10
