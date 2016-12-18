@@ -26,13 +26,9 @@ metadata:
      {
        "name": {{ $k | quote }},
        "value": {{  include "joinListWithColon" $v | quote }}
-     },
-{{- end }}
-{{- end }}
-     {
-       "name": "COMMAND",
-       "value": "exit 0"
      }
+{{- end }}
+{{- end }}
    ]
 {{- end }}
 {{- end }}
