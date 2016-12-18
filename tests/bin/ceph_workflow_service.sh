@@ -20,38 +20,6 @@ function ceph_values {
     echo "          - $addr"
 }
 
-function helm_entrypoint_mariadb {
-
-for x in mariadb-pod mariadb-init-element-job; do
-    echo "$x:"
-    echo "    kube_logger: false"
-    echo "    base_distro: $base_distro"
-    echo "    kubernetes_entrypoint: true"
-    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
-    echo "    element_name: mariadb"
-done
-
-    echo "mariadb-pv:"
-    echo "   storage_provider: ceph"
-    echo "   storage_provider_fstype: xfs"
-    echo "   mariadb_volume_size_gb: 10"
-    echo "   ceph:"
-    echo "      monitors:"
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "          - $addr"
-    echo "      pool: kollavolumes"
-    echo "      secret_name: ceph-kolla"
-    echo "      user: kolla"
-    echo "mariadb-pvc:"
-    echo "   storage_provider: ceph"
-    echo "   storage_provider_fstype: xfs"
-    echo "   mariadb_volume_size_gb: 10"
-
-}
-
 function helm_entrypoint_general {
     echo "global:"
     echo "  kolla:"
@@ -99,8 +67,12 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq; do
-    helm install kolla/$x-pv --version 0.4.0-1 \
+helm install --debug kolla/mariadb --version $VERSION \
+    --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
+    --values <(helm_entrypoint_general $1)
+
+for x in rabbitmq ; do
+    helm install kolla/$x-pv --version $VERSION \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
         --values <(ceph_values $1)
     helm install kolla/$x-pvc --version $VERSION --namespace kolla \
@@ -109,9 +81,6 @@ done
 
 helm install kolla/memcached-svc --version $VERSION \
     --namespace kolla --name memcached-svc --set element_name=memcached
-
-helm install kolla/mariadb-svc --version $VERSION \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version $VERSION \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
@@ -128,7 +97,7 @@ helm install kolla/keystone-internal-svc --version $VERSION \
     --namespace kolla --name keystone-internal-svc \
     --set "element_name=keystone-internal"
 
-helm install kolla/neutron-server-svc --version 0.4.0-1 \
+helm install kolla/neutron-server-svc --version $VERSION \
     --namespace kolla --name neutron-server-svc \
     --set "port_external=true,external_vip=$IP"
 
@@ -150,10 +119,6 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
 helm install kolla/horizon-svc --version $VERSION \
     --namespace kolla --name horizon-svc --set element_name=horizon
 
-helm install kolla/mariadb-init-element-job --version $VERSION \
-    --namespace kolla --name mariadb-init-element-job \
-    --set "$common_vars,element_name=mariadb"
-
 helm install kolla/rabbitmq-init-element-job --version $VERSION \
     --namespace kolla --name rabbitmq-init-element-job \
     --set "$common_vars,element_name=rabbitmq,cookie=67"
@@ -161,12 +126,9 @@ helm install kolla/rabbitmq-init-element-job --version $VERSION \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in mariadb rabbitmq; do
+for x in rabbitmq; do
     helm delete $x-init-element-job --purge
 done
-
-helm install kolla/mariadb-statefulset --version $VERSION \
-    --namespace kolla --name mariadb-statefulset --set "$common_vars,element_name=mariadb"
 
 helm install kolla/memcached-deployment --version $VERSION \
     --set "$common_vars,element_name=memcached" \
@@ -222,7 +184,7 @@ $DIR/tools/build_local_admin_keystonerc.sh
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
-helm install kolla/cinder-create-keystone-service-job --version 0.4.0-1 \
+helm install kolla/cinder-create-keystone-service-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-service --set "$common_vars"
 
 helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
@@ -231,7 +193,7 @@ helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
 helm install kolla/cinder-create-keystone-user-job --debug --version $VERSION \
     --namespace kolla --name cinder-create-keystone-user --set "$common_vars"
 
-helm install kolla/neutron-create-keystone-user-job --debug --version 0.4.0-1 \
+helm install kolla/neutron-create-keystone-user-job --debug --version $VERSION \
     --namespace kolla --name neutron-create-keystone-user --set "$common_vars"
 
 helm install kolla/nova-create-keystone-user-job --debug --version $VERSION \
@@ -245,7 +207,7 @@ helm install kolla/cinder-create-keystone-endpoint-public-job --version $VERSION
 helm install kolla/cinder-create-keystone-endpoint-publicv2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-endpoint-publicv2 --set "$common_vars,external_vip=172.18.0.1"
 
-helm install kolla/neutron-create-keystone-endpoint-public-job --version 0.4.0-1 \
+helm install kolla/neutron-create-keystone-endpoint-public-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
 helm install kolla/neutron-create-keystone-endpoint-internal-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-endpoint-internal --set "$common_vars"
@@ -349,7 +311,7 @@ helm install kolla/cinder-scheduler-statefulset --version $VERSION \
     --set "$common_vars,element_name=cinder-scheduler" \
     --namespace kolla --name cinder-scheduler
 
-helm install kolla/glance --debug  --version 0.4.0-1 \
+helm install kolla/glance --debug  --version $VERSION \
     --namespace kolla --name glance --set "$common_vars,element_name=glance" \
     --values <(helm_entrypoint_general $1)
 
