@@ -15,6 +15,38 @@ function ceph_values {
     echo "  - $addr"
 }
 
+function helm_entrypoint_mariadb {
+
+for x in mariadb-pod mariadb-init-element; do
+    echo "$x:"
+    echo "    enable_kube_logger: false"
+    echo "    kolla_base_distro: $base_distro"
+    echo "    kubernetes_entrypoint: true"
+    echo "    kubernetes_entrypoint_image_tag: 3.0.1"
+    echo "    element_name: mariadb"
+done
+
+    echo "mariadb-pv:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   mariadb_volume_size_gb: 10"
+    echo "   ceph:"
+    echo "      monitors:"
+    addr=172.17.0.1
+    if [ "x$1" == "xceph-multi" ]; then
+        addr=$(cat /etc/nodepool/primary_node_private)
+    fi
+    echo "          - $addr"
+    echo "      pool: kollavolumes"
+    echo "      secret_name: ceph-kolla"
+    echo "      user: kolla"
+    echo "mariadb-pvc:"
+    echo "   storage_provider: ceph"
+    echo "   storage_provider_fstype: xfs"
+    echo "   mariadb_volume_size_gb: 10"
+
+}
+
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
@@ -38,6 +70,19 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
+helm install --debug kolla/mariadb --version 3.0.0-1 \
+    --namespace kolla --name mariadb --values <(helm_entrypoint_mariadb $1)
+
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    kubectl get pods --namespace kolla
+    kubectl get jobs --namespace kolla
+    kubectl get svc --namespace kolla
+    kubectl get pv --namespace kolla
+    kubectl get pvc --namespace kolla
+    exit 0
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
@@ -47,9 +92,6 @@ for x in mariadb rabbitmq glance; do
 done
 
 kollakube res create svc memcached
-
-helm install kolla/mariadb-svc --version 3.0.0-1 \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
@@ -103,10 +145,6 @@ helm install kolla/horizon-svc --version 3.0.0-1 \
 #they will get their own test file.
 fi
 
-helm install kolla/mariadb-init-element --version 3.0.0-1 \
-    --namespace kolla --name mariadb-init-element \
-    --set "$common_vars,element_name=mariadb"
-
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
     --set "element_name=rabbitmq,rabbitmq_cluster_cookie=67"
@@ -114,12 +152,9 @@ helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in mariadb rabbitmq; do
+for x in rabbitmq; do
     helm delete $x-init-element --purge
 done
-
-helm install kolla/mariadb-pod --version 3.0.0-1 \
-    --namespace kolla --name mariadb-pod --set "$common_vars,element_name=mariadb"
 
 helm install kolla/memcached --version 3.0.0-1 \
     --set "enable_kube_logger=false,element_name=memcached" \
