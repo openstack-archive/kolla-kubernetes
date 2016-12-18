@@ -13,6 +13,17 @@ function ceph_values {
     echo "  - $addr"
 }
 
+function helm_entrypoint_mariadb {
+    for x in mariadb-pod mariadb-init-element; 
+        do
+            echo "$x:"
+            echo "    enable_kube_logger: false"
+            echo "    kolla_base_distro: $base_distro"
+    done
+    echo "mariadb-pv:"
+	ceph_values $1
+}
+
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \

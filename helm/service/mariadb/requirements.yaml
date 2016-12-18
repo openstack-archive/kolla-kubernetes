@@ -1,0 +1,16 @@
+dependencies:
+  - name: mariadb-pv 
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: mariadb-pvc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: mariadb-svc
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: mariadb-init-element
+    repository: http://localhost:10191
+    version: 3.0.0-1
+  - name: mariadb-pod
+    repository: http://localhost:10191
+    version: 3.0.0-1
