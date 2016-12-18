@@ -1,5 +1,5 @@
 {{- define "common_api_python_deployment" }}
-{{- $haproxy := .Values.haproxy_python_termination | default false }}
+{{- $haproxy := .Values.haproxy_python_termination | default true }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -17,7 +17,9 @@ spec:
         service: {{ .serviceName }}
         type: {{ .serviceType }}
       annotations:
+{{- if $haproxy }}
         kolla_upgrade: minor_rolling_safe
+{{- end }}
 #FIXME Once out of alpha, this should be converted to yaml.
 #FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
 # The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
