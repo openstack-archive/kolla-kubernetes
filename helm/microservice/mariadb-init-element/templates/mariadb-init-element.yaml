@@ -1,13 +1,16 @@
 {{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
 {{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
-{{- $resourceName := "mariadb-bootstrap" }}
+{{- $resourceName := "mariadb-init-element" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: batch/v1
 kind: Job
 spec:
   template:
+{{- include "init_container_header" . | indent 4 }}
+{{- include "common_dependency_container_single" . | indent 10 }}
+{{- include "init_container_tail" . | indent 8 }}
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
@@ -37,5 +40,5 @@ spec:
             claimName: {{ .Values.element_name }}
       restartPolicy: OnFailure
 metadata:
-  name: {{ .Values.element_name }}-bootstrap
+  name: {{ .Values.element_name }}-init-element
 {{- end }}
