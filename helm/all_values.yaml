@@ -22,7 +22,7 @@ common:
         enable_kube_logger: true
         fluentd_image_tag: 3.0.1
         kolla_toolbox_image_tag: 3.0.1
-        haproxy_image_tag: 2.0.2
+
         kubernetes_entrypoint_image_tag: 3.0.1
         kubernetes_entrypoint: false
 
