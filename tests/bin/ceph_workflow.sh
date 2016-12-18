@@ -3,6 +3,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
+. "$DIR/tests/bin/setup_helm_entrypint_config.sh"
+
 function ceph_values {
     echo "ceph:"
     echo "  monitors:"
@@ -47,21 +49,6 @@ done
 
 kollakube res create svc memcached
 
-helm install kolla/glance-api-svc --version 3.0.0-1 \
-    --namespace kolla --name glance-api-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
-
-helm install kolla/glance-registry-svc --version 3.0.0-1 \
-    --namespace kolla --name glance-registry-svc
-
-helm install kolla/neutron-server-svc --version 3.0.0-1 \
-    --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
-
-helm install kolla/cinder-api-svc --version 3.0.0-1 \
-    --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
-
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
 
@@ -80,6 +67,25 @@ helm install kolla/keystone-internal-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-internal-svc \
     --set "element_name=keystone-internal"
 
+#FIXME temporary until enough service packages are around. then
+#they will get their own test file.
+if [ "x$1" != "xhelm-entrypoint" ]; then
+
+helm install kolla/glance-api-svc --version 3.0.0-1 \
+    --namespace kolla --name glance-api-svc \
+    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/glance-registry-svc --version 3.0.0-1 \
+    --namespace kolla --name glance-registry-svc
+
+helm install kolla/neutron-server-svc --version 3.0.0-1 \
+    --namespace kolla --name neutron-server-svc \
+    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/cinder-api-svc --version 3.0.0-1 \
+    --namespace kolla --name cinder-api-svc \
+    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
     --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
@@ -91,6 +97,13 @@ helm install kolla/nova-metadata-svc --version 3.0.0-1 \
 helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
     --namespace kolla --name nova-novncproxy-svc --set element_name=nova
 
+helm install kolla/horizon-svc --version 3.0.0-1 \
+    --namespace kolla --name horizon-svc --set element_name=horizon
+
+#FIXME temporary until enough service packages are around. then
+#they will get their own test file.
+fi
+
 helm install kolla/mariadb-init-element --version 3.0.0-1 \
     --namespace kolla --name mariadb-init-element \
     --set "$common_vars,element_name=mariadb"
@@ -98,9 +111,6 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
     --set "element_name=rabbitmq,rabbitmq_cluster_cookie=67"
-
-helm install kolla/horizon-svc --version 3.0.0-1 \
-    --namespace kolla --name horizon-svc --set element_name=horizon
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -160,6 +170,15 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
+
+#FIXME temporary until enough service packages are around. then
+#they will get their own test file.
+if [ "x$1" == "xhelm-entrypoint" ]; then
+
+    echo Put test code here.
+
+    exit 0
+fi
 
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
