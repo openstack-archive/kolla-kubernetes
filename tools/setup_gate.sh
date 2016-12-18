@@ -153,8 +153,11 @@ tools/setup_simple_ceph_users.sh
 tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
 
 tests/bin/ceph_workflow.sh "$4" "$2"
-. ~/keystonerc_admin
 
-kubectl get pods --namespace=kolla
+if [ "x$2" != "xhelm-entrypoint" ]; then
+    . ~/keystonerc_admin
 
-tests/bin/basic_tests.sh
+    kubectl get pods --namespace=kolla
+
+    tests/bin/basic_tests.sh
+fi
