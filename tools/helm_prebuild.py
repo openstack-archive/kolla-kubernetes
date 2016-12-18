@@ -27,7 +27,12 @@ stateful_services = [
 
 pod_http_termination = [
     'neutron-server',
-    'nova-api'
+    'nova-api',
+    'nova-novncproxy',
+    'cinder-api',
+    'glance-api',
+    'heat-api-cfn',
+    'heat-api'
 ]
 
 common_create_keystone_admin = [
