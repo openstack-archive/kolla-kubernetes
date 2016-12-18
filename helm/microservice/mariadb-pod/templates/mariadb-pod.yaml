@@ -3,7 +3,7 @@
 {{- $resourceName := "mariadb" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 spec:
@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         service: {{ .Values.element_name }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" . | indent 10 }}
+{{- include "init_container_tail" . | indent 4 }}
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}

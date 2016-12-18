@@ -13,6 +13,23 @@ function ceph_values {
     echo "  - $addr"
 }
 
+function helm_entrypoint_mariadb {
+    for x in mariadb-pod mariadb-init-element;
+        do
+            echo "$x:"
+            echo "    enable_kube_logger: false"
+            echo "    kolla_base_distro: $base_distro"
+    done
+    echo "mariadb-pv:"
+    echo "   ceph:"
+    echo "      monitors:"
+    addr=172.17.0.1
+    if [ "x$1" == "xceph-multi" ]; then
+        addr=$(cat /etc/nodepool/primary_node_private)
+    fi
+    echo "          - $addr"
+}
+
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
@@ -36,6 +53,9 @@ kollakube res create configmap \
     cinder-scheduler cinder-volume keepalived;
 
 kollakube res create secret nova-libvirt
+
+helm install --dry-run --debug kolla/mariadb --version 3.0.0-1 \
+    --namespace kolla --name mariadb --values <(helm_entrypoint_mariadb)
 
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
