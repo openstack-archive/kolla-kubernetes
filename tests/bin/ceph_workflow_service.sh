@@ -22,7 +22,7 @@ function ceph_values {
 
 function helm_entrypoint_mariadb {
 
-for x in mariadb-pod mariadb-init-element-job; do
+for x in mariadb-statefulset mariadb-init-element-job; do
     echo "$x:"
     echo "    kube_logger: false"
     echo "    base_distro: $base_distro"
@@ -99,7 +99,11 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq; do
+helm install --debug kolla/mariadb --version 0.4.0-1 \
+    --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
+    --values <(helm_entrypoint_general $1)
+
+for x in rabbitmq ; do
     helm install kolla/$x-pv --version 0.4.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
         --values <(ceph_values $1)
@@ -110,10 +114,7 @@ done
 helm install kolla/memcached-svc --version $VERSION \
     --namespace kolla --name memcached-svc --set element_name=memcached
 
-helm install kolla/mariadb-svc --version $VERSION \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
-
-helm install kolla/rabbitmq-svc --version $VERSION \
+helm install kolla/rabbitmq-svc --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
 helm install kolla/keystone-admin-svc --version $VERSION \
@@ -150,11 +151,7 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
 helm install kolla/horizon-svc --version $VERSION \
     --namespace kolla --name horizon-svc --set element_name=horizon
 
-helm install kolla/mariadb-init-element-job --version $VERSION \
-    --namespace kolla --name mariadb-init-element-job \
-    --set "$common_vars,element_name=mariadb"
-
-helm install kolla/rabbitmq-init-element-job --version $VERSION \
+helm install kolla/rabbitmq-init-element-job --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element-job \
     --set "$common_vars,element_name=rabbitmq,cookie=67"
 
@@ -165,10 +162,7 @@ for x in mariadb rabbitmq; do
     helm delete $x-init-element-job --purge
 done
 
-helm install kolla/mariadb-statefulset --version $VERSION \
-    --namespace kolla --name mariadb-statefulset --set "$common_vars,element_name=mariadb"
-
-helm install kolla/memcached-deployment --version $VERSION \
+helm install kolla/memcached-deployment --version 3.0.0-1 \
     --set "$common_vars,element_name=memcached" \
     --namespace kolla --name memcached-deployment
 
