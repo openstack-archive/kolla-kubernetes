@@ -20,7 +20,7 @@ metadata:
 {{- else }}
 {{- range $k, $v := .Values.dependencies }}
      {
-       "name": {{ $k | quote }},
+       "name": {{ printf "dependency_%s" $k | upper | quote }},
        "value": {{  include "joinListWithColon" $v | quote }}
      },
 {{- end }}
