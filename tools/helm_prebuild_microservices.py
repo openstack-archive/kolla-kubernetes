@@ -54,9 +54,13 @@ common_create_keystone_admin = [
     'nova-create-keystone-endpoint-internal',
     'nova-create-keystone-endpoint-admin',
     'cinder-create-keystone-service',
+    'cinder-create-keystone-servicev2',
     'cinder-create-keystone-endpoint-public',
     'cinder-create-keystone-endpoint-internal',
-    'cinder-create-keystone-endpoint-admin'
+    'cinder-create-keystone-endpoint-admin',
+    'cinder-create-keystone-endpoint-publicv2',
+    'cinder-create-keystone-endpoint-internalv2',
+    'cinder-create-keystone-endpoint-adminv2'
 ]
 
 
