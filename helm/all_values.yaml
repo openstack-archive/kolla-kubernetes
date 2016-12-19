@@ -407,11 +407,23 @@ cinder-create-keystone-endpoint-admin:
         cinder_admin_service: cinder-api
         cinder_api_port: 8776
 
+cinder-create-keystone-endpoint-adminv2:
+        cinder_admin_service: cinder-api
+        cinder_api_port: 8776
+
 cinder-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         cinder_api_port: 8776
 
+cinder-create-keystone-endpoint-publicv2:
+        kolla_kubernetes_external_vip:
+        cinder_api_port: 8776
+
 cinder-create-keystone-endpoint-internal:
+        cinder_internal_service: cinder-api
+        cinder_api_port: 8776
+
+cinder-create-keystone-endpoint-internalv2:
         cinder_internal_service: cinder-api
         cinder_api_port: 8776
 
