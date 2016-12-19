@@ -2,6 +2,7 @@
 {{- $authURLBuilt := printf "%s://%s:%1.f" .Values.keystone_admin_protocol .Values.keystone_admin_svcname .Values.keystone_admin_port }}
 {{- $authURLFull := .Values.keystone_admin_url | default $authURLBuilt }}
 {{- $postfix := .postfix | default "" }}
+{{- $serviceType := "%s%s" .serviceType $postfix }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,7 +27,7 @@ spec:
           args:
             - |
                 pip install --upgrade python-openstackclient;
-                /usr/bin/openstack endpoint create --region {{ .Values.region | quote }} {{ .serviceType | quote }} {{ .interface | quote }} {{ .endpointURLFull | quote }};
+                /usr/bin/openstack endpoint create --region {{ .Values.region | quote }} {{ $serviceType | quote }} {{ .interface | quote }} {{ .endpointURLFull | quote }};
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
           env:
