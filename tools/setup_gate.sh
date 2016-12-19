@@ -120,6 +120,8 @@ fi
 
 tests/bin/setup_canal.sh
 
+tools/setup_helm.sh
+
 tools/helm_build_all.sh ~/.helm/repository/kolla
 helm repo remove kollabuild
 tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
