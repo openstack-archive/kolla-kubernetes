@@ -57,7 +57,7 @@ spec:
                 },
                 {
                    "name": "COMMAND",
-                   "value": "exit 0"
+                   "value": "echo done..."
                 }
              ],
              "volumeMounts": [
