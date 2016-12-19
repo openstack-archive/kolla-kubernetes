@@ -201,12 +201,13 @@ helm install kolla/neutron-create-keystone-user --debug --version 3.0.0-1 \
 helm install kolla/nova-create-keystone-user --debug --version 3.0.0-1 \
     --namespace kolla --name nova-create-keystone-user
 
-kollakube res create bootstrap \
-    nova-create-keystone-endpoint-public \
-    cinder-create-keystone-endpoint-publicv2
+kollakube res create bootstrap nova-create-keystone-endpoint-public
 
 helm install kolla/cinder-create-keystone-endpoint-public --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+
+helm install kolla/cinder-create-keystone-endpoint-publicv2 --version 3.0.0-1 \
+    --namespace kolla --name cinder-create-keystone-endpoint-publicv2 --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
 
 helm install kolla/glance-create-keystone-endpoint-public --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
@@ -220,9 +221,7 @@ helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap \
-    nova-create-keystone-endpoint-public \
-    cinder-create-keystone-endpoint-publicv2
+kollakube res delete bootstrap nova-create-keystone-endpoint-public
 
 for x in cinder glance neutron nova; do
     helm delete --purge $x-create-keystone-user
@@ -245,15 +244,19 @@ helm install kolla/cinder-manage-db --version 3.0.0-1 \
     --name cinder-manage-db
 
 kollakube res create bootstrap nova-create-keystone-endpoint-internal \
-    cinder-create-keystone-endpoint-internalv2 \
     nova-create-keystone-endpoint-admin \
-    cinder-create-keystone-endpoint-adminv2
 
 helm install kolla/cinder-create-keystone-endpoint-internal --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-endpoint-internal --set "$common_vars"
 
+helm install kolla/cinder-create-keystone-endpoint-internalv2 --version 3.0.0-1 \
+    --namespace kolla --name cinder-create-keystone-endpoint-internalv2 --set "$common_vars"
+
 helm install kolla/cinder-create-keystone-endpoint-admin --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-endpoint-admin --set "$common_vars"
+
+helm install kolla/cinder-create-keystone-endpoint-adminv2 --version 3.0.0-1 \
+    --namespace kolla --name cinder-create-keystone-endpoint-adminv2 --set "$common_vars"
 
 helm install kolla/glance-create-keystone-endpoint-internal --version 3.0.0-1 \
     --namespace kolla --name glance-create-keystone-endpoint-internal --set "$common_vars"
@@ -298,9 +301,7 @@ done
 
 kollakube res delete bootstrap \
     nova-create-keystone-endpoint-internal \
-    cinder-create-keystone-endpoint-internalv2 \
     nova-create-keystone-endpoint-admin \
-    cinder-create-keystone-endpoint-adminv2
 
 for x in glance neutron cinder; do
     helm delete --purge $x-create-keystone-service
@@ -308,6 +309,10 @@ for x in glance neutron cinder; do
     helm delete --purge $x-create-keystone-endpoint-internal
     helm delete --purge $x-create-keystone-endpoint-admin
 done
+
+helm delete --purge cinder-create-keystone-endpoint-publicv2
+helm delete --purge cinder-create-keystone-endpoint-internalv2
+helm delete --purge cinder-create-keystone-endpoint-adminv2
 
 helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
     --set "$common_vars,element_name=cinder" --namespace kolla \
