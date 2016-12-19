@@ -369,7 +369,7 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set "$common_vars,type=network,selector_key=kolla_controller" \
     --namespace kolla --name openvswitch-ovsdb-network &&
-    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    helm install kolla/openvswitch-vswitchd --debug --version 3.0.0-1 \
     --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
     --namespace kolla --name openvswitch-vswitchd-network
 
@@ -380,7 +380,7 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-compute &&
-    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    helm install kolla/openvswitch-vswitchd --debug --version 3.0.0-1 \
     --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
     --namespace kolla --name openvswitch-vswitchd-compute
 
