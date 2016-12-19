@@ -47,7 +47,8 @@ for x in mariadb rabbitmq glance; do
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
 
-kollakube res create svc memcached
+helm install kolla/memcached-svc --version 3.0.0-1 \
+    --namespace kolla --name memcached-svc --set element_name=memcached
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
     --namespace kolla --name mariadb-svc --set element_name=mariadb
