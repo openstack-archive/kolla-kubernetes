@@ -1,0 +1,11 @@
+{{- $resourceName := "nova-create-keystone-endpoint-public" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "compute" }}
+{{- $interface := "public" }}
+{{- $novaPublicEndpointBuilt := printf "http://%s:%1.f/v1/%%(tenant_id)s" .Values.kolla_kubernetes_external_vip .Values.nova_api_port }}
+{{- $endpointURLFull := .Values.nova_public_endpoint | default $novaPublicEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}

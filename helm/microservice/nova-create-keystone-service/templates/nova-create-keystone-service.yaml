@@ -1,0 +1,9 @@
+{{- $resourceName := "nova-create-keystone-service" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "compute" }}
+{{- $description := "Openstack Compute" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "Values" .Values }}
+{{- include "common_create_keystone_service" $env }}
+{{- end }}
