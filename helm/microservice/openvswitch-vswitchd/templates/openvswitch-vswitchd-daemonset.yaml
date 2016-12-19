@@ -54,10 +54,6 @@ spec:
                 {
                    "name": "DEPENDENCY_SOCKET",
                    "value": "/var/run/openvswitch/db.sock"
-                },
-                {
-                   "name": "COMMAND",
-                   "value": "exit 0"
                 }
              ],
              "volumeMounts": [
