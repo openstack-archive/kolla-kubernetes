@@ -53,6 +53,9 @@ common_create_keystone_admin = [
     'cinder-create-keystone-endpoint-public',
     'cinder-create-keystone-endpoint-internal',
     'cinder-create-keystone-endpoint-admin'
+    'cinder-create-keystone-endpoint-publicv2',
+    'cinder-create-keystone-endpoint-internalv2',
+    'cinder-create-keystone-endpoint-adminv2'
 ]
 
 
