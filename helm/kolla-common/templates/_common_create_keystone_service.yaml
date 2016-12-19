@@ -26,7 +26,7 @@ spec:
           args:
             - |
                 pip install --upgrade python-openstackclient;
-                /usr/bin/openstack service create --name {{ .serviceName | quote }} --description {{ .description | quote }} {{ .serviceType }}
+                /usr/bin/openstack service create --name {{ printf "%s%s" .serviceName .postfix | quote }} --description {{ .description | quote }} {{ printf "%s%s" .serviceType .postfix | quote }}
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
           env:
