@@ -1,7 +1,7 @@
 .. development_environment:
 
 ==========================================
-Kolla Kubernetes Dev Environment
+Kolla Kubernetes Development Environment
 ==========================================
 
 Install Vagrant and Ansible
@@ -270,18 +270,16 @@ Move into the ```halcyon-vagrant-kubernetes``` directory and run:
 
 .. end
 
-You can then setup Halcyon Vagrant for Kolla. Currently, it is recommended to use
-kubernetes v1.4.6, until https://github.com/kubernetes/helm/issues/1589 is
-fixed. You can select either 'centos' or 'ubuntu' as a guest operating system
-though currently Ubuntu is only supported by the Vagrant VirtualBox and OpenStack
-providers.
+You can then setup Halcyon Vagrant for Kolla. You can select either ``centos``
+or ``ubuntu`` as a guest operating system though currently Ubuntu is only
+supported by the Vagrant VirtualBox and OpenStack providers.
 
 .. path .
 .. code-block:: console
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v1.4.6 \
+        --k8s-version v1.5.1 \
         --guest-os centos
 
 .. end
@@ -376,7 +374,8 @@ Setting up Kubernetes for Kolla-Kubernetes deployment
 =====================================================
 
 To set the cluster up for developing Kolla-Kubernetes: you will most likely
-want to run the following command:
+want to run the following commands to label the nodes for running OpenStack
+services:
 
 .. path .
 .. code-block:: console
@@ -389,5 +388,3 @@ want to run the following command:
 .. end
 
 This will mark all the workers as being available for both storage and API pods.
-
-
