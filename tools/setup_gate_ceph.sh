@@ -152,5 +152,7 @@ fi
 kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
-tests/bin/cleanup_tests.sh
+if [ "x$4" != "xceph-reboot" ]; then
+    tests/bin/cleanup_tests.sh
+fi
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
