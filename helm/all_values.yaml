@@ -179,6 +179,9 @@ rabbitmq-svc:
         rabbitmq_port: 5672
         rabbitmq_management_port: 15672
 
+memcached-svc:
+        memcached_port: 11211
+
 memcached:
         memcached_replicas: 1
         memcached_port: 11211
