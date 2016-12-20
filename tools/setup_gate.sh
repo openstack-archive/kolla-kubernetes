@@ -2,7 +2,11 @@
 
 [ "x$4" == "xiscsi" ] && echo "iscsi support pending..." && exit 0
 
-trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
+if [ "x$4" == "xceph-reboot" ]; then
+    exec tests/bin/gate_reboot_master.sh `pwd` "$WORKSPACE/logs"
+fi
+
+trap 'tests/bin/gate_capture_logs.sh "$?"; kill $(jobs -p)' ERR
 
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
@@ -49,7 +53,7 @@ sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 
 if [ -f /etc/redhat-release ]; then
-    sudo yum install -y crudini jq sshpass
+    sudo yum install -y crudini jq sshpass gcc python-devel openssl-devel libffi-devel
 else
     sudo apt-get update
     sudo apt-get install -y crudini jq sshpass
@@ -168,3 +172,4 @@ else
 
     tests/bin/basic_tests.sh
 fi
+kill $(jobs -p)
