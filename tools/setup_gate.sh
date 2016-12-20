@@ -2,6 +2,11 @@
 
 [ "x$4" == "xiscsi" ] && echo "iscsi support pending..." && exit 0
 
+#if [ "x$4" == "xceph-reboot" ]; then
+if [ "x$4" == "xceph-multi" ]; then
+    exec tests/bin/gate_reboot_master.sh `pwd` "$WORKSPACE/logs"
+fi
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
