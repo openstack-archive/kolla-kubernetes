@@ -1,7 +1,7 @@
 .. development_environment:
 
 ==========================================
-Kolla Kubernetes Dev Environment
+Kolla Kubernetes Development Environment
 ==========================================
 
 Install Vagrant and Ansible
@@ -90,10 +90,7 @@ Now you can setup Libvirt for use without requiring root privileges:
 
 .. end
 
-Once both Libvirt and Vagrant have been prepared, you should now start and enable Libvirt:
-
-.. path .
-.. code-block:: console
+Once both Libvirt and Vagrant have been prepared, you shoul
 
     sudo systemctl start libvirtd
     sudo systemctl enable libvirtd
@@ -270,9 +267,7 @@ Move into the ```halcyon-vagrant-kubernetes``` directory and run:
 
 .. end
 
-You can then setup Halcyon Vagrant for Kolla. Currently, it is recommended to use
-kubernetes v1.4.6, until https://github.com/kubernetes/helm/issues/1589 is
-fixed. You can select either 'centos' or 'ubuntu' as a guest operating system
+You can then setup Halcyon Vagrant for Kolla. You can select either ``centos`` or ``ubuntu`` as a guest operating system
 though currently Ubuntu is only supported by the Vagrant VirtualBox and OpenStack
 providers.
 
@@ -281,7 +276,7 @@ providers.
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v1.4.6 \
+        --k8s-version v1.5.1 \
         --guest-os centos
 
 .. end
@@ -376,7 +371,7 @@ Setting up Kubernetes for Kolla-Kubernetes deployment
 =====================================================
 
 To set the cluster up for developing Kolla-Kubernetes: you will most likely
-want to run the following command:
+want to run the following commands:
 
 .. path .
 .. code-block:: console
@@ -389,5 +384,3 @@ want to run the following command:
 .. end
 
 This will mark all the workers as being available for both storage and API pods.
-
-
