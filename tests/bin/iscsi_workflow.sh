@@ -84,8 +84,10 @@ helm install kolla/nova-metadata-svc --version $VERSION \
 helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc --set element_name=nova
 
-helm install kolla/horizon-svc --version $VERSION \
-    --namespace kolla --name horizon-svc --set element_name=horizon
+helm install kolla/horizon-frontend-svc --version $VERSION \
+    --namespace kolla --name horizon-frontend-svc
+helm install kolla/horizon-backend-svc --version $VERSION \
+    --namespace kolla --name horizon-backend-svc
 
 helm install kolla/mariadb-init-element-job --version $VERSION \
     --namespace kolla --name mariadb-init-element-job \
@@ -326,9 +328,13 @@ for x in nova-conductor nova-scheduler nova-consoleauth; do
       --namespace kolla --name $x
 done
 
-helm install kolla/horizon-deployment --version $VERSION \
-    --set "$common_vars,element_name=horizon" \
-    --namespace kolla --name horizon-deployment
+helm install kolla/horizon-frontenddeployment --version $VERSION \
+    --set "$common_vars" \
+    --namespace kolla --name horizon-frontend-deployment
+
+helm install kolla/horizon-backend-deployment --version $VERSION \
+    --set "$common_vars" \
+    --namespace kolla --name horizon-backend-deployment
 
 helm install kolla/neutron-server-deployment --version $VERSION \
     --set "$common_vars" \

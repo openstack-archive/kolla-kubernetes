@@ -61,6 +61,7 @@ kubectl get svc -o json --all-namespaces | jq -r \
     kubectl describe svc $NAME --namespace $NAMESPACE > \
         $WORKSPACE/logs/svc/$NAMESPACE-$NAME.txt
 done
+ls -l /dev/loop* > $WORKSPACE/logs/loop.txt
 sudo iptables-save > $WORKSPACE/logs/iptables.txt
 sudo ip a > $WORKSPACE/logs/ip.txt
 sudo route -n > $WORKSPACE/logs/routes.txt
