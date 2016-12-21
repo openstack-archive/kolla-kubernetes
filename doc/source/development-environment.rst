@@ -149,7 +149,9 @@ Then install the dependencies for vagrant-libvirt and ensure git-review is prese
                  zlib1g-dev \
                  ruby-dev \
                  git \
-                 git-review
+                 git-review \
+                 g++ \
+                 qemu-utils
 
 .. end
 
