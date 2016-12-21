@@ -1,0 +1,11 @@
+{{- $resourceName := "nova-create-keystone-endpoint-admin" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "compute" }}
+{{- $interface := "admin" }}
+{{- $novaAdminEndpointBuilt := printf "http://%s:%1.f/v2/%%(tenant_id)s" .Values.nova_admin_service .Values.nova_api_port }}
+{{- $endpointURLFull := .Values.nova_admin_endpoint | default $novaAdminEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
