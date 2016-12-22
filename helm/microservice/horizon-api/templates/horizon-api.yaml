@@ -17,6 +17,10 @@ spec:
     metadata:
       labels:
         service: {{ .Values.element_name }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" | indent 10 }}
+        ]'
     spec:
       nodeSelector:
         {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}

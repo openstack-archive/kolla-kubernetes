@@ -20,6 +20,9 @@ spec:
       labels:
         component: neutron
         system: metadata-agent-{{ $restype }}
+{{- include "init_container_tail" $env | indent 4 }}
+{{- include "common_dependency_container_single" | indent 10 }}
+{{- include "init_container_tail" | indent 4 }}
     spec:
       hostNetwork: True
       nodeSelector:
