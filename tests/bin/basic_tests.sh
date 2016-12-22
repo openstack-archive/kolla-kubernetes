@@ -139,12 +139,18 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
+
+# Collecting cinder-volume debug logs
+cinder list >> $WORKSPACE/logs/cinder_list_final.txt
+
+sudo find  /var/lib/kubelet/pods -type f | grep kolla-logs | grep '\.log$' | xargs -l sudo cat >> $WORKSPACE/logs/kolla-openstack.logs
 
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
