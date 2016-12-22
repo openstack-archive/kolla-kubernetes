@@ -402,6 +402,42 @@ helm install kolla/nova-compute --version 3.0.0-1 \
     --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
     --namespace kolla --name nova-compute
 
+cat >> /tmp/iscsi-tgtd-configmap.yaml <<"EOF"
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "iscsid -d 8 -f --pid=/run/iscsid.pid",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  name: iscsid
+  namespace: kolla
+---
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "tgtd -d 1 -f --iscsi portal=0.0.0.0:3260",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  name: tgtd
+  namespace: kolla
+EOF
+
+kubectl create -f /tmp/iscsi-tgtd-configmap.yaml
+
+helm install kolla/iscsid --version 3.0.0-1 --debug\
+    --set "$common_vars,element_name=iscsid" \
+    --namespace kolla --name iscsid
+
+helm install kolla/tgtd --version 3.0.0-1 --debug\
+    --set "$common_vars,element_name=tgtd" \
+    --namespace kolla --name tgtd
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
