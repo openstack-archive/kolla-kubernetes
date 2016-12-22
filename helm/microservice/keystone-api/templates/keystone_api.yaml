@@ -17,6 +17,7 @@
 {{- $haproxy := false }}
 {{- define "keystone_initcontainer" }}
 pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 2 }}
   {
      "name": "initialize-keystone-logs",
      "image": "{{ .imageFull }}",
