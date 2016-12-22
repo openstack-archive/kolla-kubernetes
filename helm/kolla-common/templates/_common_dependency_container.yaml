@@ -14,6 +14,11 @@ metadata:
    "name": "dependencies",
    "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
    "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+{{- if .extraDepVolumeMounts }}
+   "volumeMounts": [
+{{- include .extraDepVolumeMounts . | indent 6 }}
+    ],
+{{- end }}
    "env": [
 {{- if .depsOverride }}
 {{- include "depsOverride" . }}

@@ -20,8 +20,8 @@ spec:
         service: {{ .Values.element_name }}
         type: {{ $serviceType }}
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-cinder-volume",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
