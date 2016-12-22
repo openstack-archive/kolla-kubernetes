@@ -78,6 +78,17 @@ def _isdir(path, entry):
     return os.path.isdir(os.path.join(path, entry))
 
 
+def merge_dict(a, b):
+    for key in b:
+        if key not in a:
+            a[key] = b[key]
+        else:
+            if isinstance(b[key], dict):
+                merge_dict(a[key], b[key])
+            else:
+                a[key] = b[key]
+
+
 def main():
     path = os.path.abspath(os.path.dirname(sys.argv[0]))
 
@@ -96,15 +107,14 @@ def main():
         helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
         pkg_values = copy.deepcopy(values['common'])
         if package in common_create_keystone_admin:
-            pkg_values.update(values['common-create-keystone-admin'])
+            key = 'common-create-keystone-admin'
+            pkg_values = merge_dict(pkg_values, values[key])
         if package in pod_http_termination:
-            pkg_values.update(values['pod-http-termination'])
+            pkg_values = merge_dict(pkg_values, values['pod-http-termination'])
         if package in stateful_services:
-            pkg_values.update(values['stateful-service'])
-        try:
-            pkg_values.update(values[package])
-        except KeyError:
-            pass
+            pkg_values = merge_dict(pkg_values, values['stateful-service'])
+        if package in values:
+            pkg_values = merge_dict(pkg_values, values[package])
         f = open(os.path.join(microdir, package, "values.yaml"), "w")
         f.write("# This file is generated. Please edit all_values.yaml\n")
         f.write("# and rerun tools/helm_prebuild.py\n")
