@@ -139,12 +139,21 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
+
+# Collecting cinder-volume debug logs 
+cinder list >> $WORKSPACE/logs/cinder_list_final.txt
+cinder_volume=$(sudo docker ps -a | grep cinder-volume\: | grep kolla_start | awk '{print $1}')
+cinder_log=$(sudo docker inspect $cinder_volume | grep "Source" | grep kolla-logs | awk '{print $2}')
+cinder_log_size=${#cinder_log}
+cinder_log_path=${cinder_log:1:cinder_log_size-3}
+sudo cat $cinder_log_path/cinder/cinder-volume.log >> $WORKSPACE/logs/cinder-volume-final.log
 
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
