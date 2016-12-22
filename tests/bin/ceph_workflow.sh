@@ -402,6 +402,14 @@ helm install kolla/nova-compute --version 3.0.0-1 \
     --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
     --namespace kolla --name nova-compute
 
+helm install kolla/iscsid --version 3.0.0-1 --dry-run --debug\
+    --set "$common_vars,element_name=iscsid" \
+    --namespace kolla --name iscsid
+
+helm install kolla/tgtd --version 3.0.0-1 --dry-run --debug\
+    --set "$common_vars,element_name=tgtd" \
+    --namespace kolla --name tgtd
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
