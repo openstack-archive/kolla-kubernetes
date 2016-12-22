@@ -23,8 +23,8 @@ spec:
         component: {{ $resourceName }}
         system: {{ .Values.element_name }}
       annotations:
-        pod.alpha.kubernetes.io/initialized: "true"
-        pod.alpha.kubernetes.io/init-containers: '[
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-config",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
