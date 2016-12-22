@@ -402,7 +402,9 @@ helm install kolla/nova-compute --version 3.0.0-1 \
     --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
     --namespace kolla --name nova-compute
 
-#kollakube res create pod keepalived
+#helm install kolla/keepalived --version 3.0.0-1 \
+#    --set "$common_vars,element_name=keepalived,enable_kube_logger=false" \
+#    --namespace kolla --name keepalived
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
