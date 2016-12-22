@@ -1,10 +1,29 @@
-{{- $memcachedImageBuilt := printf "%s/%s/%s-%s-memcached:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.memcached_image_tag | default .Values.kolla_tag }}
-{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
 {{- $resourceName := "memcached" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- $serviceName := "memcached" }}
+{{- $serviceType := "deployment" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := $serviceType }}
+{{- $elementNameValues := index .Values.global.kolla $elementName | default dict }}
+{{- $elementTypeValues := index $elementNameValues $elementType | default dict }}
+{{- $elementAllValues := index $elementNameValues "all" | default dict }}
+{{- $serviceNameValues := index .Values.global.kolla.all $serviceName | default dict }}
+{{- $serviceTypeValues := index $serviceNameValues $elementType | default dict }}
+{{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
+{{- $localVals := dict }}
+{{- if and (hasKey $serviceAllValues "enabled") (ne (typeOf $serviceAllValues.enabled) "<nil>") }}{{- $_ := set $localVals "enabled" $serviceAllValues.enabled }} {{- end }}
+{{- if and (hasKey $serviceTypeValues "enabled") (ne (typeOf $serviceTypeValues.enabled) "<nil>") }}{{- $_ := set $localVals "enabled" $serviceTypeValues.enabled }} {{- end }}
+{{- if and (hasKey $elementAllValues "enabled") (ne (typeOf $elementAllValues.enabled) "<nil>") }}{{- $_ := set $localVals "enabled" $elementAllValues.enabled }} {{- end }}
+{{- if and (hasKey $elementTypeValues "enabled") (ne (typeOf $elementTypeValues.enabled) "<nil>") }}{{- $_ := set $localVals "enabled" $elementTypeValues.enabled }} {{- end }}
+{{- if and (hasKey .Values "enabled") (ne (typeOf .Values.enabled) "<nil>") }}{{- $_ := set $localVals "enabled" .Values.enabled }} {{- end }}
+{{- $enabled := $localVals.enabled }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $memcachedImageBuilt := printf "%s-memcached:%s" $imagePrefix .Values.memcached_image_tag | default .Values.kolla_tag }}
+{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
+{{- if $enabled }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,7 +33,7 @@ spec:
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ $elementName }}
     spec:
       nodeSelector:
         {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
@@ -37,4 +56,5 @@ spec:
         - name: memcached-config
           configMap:
             name: {{ .Values.element_name }}
+{{- end }}
 {{- end }}
