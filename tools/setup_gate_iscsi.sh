@@ -10,6 +10,7 @@ tests/bin/fix_gate_iptables.sh
 
 if [ "x$2" == "xubuntu" ]; then
     sudo apt-get update
+    sudo apt-get install lvm2
     sudo apt-get remove -y open-iscsi
     sudo apt-get install -y bridge-utils
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
@@ -18,6 +19,7 @@ else
     sudo yum clean all
     sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils
+    sudo yum install lvm2
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
 fi
@@ -59,6 +61,7 @@ pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
 pip install "python-neutronclient"
+pip install "python-cinderclient"
 pip install -r requirements.txt
 pip install pyyaml
 popd
@@ -104,5 +107,17 @@ tests/bin/iscsi_workflow.sh "$4" "$2"
 . ~/keystonerc_admin
 
 kubectl get pods --namespace=kolla
+
+cinder endpoints >> $WORKSPACE/logs/cinder_endpoints.txt
+
+cinder list >> $WORKSPACE/logs/cinder_list.txt
+
+cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
+
+sudo pvs >> $WORKSPACE/logs/pvs.txt
+
+sudo vgs >> $WORKSPACE/logs/vgs.txt
+
+sudo lvs >> $WORKSPACE/logs/lvs.txt
 
 tests/bin/basic_tests.sh
