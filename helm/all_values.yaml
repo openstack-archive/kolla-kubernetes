@@ -336,7 +336,7 @@ nova-api-svc:
                         all:
                             port: 8774
                             node_port: 8774
-                            port_external: false
+                            port_external: true
                             node_port_enabled: false
 
 nova-metadata-svc:
@@ -375,11 +375,12 @@ nova-api-create-db-job:
         global:
             kolla:
                 nova:
-                    all:
-                        database_host: "mariadb"
-                        database_port: 3306
-                        database_name: "nova_api"
-                        database_user: "nova_api"
+                    api:
+                        all:
+                            database_host: "mariadb"
+                            database_port: 3306
+                            database_name: "nova_api"
+                            database_user: "nova_api"
 
 nova-api-deployment:
         global:

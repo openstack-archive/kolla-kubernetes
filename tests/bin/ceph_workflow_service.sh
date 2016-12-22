@@ -80,17 +80,6 @@ helm install kolla/rabbitmq --version $VERSION \
     --namespace kolla --name rabbitmq --set "$common_vars" \
     --values <(helm_entrypoint_general $1)
 
-helm install kolla/nova-api-svc --version $VERSION \
-    --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,port_external=true,external_vip=$IP"
-
-helm install kolla/nova-metadata-svc --version $VERSION \
-    --namespace kolla --name nova-metadata-svc \
-    --set "element_name=nova"
-
-helm install kolla/nova-novncproxy-svc --version $VERSION \
-    --namespace kolla --name nova-novncproxy-svc --set element_name=nova
-
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -98,47 +87,11 @@ helm install kolla/keystone --version $VERSION \
     --namespace kolla --name keystone --set "$common_vars,element_name=keystone" \
     --values <(helm_entrypoint_general $1)
 
+$DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
-
-helm install kolla/nova-create-keystone-user-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-user --set "$common_vars"
-
-kollakube res create bootstrap \
-    nova-create-keystone-endpoint-public
-
-$DIR/tools/wait_for_pods.sh kolla
-
-kollakube res delete bootstrap \
-    nova-create-keystone-endpoint-public
-
-for x in nova; do
-    helm delete --purge $x-create-keystone-user
-done
-
-
-kollakube res create bootstrap nova-create-keystone-endpoint-internal \
-    nova-create-keystone-endpoint-admin
-
-for x in nova nova-api; do
-    helm install kolla/$x-create-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-create-db
-done
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
-for x in nova-api; do
-    helm install kolla/$x-manage-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-manage-db
-done
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
@@ -148,18 +101,6 @@ $DIR/tests/bin/endpoint_test.sh
 
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
-
-for x in nova nova-api; do
-    helm delete --purge $x-create-db
-done
-
-for x in nova-api; do
-    helm delete --purge $x-manage-db
-done
-
-kollakube res delete bootstrap \
-    nova-create-keystone-endpoint-internal \
-    nova-create-keystone-endpoint-admin \
 
 helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
     --set "$common_vars,element_name=cinder" --namespace kolla \
@@ -192,20 +133,9 @@ $DIR/tools/wait_for_pods.sh kolla
 
 helm ls
 
-for x in nova-api nova-novncproxy; do
-    helm install kolla/$x-deployment --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
-done
-
-for x in nova-conductor nova-scheduler nova-consoleauth; do
-    helm install kolla/$x-statefulset --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
-done
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+helm install kolla/nova-control --version $VERSION  --namespace kolla \
+    --name nova-control --set "$common_vars,element_name=nova" \
+    --values <(helm_entrypoint_general $1)
 
 helm install kolla/nova-compute --version $VERSION  --namespace kolla \
     --name nova-compute --set "$common_vars,element_name=nova" \
