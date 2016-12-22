@@ -418,3 +418,8 @@ tgtd:
         selector_key: kolla_compute
         selector_value: "true"
         tgtd_image_tag: 3.0.1
+
+keepalived:
+        image_tag: 3.0.1
+        kolla_kubernetes_external_vip: 10.57.120.254
+        api_interface: eth0
