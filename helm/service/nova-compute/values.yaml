@@ -1,0 +1,19 @@
+global:
+    kolla:
+        nova:
+            compute:
+                daemonset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-metadata
+                        - nova-api
+                        socket:
+                        - /var/run/libvirt/libvirt-sock
+            libvirt:
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-metadata
+                        - nova-api
