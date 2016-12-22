@@ -6,7 +6,7 @@
 {{- $serviceName := "nova" }}
 {{- $serviceType := "libvirt" }}
 {{- $privileged := true }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:

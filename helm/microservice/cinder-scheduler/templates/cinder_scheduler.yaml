@@ -6,6 +6,6 @@
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "scheduler" }}
 {{- $privileged := false }}
-{{- with $env := dict "imageFull" $imageFull "resourceName" $resourceName "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+{{- with $env := dict "imageFull" $imageFull "resourceName" $resourceName "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
 {{- include "common_statefulset" $env }}
 {{- end }}

@@ -3,6 +3,6 @@
 {{- $resourceName := "keystone" }}
 {{- $serviceName := "keystone" }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}

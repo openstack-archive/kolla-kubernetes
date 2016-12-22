@@ -10,7 +10,7 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release }}
 
 {{- include "common_create_user_job" $env }}
 {{- end }}

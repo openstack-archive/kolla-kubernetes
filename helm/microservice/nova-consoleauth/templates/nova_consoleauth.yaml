@@ -6,6 +6,6 @@
 {{- $serviceName := "nova" }}
 {{- $serviceType := "consoleauth" }}
 {{- $privileged := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
 {{- include "common_statefulset" $env }}
 {{- end }}

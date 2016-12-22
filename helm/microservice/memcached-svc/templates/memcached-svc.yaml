@@ -1,6 +1,6 @@
 {{- $elementPort := .Values.memcached_port | default 11211 }}
 {{- $elementName := .Values.element_name | default "memcached" }}
 {{- $elementService := .Values.element_name | default "memcached" }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release }}
 {{- include "common_svc" $env }}
 {{- end }}

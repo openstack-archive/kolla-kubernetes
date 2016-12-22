@@ -6,7 +6,7 @@
 {{- $resourceName := printf "neutron-openvswitch-agent-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:

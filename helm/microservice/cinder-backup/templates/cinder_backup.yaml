@@ -6,7 +6,7 @@
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "backup" }}
 {{- $privileged := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
