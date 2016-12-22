@@ -1,10 +1,18 @@
-{{- $memcachedImageBuilt := printf "%s/%s/%s-%s-memcached:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.memcached_image_tag | default .Values.kolla_tag }}
-{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
 {{- $resourceName := "memcached" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- $serviceName := "memcached" }}
+{{- $serviceType := "deployment" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values }}
+{{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" . ) }}
+{{- $enabled := ne $enabledStr "false" }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $memcachedImageBuilt := printf "%s-memcached:%s" $imagePrefix .Values.memcached_image_tag | default .Values.kolla_tag }}
+{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
+{{- if $enabled }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ $elementName }}
     spec:
       nodeSelector:
         {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
@@ -37,4 +45,5 @@ spec:
         - name: memcached-config
           configMap:
             name: {{ .Values.element_name }}
+{{- end }}
 {{- end }}
