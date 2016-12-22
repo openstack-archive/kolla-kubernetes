@@ -1,0 +1,7 @@
+dependencies:
+  - name: nova-compute-daemonset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-libvirt-daemonset
+    repository: http://localhost:10191
+    version: 0.4.0-1

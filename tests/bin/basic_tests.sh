@@ -101,6 +101,9 @@ wait_for_cinder test creating
 
 openstack server add volume test test
 
+wait_for_cinder test available
+wait_for_cinder test attaching
+
 FIP=$(openstack floating ip create external -f value -c floating_ip_address)
 FIP2=$(openstack floating ip create external -f value -c floating_ip_address)
 
