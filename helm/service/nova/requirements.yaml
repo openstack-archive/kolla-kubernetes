@@ -1,0 +1,55 @@
+dependencies:
+  - name: nova-api-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-metadata-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-novncproxy-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-keystone-service-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-keystone-user-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-keystone-endpoint-admin-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-keystone-endpoint-internal-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-keystone-endpoint-public-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-create-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-api-create-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-api-manage-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-api-deployment
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-conductor-statefulset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-scheduler-statefulset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-consoleauth-statefulset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-novncproxy-deployment
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-compute-daemonset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-libvirt-daemonset
+    repository: http://localhost:10191
+    version: 0.4.0-1

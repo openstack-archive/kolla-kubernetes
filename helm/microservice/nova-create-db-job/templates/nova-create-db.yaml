@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.nova.create_db.job:global.kolla.nova.create_db.all:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.nova.create_db.job:global.kolla.nova.create_db.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $resourceName := "nova" }}
 {{- $serviceName := "nova" }}
 {{- $podTypeBootstrap := true }}
