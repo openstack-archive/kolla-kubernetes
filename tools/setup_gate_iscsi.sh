@@ -59,6 +59,7 @@ pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
 pip install "python-neutronclient"
+pip install "python-cinderclient"
 pip install -r requirements.txt
 pip install pyyaml
 popd
@@ -104,5 +105,21 @@ tests/bin/iscsi_workflow.sh "$4" "$2"
 . ~/keystonerc_admin
 
 kubectl get pods --namespace=kolla
+
+cinder endpoints >> $WORKSPACE/logs/cinder_endpoints.txt
+
+cinder list >> $WORKSPACE/logs/cinder_list.txt
+
+cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
+
+pvs >> $WORKSPACE/logs/pvs.txt
+
+vgs >> $WORKSPACE/logs/vgs.txt
+
+lvs >> $WORKSPACE/logs/lvs.txt
+
+ip a >> $WORKSPACE/logs/ips.txt
+
+docker ps | grep cinder-volume | awk '{print "docker exec -tu root "$1" cat /etc/cinder/cinder.conf"}' | sh -l >> $WORKSPACE/logs/cinder_config.txt
 
 tests/bin/basic_tests.sh

@@ -1,5 +1,10 @@
 #!/bin/bash -xe
 
+function lvmbackend_values {
+    echo "lvm_backends:"
+    echo "  - '172.17.0.1': 'cinder-volumes'"
+}
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
@@ -283,9 +288,9 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-#helm install kolla/cinder-volume-lvm --version 3.0.0-1 \
-#    --set "$common_vars,element_name=cinder" --namespace kolla \
-#    --name cinder-volume-lvm
+helm install kolla/cinder-volume-lvm --debug --version 3.0.0-1 \
+    --set "$common_vars,element_name=cinder-volume" --namespace kolla \
+    --name cinder-volume-lvm --values <(lvmbackend_values)
 
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
