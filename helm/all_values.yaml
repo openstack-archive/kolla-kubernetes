@@ -389,3 +389,10 @@ cinder-create-keystone-endpoint-public:
 cinder-create-keystone-endpoint-internal:
         cinder_internal_service: cinder-api
         cinder_api_port: 8776
+
+cinder-volume-lvm:
+        image_tag: 3.0.1
+        storage_interface: "eth0"
+        lvm_backends:
+              - 10.57.120.14: "cinder-volumes"
+              - 10.57.120.13: "local-volumes"
