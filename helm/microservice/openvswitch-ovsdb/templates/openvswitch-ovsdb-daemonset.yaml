@@ -20,6 +20,7 @@ spec:
         system: openvswitch-db-{{ $restype }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-ovs-db",
              "image": "{{ $openvswitchDBFull }}",
