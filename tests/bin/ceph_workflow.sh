@@ -412,7 +412,9 @@ helm install kolla/tgtd --version 3.0.0-1 --debug\
     --set "$common_vars,element_name=tgtd" \
     --namespace kolla --name tgtd
 
-#kollakube res create pod keepalived
+#helm install kolla/keepalived --version 3.0.0-1 \
+#    --set "$common_vars,element_name=keepalived,enable_kube_logger=false" \
+#    --namespace kolla --name keepalived
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
