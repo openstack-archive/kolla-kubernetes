@@ -1,0 +1,103 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-tgtd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.tgtd_image_tag | default .Values.kolla_tag }}
+{{- $imageFull := .Values.tgtd_image_full | default $imageBuilt }}
+{{- $resourceName := "tgtd" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.element_name }}
+  labels:
+    component: tgtd
+    system: tgtd
+spec:
+  template:
+    metadata:
+      labels:
+        component: tgtd
+        system: tgtd
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-tgtd",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  STORAGE_INTERFACE={{ .Values.storage_interface }};
+                  F=/var/lib/kolla-kubernetes/tgtd/storage_interface;
+                  [ -f $F ] && STORAGE_INTERFACE=$(<$F);
+                  storage_ip=$(ip addr list \"$STORAGE_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                  jq ''.command = \"tgtd -d 1 -f --iscsi portal=''$storage_ip'':3260\"'' /srv/configmap/..data/config.json > /srv/pod-main-config/config.json; "],
+             "volumeMounts": [
+                {
+                   "name": "tgtd-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $imageFull }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+              readOnly: true
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/lib/cinder
+              name: cinder-volumes
+            - mountPath: /etc/iscsi
+              name: iscsi-info
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: tgtd-configmap
+          configMap:
+            name: {{ .Values.element_name }}
+        - name: cinder-volumes
+          hostPath:
+            path: /var/lib/cinder
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: iscsi-info
+          hostPath:
+            path: /etc/iscsi
+{{- end }}
