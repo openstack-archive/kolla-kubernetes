@@ -1,0 +1,107 @@
+global:
+    kolla:
+        nova:
+            api:
+                create_db:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            service:
+                            - mariadb
+                manage_db:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            jobs:
+                            - nova-api-create-db
+                            service:
+                            - mariadb
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        jobs:
+                        - nova-api-create-db
+                        - nova-api-manage-db
+                        - nova-create-keystone-endpoint-public
+                        - nova-create-keystone-endpoint-internal
+                        - nova-create-keystone-endpoint-admin
+                        service:
+                        - mariadb
+                        - keystone-admin
+                        - nova-api
+            create_db:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - mariadb
+            create_keystone_service:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - keystone-admin
+            create_keystone_user:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        jobs:
+                        - nova-create-keystone-service
+                        service:
+                        - keystone-admin
+            create_keystone_endpoint:
+                admin:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            jobs:
+                            - nova-create-keystone-service
+                            - nova-create-keystone-user
+                            service:
+                            - keystone-admin
+                internal:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            jobs:
+                            - nova-create-keystone-service
+                            - nova-create-keystone-user
+                            - nova-create-keystone-endpoint-admin
+                            service:
+                            - keystone-admin
+                public:
+                    job:
+                        kubernetes_entrypoint: true
+                        dependencies:
+                            jobs:
+                            - nova-create-keystone-service
+                            - nova-create-keystone-user
+                            - nova-create-keystone-endpoint-admin
+                            - nova-create-keystone-endpoint-internal
+                            service:
+                            - keystone-admin
+            conductor:
+                statefulset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-api
+            scheduler:
+                statefulset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-api
+            consoleauth:
+                statefulset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-api
+            novncproxy:
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-novncproxy
+                        - nova-api
