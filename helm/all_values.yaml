@@ -389,3 +389,13 @@ cinder-create-keystone-endpoint-public:
 cinder-create-keystone-endpoint-internal:
         cinder_internal_service: cinder-api
         cinder_api_port: 8776
+
+iscsid:
+        selector_key: kolla_compute
+        selector_value: "true"
+        iscsid_image_tag: 3.0.1
+
+tgtd:
+        selector_key: kolla_compute
+        selector_value: "true"
+        tgtd_image_tag: 3.0.1
