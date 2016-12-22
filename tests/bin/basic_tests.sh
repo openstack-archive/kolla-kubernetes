@@ -54,6 +54,15 @@ function wait_for_cinder {
     done
 }
 
+function log_collector {
+    process_source=$1
+    container_id=$(sudo docker ps -a | grep $process_source\: | grep kolla_start | awk '{print $1}')
+    container_log=$(sudo docker inspect $container_id | grep "Source" | grep kolla-logs | awk '{print $2}')
+    container_log_size=${#container_log}
+    container_log_path=${container_log:1:container_log_size-3}
+    sudo cat $container_log_path/*/*.log >> $WORKSPACE/logs/$process_source-final.log
+}
+
 curl -o cirros.qcow2 \
     http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 echo testing cluster glance-api
@@ -139,12 +148,22 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
+
+
+# Collecting cinder-volume debug logs
+cinder list >> $WORKSPACE/logs/cinder_list_final.txt
+
+log_collector "cinder-volume"
+log_collector "nova-api"
+log_collector "nova-compute"
+log_collector "cinder-api"
 
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
