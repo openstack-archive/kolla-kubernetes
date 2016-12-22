@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    nova-control service level package using kubernetes entrypoint.
