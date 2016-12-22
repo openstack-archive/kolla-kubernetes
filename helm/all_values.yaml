@@ -176,7 +176,7 @@ rabbitmq-pod:
         rabbitmq_management_port: 15672
         rabbitmq_image_tag: 3.0.1
         dependencies:
-            DEPENDENCY_JOBS:
+            jobs:
               - rabbitmq-init-element
 
 rabbitmq-pv:
