@@ -1,0 +1,92 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-iscsid:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.iscsid_image_tag | default .Values.kolla_tag }}
+{{- $imageFull := .Values.iscsi_image_full | default $imageBuilt }}
+{{- $resourceName := "iscsid" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.element_name }}
+  labels:
+    component: iscsid
+    system: iscsid
+spec:
+  template:
+    metadata:
+      labels:
+        component: iscsid
+        system: iscsid
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-iscsid",
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "command": [
+                 "sh",
+                 "-ce",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
+             "volumeMounts": [
+                {
+                   "name": "iscsid-configmap",
+                   "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - image: "{{ $imageFull }}"
+          name: main
+          securityContext:
+            privileged: true
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ .Values.container_config_directory }}
+              name: pod-main-config
+              readOnly: true
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /etc/iscsi
+              name: iscsi-info
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: iscsid-configmap
+          configMap:
+            name: {{ .Values.element_name }}
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: iscsi-info
+          hostPath:
+            path: /etc/iscsi
+{{- end }}
