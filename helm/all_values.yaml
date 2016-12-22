@@ -424,3 +424,8 @@ tgtd:
         selector_key: kolla_compute
         selector_value: "true"
         tgtd_image_tag: 3.0.1
+
+cinder-volume-lvm:
+        image_tag: 3.0.1
+        storage_interface: "eth0"
+        lvm_backends: []

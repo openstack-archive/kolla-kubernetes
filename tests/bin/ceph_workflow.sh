@@ -329,6 +329,10 @@ helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
     --set "$common_vars,element_name=cinder" --namespace kolla \
     --name cinder-volume-ceph
 
+helm install kolla/cinder-volume-lvm --dry-run --debug --version 3.0.0-1 \
+    --set "$common_vars,element_name=cinder" --namespace kolla \
+    --name cinder-volume-lvm
+
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
     --name cinder-api

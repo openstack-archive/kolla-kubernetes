@@ -5,14 +5,12 @@ df -h
 dd if=/dev/zero of=/data/kolla/cinder-volumes.img bs=5M count=2048
 LOOP=$(losetup -f)
 losetup $LOOP /data/kolla/cinder-volumes.img
-parted $LOOP mklabel gpt
-parted $LOOP mkpart 1 0% 100%
-parted $LOOP set 1 lvm on
+parted -s $LOOP mklabel gpt
+parted -s $LOOP mkpart 1 0% 100%
+parted -s $LOOP set 1 lvm on
 partprobe $LOOP
-pvcreate $LOOP
-vgcreate cinder-volumes $LOOP
-pvs
-vgs
-echo "Finished prepping lvm storage..."
+pvcreate -y $LOOP
+vgcreate -y cinder-volumes $LOOP
+echo "Finished prepping lvm storage on $LOOP"
 EOF
 sudo bash /tmp/setup.$$

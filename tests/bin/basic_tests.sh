@@ -50,7 +50,7 @@ function wait_for_cinder {
         [ $st != "$2" ] && break
         sleep 1
         count=$((count+1))
-        [ $count -gt 30 ] && echo Cinder volume failed. && exit -1
+        [ $count -gt 120 ] && echo Cinder volume failed. && exit -1
     done
 }
 
@@ -139,12 +139,15 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
+
+sleep 180
 
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
