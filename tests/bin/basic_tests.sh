@@ -50,7 +50,8 @@ function wait_for_cinder {
         [ $st != "$2" ] && break
         sleep 1
         count=$((count+1))
-        [ $count -gt 30 ] && echo Cinder volume failed. && exit -1
+        echo "Current state: $st time spent: $count"
+        [ $count -gt 360 ] && echo Cinder volume failed. && exit -1
     done
 }
 

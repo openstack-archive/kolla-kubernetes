@@ -1,5 +1,10 @@
 #!/bin/bash -xe
 
+function lvmbackend_values {
+    echo "lvm_backends:"
+    echo "  - '172.18.0.1': 'cinder-volumes'"
+}
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
@@ -206,12 +211,12 @@ helm install kolla/glance-manage-db --version 3.0.0-1 \
     --namespace kolla --name glance-manage-db --set "$common_vars"
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
-    --set element_name=cinder \
+    --set "element_name=cinder" \
     --namespace kolla \
     --name cinder-create-db
 
 helm install kolla/cinder-manage-db --version 3.0.0-1 \
-    --set element_name=cinder \
+    --set "element_name=cinder,image_tag=3.0.1" \
     --namespace kolla \
     --name cinder-manage-db
 
@@ -283,16 +288,16 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-#helm install kolla/cinder-volume-lvm --version 3.0.0-1 \
-#    --set "$common_vars,element_name=cinder" --namespace kolla \
-#    --name cinder-volume-lvm
+helm install kolla/cinder-volume-lvm --debug --version 3.0.0-1 \
+    --set "$common_vars,element_name=cinder-volume" --namespace kolla \
+    --name cinder-volume-lvm --values <(lvmbackend_values)
 
 helm install kolla/cinder-api --version 3.0.0-1 \
-    --set "$common_vars" --namespace kolla \
+    --set "$common_vars,image_tag=3.0.1" --namespace kolla \
     --name cinder-api
 
 helm install kolla/cinder-scheduler --version 3.0.0-1 \
-    --set "$common_vars,element_name=cinder-scheduler" \
+    --set "$common_vars,element_name=cinder-scheduler,image_tag=3.0.1" \
     --namespace kolla --name cinder-scheduler
 
 helm install kolla/glance-api --version 3.0.0-1 \
