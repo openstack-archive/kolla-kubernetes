@@ -29,6 +29,11 @@ if [ "x$TYPE" == "xceph-multi" ]; then
         etc/kolla-kubernetes/kolla-kubernetes.yml
 fi
 
+# Need to change globals.yaml to enable generation of iscsi configs
+# later used for generation of configmaps.
+# sed -i 's/.*enable_cinder_backend_lvm.*/enable_cinder_backend_lvm: "yes"/g' /etc/kolla/globals.yml
+# sed -i 's/.*enable_cinder_backend_iscsi.*/enable_cinder_backend_iscsi: "yes"/g' /etc/kolla/globals.yml
+
 kolla-ansible/tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
