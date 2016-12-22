@@ -13,6 +13,6 @@
 {{- $checkPath := "/" }}
 {{- $privileged := false }}
 {{- $haproxy := .Values.haproxy | default true }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "privileged" $privileged "haproxy" $haproxy "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release }}
 {{- include "common_api_python_deployment" $env }}
 {{- end }}

@@ -3,7 +3,7 @@
 {{- $resourceName := "rabbitmq-bootstrap" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: batch/v1
 kind: Job
 spec:

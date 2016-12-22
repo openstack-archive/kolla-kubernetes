@@ -2,6 +2,6 @@
 {{- $elementService := "glance" }}
 {{- $elementName := printf "%s-registry" $elementService }}
 {{- $elementType := .Values.type }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release }}
 {{- include "common_svc" $env }}
 {{- end }}

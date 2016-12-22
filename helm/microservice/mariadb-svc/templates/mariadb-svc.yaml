@@ -1,6 +1,6 @@
 {{- $elementPort := .Values.mariadb_port | default 3306 }}
 {{- $elementName := .Values.element_name | default "mariadb" }}
 {{- $elementService := .Values.element_name | default "mariadb" }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release }}
 {{- include "common_svc" $env }}
 {{- end }}

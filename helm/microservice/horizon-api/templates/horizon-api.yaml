@@ -3,7 +3,7 @@
 {{- $resourceName := "horizon" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:

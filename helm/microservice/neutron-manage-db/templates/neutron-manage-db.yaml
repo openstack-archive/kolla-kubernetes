@@ -17,6 +17,6 @@ items:
 - key: neutron-vpnaas.conf
   path: neutron_vpnaas.conf
 {{- end }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "extraConfigmapConfig" $extraConfigmapConfig  "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "extraConfigmapConfig" $extraConfigmapConfig  "Values" .Values "Release" .Release }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}

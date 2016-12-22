@@ -3,7 +3,7 @@
 {{- $resourceName := "glance" }}
 {{- $serviceName := "glance-api" }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release }}
 apiVersion: batch/v1
 kind: Job
 metadata:

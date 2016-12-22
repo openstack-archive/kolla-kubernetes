@@ -5,7 +5,7 @@
 {{- $podTypeBootstrap := true }}
 {{- $defaultPublicHost := printf "%s-public" .Values.element_name }}
 {{- $publicHost := .Values.public_host | default $defaultPublicHost }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: batch/v1
 kind: Job
 metadata:
