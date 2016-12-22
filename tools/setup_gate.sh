@@ -12,11 +12,13 @@ tests/bin/fix_gate_iptables.sh
 
 if [ "x$2" == "xubuntu" ]; then
     sudo apt-get update
+    sudo apt-get remove -y open-iscsi
     sudo apt-get install -y bridge-utils
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
 else
     sudo yum clean all
+    sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
@@ -97,6 +99,11 @@ if [ "x$4" == "xceph-multi" ]; then
         ssh $line bash fix_gate_iptables.sh
         ssh $line sudo iptables-save > $WORKSPACE/logs/iptables-$line.txt
         ssh $line sudo setenforce 0
+        if [ "x$2" == "xubuntu" ]; then
+           ssh $line sudo apt-get -y remove open-iscsi
+        else
+           ssh $line sudo yum remove -y iscsi-initiator-utils
+        fi
         ssh $line sudo mv kubectl /usr/bin/
         ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
         set +xe
