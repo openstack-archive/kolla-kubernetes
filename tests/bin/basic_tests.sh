@@ -50,7 +50,7 @@ function wait_for_cinder {
         [ $st != "$2" ] && break
         sleep 1
         count=$((count+1))
-        [ $count -gt 30 ] && echo Cinder volume failed. && exit -1
+        [ $count -gt 120 ] && echo Cinder volume failed. && exit -1
     done
 }
 
@@ -139,6 +139,7 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
