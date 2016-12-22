@@ -24,6 +24,7 @@ spec:
 #FIXME Its unclear if ovsdb_connection, local_ip, and/or hostPID required. Try removing them once we have a working gate to test with.
 #FIXME Once out of alpha, this should be converted to yaml.
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
