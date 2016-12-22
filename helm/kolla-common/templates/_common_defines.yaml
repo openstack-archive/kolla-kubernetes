@@ -1,3 +1,31 @@
+# Requires .valName and env (.Values, .elementName, .elementType, .serviceName, .serviceType)
+{{- define "kolla_val_get" }}
+{{- $elementNameValues := index .env.Values.global.kolla .env.elementName | default dict }}
+{{- $elementTypeValues := index $elementNameValues .env.elementType | default dict }}
+{{- $elementAllValues := index $elementNameValues "all" | default dict }}
+{{- $serviceNameValues := index .env.Values.global.kolla .env.serviceName | default dict }}
+{{- $serviceTypeValues := index $serviceNameValues .env.serviceType | default dict }}
+{{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
+{{- $localVals := dict }}
+{{- if and (hasKey .env.Values.global.kolla.all .valName) (ne (typeOf (index .env.Values.global.kolla.all .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values.global.kolla.all .valName) }} {{- end }}
+{{- if and (hasKey $serviceAllValues .valName) (ne (typeOf (index $serviceAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceAllValues .valName) }} {{- end }}
+{{- if and (hasKey $serviceTypeValues .valName) (ne (typeOf (index $serviceTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceTypeValues .valName) }} {{- end }}
+{{- if and (hasKey $elementAllValues .valName) (ne (typeOf (index $elementAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementAllValues .valName) }} {{- end }}
+{{- if and (hasKey $elementTypeValues .valName) (ne (typeOf (index $elementTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementTypeValues .valName) }} {{- end }}
+{{- if and (hasKey .env.Values .valName) (ne (typeOf (index .env.Values .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values .valName) }} {{- end }}
+{{- $localVals.val }}
+{{- end }}
+
+{{- define "kolla_image_built_prefix" }}
+{{- $dockerRegistry := include "kolla_val_get" (dict "valName" "docker_registry" "env" . ) }}
+{{- $dockerNamespace := include "kolla_val_get" (dict "valName" "docker_namespace" "env" . ) }}
+{{- $baseDistro := include "kolla_val_get" (dict "valName" "base_distro" "env" . ) }}
+{{- $installType := include "kolla_val_get" (dict "valName" "install_type" "env" . ) }}
+{{- printf "%s/%s/%s-%s" $dockerRegistry $dockerNamespace $baseDistro $installType }}
+{{- end }}
+
+# FIXME  rewrite all of these to use kolla_image_built_prefix. needs all templates to pass
+# the deps for kolla_val_get
 {{- define "kolla_toolbox_image_full" }}
 {{- $kollaToolboxImageBuilt := printf "%s/%s/%s-%s-kolla-toolbox:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kolla_toolbox_image_tag }}
 {{- $kollaToolboxImageFull := .Values.kolla_toolbox_image_full | default $kollaToolboxImageBuilt }}
