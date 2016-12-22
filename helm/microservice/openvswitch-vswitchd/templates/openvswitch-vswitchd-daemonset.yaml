@@ -4,7 +4,14 @@
 {{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+{{- $extraDepVolumeMounts := "openvswitch_vswitchd_dep_volume_mounts" }}
+{{- define "openvswitch_vswitchd_dep_volume_mounts" }}
+{
+   "name": "openvswitch-run",
+   "mountPath": "/var/run/openvswitch/"
+}
+{{- end }}
+{{- with $env := dict "extraDepVolumeMounts" $extraDepVolumeMounts "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -20,6 +27,7 @@ spec:
         system: openvswitch-vswitchd-{{ $restype }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-ovs-vswitchd",
              "image": "{{ $openvswitchVswitchdFull }}",
@@ -40,23 +48,6 @@ spec:
                    "name": "kolla-logs",
                    "mountPath": "/var/log/kolla/"
                 },
-                {
-                   "name": "openvswitch-run",
-                   "mountPath": "/var/run/openvswitch/"
-                }
-             ]
-          },
-          {
-             "name": "dependencies",
-             "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
-             "env": [
-                {
-                   "name": "DEPENDENCY_SOCKET",
-                   "value": "/var/run/openvswitch/db.sock"
-                }
-             ],
-             "volumeMounts": [
                 {
                    "name": "openvswitch-run",
                    "mountPath": "/var/run/openvswitch/"
