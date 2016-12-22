@@ -25,6 +25,7 @@ spec:
         system: {{ .Values.element_name }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-nova-compute",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
