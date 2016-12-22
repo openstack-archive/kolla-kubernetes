@@ -389,3 +389,8 @@ cinder-create-keystone-endpoint-public:
 cinder-create-keystone-endpoint-internal:
         cinder_internal_service: cinder-api
         cinder_api_port: 8776
+
+keepalived:
+        image_tag: 2.0.2
+        api_interface: eth0
+        
