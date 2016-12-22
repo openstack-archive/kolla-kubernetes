@@ -12,11 +12,13 @@ tests/bin/fix_gate_iptables.sh
 
 if [ "x$2" == "xubuntu" ]; then
     sudo apt-get update
+    sudo apt-get remove open-iscsi
     sudo apt-get install -y bridge-utils
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
 else
     sudo yum clean all
+    sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
@@ -28,6 +30,9 @@ sudo systemctl status unbound
 sudo netstat -pnl
 sudo sed -i "s/127\.0\.0\.1/172.19.0.1/" /etc/resolv.conf
 sudo cat /etc/resolv.conf
+
+ls -al /run
+ls -al /var/run
 
 virtualenv .venv
 . .venv/bin/activate
