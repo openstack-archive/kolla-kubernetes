@@ -135,6 +135,7 @@ wait_for_cinder test in-use
 wait_for_cinder test detaching
 openstack server add volume test2 test
 wait_for_cinder test available
+wait_for_cinder test attaching
 
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
