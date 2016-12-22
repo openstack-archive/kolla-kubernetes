@@ -50,7 +50,8 @@ function wait_for_cinder {
         [ $st != "$2" ] && break
         sleep 1
         count=$((count+1))
-        [ $count -gt 30 ] && echo Cinder volume failed. && exit -1
+        echo "Current state: $st time spent: $count"
+        [ $count -gt 60 ] && echo Cinder volume failed. && exit -1
     done
 }
 
@@ -135,6 +136,7 @@ wait_for_cinder test in-use
 wait_for_cinder test detaching
 openstack server add volume test2 test
 wait_for_cinder test available
+wait_for_cinder test attaching
 
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
