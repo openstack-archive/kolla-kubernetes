@@ -139,12 +139,51 @@ wait_for_cinder test available
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
+sudo ls -al /dev
 sudo mount /dev/vdb /tmp/mnt
 sudo cat /tmp/mnt/test.txt
 sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
+
+
+# Collecting cinder-volume debug logs
+cinder list >> $WORKSPACE/logs/cinder_list_final.txt
+
+process_source="cinder"
+subprocess_source="cinder-volume"
+container_id=$(sudo docker ps -a | grep $subprocess_source\: | grep kolla_start | awk '{print $1}')
+container_log=$(sudo docker inspect $container_id | grep "Source" | grep kolla-logs | awk '{print $2}')
+container_log_size=${#container_log}
+container_log_path=${container_log:1:container_log_size-3}
+sudo cat $container_log_path/$process_source/$subprocess_source.log >> $WORKSPACE/logs/$subprocess_source-final.log
+
+process_source="cinder"
+subprocess_source="cinder-api"
+container_id=$(sudo docker ps -a | grep $subprocess_source\: | grep kolla_start | awk '{print $1}')
+container_log=$(sudo docker inspect $container_id | grep "Source" | grep kolla-logs | awk '{print $2}')
+container_log_size=${#container_log}
+container_log_path=${container_log:1:container_log_size-3}
+sudo cat $container_log_path/$process_source/$subprocess_source.log >> $WORKSPACE/logs/$subprocess_source-final.log
+
+process_source="nova"
+subprocess_source="nova-api"
+container_id=$(sudo docker ps -a | grep $subprocess_source\: | grep kolla_start | awk '{print $1}')
+container_log=$(sudo docker inspect $container_id | grep "Source" | grep kolla-logs | awk '{print $2}')
+container_log_size=${#container_log}
+container_log_path=${container_log:1:container_log_size-3}
+ls -al sudo cat $container_log_path/$process_source*
+#sudo cat $container_log_path/$process_source/api.log >> $WORKSPACE/logs/$subprocess_source-final.log
+
+process_source="nova"
+subprocess_source="nova-compute"
+container_id=$(sudo docker ps -a | grep $subprocess_source\: | grep kolla_start | awk '{print $1}')
+container_log=$(sudo docker inspect $container_id | grep "Source" | grep kolla-logs | awk '{print $2}')
+container_log_size=${#container_log}
+container_log_path=${container_log:1:container_log_size-3}
+ls -al sudo cat $container_log_path/$process_source*
+#sudo cat $container_log_path/$process_source/$subprocess_source.log >> $WORKSPACE/logs/$subprocess_source-final.log
 
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
