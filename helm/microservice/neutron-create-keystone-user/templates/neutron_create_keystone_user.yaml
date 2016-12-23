@@ -1,5 +1,8 @@
-{{- $resourceName := "neutron" }}
+{{- $resourceName := "neutron-create-keystone-user" }}
 {{- $serviceName := "neutron" }}
+{{- $serviceType := "create-keystone-user" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
 
 {{- $userName := .Values.neutron_user  | default "neutron" }}
 {{- $userDomain := .Values.neutron_domain | default "Default" }}
@@ -10,7 +13,7 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release }}
 
 {{- include "common_create_user_job" $env }}
 {{- end }}

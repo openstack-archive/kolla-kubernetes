@@ -70,7 +70,7 @@ spec:
             - name: KEYSTONE_PASSWORD
               valueFrom:
                secretKeyRef:
-                  name: {{ .resourceName }}-keystone-password
+                  name: {{ .serviceName }}-keystone-password
                   key: password
       volumes:
 {{ include "common_volumes" . | indent 8 }}
