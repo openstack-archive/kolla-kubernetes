@@ -1,0 +1,8 @@
+name: "bump"
+version: "0.1.0"
+usage: "helm bump <path to chart>"
+description: |-
+  This plugin increments the patch (z) version of a Helm chart
+ignoreFlags: false
+useTunnel: false
+command: "$HELM_PLUGIN_DIR/bump.sh"

@@ -1,0 +1,10 @@
+name: bump-test
+version: 4.4.4
+description: Helm chart for testing the bump plugin
+keywords:
+  - bump
+  - helm
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
