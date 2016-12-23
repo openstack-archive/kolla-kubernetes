@@ -1131,3 +1131,49 @@ kolla-kubernetes:
         vars:
           configmap_name: ironic-inspector-haproxy
           port_name: ironic_inspector_port
+  - name: heat
+    pods:
+    - name: heat-all
+      containers:
+      - name: heat-all
+    - name: heat-api
+      containers:
+      - name: heat-api
+    - name: heat-api-cfn
+      containers:
+      - name: heat-api-cfn
+    - name: heat-engine
+      containers:
+      - name: heat-engine
+    resources:
+      configmap:
+      - name: heat
+      - name: heat-all
+      - name: heat-api
+      - name: heat-api-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: heat-api-haproxy
+          port_name: heat_api_port
+      - name: heat-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: heat-api-logging
+          log_format: 'openstack'
+      - name: heat-api-cfn
+      - name: heat-api-cfn-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: heat-api-cfn-haproxy
+          port_name: heat_api_cfn_port
+      - name: heat-api-cfn-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: heat-api-cfn-logging
+          log_format: 'openstack'
+      - name: heat-engine
+      - name: heat-engine-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: heat-engine-logging
+          log_format: 'openstack'
