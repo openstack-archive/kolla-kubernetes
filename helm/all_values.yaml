@@ -568,6 +568,18 @@ heat-api-cfn-deployment:
                         all:
                             port: 8000
 
+heat-create-db-job:
+        global:
+            kolla:
+               heat:
+                   all:
+                       database_name: "heat"
+                       database_user: "heat"
+
+heat-engine:
+        image_tag: 3.0.1
+        replicas: 1
+
 glance-api-svc:
         global:
             kolla:
