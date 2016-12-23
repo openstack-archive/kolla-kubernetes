@@ -1,10 +1,10 @@
-{{- $imageBuilt := printf "%s/%s/%s-%s-heat-api-cfn:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "heat-api-cfn" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- $serviceName := "heat-api-cfn" }}
-{{- $serviceType := "server" }}
+{{- $serviceName := "heat" }}
+{{- $serviceType := "api-cfn" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
 {{- $configFileName := "heat.conf" }}
 {{- $configSectionName := "DEFAULT" }}
 {{- $configListenHostParameter := "bind_host" }}
@@ -24,6 +24,10 @@ items:
 - key: templates
   path: templates
 {{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $imageBuilt := printf "%s-heat-api-cfn:%s" $imagePrefix .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $_ := set $env "imageFull" $imageFull }}
 {{- include "common_api_python_deployment" $env }}
 {{- end }}
