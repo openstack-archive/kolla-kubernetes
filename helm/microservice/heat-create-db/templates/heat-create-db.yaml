@@ -1,0 +1,6 @@
+{{- $resourceName := "heat" }}
+{{- $serviceName := "heat" }}
+{{- $podTypeBootstrap := true }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release }}
+{{- include "common_create_db_job" $env }}
+{{- end }}
