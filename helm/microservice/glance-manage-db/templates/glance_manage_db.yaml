@@ -1,9 +1,15 @@
-{{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
-{{- $resourceName := "glance" }}
-{{- $serviceName := "glance-api" }}
+{{- $resourceName := "glance-manage-db" }}
+{{- $serviceName := "glance" }}
+{{- $serviceType := "manage-db" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $imageBuilt := printf "%s-glance-api:%s" $imagePrefix .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $_ := set $env "imageFull" $imageFull }}
+{{- $containerConfigDirectory := include "kolla_val_get" (dict "valName" "container_config_directory" "env" $env ) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -22,24 +28,24 @@ spec:
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
 {{- if ne .Values.ceph_backend true  }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: glance-api-config
               readOnly: true
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
 {{- else }}
-            - mountPath: {{ .Values.container_config_directory }}/config.json
+            - mountPath: {{ $containerConfigDirectory }}/config.json
               name: glance-api-config
               readOnly: true
               subPath: config.json
-            - mountPath: {{ .Values.container_config_directory }}/glance-api.conf
+            - mountPath: {{ $containerConfigDirectory }}/glance-api.conf
               name: glance-api-config
               readOnly: true
               subPath: glance-api.conf
-            - mountPath: {{ .Values.container_config_directory }}/ceph.conf
+            - mountPath: {{ $containerConfigDirectory }}/ceph.conf
               name: ceph-conf
               subPath: ceph.conf
-            - mountPath: {{ .Values.container_config_directory }}/ceph.client.glance.keyring
+            - mountPath: {{ $containerConfigDirectory }}/ceph.client.glance.keyring
               name: ceph-conf
               subPath: ceph.conf
 {{- end }}

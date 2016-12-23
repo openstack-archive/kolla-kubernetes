@@ -1,7 +1,7 @@
 {{- $imageBuilt := printf "%s/%s/%s-%s-nova-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "nova-api" }}
-{{- $serviceName := "nova-api" }}
+{{- $serviceName := "nova" }}
 {{- $podTypeBootstrap := true }}
 {{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
 {{- include "common_manage_db_job" $env }}
