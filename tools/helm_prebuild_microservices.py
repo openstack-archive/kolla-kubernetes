@@ -54,6 +54,7 @@ common_mariadb = [
     'ironic-api-manage-db-job',
     'ironic-inspector-create-db-job',
     'ironic-inspector-manage-db-job',
+    'heat-create-db-job',
     'cinder-delete-db-job',
     'glance-delete-db-job',
     'keystone-delete-db-job',
@@ -61,7 +62,9 @@ common_mariadb = [
     'nova-delete-db-job',
     'nova-api-delete-db-job',
     'ironic-api-delete-db-job',
-    'ironic-inspector-delete-db-job'
+    'ironic-inspector-delete-db-job',
+    'heat-create-db-job',
+    'heat-delete-db-job'
 ]
 
 common_create_keystone_admin = [
@@ -111,7 +114,19 @@ common_create_keystone_admin = [
     'ironic-inspector-delete-keystone-service-job',
     'ironic-inspector-delete-keystone-user-job',
     'ironic-delete-keystone-service-job',
-    'ironic-delete-keystone-user-job'
+    'ironic-delete-keystone-user-job',
+    'heat-create-keystone-user-job',
+    'heat-create-keystone-service-job',
+    'heat-create-keystone-endpoint-public-job',
+    'heat-create-keystone-endpoint-internal-job',
+    'heat-create-keystone-endpoint-admin-job',
+    'heat-delete-keystone-user-job',
+    'heat-delete-keystone-service-job',
+    'heat-cfn-create-keystone-service-job',
+    'heat-cfn-create-keystone-endpoint-public-job',
+    'heat-cfn-create-keystone-endpoint-internal-job',
+    'heat-cfn-create-keystone-endpoint-admin-job',
+    'heat-cfn-delete-keystone-service-job'
 ]
 
 
