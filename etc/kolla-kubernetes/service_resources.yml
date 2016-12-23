@@ -1131,3 +1131,17 @@ kolla-kubernetes:
         vars:
           configmap_name: ironic-inspector-haproxy
           port_name: ironic_inspector_port
+  - name: heat
+    pods:
+    - name: heat-all
+      containers:
+      - name: heat-all
+    - name: heat-api-cfn
+      containers:
+      - name: heat-api-cfn
+    - name: heat-api
+      containers:
+      - name: heat-api
+    - name: heat-engine
+      containers:
+      - name: heat-engine
