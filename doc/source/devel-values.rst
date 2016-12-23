@@ -1,0 +1,18 @@
+.. devel-values:
+
+=======================================
+Kolla Kubernetes Developer Values Guide
+=======================================
+
+There are some values we define commonly that need to be consistently
+used in the project.
+
+Common values
+=============
+
+ * $serviceName - Short name for the service. For nova-api, it is nova
+ * $serviceType - Short type for the service. For nova-api, it is api
+ * $elementName - Short name for the element. Should always be set to
+                  .Values.element_name | default $serviceName
+ * $elementType - Short type for the element. Should always be set to
+                  .Values.element_type | default $serviceType

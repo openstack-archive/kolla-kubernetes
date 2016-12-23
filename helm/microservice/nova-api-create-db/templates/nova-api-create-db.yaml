@@ -1,6 +1,9 @@
-{{- $resourceName := "nova-api" }}
-{{- $serviceName := "nova-api" }}
+{{- $resourceName := "nova-api-create-db" }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "api-create-db" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release }}
 {{- include "common_create_db_job" $env }}
 {{- end }}

@@ -1,8 +1,13 @@
-{{- $imageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
-{{- $resourceName := "keystone" }}
+{{- $resourceName := "keystone-manage-db" }}
 {{- $serviceName := "keystone" }}
+{{- $serviceType := "manage-db" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "configmap" $configmap "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $imageBuilt := printf "%s-keystone:%s" $imagePrefix .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $_ := set $env "imageFull" $imageFull }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}
