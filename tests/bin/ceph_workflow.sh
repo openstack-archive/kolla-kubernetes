@@ -255,9 +255,27 @@ helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION
     --namespace kolla --name neutron-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/heat-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name heat-create-keystone-user
+
+for x in heat heat-cfn; do
+    helm install kolla/$x-create-keystone-service-job --version $VERSION \
+        --namespace kolla --name $x-create-keystone-service \
+        --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+    helm install kolla/$x-create-keystone-endpoint-public-job --version $VERSION \
+        --namespace kolla --name $x-create-keystone-endpoint-public \
+        --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+    helm install kolla/$x-create-keystone-endpoint-internal-job --version $VERSION \
+        --namespace kolla --name $x-create-keystone-endpoint-internal \
+        --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+    helm install kolla/$x-create-keystone-endpoint-admin-job --version $VERSION \
+        --namespace kolla --name $x-create-keystone-endpoint-admin \
+        --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+done
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in cinder glance neutron nova; do
+
+for x in cinder glance neutron nova heat; do
     helm delete --purge $x-create-keystone-user
 done
 
@@ -311,7 +329,7 @@ helm install kolla/nova-create-keystone-endpoint-admin-job --version $VERSION \
     --namespace kolla --name nova-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-for x in nova nova-api neutron; do
+for x in nova nova-api neutron heat; do
     helm install kolla/$x-create-db-job --version $VERSION \
         --namespace kolla \
         --name $x-create-db \
@@ -340,7 +358,7 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-for x in nova nova-api cinder neutron glance; do
+for x in nova nova-api cinder neutron glance heat; do
     helm delete --purge $x-create-db
 done
 
@@ -348,7 +366,9 @@ for x in nova-api cinder neutron glance; do
     helm delete --purge $x-manage-db
 done
 
-for x in glance neutron cinder nova; do
+
+
+for x in glance neutron cinder nova heat heat-cfn; do
     helm delete --purge $x-create-keystone-service
     helm delete --purge $x-create-keystone-endpoint-public
     helm delete --purge $x-create-keystone-endpoint-internal
