@@ -277,6 +277,15 @@ nova-create-keystone-endpoint-public:
         kolla_kubernetes_external_vip:
         nova_api_port: 8774
 
+heat-create-db:
+        database_host: "mariadb"
+        database_port: 3306
+        database_name: "heat"
+        database_user: "heat"
+
+heat-manage-db:
+        image_tag: 3.0.1
+
 heat-api:
         image_tag: 3.0.1
         replicas: 1

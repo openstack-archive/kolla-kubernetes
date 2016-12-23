@@ -1,0 +1,8 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-neutron-server:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "heat" }}
+{{- $serviceName := "heat-api" }}
+{{- $podTypeBootstrap := true }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values }}
+{{- include "common_manage_db_job" $env }}
+{{- end }}
