@@ -3,7 +3,4 @@
 {{- $podTypeBootstrap := true }}
 {{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values }}
 {{- include "common_create_db_job" $env }}
-        - name: cinder-api-config
-          configMap:
-            name: cinder-api
 {{- end }}
