@@ -318,6 +318,10 @@ for x in nova nova-api neutron; do
         --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 done
 
+helm install kolla/heat-create-db --version $VERSION \
+        --set element_name=heat --namespace kolla \
+        --name heat-create-db
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -327,6 +331,10 @@ for x in nova-api neutron; do
         --name $x-manage-db \
         --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 done
+
+helm install kolla/$x-manage-db --version $VERSION \
+        --set element_name=heat --namespace kolla \
+        --name $x-manage-db
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -340,11 +348,11 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-for x in nova nova-api cinder neutron glance; do
+for x in nova nova-api cinder neutron glance heat; do
     helm delete --purge $x-create-db
 done
 
-for x in nova-api cinder neutron glance; do
+for x in nova-api cinder neutron glance heat; do
     helm delete --purge $x-manage-db
 done
 
