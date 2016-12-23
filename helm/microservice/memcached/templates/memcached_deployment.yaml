@@ -1,20 +1,30 @@
-{{- $memcachedImageBuilt := printf "%s/%s/%s-%s-memcached:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.memcached_image_tag | default .Values.kolla_tag }}
-{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
 {{- $resourceName := "memcached" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values }}
+{{- $serviceName := "memcached" }}
+{{- $serviceType := "deployment" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values "Release" .Release }}
+{{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" $env ) }}
+{{- $enabled := ne $enabledStr "false" }}
+{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
+{{- $memcachedImageBuilt := printf "%s-memcached:%s" $imagePrefix .Values.memcached_image_tag | default .Values.kolla_tag }}
+{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
+{{- $port := include "kolla_val_get" (dict "valName" "port" "env" $env ) }}
+{{- $containerConfigDirectory := include "kolla_val_get" (dict "valName" "container_config_directory" "env" $env ) }}
+{{- if $enabled }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-   name: {{ .Values.element_name }}
+   name: {{ $elementName }}
 spec:
-  replicas: {{ .Values.memcached_replicas }}
+  replicas: 1
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ $elementName }}
     spec:
       nodeSelector:
         {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
@@ -23,18 +33,19 @@ spec:
           name: main
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: memcached-config
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
           ports:
-            - containerPort: {{ .Values.memcached_port }}
-              name: {{ .Values.element_name }}
+            - containerPort: {{ $port }}
+              name: {{ $elementName }}
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
         - name: memcached-config
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
+{{- end }}
 {{- end }}

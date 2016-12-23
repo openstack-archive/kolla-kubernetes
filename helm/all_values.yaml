@@ -1,7 +1,17 @@
 common:
+        global:
+            kolla:
+                all:
+                    docker_registry: docker.io
+                    docker_namespace: kolla
+                    base_distro: centos
+                    install_type: binary
+                    container_config_directory: /var/lib/kolla/config_files
+
         selector_key: kolla_controller
         selector_value: "true"
 
+        #FIXME remove once everything's over to globals.
         docker_registry: docker.io
         docker_namespace: kolla
         kolla_base_distro: centos
@@ -180,11 +190,20 @@ rabbitmq-svc:
         rabbitmq_management_port: 15672
 
 memcached-svc:
-        memcached_port: 11211
+        global:
+            kolla:
+                memcached:
+                    all:
+                        enabled: true
+                        port: 11211
 
 memcached:
-        memcached_replicas: 1
-        memcached_port: 11211
+        global:
+            kolla:
+                memcached:
+                    all:
+                        enabled: true
+                        port: 11211
         memcached_image_tag: 3.0.1
 
 mariadb-init-element:
