@@ -136,4 +136,5 @@ helm install kolla/horizon --version $VERSION \
 
 wait_for_pods kolla nova,horizon running,succeeded
 
+
 kollakube res delete bootstrap openvswitch-set-external-ip
