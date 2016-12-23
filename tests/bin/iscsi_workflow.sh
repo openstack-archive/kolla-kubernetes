@@ -294,7 +294,7 @@ done
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in nova-api neutron; do
+for x in nova-api neutron heat; do
     helm install kolla/$x-manage-db-job --version $VERSION \
         --namespace kolla --name $x-manage-db \
         --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
