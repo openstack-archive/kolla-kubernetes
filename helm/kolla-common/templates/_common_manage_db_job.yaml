@@ -31,7 +31,7 @@ spec:
 {{- include "common_volumes" . | indent 8 }}
         - name: service-configmap
           configMap:
-            name: {{ .serviceName }}
+            name: {{ .configmap }}
 {{- if .extraConfigmapConfig }}
 {{- include .extraConfigmapConfig . | indent 12 }}
 {{- end }}
