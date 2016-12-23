@@ -51,6 +51,7 @@ common_mariadb = [
     'glance-create-db-job',
     'ironic-api-create-db-job',
     'ironic-api-manage-db-job',
+    'heat-create-db-job',
     'cinder-delete-db-job',
     'glance-delete-db-job',
     'keystone-delete-db-job',
