@@ -1,18 +1,42 @@
-# Requires .valName and env (.Values, .elementName, .elementType, .serviceName, .serviceType)
+# Requires .valName and env (.Values, .elementName, .serviceName, .ServiceKind)
+# Optional env (.serviceType)
 {{- define "kolla_val_get" }}
+{{- if hasKey .env "serviceType" }}
+{{- include "kolla_val_get_2lvl" . }}
+{{- else }}
+{{- include "kolla_val_get_simple" . }}
+{{- end }}
+{{- end }}
+
+{{- define "kolla_val_get_simple" }}
 {{- $elementNameValues := index .env.Values.global.kolla .env.elementName | default dict }}
-{{- $elementTypeValues := index $elementNameValues .env.elementType | default dict }}
+{{- $elementKindValues := index $elementNameValues .env.serviceKind | default dict }}
 {{- $elementAllValues := index $elementNameValues "all" | default dict }}
 {{- $serviceNameValues := index .env.Values.global.kolla .env.serviceName | default dict }}
-{{- $serviceTypeValues := index $serviceNameValues .env.serviceType | default dict }}
+{{- $serviceKindValues := index $serviceNameValues .env.serviceKind | default dict }}
 {{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
-{{- $localVals := dict }}
-{{- if and (hasKey .env.Values.global.kolla.all .valName) (ne (typeOf (index .env.Values.global.kolla.all .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values.global.kolla.all .valName) }} {{- end }}
-{{- if and (hasKey $serviceAllValues .valName) (ne (typeOf (index $serviceAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceAllValues .valName) }} {{- end }}
-{{- if and (hasKey $serviceTypeValues .valName) (ne (typeOf (index $serviceTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceTypeValues .valName) }} {{- end }}
-{{- if and (hasKey $elementAllValues .valName) (ne (typeOf (index $elementAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementAllValues .valName) }} {{- end }}
-{{- if and (hasKey $elementTypeValues .valName) (ne (typeOf (index $elementTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementTypeValues .valName) }} {{- end }}
-{{- if and (hasKey .env.Values .valName) (ne (typeOf (index .env.Values .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values .valName) }} {{- end }}
+{{- $localVals := dict "val" "" }}
+{{- if and (hasKey .env.Values.global.kolla.all .valName) (ne (typeOf (index .env.Values.global.kolla.all .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values.global.kolla.all .valName) }}{{- end }}
+{{- if and (hasKey $serviceAllValues .valName) (ne (typeOf (index $serviceAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceAllValues .valName) }}{{- end }}
+{{- if and (hasKey $serviceKindValues .valName) (ne (typeOf (index $serviceKindValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceKindValues .valName) }}{{- end }}
+{{- if and (hasKey $elementAllValues .valName) (ne (typeOf (index $elementAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementAllValues .valName) }}{{- end }}
+{{- if and (hasKey $elementKindValues .valName) (ne (typeOf (index $elementKindValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementKindValues .valName) }}{{- end }}
+{{- if and (hasKey .env.Values .valName) (ne (typeOf (index .env.Values .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values .valName) }}{{- end }}
+{{- $localVals.val }}
+{{- end }}
+
+{{- define "kolla_val_get_2lvl" }}
+{{- $serviceNameValues := index .env.Values.global.kolla .env.serviceName | default dict }}
+{{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
+{{- $serviceTypeValues := index $serviceNameValues .env.serviceType | default dict }}
+{{- $serviceTypeAllValues := index $serviceTypeValues "all" | default dict }}
+{{- $serviceTypeKindValues := index $serviceTypeValues .env.serviceKind | default dict }}
+{{- $localVals := dict "val" "" }}
+{{- if and (hasKey .env.Values.global.kolla.all .valName) (ne (typeOf (index .env.Values.global.kolla.all .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values.global.kolla.all .valName) }}{{- end }}
+{{- if and (hasKey $serviceAllValues .valName) (ne (typeOf (index $serviceAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceAllValues .valName) }}{{- end }}
+{{- if and (hasKey $serviceTypeAllValues .valName) (ne (typeOf (index $serviceTypeAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceTypeAllValues .valName) }}{{- end }}
+{{- if and (hasKey $serviceTypeKindValues .valName) (ne (typeOf (index $serviceTypeKindValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceTypeKindValues .valName) }}{{- end }}
+{{- if and (hasKey .env.Values .valName) (ne (typeOf (index .env.Values .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values .valName) }}{{- end }}
 {{- $localVals.val }}
 {{- end }}
 
