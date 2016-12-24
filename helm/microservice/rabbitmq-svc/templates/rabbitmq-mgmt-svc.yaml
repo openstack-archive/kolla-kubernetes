@@ -1,6 +1,7 @@
-{{- $elementPort := .Values.rabbitmq_port | default 15672 }}
-{{- $elementName := printf "%s-mgmt" .Values.element_name }}
-{{- $elementService := printf "%s-mgmt" .Values.element_name }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release }}
+{{- $serviceName := "rabbitmq" }}
+{{- $serviceComponent := "mgmt" }}
+{{- $serviceKind := "svc" }}
+{{- $elementName := $serviceName }}
+{{- with $env := dict "serviceName" $serviceName "serviceComponent" $serviceComponent "serviceKind" $serviceKind "elementName" $elementName "Values" .Values "Release" .Release }}
 {{- include "common_svc" $env }}
 {{- end }}

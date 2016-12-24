@@ -48,25 +48,23 @@ for x in mariadb rabbitmq glance; do
 done
 
 helm install kolla/memcached-svc --version 3.0.0-1 \
-    --namespace kolla --name memcached-svc --set element_name=memcached
+    --namespace kolla --name memcached-svc
 
 helm install kolla/mariadb-svc --version 3.0.0-1 \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
+    --namespace kolla --name mariadb-svc
 
 helm install kolla/rabbitmq-svc --version 3.0.0-1 \
-    --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+    --namespace kolla --name rabbitmq-svc
 
 helm install kolla/keystone-admin-svc --version 3.0.0-1 \
-    --namespace kolla --name keystone-admin-svc \
-    --set "element_name=keystone-admin"
+    --namespace kolla --name keystone-admin-svc
 
 helm install kolla/keystone-public-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/keystone-internal-svc --version 3.0.0-1 \
-    --namespace kolla --name keystone-internal-svc \
-    --set "element_name=keystone-internal"
+    --namespace kolla --name keystone-internal-svc 
 
 #FIXME temporary until enough service packages are around. then
 #they will get their own test file.
@@ -74,32 +72,32 @@ if [ "x$1" != "xhelm-entrypoint" ]; then
 
 helm install kolla/glance-api-svc --version 3.0.0-1 \
     --namespace kolla --name glance-api-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
 helm install kolla/neutron-server-svc --version 3.0.0-1 \
     --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/nova-metadata-svc --version 3.0.0-1 \
-    --namespace kolla --name nova-metadata-svc \
-    --set "element_name=nova"
+    --namespace kolla --name nova-metadata-svc
 
 helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
-    --namespace kolla --name nova-novncproxy-svc --set element_name=nova
+    --namespace kolla --name nova-novncproxy-svc
 
 helm install kolla/horizon-svc --version 3.0.0-1 \
-    --namespace kolla --name horizon-svc --set element_name=horizon
+    --namespace kolla --name horizon-svc \
+    --set "port_external=true,external_vip=$IP"
 
 #FIXME temporary until enough service packages are around. then
 #they will get their own test file.

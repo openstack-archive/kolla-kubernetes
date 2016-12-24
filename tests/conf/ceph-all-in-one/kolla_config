@@ -15,7 +15,7 @@ nova_database_address: "mariadb"
 nova_api_database_address: "mariadb"
 neutron_database_address: "mariadb"
 cinder_database_address: "mariadb"
-rabbitmq_servers: "rabbitmq"
+rabbitmq_servers: "rabbitmq-main"
 
 openstack_logging_debug: "True"
 

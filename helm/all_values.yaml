@@ -7,6 +7,8 @@ common:
                     base_distro: centos
                     install_type: binary
                     container_config_directory: /var/lib/kolla/config_files
+                    node_port_enabled: false
+                    port_external: false
 
         selector_key: kolla_controller
         selector_value: "true"
@@ -63,13 +65,25 @@ openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
 keystone-admin-svc:
-        port: 35357
+        global:
+            kolla:
+                keystone:
+                    all:
+                        admin_port: 35357
 
 keystone-internal-svc:
-        port: 5000
+        global:
+            kolla:
+                keystone:
+                    all:
+                        internal_port: 5000
 
 keystone-public-svc:
-        port: 5000
+        global:
+            kolla:
+                keystone:
+                    all:
+                        public_port: 5000
 
 keystone-create-db:
         database_host: "mariadb"
@@ -93,7 +107,12 @@ keystone-api:
         admin_port: 35357
 
 neutron-server-svc:
-        port: 9696
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
 
 neutron-create-db:
         database_host: "mariadb"
@@ -186,8 +205,12 @@ rabbitmq-pvc:
         rabbitmq_volume_size_gb: 10
 
 rabbitmq-svc:
-        rabbitmq_port: 5672
-        rabbitmq_management_port: 15672
+        global:
+            kolla:
+                rabbitmq:
+                    all:
+                        port: 5672
+                        management_port: 15672
 
 memcached-svc:
         global:
@@ -196,6 +219,7 @@ memcached-svc:
                     all:
                         enabled: true
                         port: 11211
+                        node_port: 11211
 
 memcached:
         global:
@@ -204,6 +228,7 @@ memcached:
                     all:
                         enabled: true
                         port: 11211
+                        node_port: 11211
         memcached_image_tag: 3.0.1
 
 mariadb-init-element:
@@ -221,16 +246,35 @@ mariadb-pvc:
         mariadb_volume_size_gb: 10
 
 mariadb-svc:
-        mariadb_port: 3306
+        global:
+            kolla:
+                mariadb:
+                    all:
+                        port: 3306
 
 nova-api-svc:
-        port: 8774
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
 
 nova-metadata-svc:
-        port: 8775
+        global:
+            kolla:
+                nova:
+                    metadata:
+                        all:
+                            port: 8775
 
 nova-novncproxy-svc:
-        port: 6080
+        global:
+            kolla:
+                nova:
+                    novncproxy:
+                        all:
+                            port: 6080
 
 nova-create-db:
         database_host: "mariadb"
@@ -311,12 +355,21 @@ heat-engine:
         replicas: 1
 
 glance-api-svc:
-        glance_api_port: 9292
-        type: "api"
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                            host_port: 9292
 
 glance-registry-svc:
-        glance_registry_port: 9191
-        type: "registry"
+        global:
+            kolla:
+                glance:
+                    registry:
+                        all:
+                            port: 9191
 
 glance-pv:
         glance_volume_size_gb: 10
@@ -334,7 +387,12 @@ cinder-manage-db:
         image_tag: 2.0.2
 
 cinder-api-svc:
-        port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
 
 cinder-api:
         replicas: 1
@@ -355,8 +413,11 @@ horizon-api:
         port: 80
 
 horizon-svc:
-        type: dashboard
-        port: 80
+        global:
+            kolla:
+                horizon:
+                    all:
+                        port: 80
 
 cinder-scheduler:
         replicas: 1
