@@ -1,22 +1,39 @@
 {{- define "common_svc" }}
+{{- $localVals := dict "name" .elementName }}
+{{- $_ := set $localVals "port" "port" }}
+{{- $_ := set $localVals "nodePort" "node_port" }}
+{{- $_ := set $localVals "nodePortEnabled" "node_port_enabled" }}
+{{- $_ := set $localVals "portExternal" "port_external" }}
+{{- if hasKey . "serviceType" }}{{- $_ := set $localVals "name" (printf "%s-%s" .elementName .serviceType) }}{{- end }}
+{{- if hasKey . "serviceComponent" }}{{
+{{- $_ := set $localVals "port" (printf "%s_port" .serviceComponent ) }}
+{{- $_ := set $localVals "nodePort" (printf "%s_node_port" .serviceComponent ) }}
+{{- $_ := set $localVals "nodePortEnabled" (printf "%s_node_port_enabled" .serviceComponent ) }}
+{{- $_ := set $localVals "portExternal" (printf "%s_port_external" .serviceComponent ) }}
+{{- $_ := set $localVals "name" (printf "%s-%s" .elementName .serviceComponent) }}
+{{- if hasKey . "serviceType" }}{{- $_ := set $localVals "name" (printf "%s-%s-%s" .elementName .serviceType .serviceComponent) }}{{- end }}
+{{- end }}
+{{- $nodePort := include "kolla_val_get" (dict "valName" $localVals.nodePort "env" . ) }}
+{{- $nodePortEnabled := include "kolla_val_get" (dict "valName" $localVals.nodePortEnabled "env" . ) }}
+{{- $portExternal := include "kolla_val_get" (dict "valName" $localVals.portExternal "env" . ) }}
 apiVersion: v1
 kind: Service
 spec:
   ports:
-    - port: {{ .element_port }}
-      name: {{ .element_name | quote }}
-{{- if .element_nodeport }}
-      nodePort: {{ .element_port_nodeport }}
+    - port: {{ include "kolla_val_get" (dict "valName" $localVals.port "env" . ) }}
+      name: {{ $localVals.name | quote }}
+{{- if ne $nodePortEnabled "false" }}
+      nodePort: {{ $nodePort }}
   type: NodePort
-{{- else if  .element_port_external }}
+{{- else if ne $portExternal "false" }}
   externalIPs:
-    - {{ .kolla_kubernetes_external_vip }}
+    - {{ include "kolla_val_get" (dict "valName" "external_vip" "env" . ) }}
 {{- end }}
   selector:
-    service: {{ .element_service | quote }}
-{{- if .element_service_type }}
-    type: {{ .element_service_type | quote }}
+    service: {{ .serviceName | quote }}
+{{- if .serviceType }}
+    type: {{ .serviceType | quote }}
 {{- end }}
 metadata:
-   name:  {{ .element_name | quote }}
+   name:  {{ $localVals.name | quote }}
 {{- end }}

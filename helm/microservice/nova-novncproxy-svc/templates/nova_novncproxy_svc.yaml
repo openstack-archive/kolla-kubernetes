@@ -1,8 +1,7 @@
-{{- $elementPort := .Values.port | default 6080 }}
-{{- $rootElementName := .Values.element_name | default "nova" }}
-{{- $elementServiceType := .Values.element_service_type | default "novncproxy" }}
-{{- $elementService := $rootElementName }}
-{{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService  "element_service_type" $elementServiceType "Values" .Values "Release" .Release }}
+{{- $serviceName := "nova" }}
+{{- $serviceType := "novncproxy" }}
+{{- $serviceKind := "svc" }}
+{{- $elementName := $serviceName }}
+{{- with $env := dict "serviceName" $serviceName "serviceType" $serviceType "serviceKind" $serviceKind "elementName" $elementName "Values" .Values "Release" .Release }}
 {{- include "common_svc" $env }}
 {{- end }}
