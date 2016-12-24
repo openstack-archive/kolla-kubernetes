@@ -1,0 +1,29 @@
+.. devel-values:
+
+=======================================
+Kolla Kubernetes Developer Values Guide
+=======================================
+
+There are some values we define commonly that need to be consistently
+used in the project.
+
+Common values
+=============
+
+ * $serviceName - Short name for the service. For nova-api, it is nova
+ * $serviceType - Short type for the service. For nova-api, it is api. It is
+                  optional for simple services.
+ * $serviceKind - Short kind for the service. For nova-api, it is deployment.
+ * $elementName - Short name for the element. Should always be set to
+                  .Values.element_name | default $serviceName
+ * $elementType - Short type for the element. Should always be set to
+                  .Values.element_type | default $serviceType
+
+Service Values
+==============
+ * $serviceComponent - Some k8s services are bound to the same container but
+                       with multiple ports. For example, rabbitmq has a
+                       primary port, but also a management port. This prefixes
+                       the service's config vals with "$serviceComponent_".
+                       This allows both the container and the svc's to share
+                       the same namespace.
