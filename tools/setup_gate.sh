@@ -1,6 +1,16 @@
 #!/bin/bash -xe
 
-[ "x$4" == "xiscsi" ] && echo "iscsi support pending..." && exit 0
+if [ "x$4" == "xiscsi" ]; then
+    echo "Starting iscsi setup script..."
+    tools/setup_gate_iscsi.sh $1 $2 $3 $4
+    echo "Starting iscsi workflow..."
+    tests/bin/iscsi_workflow.sh "$4" "$2"
+    . ~/keystonerc_admin
+
+    kubectl get pods --namespace=kolla
+
+    exit 0
+fi
 
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
