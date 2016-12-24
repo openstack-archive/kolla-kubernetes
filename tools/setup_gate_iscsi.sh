@@ -1,16 +1,5 @@
 #!/bin/bash -xe
 
-if [ "x$4" == "xiscsi" ]; then
-    echo "Starting iscsi setup script..."
-    tools/setup_gate_iscsi.sh $1 $2 $3 $4
-    tests/bin/iscsi_workflow.sh "$4" "$2"
-    . ~/keystonerc_admin
-
-    kubectl get pods --namespace=kolla
-
-    exit 0
-fi
-
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
@@ -76,16 +65,9 @@ popd
 pip install -r requirements.txt
 pip install .
 
-if [ "x$4" == "xexternal-ovs" ]; then
-    sudo rpm -Uvh https://repos.fedorapeople.org/openstack/openstack-newton/rdo-release-newton-4.noarch.rpm || true
-    sudo yum install -y openvswitch
-    sudo systemctl start openvswitch
-    sudo ovs-vsctl add-br br-ex
-fi
-
 tests/bin/setup_config.sh "$2" "$4"
 
-tests/bin/setup_gate_loopback.sh
+tests/bin/setup_gate_loopback_lvm.sh
 
 tools/setup_kubernetes.sh master
 
@@ -96,47 +78,9 @@ kubectl taint nodes --all dedicated-
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
 
-if [ "x$4" == "xceph-multi" ]; then
-    NODES=1
-    cat /etc/nodepool/sub_nodes_private | while read line; do
-        NODES=$((NODES+1))
-        echo $line
-        scp tools/setup_kubernetes.sh $line:
-        scp tests/bin/fix_gate_iptables.sh $line:
-        scp /usr/bin/kubectl $line:kubectl
-        NODENAME=$(ssh $line hostname)
-        ssh $line bash fix_gate_iptables.sh
-        ssh $line sudo iptables-save > $WORKSPACE/logs/iptables-$line.txt
-        ssh $line sudo setenforce 0
-        if [ "x$2" == "xubuntu" ]; then
-           ssh $line sudo apt-get -y remove open-iscsi
-        else
-           ssh $line sudo yum remove -y iscsi-initiator-utils
-        fi
-        ssh $line sudo mv kubectl /usr/bin/
-        ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
-        set +xe
-        count=0
-        while true; do
-          c=$(kubectl get nodes --no-headers=true | wc -l)
-          [ $c -ge $NODES ] && break
-          count=$((count+1))
-          [ $count -gt 30 ] && break
-          sleep 1
-        done
-        [ $count -gt 30 ] && echo Node failed to join. && exit -1
-        set -xe
-        kubectl get nodes
-        kubectl label node $NODENAME kolla_compute=true
-    done
-fi
 
 NODE=$(hostname -s)
-kubectl label node $NODE kolla_controller=true
-
-if [ "x$4" != "xceph-multi" ]; then
-    kubectl label node $NODE kolla_compute=true
-fi
+kubectl label node $NODE kolla_controller=true kolla_compute=true kolla_storage=true
 
 tests/bin/setup_canal.sh
 
@@ -155,32 +99,32 @@ TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.temp
 sudo docker pull $TOOLBOX > /dev/null
 timeout 240s tools/setup-resolv-conf.sh
 
-tests/bin/build_test_ceph.sh
+#tests/bin/build_test_ceph.sh
 
-kollakube res create pod ceph-admin ceph-rbd
-tools/wait_for_pods.sh kolla
+#kollakube res create pod ceph-admin ceph-rbd
+#tools/wait_for_pods.sh kolla
 
-str="ceph -w"
-kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
-    > $WORKSPACE/logs/ceph.log &
+#str="ceph -w"
+#kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str" \
+#    > $WORKSPACE/logs/ceph.log &
 
-for x in kollavolumes images volumes vms; do
-    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
-    -c "ceph osd pool create $x 64; ceph osd pool set $x size 1; ceph osd pool set $x min_size 1"
-done
-kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
-    -c "ceph osd pool delete rbd rbd --yes-i-really-really-mean-it"
+#for x in kollavolumes images volumes vms; do
+#    kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
+#    -c "ceph osd pool create $x 64; ceph osd pool set $x size 1; ceph osd pool set $x min_size 1"
+#done
+#kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
+#    -c "ceph osd pool delete rbd rbd --yes-i-really-really-mean-it"
 
-tools/setup_simple_ceph_users.sh
-tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
+#tools/setup_simple_ceph_users.sh
+#tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
 
-if [ "x$4" == "xhelm-entrypoint" ]; then
-   tests/bin/ceph_workflow_service.sh "$4" "$2"
-else
-   tests/bin/ceph_workflow.sh "$4" "$2"
-    . ~/keystonerc_admin
+#if [ "x$4" == "xhelm-entrypoint" ]; then
+#   tests/bin/ceph_workflow_service.sh "$4" "$2"
+#else
+#   tests/bin/ceph_workflow.sh "$4" "$2"
+#    . ~/keystonerc_admin
 
-    kubectl get pods --namespace=kolla
+#    kubectl get pods --namespace=kolla
 
-    tests/bin/basic_tests.sh
-fi
+#    tests/bin/basic_tests.sh
+#fi
