@@ -5,27 +5,11 @@ IP=172.18.0.1
 
 . "$DIR/tests/bin/setup_helm_entrypint_config.sh"
 
-function ceph_values {
-    echo "ceph:"
-    echo "  monitors:"
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "  - $addr"
-}
-
 tunnel_interface=docker0
-if [ "x$1" == "xceph-multi" ]; then
-    interface=$(netstat -ie | grep -B1 \
-        $(cat /etc/nodepool/primary_node_private) \
-        | head -n 1 | awk -F: '{print $1}')
-    tunnel_interface=$interface
-fi
 
 base_distro="$2"
 
-common_vars="enable_kube_logger=false,kolla_base_distro=$base_distro"
+common_vars="ceph_backend=false,enable_kube_logger=false,kolla_base_distro=$base_distro"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -35,16 +19,15 @@ kollakube res create configmap \
     openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
     nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume keepalived;
+    cinder-scheduler cinder-volume iscsid tgtd keepalived;
 
 kollakube res create secret nova-libvirt
 
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version 3.0.0-1 \
-        --name $x-pv --set "element_name=$x,storage_provider=ceph" \
-        --values <(ceph_values $1)
+        --name $x-pv --set "element_name=$x,storage_provider=host"
     helm install kolla/$x-pvc --version 3.0.0-1 --namespace kolla \
-        --name $x-pvc --set "element_name=$x,storage_provider=ceph"
+        --name $x-pvc --set "element_name=$x,storage_provider=host"
 done
 
 helm install kolla/memcached-svc --version 3.0.0-1 \
@@ -67,10 +50,6 @@ helm install kolla/keystone-public-svc --version 3.0.0-1 \
 helm install kolla/keystone-internal-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-internal-svc \
     --set "element_name=keystone-internal"
-
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-if [ "x$1" != "xhelm-entrypoint" ]; then
 
 helm install kolla/glance-api-svc --version 3.0.0-1 \
     --namespace kolla --name glance-api-svc \
@@ -100,10 +79,6 @@ helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
 
 helm install kolla/horizon-svc --version 3.0.0-1 \
     --namespace kolla --name horizon-svc --set element_name=horizon
-
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-fi
 
 helm install kolla/mariadb-init-element --version 3.0.0-1 \
     --namespace kolla --name mariadb-init-element \
@@ -172,15 +147,6 @@ $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
 
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-if [ "x$1" == "xhelm-entrypoint" ]; then
-
-    echo Put test code here.
-
-    exit 0
-fi
-
 helm install kolla/neutron-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
 
@@ -234,10 +200,10 @@ for x in cinder glance neutron nova; do
 done
 
 helm install kolla/glance-create-db --version 3.0.0-1 \
-    --namespace kolla --name glance-create-db
+    --namespace kolla --name glance-create-db --set "$common_vars"
 
 helm install kolla/glance-manage-db --version 3.0.0-1 \
-    --namespace kolla --name glance-manage-db
+    --namespace kolla --name glance-manage-db --set "$common_vars"
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
     --set element_name=cinder \
@@ -317,9 +283,9 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-helm install kolla/cinder-volume-ceph --version 3.0.0-1 \
-    --set "$common_vars,element_name=cinder" --namespace kolla \
-    --name cinder-volume-ceph
+#helm install kolla/cinder-volume-lvm --version 3.0.0-1 \
+#    --set "$common_vars,element_name=cinder" --namespace kolla \
+#    --name cinder-volume-lvm
 
 helm install kolla/cinder-api --version 3.0.0-1 \
     --set "$common_vars" --namespace kolla \
@@ -330,7 +296,7 @@ helm install kolla/cinder-scheduler --version 3.0.0-1 \
     --namespace kolla --name cinder-scheduler
 
 helm install kolla/glance-api --version 3.0.0-1 \
-    --set "$common_vars,ceph_backend=true" \
+    --set "$common_vars" \
     --namespace kolla --name glance-api
 
 helm install kolla/glance-registry --version 3.0.0-1 \
@@ -373,34 +339,31 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-network
 
-[ "x$1" != "xexternal-ovs" ] &&
-    helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
+helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --set "$common_vars,type=network,selector_key=kolla_controller" \
-    --namespace kolla --name openvswitch-ovsdb-network &&
-    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
+    --namespace kolla --name openvswitch-ovsdb-network
+
+helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
     --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
     --namespace kolla --name openvswitch-vswitchd-network
-
-[ "x$1" == "xceph-multi" ] &&
-    helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
-    --set "$common_vars,type=compute,selector_key=kolla_compute" \
-    --namespace kolla --name openvswitch-ovsdb-compute &&
-    helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
-    --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-openvswitch-agent-compute &&
-    helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
-    --namespace kolla --name openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip
 
 helm install kolla/nova-libvirt --version 3.0.0-1 \
-    --set "$common_vars,element_name=nova-libvirt" \
+    --set "$common_vars,element_name=nova-libvirt,libvirt_ceph=false" \
     --namespace kolla --name nova-libvirt
 
 helm install kolla/nova-compute --version 3.0.0-1 \
-    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
+    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute,nova_ceph=false" \
     --namespace kolla --name nova-compute
+
+helm install kolla/iscsid --version 3.0.0-1 --debug\
+    --set "$common_vars,element_name=iscsid" \
+    --namespace kolla --name iscsid
+
+helm install kolla/tgtd --version 3.0.0-1 --debug\
+    --set "$common_vars,element_name=tgtd" \
+    --namespace kolla --name tgtd
 
 #kollakube res create pod keepalived
 
@@ -408,5 +371,3 @@ $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap openvswitch-set-external-ip
-
-$DIR/tools/wait_for_pods.sh kolla
