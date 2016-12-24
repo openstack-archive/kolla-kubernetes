@@ -20,3 +20,29 @@ spec:
 metadata:
    name:  {{ .element_name | quote }}
 {{- end }}
+
+{{- define "common_svc2" }}
+{{- $nodePort := include "kolla_val_get" (dict "valName" "node_port" "env" . ) }}
+{{- $nodePortEnabled := include "kolla_val_get" (dict "valName" "node_port_enabled" "env" . ) }}
+{{- $portExternal := include "kolla_val_get" (dict "valName" "port_external" "env" . ) }}
+apiVersion: v1
+kind: Service
+spec:
+  ports:
+    - port: {{ include "kolla_val_get" (dict "valName" "port" "env" . ) }}
+      name: {{ .elementName | quote }}
+{{- if ne $nodePortEnabled "false" }}
+      nodePort: {{ $nodePort }}
+  type: NodePort
+{{- else if ne $portExternal "false" }}
+  externalIPs:
+    - {{ include "kolla_val_get" (dict "valName" "external_vip" "env" . ) }}
+{{- end }}
+  selector:
+    service: {{ .serviceName | quote }}
+{{- if .serviceType }}
+    type: {{ .serviceType | quote }}
+{{- end }}
+metadata:
+   name:  {{ .elementName | quote }}
+{{- end }}
