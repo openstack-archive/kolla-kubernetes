@@ -1,7 +1,7 @@
-{{- $elementPort := .Values.glance_api_port | default 9292 }}
-{{- $elementService := "glance" }}
-{{- $elementName := printf "%s-api" $elementService }}
-{{- $elementType := .Values.type }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release }}
-{{- include "common_svc" $env }}
+{{- $serviceName := "glance" }}
+{{- $serviceType := "api" }}
+{{- $serviceKind := "svc" }}
+{{- $elementName := $serviceName }}
+{{- with $env := dict "serviceName" $serviceName "serviceType" $serviceType "serviceKind" $serviceKind "elementName" $elementName "Values" .Values "Release" .Release }}
+{{- include "common_svc2" $env }}
 {{- end }}
