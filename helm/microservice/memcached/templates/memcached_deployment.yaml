@@ -3,10 +3,9 @@
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
 {{- $serviceName := "memcached" }}
-{{- $serviceType := "deployment" }}
+{{- $serviceKind := "deployment" }}
 {{- $elementName := .Values.element_name | default $serviceName }}
-{{- $elementType := .Values.element_type | $serviceType }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceKind" $serviceKind "elementName" $elementName "Values" .Values "Release" .Release }}
 {{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" $env ) }}
 {{- $enabled := ne $enabledStr "false" }}
 {{- $imagePrefix := include "kolla_image_built_prefix" $env }}

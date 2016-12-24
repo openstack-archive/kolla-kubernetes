@@ -1,10 +1,9 @@
 {{- $serviceName := "memcached" }}
-{{- $serviceType := "svc" }}
+{{- $serviceKind := "svc" }}
 {{- $elementName := .Values.element_name | default $serviceName }}
-{{- $elementType := .Values.element_type | default $serviceType }}
 {{- $elementService := $elementName }}
 #FIXME env var names don't match the rest in kolla-kubernetes
-{{- with $env := dict "element_name" $elementName "element_service" $elementService "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values }}
+{{- with $env := dict "element_name" $elementName "element_service" $elementService "serviceName" $serviceName "serviceKind" $serviceKind "elementName" $elementName "Values" .Values }}
 #FIXME move into common_service
 {{- $elementPort := include "kolla_val_get" (dict "valName" "port" "env" $env ) }}
 {{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" $env ) }}
