@@ -7,6 +7,8 @@ common:
                     base_distro: centos
                     install_type: binary
                     container_config_directory: /var/lib/kolla/config_files
+                    node_port_enabled: false
+                    port_external: false
 
         selector_key: kolla_controller
         selector_value: "true"
@@ -196,6 +198,7 @@ memcached-svc:
                     all:
                         enabled: true
                         port: 11211
+                        node_port: 11211
 
 memcached:
         global:
@@ -204,6 +207,7 @@ memcached:
                     all:
                         enabled: true
                         port: 11211
+                        node_port: 11211
         memcached_image_tag: 3.0.1
 
 mariadb-init-element:
@@ -311,8 +315,13 @@ heat-engine:
         replicas: 1
 
 glance-api-svc:
-        glance_api_port: 9292
-        type: "api"
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                            host_port: 9292
 
 glance-registry-svc:
         glance_registry_port: 9191

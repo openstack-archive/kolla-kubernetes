@@ -74,7 +74,7 @@ if [ "x$1" != "xhelm-entrypoint" ]; then
 
 helm install kolla/glance-api-svc --version 3.0.0-1 \
     --namespace kolla --name glance-api-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
