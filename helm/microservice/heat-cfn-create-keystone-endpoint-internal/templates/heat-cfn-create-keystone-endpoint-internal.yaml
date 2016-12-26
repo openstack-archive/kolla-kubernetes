@@ -1,0 +1,11 @@
+{{- $resourceName := "heat-cfn-create-keystone-endpoint-internal" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "heat-cfn" }}
+{{- $serviceType := "cloudformation" }}
+{{- $interface := "internal" }}
+{{- $heatCfnInternalEndpointBuilt := printf "http://%s:%1.f/v1" .Values.heat_cfn_internal_service .Values.heat_cfn_api_port }}
+{{- $endpointURLFull := .Values.heat_cfn_internal_endpoint | default $heatCfnInternalEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}

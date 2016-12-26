@@ -1,0 +1,19 @@
+{{- $resourceName := "heat-create-keystone-user" }}
+{{- $serviceName := "heat" }}
+{{- $serviceType := "create-keystone-user" }}
+{{- $elementName := .Values.element_name | default $serviceName }}
+{{- $elementType := .Values.element_type | $serviceType }}
+
+{{- $userName := .Values.heat_user  | default "heat" }}
+{{- $userDomain := .Values.heat_domain | default "Default" }}
+{{- $userProject := .Values.heat_project | default "service" }}
+{{- $userProjectDomain := .Values.heat_project_domain | default "Default" }}
+{{- $userRole := .Values.heat_role | default "admin" }}
+
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release }}
+
+{{- include "common_create_user_job" $env }}
+{{- end }}
