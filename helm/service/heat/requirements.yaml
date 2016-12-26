@@ -1,0 +1,48 @@
+dependencies:
+  - name: heat-api-svc
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-api-cfn-api-svc
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-create-db-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-manage-db-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-create-keystone-user-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-create-keystone-service-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-service-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-create-keystone-endpoint-admin-job
+    repository: http://localhost:10191
+  - name: heat-create-keystone-endpoint-public-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-create-keystone-endpoint-internal-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-admin-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-public-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-internal-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-api-deployment
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-api-cfn-deployment
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: heat-engine-statefulset
+    repository: http://localhost:10191
+    version: 0.6.0-1

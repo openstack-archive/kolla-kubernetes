@@ -51,13 +51,16 @@ common_mariadb = [
     'glance-create-db-job',
     'ironic-api-create-db-job',
     'ironic-api-manage-db-job',
+    'heat-create-db-job',
     'cinder-delete-db-job',
     'glance-delete-db-job',
     'keystone-delete-db-job',
     'neutron-delete-db-job',
     'nova-delete-db-job',
     'nova-api-delete-db-job',
-    'ironic-api-delete-db-job'
+    'ironic-api-delete-db-job',
+    'heat-create-db-job',
+    'heat-delete-db-job'
 ]
 
 common_create_keystone_admin = [
@@ -100,7 +103,19 @@ common_create_keystone_admin = [
     'nova-delete-keystone-service-job',
     'nova-delete-keystone-user-job',
     'ironic-delete-keystone-service-job',
-    'ironic-delete-keystone-user-job'
+    'ironic-delete-keystone-user-job',
+    'heat-create-keystone-user-job',
+    'heat-create-keystone-service-job',
+    'heat-create-keystone-endpoint-public-job',
+    'heat-create-keystone-endpoint-internal-job',
+    'heat-create-keystone-endpoint-admin-job',
+    'heat-delete-keystone-user-job',
+    'heat-delete-keystone-service-job',
+    'heat-cfn-create-keystone-service-job',
+    'heat-cfn-create-keystone-endpoint-public-job',
+    'heat-cfn-create-keystone-endpoint-internal-job',
+    'heat-cfn-create-keystone-endpoint-admin-job'
+    'heat-cfn-delete-keystone-service-job'
 ]
 
 
