@@ -310,6 +310,30 @@ heat-engine:
         image_tag: 3.0.1
         replicas: 1
 
+heat-create-keystone-endpoint-admin:
+        heat_admin_service: heat-api
+        heat_api_port: 8004
+
+heat-create-keystone-endpoint-internal:
+        heat_internal_service: heat-api
+        heat_api_port: 8004
+
+heat-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        heat_api_port: 8004
+
+heat-cfn-create-keystone-endpoint-admin:
+        heat_cfn_admin_service: heat-api
+        heat_cfn_api_port: 8000
+
+heat-cfn-create-keystone-endpoint-internal:
+        heat_cfn_internal_service: heat-api
+        heat_cfn_api_port: 8000
+
+heat-cfn-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        heat_cfn_api_port: 8000
+
 glance-api-svc:
         glance_api_port: 9292
         type: "api"

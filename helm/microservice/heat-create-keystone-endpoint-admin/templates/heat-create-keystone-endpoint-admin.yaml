@@ -1,0 +1,11 @@
+{{- $resourceName := "heat-create-keystone-endpoint-admin" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "heat" }}
+{{- $serviceType := "orchestration" }}
+{{- $interface := "admin" }}
+{{- $heatAdminEndpointBuilt := printf "http://%s:%1.f/v1/%%(tenant_id)s" .Values.heat_admin_service .Values.heat_api_port }}
+{{- $endpointURLFull := .Values.heat_admin_endpoint | default $heatAdminEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}
