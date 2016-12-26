@@ -575,6 +575,109 @@ heat-api-cfn-deployment:
                         all:
                             port: 8000
 
+heat-delete-db-job:
+        global:
+            kolla:
+                heat:
+                    all:
+                        database_name: "heat"
+                        database_user: "heat"
+
+heat-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                heat:
+                    all:
+                        keystone_user_name: heat
+
+heat-delete-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                heat:
+                    all:
+                        keystone_user_name: heat
+
+heat-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8004
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-api
+
+heat-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8004
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-api
+
+heat-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                heat:
+                    api:
+                        all:
+                            port: 8004
+
+heat-cfn-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-api
+
+heat-cfn-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-api
+
+heat-cfn-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
+heat-create-db-job:
+        global:
+            kolla:
+               heat:
+                   all:
+                       database_name: "heat"
+                       database_user: "heat"
+
 glance-api-svc:
         global:
             kolla:
