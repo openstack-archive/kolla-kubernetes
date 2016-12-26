@@ -574,6 +574,50 @@ heat-api-cfn-deployment:
                         all:
                             port: 8000
 
+heat-create-keystone-endpoint-admin:
+        heat_admin_service: heat-api
+        heat_api_port: 8004
+
+heat-create-keystone-endpoint-internal:
+        heat_internal_service: heat-api
+        heat_api_port: 8004
+
+heat-create-keystone-endpoint-public:
+        kolla_kubernetes_external_vip:
+        heat_api_port: 8004
+
+heat-cfn-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8000
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-cfn-api
+
+heat-cfn-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8000
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-cfn-api
+
+heat-cfn-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                heat:
+                    api:
+                        all:
+                            port: 8000
+
 glance-api-svc:
         global:
             kolla:
