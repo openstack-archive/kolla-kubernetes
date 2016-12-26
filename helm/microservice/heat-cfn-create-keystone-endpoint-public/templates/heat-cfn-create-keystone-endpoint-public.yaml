@@ -1,0 +1,11 @@
+{{- $resourceName := "heat-cfn-create-keystone-endpoint-public" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "heat-cfn" }}
+{{- $serviceType := "cloudformation" }}
+{{- $interface := "public" }}
+{{- $heatCfnPublicEndpointBuilt := printf "http://%s:%1.f" .Values.kolla_kubernetes_external_vip .Values.heat_cfn_api_port }}
+{{- $endpointURLFull := .Values.heat_cfn_public_endpoint | default $heatCfnPublicEndpointBuilt }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- include "common_create_keystone_endpoint" $env }}
+{{- end }}

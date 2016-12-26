@@ -255,9 +255,23 @@ helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION
     --namespace kolla --name neutron-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/heat-create-keystone-user --debug --version 3.0.0-1 \
+    --namespace kolla --name heat-create-keystone-user
+
+for x in heat heat-cfn; do
+    helm install kolla/$x-create-keystone-service --version 3.0.0-1 \
+        --namespace kolla --name $x-create-keystone-service --set "$common_vars"
+    helm install kolla/$x-create-keystone-endpoint-public --version 3.0.0-1 \
+        --namespace kolla --name $x-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    helm install kolla/$x-create-keystone-endpoint-internal --version 3.0.0-1 \
+        --namespace kolla --name $x-create-keystone-endpoint-internal --set "$common_vars"
+    helm install kolla/$x-create-keystone-endpoint-admin --version 3.0.0-1 \
+        --namespace kolla --name $x-create-keystone-endpoint-admin --set "$common_vars"
+done
 $DIR/tools/wait_for_pods.sh kolla
 
-for x in cinder glance neutron nova; do
+
+for x in cinder glance neutron nova heat; do
     helm delete --purge $x-create-keystone-user
 done
 
@@ -348,7 +362,9 @@ for x in nova-api cinder neutron glance; do
     helm delete --purge $x-manage-db
 done
 
-for x in glance neutron cinder nova; do
+
+
+for x in glance neutron cinder nova heat heat-cfn; do
     helm delete --purge $x-create-keystone-service
     helm delete --purge $x-create-keystone-endpoint-public
     helm delete --purge $x-create-keystone-endpoint-internal

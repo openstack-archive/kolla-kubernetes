@@ -1,0 +1,9 @@
+{{- $resourceName := "heat-cfn-create-keystone-service" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "heat-cfn" }}
+{{- $serviceType := "cloudformation" }}
+{{- $description := "Openstack Orchestration" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "Values" .Values "Release" .Release }}
+{{- include "common_create_keystone_service" $env }}
+{{- end }}
