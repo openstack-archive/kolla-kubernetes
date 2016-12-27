@@ -101,6 +101,14 @@ helm install kolla/nova-novncproxy-svc --version 3.0.0-1 \
 helm install kolla/horizon-svc --version 3.0.0-1 \
     --namespace kolla --name horizon-svc --set element_name=horizon
 
+helm install kolla/heat-api-svc --version 3.0.0-1 \
+    --namespace kolla --name heat-api-svc \
+    --set "element_name=heat,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
+helm install kolla/heat-cfn-api-svc --version 3.0.0-1 \
+    --namespace kolla --name heat-cfn-api-svc \
+    --set "element_name=heat-cfn,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+
 #FIXME temporary until enough service packages are around. then
 #they will get their own test file.
 fi
