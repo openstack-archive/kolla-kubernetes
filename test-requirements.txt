@@ -2,15 +2,15 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-hacking<0.11,>=0.10.0
+hacking>=0.12.0,!=0.13.0,<0.14 # Apache-2.0
 
-reno>=1.6.2 # Apache2
-coverage>=3.6
+reno>=1.8.0 # Apache2
+coverage>=4.0
 python-subunit>=0.0.18
-sphinx!=1.2.0,!=1.3b1,<1.3,>=1.1.2
-oslosphinx>=2.5.0 # Apache-2.0
+sphinx>=1.2.1,!=1.3b1,<1.4 # BSD
+oslosphinx>=4.7.0 # Apache-2.0
 oslotest>=1.10.0 # Apache-2.0
-testrepository>=0.0.18
-testscenarios>=0.4
-testtools>=1.4.0
+testrepository>=0.0.18 # Apache-2.0/BSD
+testscenarios>=0.4 # Apache-2.0/BSD
+testtools>=1.4.0 # MIT
 bashate>=0.2 # Apache-2.0
