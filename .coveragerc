@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = kolla-kubernetes
-omit = kolla-kubernetes/openstack/*
+source = kolla_kubernetes
+omit = kolla_kubernetes/tests/*
 
 [report]
 ignore_errors = True
