@@ -23,7 +23,7 @@ class FindBaseDirTest(base.BaseTestCase):
         self.assertIsNotNone(d)
 
         # check that project_root is not empty
-        self.assertTrue(len(d) > 0)
+        self.assertGreater(len(d), 0)
 
     def test_find_development_root(self):
         d = PathFinder.find_development_root()
@@ -32,4 +32,4 @@ class FindBaseDirTest(base.BaseTestCase):
         self.assertIsNotNone(d)
 
         # check that project_root is not empty
-        self.assertTrue(len(d) > 0)
+        self.assertGreater(len(d), 0)
