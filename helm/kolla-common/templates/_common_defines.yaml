@@ -1,51 +1,55 @@
-# Requires .valName and env (.Values, .elementName, .elementType, .serviceName, .serviceType)
-{{- define "kolla_val_get" }}
-{{- $elementNameValues := index .env.Values.global.kolla .env.elementName | default dict }}
-{{- $elementTypeValues := index $elementNameValues .env.elementType | default dict }}
-{{- $elementAllValues := index $elementNameValues "all" | default dict }}
-{{- $serviceNameValues := index .env.Values.global.kolla .env.serviceName | default dict }}
-{{- $serviceTypeValues := index $serviceNameValues .env.serviceType | default dict }}
-{{- $serviceAllValues := index $serviceNameValues "all" | default dict }}
-{{- $localVals := dict }}
-{{- if and (hasKey .env.Values.global.kolla.all .valName) (ne (typeOf (index .env.Values.global.kolla.all .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values.global.kolla.all .valName) }} {{- end }}
-{{- if and (hasKey $serviceAllValues .valName) (ne (typeOf (index $serviceAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceAllValues .valName) }} {{- end }}
-{{- if and (hasKey $serviceTypeValues .valName) (ne (typeOf (index $serviceTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $serviceTypeValues .valName) }} {{- end }}
-{{- if and (hasKey $elementAllValues .valName) (ne (typeOf (index $elementAllValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementAllValues .valName) }} {{- end }}
-{{- if and (hasKey $elementTypeValues .valName) (ne (typeOf (index $elementTypeValues .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index $elementTypeValues .valName) }} {{- end }}
-{{- if and (hasKey .env.Values .valName) (ne (typeOf (index .env.Values .valName)) "<nil>") }}{{- $_ := set $localVals "val" (index .env.Values .valName) }} {{- end }}
-{{- $localVals.val }}
-{{- end }}
-
 {{- define "kolla_image_built_prefix" }}
-{{- $dockerRegistry := include "kolla_val_get" (dict "valName" "docker_registry" "env" . ) }}
-{{- $dockerNamespace := include "kolla_val_get" (dict "valName" "docker_namespace" "env" . ) }}
-{{- $baseDistro := include "kolla_val_get" (dict "valName" "base_distro" "env" . ) }}
-{{- $installType := include "kolla_val_get" (dict "valName" "install_type" "env" . ) }}
+{{/* FIXME temporary until all files get a common search path defined. */}}
+{{- localVals := dict "searchPath" ":global.kolla.all" }}
+{{- if hasKey . "searchPath" }}
+{{- $_ := set localVals "searchPath" .searchPath }}
+{{- end }}
+{{- $dockerRegistry := include "kolla_val_get_str" (dict "key" "docker_registry" "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $dockerNamespace := include "kolla_val_get_str" (dict "key" "docker_namespace" "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $baseDistro := include "kolla_val_get_str" (dict "key" "base_distro" "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $installType := include "kolla_val_get_str" (dict "key" "install_type" "searchPath" $localVals.searchPath "Values" .Values) }}
 {{- printf "%s/%s/%s-%s" $dockerRegistry $dockerNamespace $baseDistro $installType }}
 {{- end }}
 
-# FIXME  rewrite all of these to use kolla_image_built_prefix. needs all templates to pass
-# the deps for kolla_val_get
+{{- define "kolla_build_image_full" }}
+{{- prefix := include "kolla_image_built_prefix" . }}
+{{/* FIXME temporary until all files get a common search path defined. */}}
+{{- localVals := dict "searchPath" ":global.kolla.all" }}
+{{- if hasKey . "searchPath" }}
+{{- $_ := set localVals "searchPath" .searchPath }}
+{{- end }}
+{{- $imageTag := include "kolla_val_get_str" (dict "key" "image_tag" "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $specifiedTag := include "kolla_val_get_str" (dict "key" .tagName "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $tagBuilt := $specified_tag | default $image_tag }}
+{{- $imageBuilt := printf "%s-%s:%s" $prefix .contName $tagBuilt }}
+{{- $imageFull := include "kolla_val_get_str" (dict "key" .imageName "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $imageFull | default $imageBuilt }}
+{{- end }}
+
 {{- define "kolla_toolbox_image_full" }}
-{{- $kollaToolboxImageBuilt := printf "%s/%s/%s-%s-kolla-toolbox:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kolla_toolbox_image_tag }}
-{{- $kollaToolboxImageFull := .Values.kolla_toolbox_image_full | default $kollaToolboxImageBuilt }}
-{{- $kollaToolboxImageFull -}}
+{{- $c := dict "contName" "kolla-toolbox" }}
+{{- $_ := set $c "imageName" "kola_toolbox_image_full" }}
+{{- $_ := set $c "tagName" "kolla_toolbox_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
 {{- end }}
 
 {{- define "haproxy_image_full" }}
-{{- $haproxyImageBuilt := printf "%s/%s/%s-%s-haproxy:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.haproxy_image_tag }}
-{{- $haproxyImageFull := .Values.haproxy_image_full | default $haproxyImageBuilt }}
-{{- $haproxyImageFull -}}
+{{- $c := dict "contName" "haproxy" }}
+{{- $_ := set $c "imageName" "haproxy_image_full" }}
+{{- $_ := set $c "tagName" "haproxy_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
 {{- end }}
 
 {{- define "fluentd_image_full" }}
-{{- $fluentdImageBuilt := printf "%s/%s/%s-%s-fluentd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.fluentd_image_tag }}
-{{- $fluentdImageFull := .Values.kolla_toolbox_image_full | default $fluentdImageBuilt }}
-{{- $fluentdImageFull -}}
+{{- $c := dict "contName" "fluentd" }}
+{{- $_ := set $c "imageName" "fluentd_image_full" }}
+{{- $_ := set $c "tagName" "fluentd_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
 {{- end }}
 
 {{- define "kubernetes_entrypoint_image_full" }}
-{{- $kubernetesEntryPointImageBuilt := printf "%s/%s/%s-%s-kubernetes-entrypoint:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.kubernetes_entrypoint_image_tag }}
-{{- $kubernetesEntryPointImageFull := .Values.kubernetes_entrypoint_image_full | default $kubernetesEntryPointImageBuilt }}
-{{- $kubernetesEntryPointImageFull }}
+{{- $c := dict "contName" "kubernetes-entrypoint" }}
+{{- $_ := set $c "imageName" "kubernetes_entrypoint_image_full" }}
+{{- $_ := set $c "tagName" "kubernetes_entrypoint_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
 {{- end }}
