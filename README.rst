@@ -8,6 +8,20 @@ Team and repository tags
 .. Change things from this point on
 
 
+==============
+Kolla Overview
+==============
+
+The Kolla project is a member of the OpenStack `Big Tent
+Governance <http://governance.openstack.org/reference/projects/index.html>`__.
+
+Kolla's mission statement is:
+
+::
+
+    To provide production-ready containers and deployment tools for operating
+    OpenStack clouds.
+
 ================
 kolla-kubernetes
 ================
