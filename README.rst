@@ -52,6 +52,23 @@ containers on bare metal.
 THe kolla-kubernetes deliverable maintains a cloud-native implementation
 of deployment of OpenStack on Kubernetes.
 
+Getting Involved
+================
+
+Need a feature? Find a bug? Let us know! Contributions are much
+appreciated and should follow the standard `Gerrit
+workflow <http://docs.openstack.org/infra/manual/developers.html>`__.
+
+-  We communicate using the #openstack-kolla irc channel.
+-  File bugs, blueprints, track releases, etc on
+   `Launchpad <https://launchpad.net/kolla-kubernetes>`__.
+-  Attend weekly
+   `meetings <https://wiki.openstack.org/wiki/Meetings/Kolla>`__.
+-  Contribute `code <https://git.openstack.org/openstack/kolla-kubernetes>`__.
+
+General Information
+===================
+
 * Free software: Apache license
 * Documentation: http://docs.openstack.org/developer/kolla-kubernetes
 * Source: http://git.openstack.org/cgit/openstack/kolla-kubernetes
