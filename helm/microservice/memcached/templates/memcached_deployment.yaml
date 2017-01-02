@@ -1,3 +1,4 @@
+{{- $localVals := dict }}
 {{- $resourceName := "memcached" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
@@ -6,15 +7,17 @@
 {{- $serviceType := "deployment" }}
 {{- $elementName := .Values.element_name | default $serviceName }}
 {{- $elementType := .Values.element_type | $serviceType }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values "Release" .Release }}
-{{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" $env ) }}
-{{- $enabled := ne $enabledStr "false" }}
-{{- $imagePrefix := include "kolla_image_built_prefix" $env }}
-{{- $memcachedImageBuilt := printf "%s-memcached:%s" $imagePrefix .Values.memcached_image_tag | default .Values.kolla_tag }}
-{{- $memcachedImageFull := .Values.memcached_image_full | default $memcachedImageBuilt }}
-{{- $port := include "kolla_val_get" (dict "valName" "port" "env" $env ) }}
-{{- $containerConfigDirectory := include "kolla_val_get" (dict "valName" "container_config_directory" "env" $env ) }}
-{{- if $enabled }}
+{{- $searchPath := printf ":global.kolla.%s.deployment:global.kolla.%s.all:global.kolla.memcached.deployment:global.kolla.memcached.all:global.kolla.all" .Values.element_name .Values.element_name }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "searchPath" $searchPath "Values" .Values "Release" .Release }}
+{{- $c := dict "searchPath" $searchPath "key" "enabled" "retDict" $localVals "retKey" "enabled" "Values" .Values }}
+{{- include "kolla_val_get_first" $c }}
+{{- $ci := dict "searchPath" $searchPath "Values" .Values "contName" "memcached" }}
+{{- $_ := set $ci "imageName" "image_full" }}
+{{- $_ := set $ci "tagName" "image_tag" }}
+{{- $memcachedImageFull := include "kolla_build_image_full" $ci }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- if $localVals.enabled }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
