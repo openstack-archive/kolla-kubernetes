@@ -48,8 +48,17 @@ def main():
     microdir = os.path.join(srcdir, "microservice")
     microservices = os.listdir(microdir)
 
-    for package in [p for p in microservices if _isdir(microdir, p)]:
+    packages = [p for p in microservices if _isdir(microdir, p)]
+    count = 1
+    for package in packages:
+        if sys.stdout.isatty():
+            sys.stdout.write("\rProcessing %i/%i" % (count, len(packages)))
+            sys.stdout.flush()
+            count += 1
         helm_build_package(repodir, os.path.join(microdir, package))
+    if sys.stdout.isatty():
+            sys.stdout.write("\r                             \n")
+            sys.stdout.flush()
 
 if __name__ == '__main__':
     sys.exit(main())
