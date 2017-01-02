@@ -8,14 +8,35 @@ Team and repository tags
 .. Change things from this point on
 
 
-===============================
+================
 kolla-kubernetes
+================
+
+The kolla-kubernetes deliverable deploys OpenStack on top of Kubernetes.
+This work is experimental at this time.  A 1.0.0 version or later signals
+this work is ready for evaluation.
+
+The kolla-kubernetes Repository
 ===============================
 
-Kubernetes deployment of the Kolla containers.
+The kolla-kubernetes repository is one of three deliverables of the
+OpenStack Kolla project.  The three deliverables that make up the Kolla
+project are:
 
-Kolla-Kubernetes is a project whose goal is to deploy Kolla's containers
-with Kubernetes.
+===============   =====================================================
+Deliverable       Repository
+===============   =====================================================
+kolla             https://git.openstack.org/openstack/kolla
+kolla-ansible     https://git.openstack.org/openstack/kolla-ansible
+kolla-kubernetes  https://git.openstack.org/openstack/kolla-kubernetes
+
+The kolla deliverable maintains container images and container build tools.
+
+The kolla-ansible deliverable maintains an Ansible deployment for Kolla
+containers on bare metal.
+
+THe kolla-kubernetes deliverable maintains a cloud-native implementation
+of deployment of OpenStack on Kubernetes.
 
 * Free software: Apache license
 * Documentation: http://docs.openstack.org/developer/kolla-kubernetes
