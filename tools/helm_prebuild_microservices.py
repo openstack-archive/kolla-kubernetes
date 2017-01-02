@@ -101,7 +101,13 @@ def main():
     microservices = os.listdir(microdir)
     values = yaml.load(open(os.path.join(srcdir, "all_values.yaml")))
 
-    for package in [p for p in microservices if _isdir(microdir, p)]:
+    packages = [p for p in microservices if _isdir(microdir, p)]
+    count = 1
+    for package in packages:
+        if sys.stdout.isatty():
+            sys.stdout.write("\rProcessing %i/%i" % (count, len(packages)) )
+            sys.stdout.flush()
+            count += 1
         pkgchartdir = os.path.join(microdir, package, "charts")
         try:
             os.makedirs(pkgchartdir)
@@ -124,6 +130,9 @@ def main():
         f.write("# and rerun tools/helm_prebuild.py\n")
         f.write(yaml.safe_dump(pkg_values, default_flow_style=False))
         f.close()
+    if sys.stdout.isatty():
+            sys.stdout.write("\r                             \n")
+            sys.stdout.flush()
 
 if __name__ == '__main__':
     sys.exit(main())
