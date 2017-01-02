@@ -1,0 +1,64 @@
+{{/* Takes an array of doted key paths named list or a string that is
+     colon seperated, an optional leaf named key that is appended to all
+     entries in the list and Values. Returns the first defined value as
+     a string */}}
+{{- define "kolla_val_get_str" }}
+{{- $c := dict "list" .list "retKey" "retval" "Values" .Values }}
+{{- $_ := set $c "retDict" $c }}
+{{- if hasKey . "key" }}
+{{- $_ := set $c "key" .key }}
+{{- end }}
+{{- include "kolla_val_get_first" $c }}
+{{ $c.retval }}
+{{- end }}
+
+{{/* Takes in an array of doted key paths named list or a string that is
+     colon seperated, an optional leaf named key that is appended to all
+     entries in the list, retDict, retKey and Values.  Returns the first
+     defined value in retDict.retKey. */}}
+{{- define "kolla_val_get_first" }}
+{{- $env := . }}
+{{- $localVals := dict "list" .list "found" false }}
+{{- if eq (typeOf .list) "string" }}
+{{- $_ := set $localVals "list" (split ":" .list) }}
+{{- end }}
+{{- range $localVals.list }}
+{{- if not $localVals.found }}
+{{- $loopVals := dict "key" . }}
+{{- if hasKey $env "key" }}
+{{- if eq . "" }}
+{{- $_ := set $loopVals "key" $env.key }}
+{{- else }}
+{{- $_ := set $loopVals "key" (printf "%s.%s" . $env.key) }}
+{{- end }}
+{{- end }}
+{{- $c := dict "key" $loopVals.key "retDict" $env.retDict "retKey" $env.retKey "Values" $env.Values }}
+{{- include "kolla_val_get_single" $c }}
+{{- if hasKey $c "retval" }}
+{{- $_ := set $localVals "found" true }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/* Takes in a key path, dot seperated. Returns its value in retval. If
+     retDict and retKey, the value is also assigned to retDict.retKey. */}}
+{{- define "kolla_val_get_single" }}
+{{- $localVals := dict }}
+{{- $env := . }}
+{{- $_ := set $localVals "item" $env.Values }}
+{{- $_ := set $localVals "allFound" true }}
+{{- range (split "." $env.key) }}
+{{- if and ($localVals.allFound) (hasKey $localVals.item .) }}
+{{- $_ := set $localVals "item" (index $localVals.item .) }}
+{{- else }}
+{{- $_ := set $localVals "allFound" false }}
+{{- end }}
+{{- end }}
+{{- if $localVals.allFound }}
+{{- $_ := set $env "retval" $localVals.item }}
+{{- end }}
+{{- if and $localVals.allFound (hasKey $env "retDict") (hasKey $env "retKey") }}
+{{- $_ := set $env.retDict $env.retKey $localVals.item }}
+{{- end }}
+{{- end }}
