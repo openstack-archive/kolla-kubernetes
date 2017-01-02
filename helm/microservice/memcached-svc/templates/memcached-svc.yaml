@@ -1,16 +1,18 @@
-{{- $serviceName := "memcached" }}
-{{- $serviceType := "svc" }}
-{{- $elementName := .Values.element_name | default $serviceName }}
-{{- $elementType := .Values.element_type | default $serviceType }}
-{{- $elementService := $elementName }}
-#FIXME env var names don't match the rest in kolla-kubernetes
-{{- with $env := dict "element_name" $elementName "element_service" $elementService "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "Values" .Values }}
-#FIXME move into common_service
-{{- $elementPort := include "kolla_val_get" (dict "valName" "port" "env" $env ) }}
-{{- $enabledStr := include "kolla_val_get" (dict "valName" "enabled" "env" $env ) }}
-{{- $enabled := ne $enabledStr "false" }}
-{{- $_ := set $env "element_port" $elementPort }}
-{{- if $enabled }}
+{{- $localVals := dict }}
+{{- $searchPath := printf ":global.kolla.%s.svc:global.kolla.%s.all:global.kolla.memcached.svc:global.kolla.memcached.all:global.kolla.all" .Values.element_name .Values.element_name }}
+{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
+{{- $elementName := .Values.element_name | default "memcached" }}
+{{- $elementService := .Values.element_name | default "memcached" }}
+{{- $c := dict "searchPath" $searchPath "key" "enabled" "retDict" $localVals "retKey" "enabled" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "searchPath" $searchPath "Values" .Values "Release" .Release }}
+{{- if $localVals.enabled }}
 {{- include "common_svc" $env }}
+{{- else }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-svc-disabled" $elementName }}
+data:
 {{- end }}
 {{- end }}
