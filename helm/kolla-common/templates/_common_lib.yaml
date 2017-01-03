@@ -60,3 +60,25 @@
 - name: KOLLA_CONFIG_STRATEGY
   value: COPY_ONCE
 {{- end }}
+
+{{ /*
+  Can be used for any container that requires outside network access.
+  User must pass in values for http_proxy, https_proxy, and/or no_proxy.
+  The template also supports an .extra_no_proxy value for internal services
+  that are accessed by the container that need to bypass the proxy.
+*/ }}
+{{- define "common_proxy_vars" }}
+{{- if .Values.http_proxy }}
+- name: http_proxy
+  value: {{ .Values.http_proxy }}
+{{- end }}
+{{- if .Values.https_proxy }}
+- name: https_proxy
+  value: {{ .Values.https_proxy }}
+{{- end }}
+{{- $noproxy := printf "%s,%s" .Values.no_proxy .extra_no_proxy | trimAll "," }}
+{{- if $noproxy }}
+- name: no_proxy
+  value: {{ $noproxy }}
+{{- end }}
+{{- end }}
