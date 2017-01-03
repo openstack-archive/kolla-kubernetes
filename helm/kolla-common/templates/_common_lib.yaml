@@ -60,3 +60,19 @@
 - name: KOLLA_CONFIG_STRATEGY
   value: COPY_ONCE
 {{- end }}
+
+{{- define "common_proxy_vars" }}
+{{- if .Values.http_proxy }}
+- name: http_proxy
+  value: {{ .Values.http_proxy }}
+{{- end }}
+{{- if .Values.https_proxy }}
+- name: https_proxy
+  value: {{ .Values.https_proxy }}
+{{- end }}
+{{- $noproxy := printf "%s,%s" .Values.no_proxy .extra_no_proxy | trimAll "," }}
+{{- if $noproxy }}
+- name: no_proxy
+  value: {{ $noproxy }}
+{{- end }}
+{{- end }}
