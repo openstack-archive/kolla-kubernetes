@@ -7,6 +7,10 @@ common:
                     base_distro: centos
                     install_type: binary
                     container_config_directory: /var/lib/kolla/config_files
+                    image_tag: 2.0.2
+                    fluentd_image_tag: 3.0.1
+                    kolla_toolbox_image_tag: 3.0.1
+                    kubernetes_entrypoint_image_tag: 3.0.1
 
         selector_key: kolla_controller
         selector_value: "true"
@@ -30,10 +34,6 @@ common:
         #kolla_toolbox_image_tag:
 
         enable_kube_logger: true
-        fluentd_image_tag: 3.0.1
-        kolla_toolbox_image_tag: 3.0.1
-
-        kubernetes_entrypoint_image_tag: 3.0.1
         kubernetes_entrypoint: false
 
 common-create-keystone-admin:
