@@ -1,6 +1,7 @@
 {{- define "common_create_user_job" }}
 {{- $authURLBuilt := printf "%s://%s:%1.f" .Values.keystone_admin_protocol .Values.keystone_admin_svcname .Values.keystone_admin_port }}
 {{- $authURLFull := .Values.keystone_admin_url | default $authURLBuilt }}
+{{- $extra_no_proxy := .Values.keystone_admin_svcname }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -72,6 +73,9 @@ spec:
                secretKeyRef:
                   name: {{ .serviceName }}-keystone-password
                   key: password
+{{- with $env := dict "extra_no_proxy" $extra_no_proxy "Values" .Values }}
+{{ include "common_proxy_vars" $env | indent 12 }}
+{{- end }}
       volumes:
 {{ include "common_volumes" . | indent 8 }}
       restartPolicy: OnFailure
