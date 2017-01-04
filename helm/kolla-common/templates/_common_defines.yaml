@@ -29,7 +29,7 @@
 {{- define "kolla_toolbox_image_full" }}
 {{- $c := dict "searchPath" .searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "kolla-toolbox" }}
-{{- $_ := set $c "imageName" "kola_toolbox_image_full" }}
+{{- $_ := set $c "imageName" "kolla_toolbox_image_full" }}
 {{- $_ := set $c "tagName" "kolla_toolbox_image_tag" }}
 {{- include "kolla_build_image_full" $c }}
 {{- end }}
