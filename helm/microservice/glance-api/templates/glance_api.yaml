@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.glance.api.deployment:global.kolla.glance.api.all:global.kolla.glance.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "glance-api" }}

@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.iscsid.svc:global.kolla.iscsid.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-iscsid:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.iscsid_image_tag | default .Values.kolla_tag }}
 {{- $imageFull := .Values.iscsi_image_full | default $imageBuilt }}
 {{- $resourceName := "iscsid" }}

@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.keystone.api.deployment:global.kolla.keystone.api.all:global.kolla.keystone.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "keystone" }}
@@ -48,6 +49,6 @@ items:
 - key: config.json
   path: config.json
 {{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_apache_deployment" $env }}
 {{- end }}

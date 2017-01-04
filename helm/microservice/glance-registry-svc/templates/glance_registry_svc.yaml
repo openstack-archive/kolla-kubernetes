@@ -1,7 +1,8 @@
+{{- $searchPath := ":global.kolla.glance.registry.svc:global.kolla.glance.registry.all:global.kolla.glance.all:global.kolla.all" }}
 {{- $elementPort := .Values.glance_registry_port | default 9191 }}
 {{- $elementService := "glance" }}
 {{- $elementName := printf "%s-registry" $elementService }}
 {{- $elementType := .Values.type }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}

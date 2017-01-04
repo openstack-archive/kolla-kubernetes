@@ -3,11 +3,13 @@
 {{- $resourceName := "tgtd" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $searchPath := printf ":global.kolla.%s.daemonset:global.kolla.%s.daemonset:global.kolla.tgtd.daemonset:global.kolla.tgtd.all:global.kolla.tgtd.all:global.kolla.all" $elementName $elementName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ .Values.element_name }}
+  name: {{ $elementName }}
   labels:
     component: tgtd
     system: tgtd
@@ -81,7 +83,7 @@ spec:
           emptyDir: {}
         - name: tgtd-configmap
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
         - name: cinder-volumes
           hostPath:
             path: /var/lib/cinder

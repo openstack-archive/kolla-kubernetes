@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.horizon.deployment:global.kolla.horizon.all:global.kolla.all" }}
 {{- $horizonImageBuilt := printf "%s/%s/%s-%s-horizon:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.horizon_image_tag | default .Values.kolla_tag }}
 {{- $horizonImageFull := .Values.horizon_image_full | default $horizonImageBuilt }}
 {{- $resourceName := "horizon" }}

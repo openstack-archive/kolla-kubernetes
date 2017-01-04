@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.keystone.create_keystone_endpoint.job:global.kolla.keystone.create_keystone_endpoint.all:global.kolla.keystone.all:global.kolla.all" }}
 {{- $ImageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag | default .Values.kolla_tag }}
 {{- $ImageFull := .Values.image_full | default $ImageBuilt }}
 {{- $resourceName := "keystone" }}

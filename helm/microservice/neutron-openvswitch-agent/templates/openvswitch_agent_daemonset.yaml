@@ -1,4 +1,5 @@
 {{- $restype := .Values.type }}
+{{- $searchPath := printf ":global.kolla.neutron.openvswitch_agent_%s.daemonset:global.kolla.neutron.openvswitch_agent_%s.all:global.kolla.neutron.openvswitch_agent.all:global.kolla.neutron.all:global.kolla.all" $restype $restype }}
 
 {{- $openvswitchAgentImageBuilt := printf "%s/%s/%s-%s-neutron-openvswitch-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_agent_image_tag }}
 {{- $openvswitchAgentImageFull := .Values.openvswitch_agent_image_full | default $openvswitchAgentImageBuilt }}

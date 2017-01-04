@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.cinder.volume_ceph.statefulset:global.kolla.cinder.volume_ceph.all:global.kolla.cinder.volume.all:global.kolla.cinder.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-cinder-volume:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "cinder-volume-ceph" }}
