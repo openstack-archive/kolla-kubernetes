@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.nova.libvirt.deployment:global.kolla.nova.libvirt.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-nova-libvirt:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "nova-libvirt" }}
@@ -6,7 +7,7 @@
 {{- $serviceName := "nova" }}
 {{- $serviceType := "libvirt" }}
 {{- $privileged := true }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:

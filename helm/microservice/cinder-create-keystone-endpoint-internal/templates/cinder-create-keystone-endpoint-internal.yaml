@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.cinder.create_keystone_endpoint.internal.job:global.kolla.cinder.create_keystone_endpoint.all:global.kolla.cinder.api.all:global.kolla.cinder.all:global.kolla.all" }}
 {{- $resourceName := "cinder-create-keystone-endpoint-internal" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
@@ -6,6 +7,6 @@
 {{- $interface := "internal" }}
 {{- $cinderInternalEndpointBuilt := printf "http://%s:%1.f/v1/%%(tenant_id)s" .Values.cinder_internal_service .Values.cinder_api_port }}
 {{- $endpointURLFull := .Values.cinder_internal_endpoint | default $cinderInternalEndpointBuilt }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}

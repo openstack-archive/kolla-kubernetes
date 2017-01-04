@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.nova.create_keystone_endpoint.admin.job:global.kolla.nova.create_keystone_endpoint.all:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $resourceName := "nova-create-keystone-endpoint-admin" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
@@ -6,6 +7,6 @@
 {{- $interface := "admin" }}
 {{- $novaAdminEndpointBuilt := printf "http://%s:%1.f/v2/%%(tenant_id)s" .Values.nova_admin_service .Values.nova_api_port }}
 {{- $endpointURLFull := .Values.nova_admin_endpoint | default $novaAdminEndpointBuilt }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}

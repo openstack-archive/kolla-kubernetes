@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.neutron.manage_db.job:global.kolla.neutron.manage_db.all:global.kolla.neutron.server.all:global.kolla.neutron.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-neutron-server:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "neutron" }}
@@ -17,6 +18,6 @@ items:
 - key: neutron-vpnaas.conf
   path: neutron_vpnaas.conf
 {{- end }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "extraConfigmapConfig" $extraConfigmapConfig  "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "extraConfigmapConfig" $extraConfigmapConfig  "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}

@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.neutron.create_keystone_endpoint.public.job:global.kolla.neutron.create_keystone_endpoint.all:global.kolla.neutron.server.all:global.kolla.neutron.all:global.kolla.all" }}
 {{- $resourceName := "neutron-create-keystone-endpoint-public" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
@@ -6,6 +7,6 @@
 {{- $interface := "public" }}
 {{- $neutronPublicEndpointBuilt := printf "http://%s:%1.f" .Values.kolla_kubernetes_external_vip .Values.neutron_server_port }}
 {{- $endpointURLFull := .Values.neutron_public_endpoint | default $neutronPublicEndpointBuilt }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}

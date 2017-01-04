@@ -1,8 +1,9 @@
+{{- $searchPath := ":global.kolla.nova.api.svc:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $elementPort := .Values.port | default 8774 }}
 {{- $rootElementName := .Values.element_name | default "nova" }}
 {{- $elementServiceType := .Values.element_service_type | default "api" }}
 {{- $elementService := $rootElementName }}
 {{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}
