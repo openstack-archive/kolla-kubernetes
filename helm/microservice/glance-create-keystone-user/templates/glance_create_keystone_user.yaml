@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.glance.create_keystone_user.job:global.kolla.glance.create_keystone_user.all:global.kolla.glance.all:global.kolla.all" }}
 {{- $resourceName := "glance-create-keystone-user" }}
 {{- $serviceName := "glance" }}
 {{- $serviceType := "create-keystone-user" }}
@@ -13,7 +14,7 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "podTypeBootstrap" $podTypeBootstrap "userName" $userName "userDomain" $userDomain "userProject" $userProject "userProjectDomain" $userProjectDomain "userRole" $userRole "Values" .Values "Release" .Release "searchPath" $searchPath }}
 
 {{- include "common_create_user_job" $env }}
 {{- end }}

@@ -1,8 +1,9 @@
+{{- $searchPath := ":global.kolla.neutron.server.svc:global.kolla.neutron.server.all:global.kolla.neutron.all:global.kolla.all" }}
 {{- $elementPort := .Values.port | default 9696 }}
 {{- $rootElementName := .Values.element_name | default "neutron" }}
 {{- $elementServiceType := .Values.element_service_type | default "server" }}
 {{- $elementService := $rootElementName }}
 {{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}

@@ -1,10 +1,11 @@
 {{- $restype := .Values.type }}
+{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.deployment:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
 {{- $openvswitchVswitchdImageBuilt := printf "%s/%s/%s-%s-openvswitch-vswitchd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_vswitchd_image_tag | default .Values.kolla_tag }}
 {{- $openvswitchVswitchdFull := .Values.openvswitch_vswitchd_image_full | default $openvswitchVswitchdImageBuilt }}
 {{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:

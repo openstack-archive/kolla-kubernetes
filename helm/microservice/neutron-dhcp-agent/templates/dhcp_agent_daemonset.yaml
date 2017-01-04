@@ -1,10 +1,11 @@
+{{- $searchPath := ":global.kolla.neutron.dhcp_agent.daemonset:global.kolla.neutron.dhcp_agent.all:global.kolla.neutron.all:global.kolla.all" }}
 {{- $dhcpAgentImageBuilt := printf "%s/%s/%s-%s-neutron-dhcp-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.dhcp_agent_image_tag }}
 {{- $dhcpAgentImageFull := .Values.dhcp_agent_image_full | default $dhcpAgentImageBuilt }}
 
 {{- $resourceName := printf "neutron-dhcp-agent" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:

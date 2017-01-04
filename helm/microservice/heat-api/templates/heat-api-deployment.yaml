@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.heat.api.deployment:global.kolla.heat.api.all:global.kolla.heat.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-heat-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "heat-api" }}
@@ -22,6 +23,6 @@ items:
 - key: api-paste.ini
   path: api-paste.ini
 {{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_python_deployment" $env }}
 {{- end }}

@@ -1,3 +1,4 @@
+{{- $searchPath := ":global.kolla.cinder.backup.statefulset:global.kolla.cinder.backup.all:global.kolla.cinder.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-cinder-backup:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "cinder-backup" }}
@@ -6,7 +7,7 @@
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "backup" }}
 {{- $privileged := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
