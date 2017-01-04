@@ -1,0 +1,9 @@
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+2: Pete Birley <pete@port.direct>
+Workflow+1: Pete Birley <pete@port.direct>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 04 Jan 2017 01:05:40 +0000
+Reviewed-on: https://review.openstack.org/416077
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
