@@ -1,6 +1,7 @@
 {{- $elementPort := .Values.rabbitmq_port | default 15672 }}
 {{- $elementName := printf "%s-mgmt" .Values.element_name }}
 {{- $elementService := printf "%s-mgmt" .Values.element_name }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release }}
+{{- $searchPath := printf ":global.kolla.%s.svc:global.kolla.%s.all:global.kolla.rabbitmq.svc:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}

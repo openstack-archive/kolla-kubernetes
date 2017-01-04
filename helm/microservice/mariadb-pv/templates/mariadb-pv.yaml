@@ -1,8 +1,10 @@
-{{- $pvName := "mariadb" }}
+{{- $elementName := .Values.element_name | default "mariadb" }}
+{{- $pvName := $elementName }}
+{{- $searchPath := printf ":global.kolla.%s.pv:global.kolla.%s.all:global.kolla.mariadb.pv:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
 {{- $storageProvider := .Values.storage_provider }}
 {{- $storageProviderFStype := .Values.storage_provider_fstype | default "xfs" }}
 {{- $volumeName := "mariadb" }}
 {{- $volumeSizeGB := .Values.mariadb_volume_size_gb | default 10 }}
-{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release }}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_pv" $env }}
 {{- end }}
