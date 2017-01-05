@@ -50,7 +50,7 @@ helm install kolla/keystone-admin-svc --version 3.0.0-1 \
 
 helm install kolla/keystone-public-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=keystone-public,port_external=true,external_vip=$IP"
 
 helm install kolla/keystone-internal-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-internal-svc \
@@ -58,22 +58,22 @@ helm install kolla/keystone-internal-svc --version 3.0.0-1 \
 
 helm install kolla/glance-api-svc --version 3.0.0-1 \
     --namespace kolla --name glance-api-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
 helm install kolla/neutron-server-svc --version 3.0.0-1 \
     --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=cinder,port_external=true,external_vip=$IP"
 
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=nova,port_external=true,external_vip=$IP"
 
 helm install kolla/nova-metadata-svc --version 3.0.0-1 \
     --namespace kolla --name nova-metadata-svc \
@@ -180,16 +180,16 @@ kollakube res create bootstrap \
     cinder-create-keystone-endpoint-publicv2
 
 helm install kolla/cinder-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
 
 helm install kolla/glance-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
 
 helm install kolla/nova-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
 
 helm install kolla/neutron-create-keystone-endpoint-public --version 3.0.0-1 \
-    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,kolla_kubernetes_external_vip=172.18.0.1"
+    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
 helm install kolla/neutron-create-keystone-endpoint-internal --version 3.0.0-1 \
     --namespace kolla --name neutron-create-keystone-endpoint-internal --set "$common_vars"
 helm install kolla/neutron-create-keystone-endpoint-admin --version 3.0.0-1 \

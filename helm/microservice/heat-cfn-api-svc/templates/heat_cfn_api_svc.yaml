@@ -1,9 +1,9 @@
 {{- $searchPath := ":global.kolla.heat.api-cfn.svc:global.kolla.heat.api-cfn.all:global.kolla.heat.all:global.kolla.all" }}
-{{- $elementPort := .Values.port | default 8000 }}
+{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
 {{- $rootElementName := .Values.element_name | default "heat-cfn" }}
 {{- $elementServiceType := .Values.element_service_type | default "api" }}
 {{- $elementService := $rootElementName }}
 {{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "element_port_external" .Values.element_port_external "kolla_kubernetes_external_vip" .Values.kolla_kubernetes_external_vip "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}
