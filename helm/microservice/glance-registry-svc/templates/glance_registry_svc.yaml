@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.glance.registry.svc:global.kolla.glance.registry.all:global.kolla.glance.all:global.kolla.all" }}
-{{- $elementPort := .Values.glance_registry_port | default 9191 }}
+{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
 {{- $elementService := "glance" }}
 {{- $elementName := printf "%s-registry" $elementService }}
 {{- $elementType := .Values.type }}

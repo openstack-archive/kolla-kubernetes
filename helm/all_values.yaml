@@ -64,13 +64,34 @@ openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
 
 keystone-admin-svc:
-        port: 35357
+        global:
+            kolla:
+                keystone:
+                    all:
+                        admin_port: 35357
+                        admin_node_port: 35357
+                        admin_port_external: false
+                        admin_node_port_enabled: false
 
 keystone-internal-svc:
-        port: 5000
+        global:
+            kolla:
+                keystone:
+                    all:
+                        port: 5000
+                        node_port: 5000
+                        port_external: false
+                        node_port_enabled: false
 
 keystone-public-svc:
-        port: 5000
+        global:
+            kolla:
+                keystone:
+                    all:
+                        port: 5000
+                        node_port: 5000
+                        port_external: false
+                        node_port_enabled: false
 
 keystone-create-db:
         database_host: "mariadb"
@@ -94,7 +115,15 @@ keystone-api:
         admin_port: 35357
 
 neutron-server-svc:
-        port: 9696
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
+                            node_port: 9696
+                            port_external: false
+                            node_port_enabled: false
 
 neutron-create-db:
         database_host: "mariadb"
@@ -190,8 +219,18 @@ rabbitmq-pvc:
         rabbitmq_volume_size_gb: 10
 
 rabbitmq-svc:
-        rabbitmq_port: 5672
-        rabbitmq_management_port: 15672
+        global:
+            kolla:
+                rabbitmq:
+                    all:
+                        port: 5672
+                        node_port: 9696
+                        port_external: false
+                        node_port_enabled: false
+                        mgmt_port: 15672
+                        mgmt_node_port: 15672
+                        mgmt_port_external: false
+                        mgmt_node_port_enabled: false
 
 memcached-svc:
         global:
@@ -200,6 +239,9 @@ memcached-svc:
                     all:
                         enabled: true
                         port: 11211
+                        node_port: 11211
+                        port_external: false
+                        node_port_enabled: false
 
 memcached:
         global:
@@ -225,16 +267,47 @@ mariadb-pvc:
         mariadb_volume_size_gb: 10
 
 mariadb-svc:
-        mariadb_port: 3306
+        global:
+            kolla:
+                mariadb:
+                    all:
+                        port: 3306
+                        node_port: 3306
+                        port_external: false
+                        node_port_enabled: false
 
 nova-api-svc:
-        port: 8774
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
+                            node_port: 8774
+                            port_external: false
+                            node_port_enabled: false
 
 nova-metadata-svc:
-        port: 8775
+        global:
+            kolla:
+                nova:
+                    metadata:
+                        all:
+                            port: 8775
+                            node_port: 8775
+                            port_external: false
+                            node_port_enabled: false
 
 nova-novncproxy-svc:
-        port: 6080
+        global:
+            kolla:
+                nova:
+                    novncproxy:
+                        all:
+                            port: 6080
+                            node_port: 6080
+                            port_external: false
+                            node_port_enabled: false
 
 nova-create-db:
         database_host: "mariadb"
@@ -309,10 +382,26 @@ nova-create-keystone-endpoint-public:
         nova_api_port: 8774
 
 heat-api-svc:
-        port: 8004
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8004
+                            node_port: 8004
+                            port_external: false
+                            node_port_enabled: false
 
 heat-cfn-api-svc:
-        port: 8000
+        global:
+            kolla:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
+                            node_port: 8004
+                            port_external: false
+                            node_port_enabled: false
 
 heat-api:
         global:
@@ -335,12 +424,26 @@ heat-engine:
         replicas: 1
 
 glance-api-svc:
-        glance_api_port: 9292
-        type: "api"
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                            node_port: 9292
+                            port_external: false
+                            node_port_enabled: false
 
 glance-registry-svc:
-        glance_registry_port: 9191
-        type: "registry"
+        global:
+            kolla:
+                glance:
+                    registry:
+                        all:
+                            port: 9191
+                            node_port: 9191
+                            port_external: false
+                            node_port_enabled: false
 
 glance-pv:
         glance_volume_size_gb: 10
@@ -358,7 +461,15 @@ cinder-manage-db:
         image_tag: 2.0.2
 
 cinder-api-svc:
-        port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                            node_port: 8776
+                            port_external: false
+                            node_port_enabled: false
 
 cinder-api:
         global:
@@ -382,8 +493,14 @@ horizon-api:
         port: 80
 
 horizon-svc:
-        type: dashboard
-        port: 80
+        global:
+            kolla:
+                horizon:
+                    all:
+                        port: 80
+                        node_port: 80
+                        port_external: false
+                        node_port_enabled: false
 
 cinder-scheduler:
         replicas: 1
