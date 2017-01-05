@@ -5,8 +5,11 @@
 {{- $serviceName := "neutron" }}
 {{- $serviceType := "network" }}
 {{- $interface := "internal" }}
-{{- $neutronInternalEndpointBuilt := printf "http://%s:%1.f" .Values.neutron_internal_service .Values.neutron_server_port }}
-{{- $endpointURLFull := .Values.neutron_internal_endpoint | default $neutronInternalEndpointBuilt }}
+{{- $service := include "kolla_val_get_str" (dict "key" "service" "searchPath" $searchPath "Values" .Values) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
+{{- $neutronInternalEndpointBuilt := printf "http://%s:%s" $service $port }}
+{{- $endpointURLFullUser := include "kolla_val_get_str" (dict "key" "endpoint" "searchPath" $searchPath "Values" .Values) }}
+{{- $endpointURLFull := $endpointURLFullUser | default $neutronInternalEndpointBuilt }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}

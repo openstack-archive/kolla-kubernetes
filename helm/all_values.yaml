@@ -38,17 +38,22 @@ common:
         kubernetes_entrypoint: false
 
 common-create-keystone-admin:
-        keystone_admin_protocol: http
-        keystone_admin_svcname: keystone-admin
-        keystone_admin_port: 35357
-        keystone_admin_url:
-        keystone_admin_project: admin
-        keystone_admin_username: admin
-        keystone_admin_domain_name: Default
-        region: RegionOne
+        global:
+            kolla:
+                all:
+                    keystone_admin_protocol: http
+                    keystone_admin_svcname: keystone-admin
+                    keystone_admin_port: 35357
+                    keystone_admin_project: admin
+                    keystone_admin_username: admin
+                    keystone_admin_domain_name: Default
+                    region: RegionOne
 
 pod-http-termination:
-        haproxy_python_termination: true
+        global:
+            kolla:
+                all:
+                    haproxy_python_termination: true
         haproxy_image_tag: 2.0.2
 
 stateful-service:
@@ -134,17 +139,49 @@ neutron-create-db:
 neutron-manage-db:
         image_tag: 2.0.2
 
+neutron-create-keystone-user:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    all:
+                        keystone_user_name: neutron
+
 neutron-create-keystone-endpoint-public:
-        kolla_kubernetes_external_vip:
-        neutron_server_port: 9696
+        global:
+            kolla:
+                all:
+                    external_vip:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
 
 neutron-create-keystone-endpoint-internal:
-        neutron_internal_service: neutron-server
-        neutron_server_port: 9696
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
+                    create_keystone_endpoint:
+                        all:
+                            service: neutron-server
 
 neutron-create-keystone-endpoint-admin:
-        neutron_admin_service: neutron-server
-        neutron_server_port: 9696
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
+                    create_keystone_endpoint:
+                        all:
+                            service: neutron-server
 
 neutron-server:
         global:
@@ -369,17 +406,49 @@ nova-libvirt:
         libvirt_tcp: false
         libvirt_ceph: true
 
+nova-create-keystone-user:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    all:
+                        keystone_user_name: nova
+
 nova-create-keystone-endpoint-admin:
-        nova_admin_service: nova-api
-        nova_api_port: 8774
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
+                    create_keystone_endpoint:
+                        all:
+                            service: nova-api
 
 nova-create-keystone-endpoint-internal:
-        nova_internal_service: nova-api
-        nova_api_port: 8774
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
+                    create_keystone_endpoint:
+                        all:
+                            service: nova-api
 
 nova-create-keystone-endpoint-public:
-        kolla_kubernetes_external_vip:
-        nova_api_port: 8774
+        global:
+            kolla:
+                all:
+                    external_vip:
+                nova:
+                    api:
+                        all:
+                            port: 8774
 
 heat-api-svc:
         global:
@@ -517,17 +586,49 @@ glance-manage-db:
         ceph_backend: true
         pvc_name: "glance"
 
+glance-create-keystone-user:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    all:
+                        keystone_user_name: glance
+
 glance-create-keystone-endpoint-public:
-        kolla_kubernetes_external_vip:
-        glance_api_port: 9292
+        global:
+            kolla:
+                all:
+                    external_vip:
+                glance:
+                    api:
+                        all:
+                            port: 9292
 
 glance-create-keystone-endpoint-internal:
-        glance_internal_service: glance-api
-        glance_api_port: 9292
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                    create_keystone_endpoint:
+                        all:
+                            service: glance-api
 
 glance-create-keystone-endpoint-admin:
-        glance_admin_service: glance-api
-        glance_api_port: 9292
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                    create_keystone_endpoint:
+                        all:
+                            service: glance-api
 
 glance-api:
         image_tag: 2.0.2
@@ -544,29 +645,81 @@ glance-registry:
                         all:
                             port: 9191
 
+cinder-create-keystone-user:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                cinder:
+                    all:
+                        keystone_user_name: cinder
+
 cinder-create-keystone-endpoint-admin:
-        cinder_admin_service: cinder-api
-        cinder_api_port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
 
 cinder-create-keystone-endpoint-adminv2:
-        cinder_admin_service: cinder-api
-        cinder_api_port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
 
 cinder-create-keystone-endpoint-public:
-        kolla_kubernetes_external_vip:
-        cinder_api_port: 8776
+        global:
+            kolla:
+                all:
+                    external_vip:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
 
 cinder-create-keystone-endpoint-publicv2:
-        kolla_kubernetes_external_vip:
-        cinder_api_port: 8776
+        global:
+            kolla:
+                all:
+                    external_vip:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
 
 cinder-create-keystone-endpoint-internal:
-        cinder_internal_service: cinder-api
-        cinder_api_port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
 
 cinder-create-keystone-endpoint-internalv2:
-        cinder_internal_service: cinder-api
-        cinder_api_port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
 
 iscsid:
         selector_key: kolla_compute
