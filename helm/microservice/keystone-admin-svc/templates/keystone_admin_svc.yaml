@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.keystone.admin.svc:global.kolla.keystone.admin.all:global.kolla.keystone.all:global.kolla.all" }}
-{{- $elementPort := .Values.port | default 35357 }}
+{{- $elementPort := include "kolla_val_get_str" (dict "key" "admin_port" "searchPath" .searchPath "Values" .Values) }}
 {{- $elementSuffix := .Values.element_compoenent | default "admin" }}
 {{- $elementServiceType := .Values.element_service_type | default "api" }}
 {{- $elementService := .Values.element_service | default "keystone"  }}
