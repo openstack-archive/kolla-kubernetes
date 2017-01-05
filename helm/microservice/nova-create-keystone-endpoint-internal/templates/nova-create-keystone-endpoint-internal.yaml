@@ -5,8 +5,11 @@
 {{- $serviceName := "nova" }}
 {{- $serviceType := "compute" }}
 {{- $interface := "internal" }}
-{{- $novaInternalEndpointBuilt := printf "http://%s:%1.f/v2/%%(tenant_id)s" .Values.nova_internal_service .Values.nova_api_port }}
-{{- $endpointURLFull := .Values.nova_internal_endpoint | default $novaInternalEndpointBuilt }}
+{{- $service := include "kolla_val_get_str" (dict "key" "service" "searchPath" $searchPath "Values" .Values) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
+{{- $novaInternalEndpointBuilt := printf "http://%s:%1.f/v2/%%(tenant_id)s" $service $port }}
+{{- $endpointURLFullUser := include "kolla_val_get_str" (dict "key" "endpoint" "searchPath" $searchPath "Values" .Values) }}
+{{- $endpointURLFull := $endpointURLFullUser | default $novaInternalEndpointBuilt }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Release" .Release "Values" .Values "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}
