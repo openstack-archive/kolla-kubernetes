@@ -1,6 +1,17 @@
 {{- define "common_create_user_job" }}
-{{- $authURLBuilt := printf "%s://%s:%1.f" .Values.keystone_admin_protocol .Values.keystone_admin_svcname .Values.keystone_admin_port }}
-{{- $authURLFull := .Values.keystone_admin_url | default $authURLBuilt }}
+{{- $region := include "kolla_val_get_str" (dict "key" "region" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminProtocol := include "kolla_val_get_str" (dict "key" "keystone_admin_protocol" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminSvcname := include "kolla_val_get_str" (dict "key" "keystone_admin_svcname" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminPort := include "kolla_val_get_str" (dict "key" "keystone_admin_port" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminProject := include "kolla_val_get_str" (dict "key" "keystone_admin_project" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminProjectDomainName := include "kolla_val_get_str" (dict "key" "keystone_admin_project_domain_name" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminDomainName := include "kolla_val_get_str" (dict "key" "keystone_admin_domain_name" "searchPath" .searchPath "Values" .Values ) }}
+{{- $keystoneAdminUserName := include "kolla_val_get_str" (dict "key" "keystone_admin_username" "searchPath" .searchPath "Values" .Values ) }}
+{{- $authURLBuilt := printf "%s://%s:%1.f" $keystoneAdminProtocol $keystoneAdminSvcname $keystoneAdminPort }}
+{{- $authURLUser := include "kolla_val_get_str" (dict "key" "keystone_admin_url" "searchPath" .searchPath "Values" .Values ) }}
+{{- $authURLFull := adminURLUser | default $authURLBuilt }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,7 +25,7 @@ spec:
 {{- include "init_container_tail" . | indent 4 }}
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
           name: main
@@ -27,13 +38,13 @@ spec:
                 pip install --upgrade python-openstackclient;
                 USER_PROJECT_ID=$(/usr/bin/openstack project create --or-show --enable -f value -c id \
                     --domain="{{ .userDomain }}" \
-                    --description="Service Project for {{ .Values.region }}/{{ .userDomain }}" \
+                    --description="Service Project for {{ $region }}/{{ .userDomain }}" \
                     "{{ .userProject }}");
                 USER_ID=$(/usr/bin/openstack user create --or-show --enable -f value -c id \
                     --domain="{{ .userDomain }}" \
                     --project-domain "{{ .userProjectDomain }}" \
                     --project="${USER_PROJECT_ID}" \
-                    --description "Service User for {{ .Values.region }}/{{ .userDomain }}/{{ .serviceName }}" \
+                    --description "Service User for {{ $region }}/{{ .userDomain }}/{{ .serviceName }}" \
                     --email="{{ .userName }}@{{ .userDomain | lower }}" \
                     --password="${KEYSTONE_PASSWORD}" \
                     "{{ .userName }}");
@@ -49,19 +60,19 @@ spec:
 {{ include "common_volume_mounts" . | indent 12 }}
           env:
             - name: OS_USERNAME
-              value: {{ .Values.keystone_admin_username | quote }}
+              value: {{ $keystoneAdminUserName | quote }}
             - name: OS_IDENTITY_API_VERSION
               value: "3"
             - name: OS_REGION_NAME
-              value: {{ .Values.region | quote }}
+              value: {{ $region | quote }}
             - name: OS_PROJECT_NAME
-              value: {{ .Values.keystone_admin_project | quote }}
+              value: {{ $keystoneAdminProject | quote }}
             - name: OS_AUTH_URL
               value: {{ $authURLFull | quote }}
             - name: OS_PROJECT_DOMAIN_NAME
-              value: {{ .Values.keystone_admin_project_domain_name | default .Values.keystone_admin_domain_name }}
+              value: {{ $keystoneAdminProjectDomainName | default $keystoneAdminDomainName }}
             - name: OS_USER_DOMAIN_NAME
-              value: {{ .Values.keystone_admin_domain_name | default .Values.keystone_admin_domain_name }}
+              value: {{ $keystoneAdminDomainName | default $keystoneAdminDomainName }}
             - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef:
