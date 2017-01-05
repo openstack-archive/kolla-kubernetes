@@ -1,8 +1,9 @@
+{{- $searchPath := ":global.kolla.nova.api.manage_db.job:global.kolla.nova.api.manage_db.all:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $imageBuilt := printf "%s/%s/%s-%s-nova-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
 {{- $imageFull := .Values.image_full | default $imageBuilt }}
 {{- $resourceName := "nova-api" }}
 {{- $serviceName := "nova-api" }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}
