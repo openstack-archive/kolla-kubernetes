@@ -205,7 +205,7 @@ helm install kolla/glance-create-keystone-service --version 3.0.0-1 \
 helm install kolla/cinder-create-keystone-service --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-service --set "$common_vars"
 
-helm install kolla/cinder-create-keystone-service --version 3.0.0-1 \
+helm install kolla/cinder-create-keystone-servicev2 --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-servicev2 --set "$common_vars"
 
 helm install kolla/cinder-create-keystone-user --debug --version 3.0.0-1 \
