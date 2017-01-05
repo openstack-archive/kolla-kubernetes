@@ -1,11 +1,21 @@
 {{- define "common_api_python_deployment" }}
-{{- $haproxy := .Values.haproxy_python_termination | default true }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" .searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" .searchPath "Values" .Values ) }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" .searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
+{{- $novaMetadataSearchPath := ":global.kolla.nova.metadata.deployment:global.kolla.nova.metadata.all:global.kolla.nova.all:global.kolla.all" }}
+{{- $novaMetadataPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $novaMetadataSearchPath "Values" .Values ) }}
+{{- $localVals := dict }}
+{{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $localVals "retKey" "haproxy" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
    name: {{ .resourceName }}
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ $replicas }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -17,7 +27,7 @@ spec:
         service: {{ .serviceName }}
         type: {{ .serviceType }}
       annotations:
-{{- if $haproxy }}
+{{- if $localVals.haproxy }}
         kolla_upgrade: minor_rolling_safe
 {{- end }}
 #FIXME Once out of alpha, this should be converted to yaml.
@@ -29,7 +39,7 @@ spec:
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
                   "-c",
@@ -42,7 +52,7 @@ spec:
                    sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
 {{- else }}
                    CONF=/srv/pod-main-config/{{ .configFileName }};
-{{- if $haproxy }}
+{{- if $localVals.haproxy }}
 {{- if eq .resourceName "nova-api" }}
                    crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
                    crudini --set $CONF DEFAULT metadata_listen_port 8081;
@@ -68,9 +78,9 @@ spec:
 #You've got 2 days to drain or figure out why it won't.
       terminationGracePeriodSeconds: 172800
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-{{- if $haproxy }}
+{{- if $localVals.haproxy }}
         - name: haproxy
           image: {{ include "haproxy_image_full" . | quote }}
           command:
@@ -82,7 +92,7 @@ spec:
           readinessProbe:
             httpGet:
               path: {{ .checkPath }}
-              port: {{ .Values.port }}
+              port: {{ $port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
           lifecycle:
@@ -101,22 +111,22 @@ spec:
 {{ include "common_volume_mounts" . | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: haproxy-config
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
           ports:
-            - containerPort: {{ .Values.port }}
+            - containerPort: {{ $port }}
               name: {{ .portName }}
 {{- if eq .resourceName "nova-api" }}
-            - containerPort: {{ .Values.metadata_port }}
+            - containerPort: {{ $novaMetadataPort }}
               name: nova-metadata
 {{- end }}
 {{- end }}
         - name: main
           image: "{{ .imageFull }}"
-{{- if $haproxy }}
+{{- if $localVals.haproxy }}
           lifecycle:
             preStop:
               exec:
@@ -129,7 +139,7 @@ spec:
 {{ include "common_volume_mounts" . | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
 {{- if .extraVolumeMounts }}
 {{- include .extraVolumeMounts . | indent 12 }}
@@ -141,12 +151,12 @@ spec:
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
-{{- if not $haproxy }}
+{{- if not $localVals.haproxy }}
           ports:
-            - containerPort: {{ .Values.port }}
+            - containerPort: {{ $port }}
               name: {{ .portName }}
 {{- if eq .resourceName "nova-api" }}
-            - containerPort: {{ .Values.metadata_port }}
+            - containerPort: {{ $novaMetadataPort }}
               name: nova-metadata
 {{- end }}
 {{- end }}
@@ -163,7 +173,7 @@ spec:
 {{- if .extraConfigmapConfig }}
 {{- include .extraConfigmapConfig . | indent 12 }}
 {{- end }}
-{{- if $haproxy }}
+{{- if $localVals.haproxy }}
         - name: haproxy-config
           configMap:
             name: {{ .resourceName }}-haproxy

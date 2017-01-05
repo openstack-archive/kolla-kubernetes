@@ -2,6 +2,7 @@ common:
         global:
             kolla:
                 all:
+                    replicas: 1
                     docker_registry: docker.io
                     docker_namespace: kolla
                     base_distro: centos
@@ -117,9 +118,12 @@ neutron-create-keystone-endpoint-admin:
         neutron_server_port: 9696
 
 neutron-server:
-        image_tag: 2.0.2
-        replicas: 3
-        port: 9696
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
 
 neutron-openvswitch-agent:
         type: network
@@ -248,10 +252,15 @@ nova-api-manage-db:
         image_tag: 2.0.2
 
 nova-api:
-        image_tag: 2.0.2
-        replicas: 3
-        port: 8774
-        metadata_port: 8775
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
+                    metadata:
+                        all:
+                            port: 8775
 
 nova-conductor:
         image_tag: 2.0.2
@@ -266,9 +275,12 @@ nova-consoleauth:
         replicas: 1
 
 nova-novncproxy:
-        image_tag: 2.0.2
-        replicas: 1
-        port: 6080
+        global:
+            kolla:
+                nova:
+                    novncproxy:
+                        all:
+                            port: 6080
 
 nova-compute:
         image_tag: 2.0.2
@@ -303,14 +315,20 @@ heat-cfn-api-svc:
         port: 8000
 
 heat-api:
-        image_tag: 3.0.1
-        replicas: 1
-        port: 8004
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8004
 
 heat-api-cfn:
-        image_tag: 3.0.1
-        replicas: 1
-        port: 8000
+        global:
+            kolla:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
 
 heat-engine:
         image_tag: 3.0.1
@@ -343,9 +361,12 @@ cinder-api-svc:
         port: 8776
 
 cinder-api:
-        replicas: 1
-        image_tag: 2.0.2
-        port: 8776
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
 
 cinder-backup:
         replicas: 1
@@ -399,9 +420,12 @@ glance-api:
         pvc_name: "glance"
 
 glance-registry:
-        image_tag: 2.0.2
-        port: 9191
-        replicas: 1
+        global:
+            kolla:
+                glance:
+                    registry:
+                        all:
+                            port: 9191
 
 cinder-create-keystone-endpoint-admin:
         cinder_admin_service: cinder-api
