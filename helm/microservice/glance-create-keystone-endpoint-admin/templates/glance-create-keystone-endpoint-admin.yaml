@@ -5,8 +5,11 @@
 {{- $serviceName := "glance" }}
 {{- $serviceType := "image" }}
 {{- $interface := "admin" }}
-{{- $glanceAdminEndpointBuilt := printf "http://%s:%1.f" .Values.glance_admin_service .Values.glance_api_port }}
-{{- $endpointURLFull := .Values.glance_admin_endpoint | default $glanceAdminEndpointBuilt }}
+{{- $service := include "kolla_val_get_str" (dict "key" "service" "searchPath" $searchPath "Values" .Values) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
+{{- $glanceAdminEndpointBuilt := printf "http://%s:%s" $service $port }}
+{{- $endpointURLFullUser := include "kolla_val_get_str" (dict "key" "endpoint" "searchPath" $searchPath "Values" .Values) }}
+{{- $endpointURLFull := $endpointURLFullUser | default $glanceAdminEndpointBuilt }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
 {{- end }}
