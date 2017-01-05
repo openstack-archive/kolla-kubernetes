@@ -5,8 +5,11 @@
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "volume" }}
 {{- $interface := "public" }}
-{{- $cinderPublicEndpointBuilt := printf "http://%s:%1.f/v2/%%(tenant_id)s" .Values.kolla_kubernetes_external_vip .Values.cinder_api_port }}
-{{- $endpointURLFull := .Values.cinder_public_endpoint | default $cinderPublicEndpointBuilt }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $externalVip := include "kolla_val_get_str" (dict "key" "external_vip" "searchPath" $searchPath "Values" .Values ) }}
+{{- $cinderPublicEndpointBuilt := printf "http://%s:%s/v2/%%(tenant_id)s" $externalVip $port }}
+{{- $endpointURLFullUser := include "kolla_val_get_str" (dict "key" "endpoint" "searchPath" $searchPath "Values" .Values ) }}
+{{- $endpointURLFull := $endpointURLFullUser | default $cinderPublicEndpointBuilt }}
 {{- $postfix := "v2" }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "interface" $interface "endpointURLFull" $endpointURLFull "postfix" $postfix "Release" .Release "Values" .Values "searchPath" $searchPath }}
 {{- include "common_create_keystone_endpoint" $env }}
