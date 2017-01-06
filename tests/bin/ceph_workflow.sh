@@ -42,13 +42,19 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
-for x in mariadb rabbitmq glance; do
-    helm install kolla/$x-pv --version 3.0.0-1 \
+for x in mariadb rabbitmq glance helm-repo; do
+    helm install kolla/$x-pv --debug --version 3.0.0-1 \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
         --values <(ceph_values $1)
-    helm install kolla/$x-pvc --version 3.0.0-1 --namespace kolla \
+    helm install kolla/$x-pvc --debug --version 3.0.0-1 --namespace kolla \
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
+
+helm install kolla/helm-repo-svc --debug --version 3.0.0-1 \
+    --namespace kolla --name helm-repo-svc --set element_name=helm-repo
+
+helm install kolla/helm-repo --debug --version 3.0.0-1 \
+    --namespace kolla --name helm-repo --set "$common_vars,element_name=helm-repo"
 
 helm install kolla/memcached-svc --version 3.0.0-1 \
     --namespace kolla --name memcached-svc --set element_name=memcached
