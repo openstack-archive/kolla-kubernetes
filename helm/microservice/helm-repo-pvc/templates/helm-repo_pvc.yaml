@@ -1,0 +1,7 @@
+{{- $searchPath := ":global.kolla.helm-repo.pvc:global.kolla.helm-repo.all:global.kolla.all" }}
+{{- $pvcName := "helm-repo" }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $volumeSizeGB := .Values.volume_size_gb | default 10 }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- include "common_pvc" $env }}
+{{- end }}
