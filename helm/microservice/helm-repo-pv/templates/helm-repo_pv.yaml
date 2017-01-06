@@ -1,0 +1,9 @@
+{{- $searchPath := ":global.kolla.helm-repo.pv:global.kolla.helm-repo.all:global.kolla.all" }}
+{{- $pvName := "helm-repo" }}
+{{- $storageProvider := .Values.storage_provider }}
+{{- $storageProviderFStype := .Values.storage_provider_fstype | default "xfs" }}
+{{- $volumeName := "helm-repo"}}
+{{- $volumeSizeGB := .Values.helm-repo_volume_size_gb | default 10 }}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values  "Release" .Release "searchPath" $searchPath }}
+{{- include "common_pv" $env }}
+{{- end }}
