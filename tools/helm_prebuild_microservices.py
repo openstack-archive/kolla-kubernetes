@@ -25,7 +25,9 @@ stateful_services = [
     'mariadb-pv',
     'mariadb-pvc',
     'glance-pv',
-    'glance-pvc'
+    'glance-pvc',
+    'helm-repo-pv',
+    'helm-repo-pvc'
 ]
 
 pod_http_termination = [
