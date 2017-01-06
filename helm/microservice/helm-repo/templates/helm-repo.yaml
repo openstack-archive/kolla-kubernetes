@@ -1,0 +1,91 @@
+{{- $searchPath := ":global.kolla.helm-repo.deployment:global.kolla.helm-repo.all:global.kolla.all" }}
+{{- $imageBuilt := printf "%s/%s/%s-%s-helm-repo:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $resourceName := "helm-repo" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "helm-repo" }}
+{{- $privileged := false }}
+{{- $method := .Values.method | default "git" }}
+{{- $url := .Values.url | default "https://github.com/openstack/kolla-kubernetes" }}
+{{- $persistent := .Values.persistent | default "true" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: {{ $resourceName }}
+spec:
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        service: {{ $serviceName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+              "name": "prepare-repo",
+              "image": "{{ $imageFull }}",
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  " if [ ! ''$(ls -A /helm-repo)'' ]; then
+                       pushd /tmp;
+                       if [ ''x{{ $method }}'' == ''xgit''  ]; then
+                         git clone {{ $url }} kolla-kubernetes;
+                         pushd kolla-kubernetes;
+                         tools/helm_prebuild_microservices.py;
+                         tools/helm_build_microservices.py /helm-repo;
+                         popd;
+                       fi;
+                       if [ ''x{{ $method }}'' == ''xtar''  ]; then
+                         mkdir tar;
+                         pushd tar;
+                         curl -O {{ $url }};
+                         tar -zxvf *;
+                         pushd kolla-kubernetes;
+                         tools/helm_prebuild_microservices.py;
+                         tools/helm_build_microservices.py /helm-repo;
+                         popd; popd;
+                       fi;
+                       popd;
+                       pushd /helm-repo;
+                       helm repo index --url http://helm-repo:{{ .Values.port }} /helm-repo;
+                       popd;
+                    fi;
+              "],
+              "volumeMounts": [
+{{- if $persistent }}
+                  {
+                      "name": "helm-repo-persistent-storage",
+                      "mountPath": "/helm-repo"
+                  }
+{{- end }}
+              ]
+          }
+      ]'
+    spec:
+      nodeSelector:
+          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+      containers:
+        - name: main
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+{{- if  $persistent }}
+            - mountPath: /helm-repo
+              name: helm-repo-persistent-storage
+{{- end }}
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.port }}
+              name: {{ $resourceName | quote }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+{{- if $persistent }}
+        - name: helm-repo-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc_name }}
+{{- end }}
+{{- end }}
