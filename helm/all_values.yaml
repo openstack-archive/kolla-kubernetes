@@ -733,3 +733,22 @@ cinder-volume-lvm:
         image_tag: 3.0.1
         storage_interface: "eth0"
         lvm_backends: []
+
+helm-repo-svc:
+        port: 8879
+
+helm-repo-pv:
+        volume_size_gb: 10
+
+helm-repo-pvc:
+        volume_size_gb: 10
+
+helm-repo:
+        image_tag: 3.0.2
+        replicas: 1
+        port: 8879
+        address: 0.0.0.0
+        pvc_name: "helm-repo"
+        persistent: true
+        method: "git"
+        url: "https://github.com/openstack/kolla-kubernetes"
