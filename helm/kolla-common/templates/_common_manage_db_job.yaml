@@ -1,4 +1,7 @@
 {{- define "common_manage_db_job" }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -10,14 +13,14 @@ spec:
 {{- include "init_container_tail" . | indent 4 }}
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       restartPolicy: OnFailure
       containers:
         - image: {{ .imageFull | quote }}
           name: "main"
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: service-configmap
               readOnly: true
           env:
