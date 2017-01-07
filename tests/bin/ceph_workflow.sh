@@ -62,7 +62,7 @@ helm install kolla/keystone-admin-svc --version 3.0.0-1 \
 
 helm install kolla/keystone-public-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=keystone-public,port_external=true,external_vip=$IP"
 
 helm install kolla/keystone-internal-svc --version 3.0.0-1 \
     --namespace kolla --name keystone-internal-svc \
@@ -74,22 +74,22 @@ if [ "x$1" != "xhelm-entrypoint" ]; then
 
 helm install kolla/glance-api-svc --version 3.0.0-1 \
     --namespace kolla --name glance-api-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/glance-registry-svc --version 3.0.0-1 \
     --namespace kolla --name glance-registry-svc
 
 helm install kolla/neutron-server-svc --version 3.0.0-1 \
     --namespace kolla --name neutron-server-svc \
-    --set "element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version 3.0.0-1 \
     --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=cinder,port_external=true,external_vip=$IP"
 
 helm install kolla/nova-api-svc --version 3.0.0-1 \
     --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=nova,port_external=true,external_vip=$IP"
 
 helm install kolla/nova-metadata-svc --version 3.0.0-1 \
     --namespace kolla --name nova-metadata-svc \
@@ -103,11 +103,11 @@ helm install kolla/horizon-svc --version 3.0.0-1 \
 
 helm install kolla/heat-api-svc --version 3.0.0-1 \
     --namespace kolla --name heat-api-svc \
-    --set "element_name=heat,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=heat,port_external=true,external_vip=$IP"
 
 helm install kolla/heat-cfn-api-svc --version 3.0.0-1 \
     --namespace kolla --name heat-cfn-api-svc \
-    --set "element_name=heat-cfn,element_port_external=true,kolla_kubernetes_external_vip=$IP"
+    --set "element_name=heat-cfn,port_external=true,external_vip=$IP"
 
 #FIXME temporary until enough service packages are around. then
 #they will get their own test file.
