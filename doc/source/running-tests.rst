@@ -64,7 +64,7 @@ directory use:
 
     $ tox -e py27 kolla_kubernetes.tests
 
-To run the tests of a specific file say ``kolla_kubernetes/tests/test_utils.py`:
+To run the tests of a specific file say ``kolla_kubernetes/tests/test_utils.py``:
 
 .. code-block:: console
 
@@ -78,7 +78,7 @@ the ``kolla_kubernetes/tests/test_utils.py`` file:
     $ tox -e py27 test_utils.TestJinjaUtils
 
 To run the ``TestJinjaUtils.test_merge_configs_and_self_render`` test method in
-the ``kolla_kubernetes/tests/test_utils.py``` file:
+the ``kolla_kubernetes/tests/test_utils.py`` file:
 
 .. code-block:: console
 
