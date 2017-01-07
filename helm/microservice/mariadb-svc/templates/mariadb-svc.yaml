@@ -1,6 +1,7 @@
 {{- $elementPort := .Values.mariadb_port | default 3306 }}
 {{- $elementName := .Values.element_name | default "mariadb" }}
 {{- $elementService := .Values.element_name | default "mariadb" }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release }}
+{{- $searchPath := printf ":global.kolla.%s.svc:global.kolla.%s.all:global.kolla.mariadb.svc:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}

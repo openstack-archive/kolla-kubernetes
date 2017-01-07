@@ -1,18 +1,20 @@
 {{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
 {{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
 {{- $resourceName := "mariadb" }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.all:global.kolla.mariadb.statefulset:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 spec:
-  serviceName: {{ .Values.element_name }}
+  serviceName: {{ $elementName }}
   replicas: 1
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ $elementName }}
     spec:
       nodeSelector:
           {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
@@ -38,16 +40,16 @@ spec:
                   key: password
           ports:
             - containerPort: {{ .Values.mariadb_port | default 3306 }}
-              name: {{ .Values.element_name }}
+              name: {{ $elementName }}
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
         - name: pod-main-config
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
         - name: mariadb-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ .Values.element_name }}
+            claimName: {{ $elementName }}
 metadata:
-   name: {{ .Values.element_name }}
+   name: {{ $elementName }}
 {{- end }}
