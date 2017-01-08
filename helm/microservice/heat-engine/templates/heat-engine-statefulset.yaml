@@ -1,6 +1,9 @@
 {{- $searchPath := ":global.kolla.heat.engine.statefulset:global.kolla.heat.engine.all:global.kolla.heat.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-heat-engine:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "heat-engine" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "heat-engine" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
