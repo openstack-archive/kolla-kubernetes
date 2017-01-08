@@ -1,10 +1,10 @@
 {{- $elementName := .Values.element_name | default "rabbitmq" }}
 {{- $searchPath := printf ":global.kolla.%s.pv:global.kolla.%s.all:global.kolla.rabbitmq.pv:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName }}
 {{- $pvName := $elementName }}
-{{- $storageProvider := .Values.storage_provider }}
-{{- $storageProviderFStype := .Values.storage_provider_fstype | default "xfs" }}
+{{- $storageProvider := include "kolla_val_get_str" (dict "key" "storage_provider" "searchPath" $searchPath "Values" .Values ) }}
+{{- $volumeSizeGB := include "kolla_val_get_str" (dict "key" "size_gb" "searchPath" $searchPath "Values" .Values ) }}
+{{- $storageProviderFStype := include "kolla_val_get_str" (dict "key" "storage_provider_fstype" "searchPath" $searchPath "Values" .Values ) }}
 {{- $volumeName := $elementName }}
-{{- $volumeSizeGB := .Values.rabbitmq_volume_size_gb | default 10 }}
 {{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_pv" $env }}
 {{- end }}
