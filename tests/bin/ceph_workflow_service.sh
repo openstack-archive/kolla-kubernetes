@@ -6,13 +6,16 @@ IP=172.18.0.1
 . "$DIR/tests/bin/setup_helm_entrypint_config.sh"
 
 function ceph_values {
-    echo "ceph:"
-    echo "  monitors:"
+    echo "global:"
+    echo "  kolla:"
+    echo "    all:"
+    echo "      ceph:"
+    echo "          monitors:"
     addr=172.17.0.1
     if [ "x$1" == "xceph-multi" ]; then
         addr=$(cat /etc/nodepool/primary_node_private)
     fi
-    echo "  - $addr"
+    echo "          - $addr"
 }
 
 function helm_entrypoint_mariadb {

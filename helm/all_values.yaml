@@ -57,13 +57,17 @@ pod-http-termination:
         haproxy_image_tag: 2.0.2
 
 stateful-service:
-        storage_provider: "host"
-        storage_provider_fstype: "xfs"
-        ceph:
-               monitors: []
-               pool: kollavolumes
-               secret_name: ceph-kolla
-               user: kolla
+        global:
+            kolla:
+                all:
+                    storage_provider: host
+                    storage_provider_fstype: xfs
+                    size_gb: 10
+                    ceph:
+                        monitors: []
+                        pool: kollavolumes
+                        secret_name: ceph-kolla
+                        user: kolla
 
 openvswitch-ovsdb:
         openvswitch_ovsdb_image_tag: 2.0.2
@@ -251,12 +255,6 @@ rabbitmq-pod:
             jobs:
               - rabbitmq-init-element
 
-rabbitmq-pv:
-        rabbitmq_volume_size_gb: 10
-
-rabbitmq-pvc:
-        rabbitmq_volume_size_gb: 10
-
 rabbitmq-svc:
         global:
             kolla:
@@ -298,12 +296,6 @@ mariadb-pod:
         database_user: root
         mariadb_port: 3306
         mariadb_image_tag: 3.0.1
-
-mariadb-pv:
-        mariadb_volume_size_gb: 10
-
-mariadb-pvc:
-        mariadb_volume_size_gb: 10
 
 mariadb-svc:
         global:
@@ -520,12 +512,6 @@ glance-registry-svc:
                             node_port: 9191
                             port_external: false
                             node_port_enabled: false
-
-glance-pv:
-        glance_volume_size_gb: 10
-
-glance-pvc:
-        glance_volume_size_gb: 10
 
 cinder-create-db:
         global:
