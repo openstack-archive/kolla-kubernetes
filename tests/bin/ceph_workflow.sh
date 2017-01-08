@@ -28,7 +28,7 @@ fi
 
 base_distro="$2"
 
-common_vars="enable_kube_logger=false,kolla_base_distro=$base_distro"
+common_vars="enable_kube_logger=false,kolla_base_distro=$base_distro,base_distro=$base_distro"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -122,7 +122,7 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
 
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
-    --set "element_name=rabbitmq,rabbitmq_cluster_cookie=67"
+    --set "$common_vars,element_name=rabbitmq,rabbitmq_cluster_cookie=67"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -135,7 +135,7 @@ helm install kolla/mariadb-pod --version 3.0.0-1 \
     --namespace kolla --name mariadb-pod --set "$common_vars,element_name=mariadb"
 
 helm install kolla/memcached --version 3.0.0-1 \
-    --set "enable_kube_logger=false,element_name=memcached" \
+    --set "$common_vars,element_name=memcached" \
     --namespace kolla --name memcached
 
 helm install kolla/rabbitmq-pod --version 3.0.0-1 \
@@ -147,7 +147,8 @@ $DIR/tools/wait_for_pods.sh kolla
 helm install --debug kolla/keystone-create-db --version 3.0.0-1 \
     --set element_name=keystone \
     --namespace kolla \
-    --name keystone-create-db
+    --name keystone-create-db \
+    --set "$common_vars"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -156,7 +157,8 @@ helm delete keystone-create-db
 
 helm install --debug kolla/keystone-manage-db --version 3.0.0-1 \
     --namespace kolla \
-    --name keystone-manage-db
+    --name keystone-manage-db \
+    --set "$common_vars"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -167,7 +169,7 @@ kollakube template bootstrap keystone-endpoints
 
 helm install --debug kolla/keystone-create-endpoints --version 3.0.0-1 \
     --namespace kolla \
-    --set element_name=keystone,public_host=$IP \
+    --set $common_vars,element_name=keystone,public_host=$IP \
     --name keystone-create-endpoints
 
 $DIR/tools/pull_containers.sh kolla
@@ -205,19 +207,19 @@ helm install kolla/cinder-create-keystone-servicev2 --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-servicev2 --set "$common_vars"
 
 helm install kolla/cinder-create-keystone-user --debug --version 3.0.0-1 \
-    --namespace kolla --name cinder-create-keystone-user
+    --namespace kolla --name cinder-create-keystone-user --set "$common_vars"
 
 helm install kolla/glance-create-keystone-user --debug --version 3.0.0-1 \
-    --namespace kolla --name glance-create-keystone-user
+    --namespace kolla --name glance-create-keystone-user --set "$common_vars"
 
 helm install kolla/neutron-create-keystone-user --debug --version 3.0.0-1 \
-    --namespace kolla --name neutron-create-keystone-user
+    --namespace kolla --name neutron-create-keystone-user --set "$common_vars"
 
 helm install kolla/nova-create-keystone-service --debug --version 3.0.0-1 \
-    --namespace kolla --name nova-create-keystone-service
+    --namespace kolla --name nova-create-keystone-service --set "$common_vars"
 
 helm install kolla/nova-create-keystone-user --debug --version 3.0.0-1 \
-    --namespace kolla --name nova-create-keystone-user
+    --namespace kolla --name nova-create-keystone-user --set "$common_vars"
 
 helm install kolla/cinder-create-keystone-endpoint-public --version 3.0.0-1 \
     --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
@@ -245,18 +247,18 @@ for x in cinder glance neutron nova; do
 done
 
 helm install kolla/glance-create-db --version 3.0.0-1 \
-    --namespace kolla --name glance-create-db
+    --namespace kolla --name glance-create-db --set "$common_vars"
 
 helm install kolla/glance-manage-db --version 3.0.0-1 \
-    --namespace kolla --name glance-manage-db
+    --namespace kolla --name glance-manage-db --set "$common_vars"
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
-    --set element_name=cinder \
+    --set $common_vars,element_name=cinder \
     --namespace kolla \
     --name cinder-create-db
 
 helm install kolla/cinder-manage-db --version 3.0.0-1 \
-    --set element_name=cinder \
+    --set $common_vars,element_name=cinder \
     --namespace kolla \
     --name cinder-manage-db
 
@@ -286,7 +288,7 @@ helm install kolla/nova-create-keystone-endpoint-admin --version 3.0.0-1 \
 
 for x in nova nova-api neutron; do
     helm install kolla/$x-create-db --version 3.0.0-1 \
-        --set element_name=$x --namespace kolla \
+        --set $common_vars,element_name=$x --namespace kolla \
         --name $x-create-db
 done
 
@@ -295,7 +297,7 @@ $DIR/tools/wait_for_pods.sh kolla
 
 for x in nova-api neutron; do
     helm install kolla/$x-manage-db --version 3.0.0-1 \
-        --set element_name=$x --namespace kolla \
+        --set $common_vars,element_name=$x --namespace kolla \
         --name $x-manage-db
 done
 
@@ -403,7 +405,7 @@ helm install kolla/neutron-openvswitch-agent --version 3.0.0-1 \
     --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-compute &&
     helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=compute,selector_key=kolla_compute \
+    --set $common_vars,type=compute,selector_key=kolla_compute \
     --namespace kolla --name openvswitch-vswitchd-compute
 
 kollakube res create bootstrap openvswitch-set-external-ip

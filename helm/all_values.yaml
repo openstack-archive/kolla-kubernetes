@@ -119,10 +119,12 @@ keystone-create-endpoints:
         region: RegionOne
 
 keystone-api:
-        image_tag: 2.0.2
-        replicas: 3
-        port: 5000
-        admin_port: 35357
+        global:
+            kolla:
+                keystone:
+                    all:
+                        port: 5000
+                        admin_port: 35357
 
 neutron-server-svc:
         global:
@@ -371,18 +373,6 @@ nova-api:
                         all:
                             port: 8775
 
-nova-conductor:
-        image_tag: 2.0.2
-        replicas: 1
-
-nova-scheduler:
-        image_tag: 2.0.2
-        replicas: 1
-
-nova-consoleauth:
-        image_tag: 2.0.2
-        replicas: 1
-
 nova-novncproxy:
         global:
             kolla:
@@ -487,10 +477,6 @@ heat-api-cfn:
                         all:
                             port: 8000
 
-heat-engine:
-        image_tag: 3.0.1
-        replicas: 1
-
 glance-api-svc:
         global:
             kolla:
@@ -564,10 +550,6 @@ horizon-svc:
                         node_port: 80
                         port_external: false
                         node_port_enabled: false
-
-cinder-scheduler:
-        replicas: 1
-        image_tag: 2.0.2
 
 glance-create-db:
         global:
@@ -725,7 +707,7 @@ iscsid:
         iscsid_image_tag: 3.0.1
 
 tgtd:
-        selector_key: kolla_compute
+        selector_key: kolla_controller
         selector_value: "true"
         tgtd_image_tag: 3.0.1
 
