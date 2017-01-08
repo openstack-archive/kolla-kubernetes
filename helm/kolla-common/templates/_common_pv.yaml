@@ -1,4 +1,14 @@
 {{- define "common_pv" }}
+{{- $cephPool := include "kolla_val_get_str" (dict "key" "ceph.pool" "searchPath" .searchPath "Values" .Values) }}
+{{- $cephUser := include "kolla_val_get_str" (dict "key" "ceph.user" "searchPath" .searchPath "Values" .Values) }}
+{{- $cephKeyring := include "kolla_val_get_str" (dict "key" "ceph.keyring" "searchPath" .searchPath "Values" .Values) }}
+{{- $cephSecretName := include "kolla_val_get_str" (dict "key" "ceph.secret_name" "searchPath" .searchPath "Values" .Values) }}
+{{- $localVals := dict }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "key" "ceph.monitors" }}
+{{- $_ := set $c "retDict" $localVals }}
+{{- $_ := set $c "retKey" "monitors" }}
+{{- $_ := include "kolla_val_get_raw" $c }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -20,24 +30,24 @@ spec:
 {{- else if eq .storageProvider "ceph" }}
   rbd:
     monitors:
-      {{- range .Values.ceph.monitors }}
+      {{- range $localVals.monitors }}
       - {{ if contains ":" . }} {{ . | quote}} {{ else }} {{ printf "%s:6789" . | quote }} {{ end }}
       {{- end }}
-    pool: {{ .Values.ceph.pool }}
+    pool: {{ $cephPool }}
     image: {{ .volumeName }}
-    user: {{ .Values.ceph.user }}
-    {{- if .Values.ceph.keyring }}
-    {{- if gt (.Values.ceph.keyring|len)  0 }}
-    keyring: {{ .Values.ceph.keyring }}
+    user: {{ $cephUser }}
+    {{- if $cephKeyring }}
+    {{- if gt ($cephKeyring | len) 0 }}
+    keyring: {{ $cephKeyring }}
     {{- end }}
     {{- end }}
-    {{- if .Values.ceph.secret_name }}
-    {{- if gt (.Values.ceph.secret_name|len) 0 }}
+    {{- if $cephSecretName }}
+    {{- if gt ($cephSecretName | len) 0 }}
     secretRef:
-      name: {{ .Values.ceph.secret_name }}
+      name: {{ $cephSecretName }}
     {{- end }}
     {{- end }}
-    fsType: {{ .storageProviderFStype | default "xfs" }}
+    fsType: {{ .storageProviderFStype }}
     readOnly: false
 {{- end }}
 {{- end }}
