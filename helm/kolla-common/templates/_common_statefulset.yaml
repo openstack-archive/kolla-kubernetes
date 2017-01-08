@@ -1,13 +1,18 @@
 {{- define "common_statefulset" }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" .searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" .searchPath "Values" .Values ) }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 spec:
   serviceName: {{ .serviceName | quote }}
-  replicas: {{ .Values.replicas }}
+  replicas: {{ $replicas }}
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ .serviceName }}
         type: {{ .serviceType }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
@@ -15,14 +20,14 @@ spec:
           {
               "name": "initialize-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
                   "-ce",
                   "cp -a /config/..data/* /podconfig/; "],
               "volumeMounts": [
                   {
-                      "name": "{{ .Values.element_name }}-config",
+                      "name": "service-config",
                       "mountPath": "/config/"
                   },
                   {
@@ -34,13 +39,13 @@ spec:
       ]'
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - name: main
           image: "{{ .imageFull }}"
           volumeMounts:
 {{- include "common_volume_mounts" . | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-config
           env:
 {{- include "common_env_vars" . | indent 12 }}
@@ -51,11 +56,11 @@ spec:
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
-        - name: {{ .Values.element_name }}-config
+        - name: service-config
           configMap:
             name: {{ .serviceName }}-{{ .serviceType }}
         - name: pod-config
           emptyDir: {}
 metadata:
-   name: {{ .Values.element_name }}
+   name: {{ .serviceName }}-{{ .serviceType }}
 {{- end }}
