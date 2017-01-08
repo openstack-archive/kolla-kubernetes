@@ -6,6 +6,11 @@ if [ "x$4" == "xiscsi" ]; then
     exit 0
 fi
 
+if [ "x$4" == "xhelm-operator" ]; then
+    echo "helm operator job is not yet implemented..."
+    exit 0
+fi
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
