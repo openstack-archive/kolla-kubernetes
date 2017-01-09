@@ -1,10 +1,18 @@
-{{- $rabbitmqImageBuilt := printf "%s/%s/%s-%s-rabbitmq:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.rabbitmq_image_tag | default .Values.kolla_tag }}
-{{- $rabbitmqImageFull := .Values.rabbitmq_image_full | default $rabbitmqImageBuilt }}
 {{- $resourceName := "rabbitmq-bootstrap" }}
 {{- $elementName := .Values.element_name | default "rabbitmq" }}
 {{- $searchPath := printf ":global.kolla.%s.init_element.job:global.kolla.%s.init_element.all:global.kolla.%s.all:global.kolla.rabbitmq.init_element.job:global.kolla.rabbitmq.init_element.all:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName $elementName }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "rabbitmq" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $cookie := include "kolla_val_get_str" (dict "key" "cookie" "searchPath" $searchPath "Values" .Values ) }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: batch/v1
 kind: Job
@@ -15,20 +23,20 @@ spec:
 {{- include "init_container_tail" $env | indent 4 }}
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-        - image: "{{ $rabbitmqImageFull }}"
+        - image: "{{ $imageFull }}"
           name: main
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: rabbitmq-config
             - mountPath: /var/lib/rabbitmq
               name: rabbitmq-persistent-storage
           env:
 {{- include "common_bootstrap_env_vars" $env | indent 12 }}
             - name: RABBITMQ_CLUSTER_COOKIE
-              value: {{ .Values.rabbitmq_cluster_cookie | quote }}
+              value: {{ $cookie | quote }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
         - name: rabbitmq-config
