@@ -1,9 +1,20 @@
 {{- $restype := .Values.type }}
 {{- $searchPath := printf ":global.kolla.neutron.openvswitch_agent_%s.daemonset:global.kolla.neutron.openvswitch_agent_%s.all:global.kolla.neutron.openvswitch_agent.all:global.kolla.neutron.all:global.kolla.all" $restype $restype }}
-
-{{- $openvswitchAgentImageBuilt := printf "%s/%s/%s-%s-neutron-openvswitch-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_agent_image_tag }}
-{{- $openvswitchAgentImageFull := .Values.openvswitch_agent_image_full | default $openvswitchAgentImageBuilt }}
-
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "neutron-openvswitch-agent" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "openvswitch_tcp" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "openvswitch_tcp" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $tunnelInterface := include "kolla_val_get_str" (dict "key" "tunnel_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $resourceName := printf "neutron-openvswitch-agent-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
@@ -28,16 +39,16 @@ spec:
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  TUNNEL_INTERFACE={{ .Values.tunnel_interface }};
+                  TUNNEL_INTERFACE={{ $tunnelInterface }};
                   F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
                   [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
                   IP=$(ip addr list \"$TUNNEL_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
-{{- if .Values.enable_openvswitch_tcp }}
+{{- if $localVals.openvswitch_tcp }}
                   crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
 {{- end }}
                   crudini --set /srv/pod-main-config/ml2_conf.ini ovs local_ip $IP"
@@ -60,7 +71,7 @@ spec:
           {
               "name": "update-permissions",
               "image": "{{ $openvswitchAgentImageFull }}",
-              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "securityContext": {
                   "runAsUser": 0
               },
@@ -81,7 +92,7 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $openvswitchAgentImageFull }}"
           name: main
@@ -92,7 +103,7 @@ spec:
               value: COPY_ONCE
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
               readOnly: true
             - mountPath: /var/lib/kolla-kubernetes/neutron-openvswitch-agent
@@ -114,7 +125,7 @@ spec:
 #      securityContext:
 #        privileged: true
 #      volumeMounts:
-#        - mountPath: {{ .Values.container_config_directory }}/neutron-linuxbridge-agent/
+#        - mountPath: {{ $containerConfigDirectory }}/neutron-linuxbridge-agent/
 #          name: neutron-linuxbridge-agent-config
 #          readOnly: true
 #        - mountPath: /var/run
