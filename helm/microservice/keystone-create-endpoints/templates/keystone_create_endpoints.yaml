@@ -1,10 +1,20 @@
 {{- $searchPath := ":global.kolla.keystone.create_keystone_endpoint.job:global.kolla.keystone.create_keystone_endpoint.all:global.kolla.keystone.all:global.kolla.all" }}
-{{- $ImageBuilt := printf "%s/%s/%s-%s-keystone:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag | default .Values.kolla_tag }}
-{{- $ImageFull := .Values.image_full | default $ImageBuilt }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $adminPort := include "kolla_val_get_str" (dict "key" "admin_port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $region := include "kolla_val_get_str" (dict "key" "region" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "keystone" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "keystone" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
-{{- $defaultPublicHost := printf "%s-public" .Values.element_name }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $defaultPublicHost := printf "%s-public" $elementName }}
 {{- $publicHost := .Values.public_host | default $defaultPublicHost }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: batch/v1
@@ -18,7 +28,7 @@ spec:
 {{- include "init_container_tail" $env | indent 4 }}
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       restartPolicy: OnFailure
       containers:
         - image: "{{ $ImageFull }}"
@@ -28,13 +38,13 @@ spec:
                     $KEYSTONE_ADMIN_PASSWORD
                     admin
                     admin
-                    http://{{ .Values.element_name }}-admin:{{ .Values.admin_port }}/v3
-                    http://{{ .Values.element_name }}-internal:{{ .Values.port }}/v3
-                    http://{{ $publicHost }}:{{ .Values.port }}/v3
-                    {{ .Values.region }}"]
+                    http://{{ $elementName }}-admin:{{ $adminPort }}/v3
+                    http://{{ $elementName }}-internal:{{ $port }}/v3
+                    http://{{ $publicHost }}:{{ $port }}/v3
+                    {{ $region }}"]
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: service-configmap
               readOnly: true
           env:

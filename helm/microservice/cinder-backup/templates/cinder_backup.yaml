@@ -1,24 +1,33 @@
 {{- $searchPath := ":global.kolla.cinder.backup.statefulset:global.kolla.cinder.backup.all:global.kolla.cinder.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-cinder-backup:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "cinder-backup" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "cinder-backup" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "backup" }}
 {{- $privileged := false }}
+{{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: {{ .Values.element_name }}
+  name: {{ $elementName }}
 spec:
-  serviceName: {{ .Values.element_name }}
-  replicas: {{ .Values.replicas }}
+  serviceName: {{ $elementName }}
+  replicas: {{ $replicas }}
   template:
     metadata:
       labels:
-        service: {{ .Values.element_name }}
+        service: {{ $elementName }}
         type: {{ $serviceType }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
@@ -59,7 +68,7 @@ spec:
         ]'
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - name: main
           image: "{{ $imageFull }}"
@@ -67,7 +76,7 @@ spec:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
           env:
 {{- include "common_env_vars" $env | indent 12 }}
@@ -80,5 +89,5 @@ spec:
           emptyDir: {}
         - name: cinder-backup-configmap
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
 {{- end }}
