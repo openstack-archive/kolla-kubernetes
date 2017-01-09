@@ -1,0 +1,15 @@
+apiVersion: openstack.kolla/v1
+kind: MemcachedOperator
+metadata:
+  name: memcached-operator
+  namespace: kolla
+description: "memcached operator"
+spec:
+  state: ""
+  version: "0.4.0-1"
+  port: "13131"
+  service: "memcached"
+  label: ""
+  configmaps:
+    - name: "memcached"
+      version: ""
