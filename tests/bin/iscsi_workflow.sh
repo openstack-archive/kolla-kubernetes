@@ -14,7 +14,7 @@ tunnel_interface=docker0
 
 base_distro="$2"
 
-common_vars="ceph_backend=false,enable_kube_logger=false,kolla_base_distro=$base_distro,base_distro=$base_distro"
+common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -91,7 +91,7 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
 
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
-    --set "$common_vars,element_name=rabbitmq,rabbitmq_cluster_cookie=67"
+    --set "$common_vars,element_name=rabbitmq,cookie=67"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
