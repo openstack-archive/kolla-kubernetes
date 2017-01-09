@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.glance.registry.deployment:global.kolla.glance.registry.all:global.kolla.glance.all:global.kolla.all" }}
-{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "glance-registry" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
