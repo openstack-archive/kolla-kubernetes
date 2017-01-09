@@ -1,0 +1,11 @@
+apiVersion: openstack.kolla/v1
+kind: MemcachedOperator
+metadata:
+  name: memcached-operator
+description: "memcached operator"
+spec:
+  state: "standby"
+  version: "3.0.0-1"
+  port: "13131"
+  service: "memcached"
+  image: "docker.io/busybox:latest"
