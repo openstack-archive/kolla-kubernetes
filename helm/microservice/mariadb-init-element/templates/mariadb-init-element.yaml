@@ -1,8 +1,14 @@
-{{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
-{{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
 {{- $resourceName := "mariadb-bootstrap" }}
 {{- $elementName := .Values.element_name | default "mariadb" }}
 {{- $searchPath := printf ":global.kolla.%s.init_element.job:global.kolla.%s.init_element.all:global.kolla.%s.all:global.kolla.mariadb.init_element.job:global.kolla.mariadb.init_element.all:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName $elementName }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "mariadb" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
@@ -12,13 +18,13 @@ spec:
   template:
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-        - image: "{{ $mariadbImageFull }}"
+        - image: "{{ $imageFull }}"
           name: main
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: mariadb-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
