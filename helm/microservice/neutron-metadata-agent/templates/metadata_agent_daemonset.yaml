@@ -1,9 +1,14 @@
 {{- $restype := .Values.type }}
 {{- $searchPath := printf ":global.kolla.neutron.metadata_agent_%s.daemonset:global.kolla.neutron.metadata_agent_%s.all:global.kolla.neutron.metadata_agent.all:global.kolla.neutron.all:global.kolla.all" $restype $restype }}
-
-{{- $metadataAgentImageBuilt := printf "%s/%s/%s-%s-neutron-metadata-agent:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.metadata_agent_image_tag }}
-{{- $metadataAgentImageFull := .Values.metadata_agent_image_full | default $metadataAgentImageBuilt }}
-
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "neutron-metadata-agent" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $resourceName := printf "neutron-metadata-agent-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
@@ -28,16 +33,16 @@ spec:
     spec:
       hostNetwork: True
       nodeSelector:
-        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+        {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: {{ $metadataAgentImageFull | quote }}
-          imagePullPolicy: {{ .Values.image_pull_policy | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           securityContext:
             privileged: true
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: neutron-metadata-agent-config
               readOnly: true
             - mountPath: /var/lib/neutron/kolla/

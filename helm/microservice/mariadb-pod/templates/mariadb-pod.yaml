@@ -1,8 +1,16 @@
-{{- $mariadbImageBuilt := printf "%s/%s/%s-%s-mariadb:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.mariadb_image_tag | default .Values.kolla_tag }}
-{{- $mariadbImageFull := .Values.mariadb_image_full | default $mariadbImageBuilt }}
 {{- $resourceName := "mariadb" }}
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.all:global.kolla.mariadb.statefulset:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "mariadb" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $databaseUser := include "kolla_val_get_str" (dict "key" "database_user" "searchPath" $searchPath "Values" .Values ) }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
@@ -17,17 +25,17 @@ spec:
         service: {{ $elementName }}
     spec:
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $mariadbImageFull }}"
           name: main
           lifecycle:
             preStop:
               exec:
-                command: ["mysqladmin -u {{ .Values.database_user }} -p$DATABASE_PASSWORD shutdown"]
+                command: ["mysqladmin -u {{ $databaseUser }} -p$DATABASE_PASSWORD shutdown"]
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
             - mountPath: /var/lib/mysql
               name: mariadb-persistent-storage
@@ -39,7 +47,7 @@ spec:
                   name: database-password
                   key: password
           ports:
-            - containerPort: {{ .Values.mariadb_port | default 3306 }}
+            - containerPort: {{ $port }}
               name: {{ $elementName }}
 {{- include "common_containers" . | indent 8 }}
       volumes:

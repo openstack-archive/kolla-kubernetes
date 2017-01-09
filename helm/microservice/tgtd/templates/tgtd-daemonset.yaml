@@ -1,10 +1,18 @@
-{{- $imageBuilt := printf "%s/%s/%s-%s-tgtd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.tgtd_image_tag | default .Values.kolla_tag }}
-{{- $imageFull := .Values.tgtd_image_full | default $imageBuilt }}
 {{- $resourceName := "tgtd" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- $searchPath := printf ":global.kolla.%s.daemonset:global.kolla.%s.daemonset:global.kolla.tgtd.daemonset:global.kolla.tgtd.all:global.kolla.tgtd.all:global.kolla.all" $elementName $elementName }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "tgtd" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $storageInterface := include "kolla_val_get_str" (dict "key" "storage_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -25,12 +33,12 @@ spec:
           {
              "name": "initialize-tgtd",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-ce",
                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  STORAGE_INTERFACE={{ .Values.storage_interface }};
+                  STORAGE_INTERFACE={{ $storageInterface }};
                   F=/var/lib/kolla-kubernetes/tgtd/storage_interface;
                   [ -f $F ] && STORAGE_INTERFACE=$(<$F);
                   storage_ip=$(ip addr list \"$STORAGE_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
@@ -51,7 +59,7 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
           name: main
@@ -61,7 +69,7 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
               readOnly: true
             - mountPath: /run
