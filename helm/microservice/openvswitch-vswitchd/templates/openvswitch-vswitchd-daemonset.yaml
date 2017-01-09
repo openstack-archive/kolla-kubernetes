@@ -1,7 +1,25 @@
 {{- $restype := .Values.type }}
 {{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.deployment:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
-{{- $openvswitchVswitchdImageBuilt := printf "%s/%s/%s-%s-openvswitch-vswitchd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_vswitchd_image_tag | default .Values.kolla_tag }}
-{{- $openvswitchVswitchdFull := .Values.openvswitch_vswitchd_image_full | default $openvswitchVswitchdImageBuilt }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "openvswitch-vswitchd" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $extBridgeName := include "kolla_val_get_str" (dict "key" "ext_bridge_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $extInterfaceName := include "kolla_val_get_str" (dict "key" "ext_interface_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "setup_bridge" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "setup_bridge" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "key" "add_port" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "add_port" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
 {{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
@@ -24,16 +42,16 @@ spec:
 {{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-ovs-vswitchd",
-             "image": "{{ $openvswitchVswitchdFull }}",
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-xec",
                  "mkdir -p /var/log/kolla/openvswitch;
-{{- if .Values.kolla_kubernetes_ovs_setup_bridge }}
-                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ .Values.ext_bridge_name }} ;
-{{- if .Values.kolla_kubernetes_ovs_add_port }}
-                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ .Values.ext_bridge_name }} {{ .Values.ext_interface_name }};
+{{- if $localVals.setup_bridge }}
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }} ;
+{{- if $localVals.add_port }}
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }} {{ $extInterfaceName }};
 {{- end }}
 {{- end }}
                   echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
@@ -51,7 +69,7 @@ spec:
           {
              "name": "reqdependencies",
              "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "env": [
                 {
                    "name": "DEPENDENCY_SOCKET",
@@ -70,9 +88,9 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-        - image: "{{ $openvswitchVswitchdFull }}"
+        - image: "{{ $imageFull }}"
           name: main
           securityContext:
             privileged: true

@@ -1,6 +1,21 @@
 {{- $searchPath := ":global.kolla.glance.api.deployment:global.kolla.glance.api.all:global.kolla.glance.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $pvcName := include "kolla_val_get_str" (dict "key" "pvc_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "glance-api" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "ceph_backend" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "ceph_backend" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
 {{- $resourceName := "glance-api" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
@@ -18,9 +33,9 @@ kind: Deployment
 metadata:
    name: {{ $resourceName }}
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ $replicas }}
   strategy:
-{{- if eq .Values.ceph_backend true }}
+{{- if $localVals.ceph_backend }}
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
@@ -37,19 +52,19 @@ spec:
         service: {{ $serviceName }}
         type: {{ $serviceType }}
       annotations:
-{{- if eq .Values.ceph_backend true }}
+{{- if $localVals.ceph_backend }}
         kolla_upgrade: minor_rolling_safe
 {{- end }}
         pod.alpha.kubernetes.io/init-containers: '[
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
                   "-c",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-{{- if eq .Values.ceph_backend true }}
+{{- if $localVals.ceph_backend }}
                    cp -a /srv/ceph.conf /srv/pod-main-config/;
                    cp -a /srv/ceph.client.glance.keyring /srv/pod-main-config/;
 {{- end }}
@@ -58,7 +73,7 @@ spec:
                    crudini --set $CONF DEFAULT bind_port 8080;"
               ],
               "volumeMounts": [
-{{- if eq .Values.ceph_backend true }}
+{{- if $localVals.ceph_backend }}
                   {
                       "name": "ceph-conf",
                       "mountPath": "/srv/ceph.conf",
@@ -82,11 +97,11 @@ spec:
           }
       ]'
     spec:
-{{- if eq .Values.ceph_backend true }}
+{{- if $localVals.ceph_backend }}
       hostPID: True
 {{- end }}
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
 #You've got 2 days to drain or figure out why it won't.
       terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
       containers:
@@ -101,7 +116,7 @@ spec:
           readinessProbe:
             httpGet:
               path: {{ $checkPath }}
-              port: {{ .Values.port }}
+              port: {{ $port }}
             initialDelaySeconds: 5
             timeoutSeconds: 5
           lifecycle:
@@ -120,12 +135,12 @@ spec:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: haproxy-config
           env:
 {{- include "common_env_vars" $env | indent 12 }}
           ports:
-            - containerPort: {{ .Values.port }}
+            - containerPort: {{ $port }}
               name: {{ $portName }}
         - name: main
           image: "{{ $imageFull }}"
@@ -140,9 +155,9 @@ spec:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
               name: kolla-kubernetes-events
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
-{{- if ne .Values.ceph_backend true }}
+{{- if not $localVals.ceph_backend }}
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
 {{- end }}
@@ -160,10 +175,10 @@ spec:
         - name: haproxy-config
           configMap:
             name: glance-api-haproxy
-{{- if ne .Values.ceph_backend true }}
+{{- if not $localVals.ceph_backend }}
         - name: glance-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ .Values.pvc_name }}
+            claimName: {{ $pvcName }}
 {{- else }}
         - name: ceph-conf
           configMap:
