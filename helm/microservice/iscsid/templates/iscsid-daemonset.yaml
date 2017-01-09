@@ -1,14 +1,22 @@
 {{- $searchPath := ":global.kolla.iscsid.daemonset:global.kolla.iscsid.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-iscsid:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.iscsid_image_tag | default .Values.kolla_tag }}
-{{- $imageFull := .Values.iscsi_image_full | default $imageBuilt }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "iscsid" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "iscsid" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
+{{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ .Values.element_name }}
+  name: {{ $elementName }}
   labels:
     component: iscsid
     system: iscsid
@@ -24,7 +32,7 @@ spec:
           {
              "name": "initialize-iscsid",
              "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-ce",
@@ -45,7 +53,7 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
           name: main
@@ -55,7 +63,7 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
               readOnly: true
             - mountPath: /run
@@ -75,7 +83,7 @@ spec:
           emptyDir: {}
         - name: iscsid-configmap
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
         - name: lib-modules
           hostPath:
             path: /lib/modules

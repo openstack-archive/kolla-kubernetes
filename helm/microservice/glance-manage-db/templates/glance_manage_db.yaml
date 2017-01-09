@@ -1,6 +1,19 @@
 {{- $searchPath := ":global.kolla.glance.manage_db.job:global.kolla.glance.manage_db.all:global.kolla.glance.api.all:global.kolla.glance.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-glance-api:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $pvcName := include "kolla_val_get_str" (dict "key" "pvc_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "glance-api" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "ceph_backend" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "ceph_backend" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
 {{- $resourceName := "glance" }}
 {{- $serviceName := "glance-api" }}
 {{- $podTypeBootstrap := true }}
@@ -14,7 +27,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: {{ $imageFull | quote }}
           name: main
@@ -22,25 +35,25 @@ spec:
 {{- include "common_bootstrap_env_vars" $env | indent 12 }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-{{- if ne .Values.ceph_backend true  }}
-            - mountPath: {{ .Values.container_config_directory }}
+{{- if not $localVals.ceph_backend  }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: glance-api-config
               readOnly: true
             - mountPath: /var/lib/glance/
               name: glance-persistent-storage
 {{- else }}
-            - mountPath: {{ .Values.container_config_directory }}/config.json
+            - mountPath: {{ $containerConfigDirectory }}/config.json
               name: glance-api-config
               readOnly: true
               subPath: config.json
-            - mountPath: {{ .Values.container_config_directory }}/glance-api.conf
+            - mountPath: {{ $containerConfigDirectory }}/glance-api.conf
               name: glance-api-config
               readOnly: true
               subPath: glance-api.conf
-            - mountPath: {{ .Values.container_config_directory }}/ceph.conf
+            - mountPath: {{ $containerConfigDirectory }}/ceph.conf
               name: ceph-conf
               subPath: ceph.conf
-            - mountPath: {{ .Values.container_config_directory }}/ceph.client.glance.keyring
+            - mountPath: {{ $containerConfigDirectory }}/ceph.client.glance.keyring
               name: ceph-conf
               subPath: ceph.conf
 {{- end }}
@@ -49,10 +62,10 @@ spec:
         - name: glance-api-config
           configMap:
             name: glance-api
-{{- if ne .Values.ceph_backend true }}
+{{- if not $localVals.ceph_backend }}
         - name: glance-persistent-storage
           persistentVolumeClaim:
-            claimName: {{ .Values.pvc_name }}
+            claimName: {{ $pvcName }}
 {{- else }}
         - name: ceph-conf
           configMap:
