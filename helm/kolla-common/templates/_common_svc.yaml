@@ -37,4 +37,6 @@ spec:
 {{- end }}
 metadata:
    name:  {{ .element_name | quote }}
+   labels:
+     operator: {{ .Values.operator_label | default "none" }}
 {{- end }}
