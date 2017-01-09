@@ -1,10 +1,16 @@
 {{- define "common_volume_mounts" }}
+{{- $localVals := dict }}
+{{- $c1 := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c1 "key" "resolve_conf_net_host_workaround" }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "kubernetes_entrypoint" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
 - mountPath: /var/log/kolla/
   name: kolla-logs
 - mountPath: /etc/localtime
   name: host-etc-localtime
   readOnly: true
-{{- if and .netHostTrue .Values.enable_resolve_conf_net_host_workaround }}
+{{- if and .netHostTrue $localVals.resolve_conf_net_host_workaround }}
 - mountPath: /etc/resolv.conf
   name: resolv-conf
   subPath: resolv.conf
@@ -12,11 +18,18 @@
 {{- end }}
 
 {{- define "common_containers" }}
-{{- if .Values.enable_kube_logger }}
+{{- $localVals := dict }}
+{{- $c1 := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c1 "key" "kube_logger" }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "kube_logger" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" .searchPath "Values" .Values ) }}
+{{- if $localVals.kube_logger }}
 - name: logging
   image: {{ include "fluentd_image_full" . | quote }}
   volumeMounts:
-    - mountPath: {{ .Values.container_config_directory }}
+    - mountPath: {{ $containerConfigDirectory }}
       name: logging-config
 {{- include "common_volume_mounts" . | indent 4 }}
   env:
@@ -26,19 +39,31 @@
 {{- end }}
 
 {{- define "common_volumes" }}
+{{- $localVals := dict }}
+{{- $c1 := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c1 "key" "kube_logger" }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "kube_logger" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c2 "key" "resolve_conf_net_host_workaround" }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "resolve_conf_net_host_workaround" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
+{{- $loggerConfigmapName := include "kolla_val_get_str" (dict "key" "logger_configmap_name" "searchPath" .searchPath "Values" .Values ) }}
 - name: host-etc-localtime
   hostPath:
     path: /etc/localtime
 - name: kolla-logs
   emptyDir: {}
 {{- $podTypeNotBootstrap := not .podTypeBootstrap }}
-{{- if and .Values.enable_kube_logger $podTypeNotBootstrap }}
+{{- if and $localVals.kube_logger $podTypeNotBootstrap }}
 - name: logging-config
   configMap:
 {{- $loggerConfigmapNameDefault := printf "%s-logging" .resourceName }}
-    name: {{ .Values.logger_configmap_name | default $loggerConfigmapNameDefault }}
+    name: {{ $loggerConfigmapName | default $loggerConfigmapNameDefault }}
 {{- end }}
-{{- if and .netHostTrue .Values.enable_resolve_conf_net_host_workaround }}
+{{- if and .netHostTrue $localVals.resolve_conf_net_host_workaround }}
 - name: resolv-conf
   configMap:
     name: resolv-conf
