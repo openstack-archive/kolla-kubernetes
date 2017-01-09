@@ -1,41 +1,60 @@
 {{- $searchPath := ":global.kolla.nova.compute.daemonset:global.kolla.nova.compute.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-nova-compute:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $novncSearchPath := "global.kolla.nova.novncproxy.all" }}
 {{- $resourceName := "nova-compute" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- $serviceName := "nova" }}
 {{- $serviceType := "compute" }}
 {{- $privileged := true }}
-{{- $novncProxyHost := .Values.novnc_proxy_host | default "nova-novncproxy" }}
-{{- $novncProxyPort := .Values.novnc_proxy_port | default 6080 }}
+{{- $novncProxyHost := include "kolla_val_get_str" (dict "key" "host" "searchPath" $novncSearchPath "Values" .Values }}
+{{- $novncProxyPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $novncSearchPath "Values" .Values }}
 {{- $novncProxyBaseUrl := printf "http://%s:%d/vnc_auto.html" $novncProxyHost $novncProxyPort }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "nova-compute" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "libvirt_tcp" "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "libvirt_tcp" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "key" "ceph_backend" "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "ceph_backend" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $tunnelInterface := include "kolla_val_get_str" (dict "key" "tunnel_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ .Values.element_name }}
+  name: {{ $elementName }}
   labels:
     component: {{ $serviceName }}
-    system: {{ .Values.element_name }}
+    system: {{ $elementName }}
 spec:
   template:
     metadata:
       labels:
         component: {{ $serviceName }}
-        system: {{ .Values.element_name }}
+        system: {{ $elementName }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
 {{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-nova-compute",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-xec",
                  "cp -a /config/..data/* /nova/;
-                  IP=$(ip addr show dev {{ .Values.tunnel_interface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   mkdir -p /var/log/kolla/nova-init;
                   echo Using $IP | tee /var/log/kolla/nova-init/ip.log;
                   crudini --set /nova/nova.conf DEFAULT my_ip $IP;
@@ -43,16 +62,16 @@ spec:
                   crudini --set /nova/nova.conf vnc vncserver_listen $IP;
                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
                   crudini --set /nova/nova.conf vnc novncproxy_base_url {{ $novncProxyBaseUrl }};
-{{- if .Values.libvirt_tcp }}
+{{- if $localVals.libvirt_tcp }}
                   sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
 {{- end }}
-{{- if .Values.nova_ceph }}
+{{- if $localVal.ceph_backend }}
                   cp -a /secret/a/..data/ceph.client.nova.keyring /nova/ceph.client.nova.keyring;
                   cp -a /config2/..data/ceph.conf /nova/ceph.conf;
 {{- end }}
              "],
              "volumeMounts": [
-{{- if .Values.nova_ceph }}
+{{- if $localVals.ceph_backend }}
                 {
                    "name": "ceph-conf",
                    "mountPath": "/config2/"
@@ -79,7 +98,7 @@ spec:
           {
              "name": "initialize-nova",
              "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-ce",
@@ -101,8 +120,8 @@ spec:
     spec:
       hostNetwork: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
-{{- if not .Values.libvirt_tcp }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+{{- if not $localVals.libvirt_tcp }}
       hostIPC: True
 {{- end }}
       containers:
@@ -112,7 +131,7 @@ spec:
             privileged: true
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: nova-config
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
@@ -131,7 +150,7 @@ spec:
 {{- include "common_volumes" $env | indent 8 }}
         - name: nova-compute-config
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova
@@ -149,7 +168,7 @@ spec:
             path: /sys/fs/cgroup
         - name: nova-config
           emptyDir: {}
-{{- if .Values.nova_ceph }}
+{{- if $localVals.ceph_backend }}
         - name: ceph-conf
           configMap:
             name: ceph-conf

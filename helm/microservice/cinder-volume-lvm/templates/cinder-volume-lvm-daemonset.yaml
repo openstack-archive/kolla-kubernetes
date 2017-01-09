@@ -1,38 +1,51 @@
 {{- $searchPath := ":global.kolla.cinder.volume_lvm.daemonset:global.kolla.cinder.volume_lvm.all:global.kolla.cinder.volume.all:global.kolla.cinder.all:global.kolla.all" }}
-{{- $imageBuilt := printf "%s/%s/%s-%s-cinder-volume:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
-{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "cinder-volume" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "cinder-volume-lvm" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- $serviceName := "cinder" }}
 {{- $serviceType := "volume" }}
 {{- $privileged := true }}
+{{- $localVals := dict }}
+{{- $c1 := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c1 "key" "lvm_backends" }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "lvm_backends" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ .Values.element_name }}
+  name: {{ $elementName }}
   labels:
     component: {{ $resourceName }}
-    system:  {{ .Values.element_name }}
+    system:  {{ $elementName }}
 spec:
   template:
     metadata:
       labels:
         component: {{ $resourceName }}
-        system: {{ .Values.element_name }}
+        system: {{ $elementName }}
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
           {
              "name": "initialize-cinder-volume-lvm",
              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "bash",
                  "-ce",
                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  {{- $map := index .Values "lvm_backends" }}
-                  {{- range $key, $val := $map }}
+                  {{- range $key, $val := $localVals.lvm_backends }}
                   {{- range $key2, $val2 := $val }}
                   {{- $vg_ip := $key2 }}
                   {{- $vg_name := $val2 }}
@@ -60,7 +73,7 @@ spec:
           {
              "name": "initialize-cinder-logs",
              "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-ce",
@@ -78,7 +91,7 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
           name: main
@@ -88,7 +101,7 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ .Values.container_config_directory }}
+            - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
               readOnly: true
             - mountPath: /run
@@ -110,7 +123,7 @@ spec:
           emptyDir: {}
         - name: cinder-volume-configmap
           configMap:
-            name: {{ .Values.element_name }}
+            name: {{ $elementName }}
         - name: cinder-volumes
           hostPath:
             path: /var/lib/cinder
