@@ -24,6 +24,8 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
    name: {{ $elementName }}
+   labels:
+    operator: {{ .Values.operator_label | default "none" }}
 spec:
   replicas: 1
   template:
@@ -55,7 +57,7 @@ spec:
 {{- include "common_volumes" $env | indent 8 }}
         - name: memcached-config
           configMap:
-            name: {{ $elementName }}
+            name: {{ .Values.operator_configmap | default $elementName }}
 {{- else }}
 {{- include "common_disabled" (dict "elementName" $elementName "serviceKind" "deployment") }}
 {{- end }}
