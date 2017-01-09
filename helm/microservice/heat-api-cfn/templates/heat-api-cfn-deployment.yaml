@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.heat.api-cfn.deployment:global.kolla.heat.api-cfn.all:global.kolla.heat.all:global.kolla.all" }}
-{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "heat-api-cfn" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}

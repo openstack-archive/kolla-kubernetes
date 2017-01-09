@@ -15,6 +15,8 @@
 {{- $_ := set $ci "imageName" "image_full" }}
 {{- $_ := set $ci "tagName" "image_tag" }}
 {{- $memcachedImageFull := include "kolla_build_image_full" $ci }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- if $localVals.enabled }}
@@ -34,7 +36,7 @@ spec:
         ]'
     spec:
       nodeSelector:
-        {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+        {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $memcachedImageFull }}"
           name: main
