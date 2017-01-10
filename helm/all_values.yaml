@@ -95,7 +95,7 @@ keystone-create-db:
                         database_name: "keystone"
                         database_user: "keystone"
 
-keystone-create-endpoints:
+keystone-create-endpoints-job:
         global:
             kolla:
                 all:
@@ -186,7 +186,7 @@ neutron-server:
                         all:
                             port: 9696
 
-neutron-openvswitch-agent:
+neutron-openvswitch-agent-daemonset:
         type: network
         global:
             kolla:
@@ -197,7 +197,7 @@ neutron-openvswitch-agent:
                         daemonset:
                             logger_configmap_name: neutron-openvswitch-agent-logger
 
-neutron-l3-agent:
+neutron-l3-agent-daemonset:
         type: network
         global:
             kolla:
@@ -210,7 +210,7 @@ neutron-l3-agent:
                         daemonset:
                             logger_configmap_name: neutron-l3-agent-logger
 
-neutron-dhcp-agent:
+neutron-dhcp-agent-daemonset:
         global:
             kolla:
                 all:
@@ -221,7 +221,7 @@ neutron-dhcp-agent:
                             logger_configmap_name: neutron-dhcp-agent-logger
 
 
-neutron-metadata-agent:
+neutron-metadata-agent-daemonset:
         type: network
         global:
             kolla:
@@ -230,10 +230,10 @@ neutron-metadata-agent:
                         daemonset:
                             logger_configmap_name: neutron-metadata-agent-logger
 
-openvswitch-ovsdb:
+openvswitch-ovsdb-daemonset:
         type: network
 
-openvswitch-vswitchd:
+openvswitch-vswitchd-daemonset:
         type: network
         global:
             kolla:
@@ -244,14 +244,14 @@ openvswitch-vswitchd:
                         ext_bridge_name: br-ex
                         ext_interface_name: eth1
 
-rabbitmq-init-element:
+rabbitmq-init-element-job:
         global:
             kolla:
                 rabbitmq:
                     all:
                         cookie:
 
-rabbitmq-pod:
+rabbitmq-statefulset:
         global:
             kolla:
                 rabbitmq:
@@ -288,7 +288,7 @@ memcached-svc:
                         port_external: false
                         node_port_enabled: false
 
-memcached:
+memcached-deployment:
         global:
             kolla:
                 memcached:
@@ -296,14 +296,14 @@ memcached:
                         enabled: true
                         port: 11211
 
-mariadb-init-element:
+mariadb-init-element-job:
         global:
             kolla:
                 mariadb:
                     all:
                         image_tag: 3.0.1
 
-mariadb-pod:
+mariadb-statefulset:
         global:
             kolla:
                 mariadb:
@@ -394,7 +394,7 @@ nova-novncproxy:
                         all:
                             port: 6080
 
-nova-compute:
+nova-compute-daemonset:
         global:
             kolla:
                 all:
@@ -410,7 +410,7 @@ nova-compute:
                             selector_key: kolla_compute
                             libvirt_tcp: false
 
-nova-libvirt:
+nova-libvirt-daemonset:
         global:
             kolla:
                 all:
@@ -574,7 +574,7 @@ glance-create-db:
                         database_name: "glance"
                         database_user: "glance"
 
-glance-manage-db:
+glance-manage-db-job:
         global:
             kolla:
                 all:
@@ -628,7 +628,7 @@ glance-create-keystone-endpoint-admin:
                         all:
                             service: glance-api
 
-glance-api:
+glance-api-deployment:
         global:
             kolla:
                 all:
@@ -723,7 +723,7 @@ cinder-create-keystone-endpoint-internalv2:
                         all:
                             service: cinder-api
 
-tgtd:
+tgtd-daemonset:
         global:
             kolla:
                 all:
@@ -733,14 +733,14 @@ tgtd:
                     all:
                         image_tag: 3.0.1
 
-iscsid:
+iscsid-daemonset:
         global:
             kolla:
                 iscsid:
                     all:
                         image_tag: 3.0.1
 
-cinder-volume-lvm:
+cinder-volume-lvm-daemonset:
         global:
             kolla:
                 cinder:
