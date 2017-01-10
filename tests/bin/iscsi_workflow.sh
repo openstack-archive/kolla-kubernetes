@@ -10,13 +10,17 @@ function lvmbackend_values {
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
-. "$DIR/tests/bin/setup_helm_entrypint_config.sh"
+. "$DIR/tests/bin/common_workflow_config.sh"
 
 tunnel_interface=docker0
 
 base_distro="$2"
 
-common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro"
+function general_config {
+    common_workflow_config $IP $base_distro $tunnel_interface
+}
+
+common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -48,7 +52,7 @@ helm install kolla/rabbitmq-svc --version $VERSION \
 
 helm install kolla/keystone-admin-svc --version $VERSION \
     --namespace kolla --name keystone-admin-svc \
-    --set "element_name=keystone-admin"
+    --set "global.kolla.keystone.all.admin_port_external=true"
 
 helm install kolla/keystone-public-svc --version $VERSION \
     --namespace kolla --name keystone-public-svc \
@@ -155,6 +159,18 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
+
+helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
+    --set "$common_vars,type=network,selector_key=kolla_controller" \
+    --namespace kolla --name openvswitch-ovsdb-network
+
+helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
+    --set $common_vars,type=network,selector_key=kolla_controller \
+    --namespace kolla --name openvswitch-vswitchd-network
+
+kollakube res create bootstrap openvswitch-set-external-ip
+
+$DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
@@ -352,16 +368,6 @@ helm install kolla/neutron-l3-agent-daemonset --version $VERSION \
 helm install kolla/neutron-openvswitch-agent-daemonset --version $VERSION \
     --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
     --namespace kolla --name neutron-openvswitch-agent-network
-
-helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
-    --set "$common_vars,type=network,selector_key=kolla_controller" \
-    --namespace kolla --name openvswitch-ovsdb-network
-
-helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
-    --set $common_vars,type=network,selector_key=kolla_controller \
-    --namespace kolla --name openvswitch-vswitchd-network
-
-kollakube res create bootstrap openvswitch-set-external-ip
 
 helm install kolla/nova-libvirt-daemonset --version $VERSION \
     --set "$common_vars,element_name=nova-libvirt,libvirt_ceph=false" \
