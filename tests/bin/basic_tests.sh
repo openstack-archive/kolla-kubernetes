@@ -96,11 +96,14 @@ neutron subnet-create --gateway=172.18.1.1 \
     --allocation-pool start=172.18.1.65,end=172.18.1.254 \
     --name admin admin 172.18.1.0/24
 neutron router-interface-add admin admin
-neutron security-group-rule-create --protocol icmp \
-    --direction ingress default
-neutron security-group-rule-create --protocol tcp \
-    --port-range-min 22 --port-range-max 22 \
-    --direction ingress default
+
+openstack security group list -f value -c ID | while read line; do
+    neutron security-group-rule-create --protocol icmp \
+        --direction ingress $SG_ID
+    neutron security-group-rule-create --protocol tcp \
+        --port-range-min 22 --port-range-max 22 \
+        --direction ingress $SG_ID
+done
 
 openstack flavor create --public --id 1 --ram 512 --disk 1 --vcpus 1 m1.tiny || true
 
