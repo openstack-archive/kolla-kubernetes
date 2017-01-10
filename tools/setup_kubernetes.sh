@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+BASE_DISTRO=$2
+INSTALL_TYPE=$3
+
 if [ -f /etc/redhat-release ]; then
     cat > /tmp/setup.$$ <<"EOF"
 setenforce 0
@@ -38,7 +43,7 @@ rm -f /tmp/kubeout
 EOF
 else
     cat >> /tmp/setup.$$ <<EOF
-kubeadm join --token "$2" "$3" --skip-preflight-checks
+kubeadm join --token "$4" "$5" --skip-preflight-checks
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
@@ -51,6 +56,9 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 
+. $DIR/setup_registry.sh
+setup_registry $BASE_DISTRO $INSTALL_TYPE 1 /tmp
+
 if [ "$1" == "master" ]; then
     count=0
     while true; do
@@ -60,3 +68,11 @@ if [ "$1" == "master" ]; then
         [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
     done
 fi
+
+count=0
+while true; do
+    curl -sq http://127.0.0.1:4000 > /dev/null 2>&1 && break || true
+    sleep 1
+    count=$((count + 1))
+    [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
+done
