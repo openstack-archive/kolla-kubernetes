@@ -5,7 +5,11 @@ VERSION=0.4.0-1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
-. "$DIR/tests/bin/setup_helm_entrypint_config.sh"
+. "$DIR/tests/bin/common_workflow_config.sh"
+
+function general_config {
+    common_workflow_config $IP $base_distro $tunnel_interface
+}
 
 function ceph_values {
     echo "global:"
@@ -41,6 +45,9 @@ function helm_entrypoint_general {
     echo "         pool: kollavolumes"
     echo "         secret_name: ceph-kolla"
     echo "         user: kolla"
+    echo "    keystone:"
+    echo "      all:"
+    echo "        admin_port_external: true"
 }
 
 tunnel_interface=docker0
