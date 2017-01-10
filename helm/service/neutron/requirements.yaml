@@ -1,4 +1,4 @@
 dependencies:
-  - name: neutron-server
+  - name: neutron-server-deployment
     repository: http://localhost:10191
     version: 3.0.0-1

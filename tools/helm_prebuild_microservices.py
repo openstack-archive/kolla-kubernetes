@@ -29,41 +29,41 @@ stateful_services = [
 ]
 
 pod_http_termination = [
-    'neutron-server',
-    'nova-api',
-    'nova-novncproxy',
-    'cinder-api',
-    'glance-api',
-    'glance-registry',
-    'heat-api-cfn',
-    'heat-api'
+    'neutron-server-deployment',
+    'nova-api-deployment',
+    'nova-novncproxy-deployment',
+    'cinder-api-deployment',
+    'glance-api-deployment',
+    'glance-registry-deployment',
+    'heat-api-cfn-deployment',
+    'heat-api-deployment'
 ]
 
 common_create_keystone_admin = [
-    'neutron-create-keystone-service',
-    'neutron-create-keystone-endpoint-public',
-    'neutron-create-keystone-endpoint-internal',
-    'neutron-create-keystone-endpoint-admin',
-    'cinder-create-keystone-user',
-    'glance-create-keystone-user',
-    'glance-create-keystone-service',
-    'glance-create-keystone-endpoint-public',
-    'glance-create-keystone-endpoint-internal',
-    'glance-create-keystone-endpoint-admin',
-    'neutron-create-keystone-user',
-    'nova-create-keystone-user',
-    'nova-create-keystone-service',
-    'nova-create-keystone-endpoint-public',
-    'nova-create-keystone-endpoint-internal',
-    'nova-create-keystone-endpoint-admin',
-    'cinder-create-keystone-service',
-    'cinder-create-keystone-servicev2',
-    'cinder-create-keystone-endpoint-public',
-    'cinder-create-keystone-endpoint-internal',
-    'cinder-create-keystone-endpoint-admin',
-    'cinder-create-keystone-endpoint-publicv2',
-    'cinder-create-keystone-endpoint-internalv2',
-    'cinder-create-keystone-endpoint-adminv2'
+    'neutron-create-keystone-service-job',
+    'neutron-create-keystone-endpoint-public-job',
+    'neutron-create-keystone-endpoint-internal-job',
+    'neutron-create-keystone-endpoint-admin-job',
+    'cinder-create-keystone-user-job',
+    'glance-create-keystone-user-job',
+    'glance-create-keystone-service-job',
+    'glance-create-keystone-endpoint-public-job',
+    'glance-create-keystone-endpoint-internal-job',
+    'glance-create-keystone-endpoint-admin-job',
+    'neutron-create-keystone-user-job',
+    'nova-create-keystone-user-job',
+    'nova-create-keystone-service-job',
+    'nova-create-keystone-endpoint-public-job',
+    'nova-create-keystone-endpoint-internal-job',
+    'nova-create-keystone-endpoint-admin-job',
+    'cinder-create-keystone-service-job',
+    'cinder-create-keystone-servicev2-job',
+    'cinder-create-keystone-endpoint-public-job',
+    'cinder-create-keystone-endpoint-internal-job',
+    'cinder-create-keystone-endpoint-admin-job',
+    'cinder-create-keystone-endpoint-publicv2-job',
+    'cinder-create-keystone-endpoint-internalv2-job',
+    'cinder-create-keystone-endpoint-adminv2-job'
 ]
 
 
