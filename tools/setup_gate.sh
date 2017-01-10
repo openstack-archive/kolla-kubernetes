@@ -12,6 +12,8 @@ if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
     sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
 fi
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
@@ -105,7 +107,7 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $BASE_DISTRO $INSTALL_TYPE
 
 kubectl taint nodes --all dedicated-
 
