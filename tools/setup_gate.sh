@@ -12,14 +12,22 @@ if [ "x$PIPELINE" == "xperiodic" ]; then
 fi
 
 if [ "x$BRANCH" == "xt" ]; then
-    echo Version: $BRANCH is not enabled yet.
-    exit 0
+    sed -i 's/2\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+    sed -i 's/3\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/3\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+    echo 'docker_registry: "127.0.0.1:4000"' >> tests/conf/ceph-all-in-one/kolla_config
+    echo 'docker_namespace: "lokolla"' >> tests/conf/ceph-all-in-one/kolla_config
+    sed -i 's/docker_registry:.*/docker_registry: "127.0.0.1:4000"/g' helm/all_values.yaml
+    sed -i 's/docker_namespace:.*/docker_namespace: "lokolla"/g' helm/all_values.yaml
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
     sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
 fi
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
@@ -113,7 +121,7 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $BASE_DISTRO $INSTALL_TYPE $ZUUL_BRANCH
 
 kubectl taint nodes --all dedicated-
 
@@ -122,12 +130,16 @@ kubectl taint nodes --all dedicated-
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
 
+source ./tools/setup_registry.sh
+registry_filename=$(registry_file $BASE_DISTRO $INSTALL_TYPE $ZUUL_BRANCH)
+
 if [ "x$4" == "xceph-multi" ]; then
     NODES=1
     cat /etc/nodepool/sub_nodes_private | while read line; do
         NODES=$((NODES+1))
         echo $line
         scp tools/setup_kubernetes.sh $line:
+        scp tools/setup_registry.sh $line:
         scp tests/bin/fix_gate_iptables.sh $line:
         scp /usr/bin/kubectl $line:kubectl
         NODENAME=$(ssh -n $line hostname)
@@ -140,7 +152,9 @@ if [ "x$4" == "xceph-multi" ]; then
            ssh -n $line sudo yum remove -y iscsi-initiator-utils
         fi
         ssh -n $line sudo mv kubectl /usr/bin/
-        ssh -n $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        scp /tmp/$registry_filename $line:/tmp/$registry_filename
+        ssh -n $line bash setup_kubernetes.sh slave $BASE_DISTRO $INSTALL_TYPE $ZUUL_BRANCH "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        ssh -n $line rm -f $registry_filename
         set +xe
         count=0
         while true; do
@@ -156,6 +170,8 @@ if [ "x$4" == "xceph-multi" ]; then
         kubectl label node $NODENAME kolla_compute=true
     done
 fi
+
+rm -f /tmp/$registry_filename
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true

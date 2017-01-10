@@ -6,6 +6,9 @@ CONFIG="$4"
 BRANCH="$6"
 PIPELINE="$7"
 
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
@@ -83,7 +86,7 @@ tests/bin/setup_config_iscsi.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback_lvm.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $BASE_DISTRO $INSTALL_TYPE $ZUUL_BRANCH
 
 kubectl taint nodes --all dedicated-
 
