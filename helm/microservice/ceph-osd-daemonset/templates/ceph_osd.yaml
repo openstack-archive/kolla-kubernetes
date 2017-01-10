@@ -1,0 +1,123 @@
+{{- $imageBuilt := printf "%s/%s/%s-%s-ceph-osd:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.image_tag }}
+{{- $imageFull := .Values.image_full | default $imageBuilt }}
+{{- $storage_interface := .Values.storage_interface | default "eth0" }}
+{{- $podTypeBootstrap := true }}
+{{- $node := .Values.node }}
+{{- $osdNumber := .Values.osd_number }}
+{{- $osdName := printf "ceph-osd%1.f" .Values.osd_number }}
+{{- $osdDev := .Values.osd_dev }}
+{{- $osdPartNum := .Values.osd_part_num }}
+{{- $osdPartDev := printf "%sp%1.f" .Values.osd_dev .Values.osd_part_num }}
+{{- $osdJournalDev := .Values.osd_journal_dev }}
+{{- $osdJournalPartNum := .Values.osd_journal_part_num }}
+{{- $osdJournalPartDev := printf "%sp%1.f" .Values.osd_journal_dev .Values.osd_journal_part_num }}
+apiVersion: batch/v1
+kind: DaemonSet
+metadata:
+  name: {{ $osdName }}
+spec:
+  template:
+    metadata:
+      annotations:
+  #FIXME Once out of alpha, this should be converted to yaml.
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+              "name": "update-config",
+              "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  STORAGE_INTERFACE={{ $storage_interface }};
+                  F=/var/lib/kolla-kubernetes/ceph-osd/storage_interface;
+                  [ -f $F ] && STORAGE_INTERFACE=$(<$F) || true;
+                  IP=$(ip addr list {{ $storage_interface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+                  CONF=/srv/pod-main-config/ceph.conf;
+                  sed -i ''/^mon host.*/d;/^mon host/d;/^mon addr/d'' $CONF;
+                  sed -i ''/^\\[global\\]/a mon host = ''$IP $CONF;
+                  sed -i ''/^\\[global\\]/a mon addr = ''$IP'':6789'' $CONF;
+                  sed -i ''/^\\[global\\]/a mon initial members = minikube'' $CONF;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "ceph-osd-config",
+                      "mountPath": "/srv/configmap"
+                  },
+                  {
+                      "name": "pod-main-config",
+                      "mountPath": "/srv/pod-main-config"
+                  },
+                  {
+                      "name": "ceph-osd",
+                      "mountPath": "/var/lib/ceph/osd"
+                  }
+              ]
+          }
+        ]'
+    spec:
+        hostNetwork: True
+        hostPID: True
+        nodeSelector:
+          kubernetes.io/hostname: {{ $node }}
+        containers:
+          - image: {{ $imageFull | quote }}
+            name: main
+            securityContext:
+              privileged: true
+            env:
+{{- include "common_env_vars" . | indent 12 }}
+            - name: USE_EXTERNAL_JOURNAL
+              value: "True"
+            - name: JOURNAL_DEV
+              value: "{{ $osdJournalDev }}"
+            - name: JOURNAL_PARTITION_NUM
+              value: "{{ $osdJournalPartNum }}"
+            - name: JOURNAL_PARTITION
+              value: "{{ $osdJournalPartDev }}"
+            - name: OSD_DEV
+              value: "{{ $osdDev }}"
+            - name: OSD_PARTITION_NUM
+              value: "{{ $osdPartNum }}"
+            - name: OSD_PARTITION
+              value: "{{ $osdPartDev }}"
+            - name: OSD_INITIAL_WEIGHT
+              value: "1"
+            - name: OSD_FILESYSTEM
+              value: "xfs"
+            - name: HOSTNAME
+              value: {{ $node }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/lib/kolla/config_files/ceph.conf
+              name: pod-main-config
+              readOnly: true
+              subPath: ceph.conf
+            - mountPath: /var/lib/kolla/config_files/config.json
+              name: pod-main-config
+              readOnly: true
+              subPath: config.json
+            - mountPath: /var/lib/ceph
+              name: ceph-osd
+            - mountPath: /var/lib/kolla/config_files/ceph.client.admin.keyring
+              subPath: data
+              name: ceph-client-admin-keyring
+            - mountPath: /dev
+              name: host-dev
+      volumes:
+{{ include "common_volumes" $env | indent 8 }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: ceph-osd-config
+          configMap:
+            name: ceph-osd
+        - name: ceph-osd
+          hostPath:
+            path: /var/lib/kolla/volumes/ceph-osd
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: ceph-client-admin-keyring
+{{- end }}
