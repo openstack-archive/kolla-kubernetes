@@ -12,30 +12,16 @@ common:
                     fluentd_image_tag: 3.0.1
                     kolla_toolbox_image_tag: 3.0.1
                     kubernetes_entrypoint_image_tag: 3.0.1
-
-        selector_key: kolla_controller
-        selector_value: "true"
-
-        #FIXME remove once everything's over to globals.
-        docker_registry: docker.io
-        docker_namespace: kolla
-        kolla_base_distro: centos
-        kolla_install_type: binary
-
-        image_pull_policy: IfNotPresent
-
-        enable_resolve_conf_net_host_workaround: true
-        enable_openvswitch_tcp: false
-        enable_neutron_dvr: false
-
-        container_config_directory: /var/lib/kolla/config_files
-
-        #Common Image overrides
-        #fluentd_image_full:
-        #kolla_toolbox_image_tag:
-
-        enable_kube_logger: true
-        kubernetes_entrypoint: false
+#FIXME remove once 3.0.2 is released
+                    kubernetes_entrypoint_image_full: docker.io/kolla/centos-binary-kubernetes-entrypoint:3.0.1
+                    openvswitch_tcp: false
+                    selector_key: kolla_controller
+                    selector_value: "true"
+                    image_pull_policy: IfNotPresent
+                    container_config_directory: /var/lib/kolla/config_files
+                    kubernetes_entrypoint: false
+                    resolve_conf_net_host_workaround: true
+                    kube_logger: true
 
 common-create-keystone-admin:
         global:
@@ -54,7 +40,7 @@ pod-http-termination:
             kolla:
                 all:
                     haproxy_python_termination: true
-        haproxy_image_tag: 2.0.2
+                    haproxy_image_tag: 2.0.2
 
 stateful-service:
         global:
@@ -68,9 +54,6 @@ stateful-service:
                         pool: kollavolumes
                         secret_name: ceph-kolla
                         user: kolla
-
-openvswitch-ovsdb:
-        openvswitch_ovsdb_image_tag: 2.0.2
 
 keystone-admin-svc:
         global:
@@ -113,10 +96,14 @@ keystone-create-db:
                         database_user: "keystone"
 
 keystone-create-endpoints:
-        image_tag: 2.0.2
-        port: 5000
-        admin_port: 35357
-        region: RegionOne
+        global:
+            kolla:
+                all:
+                    region: RegionOne
+                keystone:
+                    all:
+                        port: 5000
+                        admin_port: 35357
 
 keystone-api:
         global:
@@ -201,61 +188,80 @@ neutron-server:
 
 neutron-openvswitch-agent:
         type: network
-
-        #Image overrides
-        #openvswitch_agent_image_full:
-        openvswitch_agent_image_tag: 2.0.2
-
-        logger_configmap_name: neutron-openvswitch-agent-logger
-
-        tunnel_interface: eth0
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                neutron:
+                    openvswitch_agent:
+                        daemonset:
+                            logger_configmap_name: neutron-openvswitch-agent-logger
 
 neutron-l3-agent:
         type: network
-
-        #Image overrides
-        #l3_agent_image_full:
-        l3_agent_image_tag: 2.0.2
-
-        logger_configmap_name: neutron-l3-agent-logger
-
-        tunnel_interface: eth0
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                neutron:
+                    all:
+                        dvr: false
+                    l3_agent:
+                        daemonset:
+                            logger_configmap_name: neutron-l3-agent-logger
 
 neutron-dhcp-agent:
-        dhcp_agent_image_full:
-        dhcp_agent_image_tag: 2.0.2
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                neutron:
+                    dhcp_agent:
+                        daemonset:
+                            logger_configmap_name: neutron-dhcp-agent-logger
 
-        logger_configmap_name: neutron-dhcp-agent-logger
-        enable_openvswitch_tcp: false
-
-        tunnel_interface: eth0
 
 neutron-metadata-agent:
         type: network
+        global:
+            kolla:
+                neutron:
+                    dhcp_agent:
+                        daemonset:
+                            logger_configmap_name: neutron-metadata-agent-logger
 
-        metadata_agent_image_full:
-        metadata_agent_image_tag: 2.0.2
-
-        logger_configmap_name: neutron-metadata-agent-logger
+openvswitch-ovsdb:
+        type: network
 
 openvswitch-vswitchd:
-        openvswitch_vswitchd_image_tag: 2.0.2
-        kolla_kubernetes_ovs_setup_bridge: true
-        kolla_kubernetes_ovs_add_port: false
-        ext_bridge_name: "br-ex"
-        ext_interface_name: "eth1"
+        type: network
+        global:
+            kolla:
+                openvswitch:
+                    all:
+                        setup_bridge: true
+                        add_port: false
+                        ext_bridge_name: br-ex
+                        ext_interface_name: eth1
 
 rabbitmq-init-element:
-        rabbitmq_cluster_cookie:
-        rabbitmq_image_tag: 3.0.1
+        global:
+            kolla:
+                rabbitmq:
+                    all:
+                        cookie:
 
 rabbitmq-pod:
-        rabbitmq_port: 5672
-        rabbitmq_management_port: 15672
-        rabbitmq_image_tag: 3.0.1
-        dependencies:
-            jobs:
-              - rabbitmq-init-element
+        global:
+            kolla:
+                rabbitmq:
+                    all:
+                        port: 5672
+                        mgmt_port: 15672
+                    statefulset:
+                        dependencies:
+                            jobs:
+                            - rabbitmq-init-element
 
 rabbitmq-svc:
         global:
@@ -289,15 +295,22 @@ memcached:
                     all:
                         enabled: true
                         port: 11211
-        memcached_image_tag: 3.0.1
 
 mariadb-init-element:
-        mariadb_image_tag: 3.0.1
+        global:
+            kolla:
+                mariadb:
+                    all:
+                        image_tag: 3.0.1
 
 mariadb-pod:
-        database_user: root
-        mariadb_port: 3306
-        mariadb_image_tag: 3.0.1
+        global:
+            kolla:
+                mariadb:
+                    all:
+                        database_user: root
+                        port: 3306
+                        image_tag: 3.0.1
 
 mariadb-svc:
         global:
@@ -382,18 +395,31 @@ nova-novncproxy:
                             port: 6080
 
 nova-compute:
-        image_tag: 2.0.2
-        selector_key: kolla_compute
-        selector_value: "true"
-        libvirt_tcp: false
-        nova_ceph: true
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                    ceph_backend: false
+                nova:
+                    novncproxy:
+                        all:
+                            host: nova-novncproxy
+                            port: 6080
+                    compute:
+                        all:
+                            selector_key: kolla_compute
+                            libvirt_tcp: false
 
 nova-libvirt:
-        image_tag: 2.0.2
-        selector_key: kolla_compute
-        selector_value: "true"
-        libvirt_tcp: false
-        libvirt_ceph: true
+        global:
+            kolla:
+                all:
+                    ceph_backend: false
+                nova:
+                    compute:
+                        all:
+                            selector_key: kolla_compute
+                            libvirt_tcp: false
 
 nova-create-keystone-user:
         global:
@@ -528,19 +554,6 @@ cinder-api:
                         all:
                             port: 8776
 
-cinder-backup:
-        replicas: 1
-        image_tag: 2.0.2
-
-cinder-volume-ceph:
-        replicas: 1
-        image_tag: 2.0.2
-
-horizon-api:
-        horizon_image_tag: 2.0.2
-        replicas: 1
-        port: 80
-
 horizon-svc:
         global:
             kolla:
@@ -562,9 +575,14 @@ glance-create-db:
                         database_user: "glance"
 
 glance-manage-db:
-        image_tag: 2.0.2
-        ceph_backend: true
-        pvc_name: "glance"
+        global:
+            kolla:
+                all:
+                    ceph_backend: false
+                glance:
+                    api:
+                        all:
+                            pvc_name: glance
 
 glance-create-keystone-user:
         global:
@@ -611,11 +629,15 @@ glance-create-keystone-endpoint-admin:
                             service: glance-api
 
 glance-api:
-        image_tag: 2.0.2
-        replicas: 1
-        ceph_backend: false
-        port: 9292
-        pvc_name: "glance"
+        global:
+            kolla:
+                all:
+                    ceph_backend: false
+                glance:
+                    api:
+                        all:
+                            port: 9292
+                            pvc_name: glance
 
 glance-registry:
         global:
@@ -701,17 +723,29 @@ cinder-create-keystone-endpoint-internalv2:
                         all:
                             service: cinder-api
 
-iscsid:
-        selector_key: kolla_compute
-        selector_value: "true"
-        iscsid_image_tag: 3.0.1
-
 tgtd:
-        selector_key: kolla_controller
-        selector_value: "true"
-        tgtd_image_tag: 3.0.1
+        global:
+            kolla:
+                all:
+                    storage_interface: eth0
+            kolla:
+                tgtd:
+                    all:
+                        image_tag: 3.0.1
+
+iscsid:
+        global:
+            kolla:
+                iscsid:
+                    all:
+                        image_tag: 3.0.1
 
 cinder-volume-lvm:
-        image_tag: 3.0.1
-        storage_interface: "eth0"
-        lvm_backends: []
+        global:
+            kolla:
+                cinder:
+                    volume_lvm:
+                        all:
+                            image_tag: 3.0.1
+                        daemonset:
+                            lvm_backends: []

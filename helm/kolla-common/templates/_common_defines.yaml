@@ -1,28 +1,18 @@
-{{/* FIXME temporary searchPath workaround until all files get a common search path defined. */}}
 {{- define "kolla_image_built_prefix" }}
-{{- $localVals := dict "searchPath" ":global.kolla.all" }}
-{{- if and (hasKey . "searchPath") (eq (typeOf .searchPath) "string") }}
-{{- $_ := set $localVals "searchPath" .searchPath }}
-{{- end }}
-{{- $dockerRegistry := include "kolla_val_get_str" (dict "key" "docker_registry" "searchPath" $localVals.searchPath "Values" .Values) }}
-{{- $dockerNamespace := include "kolla_val_get_str" (dict "key" "docker_namespace" "searchPath" $localVals.searchPath "Values" .Values) }}
-{{- $baseDistro := include "kolla_val_get_str" (dict "key" "base_distro" "searchPath" $localVals.searchPath "Values" .Values) }}
-{{- $installType := include "kolla_val_get_str" (dict "key" "install_type" "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $dockerRegistry := include "kolla_val_get_str" (dict "key" "docker_registry" "searchPath" .searchPath "Values" .Values) }}
+{{- $dockerNamespace := include "kolla_val_get_str" (dict "key" "docker_namespace" "searchPath" .searchPath "Values" .Values) }}
+{{- $baseDistro := include "kolla_val_get_str" (dict "key" "base_distro" "searchPath" .searchPath "Values" .Values) }}
+{{- $installType := include "kolla_val_get_str" (dict "key" "install_type" "searchPath" .searchPath "Values" .Values) }}
 {{- printf "%s/%s/%s-%s" $dockerRegistry $dockerNamespace $baseDistro $installType }}
 {{- end }}
 
-{{/* FIXME temporary searchPath workaround until all files get a common search path defined. */}}
 {{- define "kolla_build_image_full" }}
 {{- $prefix := include "kolla_image_built_prefix" . }}
-{{- $localVals := dict "searchPath" ":global.kolla.all" }}
-{{- if and (hasKey . "searchPath") (eq (typeOf .searchPath) "string") }}
-{{- $_ := set $localVals "searchPath" .searchPath }}
-{{- end }}
-{{- $imageTag := include "kolla_val_get_str" (dict "key" "image_tag" "searchPath" $localVals.searchPath "Values" .Values) }}
-{{- $specifiedTag := include "kolla_val_get_str" (dict "key" .tagName "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $imageTag := include "kolla_val_get_str" (dict "key" "image_tag" "searchPath" .searchPath "Values" .Values) }}
+{{- $specifiedTag := include "kolla_val_get_str" (dict "key" .tagName "searchPath" .searchPath "Values" .Values) }}
 {{- $tagBuilt := $specifiedTag | default $imageTag }}
 {{- $imageBuilt := printf "%s-%s:%s" $prefix .contName $tagBuilt }}
-{{- $imageFull := include "kolla_val_get_str" (dict "key" .imageName "searchPath" $localVals.searchPath "Values" .Values) }}
+{{- $imageFull := include "kolla_val_get_str" (dict "key" .imageName "searchPath" .searchPath "Values" .Values) }}
 {{- $imageFull | default $imageBuilt }}
 {{- end }}
 

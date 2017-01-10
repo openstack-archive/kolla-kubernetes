@@ -22,7 +22,7 @@ function helm_entrypoint_mariadb {
 
 for x in mariadb-pod mariadb-init-element; do
     echo "$x:"
-    echo "    enable_kube_logger: false"
+    echo "    kube_logger: false"
     echo "    base_distro: $base_distro"
     echo "    kubernetes_entrypoint: true"
     echo "    kubernetes_entrypoint_image_tag: 3.0.1"
@@ -60,7 +60,7 @@ fi
 
 base_distro="$2"
 
-common_vars="enable_kube_logger=false,kolla_base_distro=$base_distro,base_distro=$base_distro"
+common_vars="kube_logger=false,base_distro=$base_distro"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -138,7 +138,7 @@ helm install kolla/mariadb-init-element --version 3.0.0-1 \
 
 helm install kolla/rabbitmq-init-element --version 3.0.0-1 \
     --namespace kolla --name rabbitmq-init-element \
-    --set "$common_vars,element_name=rabbitmq,rabbitmq_cluster_cookie=67"
+    --set "$common_vars,element_name=rabbitmq,cookie=67"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -256,7 +256,7 @@ helm install kolla/glance-create-db --version 3.0.0-1 \
     --namespace kolla --name glance-create-db --set "$common_vars"
 
 helm install kolla/glance-manage-db --version 3.0.0-1 \
-    --namespace kolla --name glance-manage-db --set "$common_vars"
+    --namespace kolla --name glance-manage-db --set "$common_vars,ceph_backend=true"
 
 helm install kolla/cinder-create-db --version 3.0.0-1 \
     --set $common_vars,element_name=cinder \
@@ -401,17 +401,17 @@ helm install kolla/openvswitch-ovsdb --version 3.0.0-1 \
     --namespace kolla --name openvswitch-ovsdb-network
 
 helm install kolla/openvswitch-vswitchd --version 3.0.0-1 \
-    --set enable_kube_logger=false,type=network,selector_key=kolla_controller \
+    --set $common_vars,type=network,selector_key=kolla_controller \
     --namespace kolla --name openvswitch-vswitchd-network
 
 kollakube res create bootstrap openvswitch-set-external-ip
 
 helm install kolla/nova-libvirt --version 3.0.0-1 \
-    --set "$common_vars,element_name=nova-libvirt" \
+    --set "$common_vars,ceph_backend=true,element_name=nova-libvirt" \
     --namespace kolla --name nova-libvirt
 
 helm install kolla/nova-compute --version 3.0.0-1 \
-    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
+    --set "$common_vars,ceph_backend=true,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
     --namespace kolla --name nova-compute
 
 #kollakube res create pod keepalived

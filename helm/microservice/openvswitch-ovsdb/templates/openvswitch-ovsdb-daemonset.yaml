@@ -1,7 +1,14 @@
 {{- $restype := .Values.type }}
 {{- $searchPath := printf ":global.kolla.openvswitch.db_%s.deployment:global.kolla.openvswitch.db_%s.all:global.kolla.openvswitch.db.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
-{{- $openvswitchDBImageBuilt := printf "%s/%s/%s-%s-openvswitch-db-server:%s" .Values.docker_registry .Values.docker_namespace .Values.kolla_base_distro .Values.kolla_install_type .Values.openvswitch_ovsdb_image_tag | default .Values.kolla_tag }}
-{{- $openvswitchDBFull := .Values.openvswitch_db_image_full | default $openvswitchDBImageBuilt }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "openvswitch-db-server" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $resourceName := printf "openvswitch-db-server-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
@@ -24,8 +31,8 @@ spec:
 {{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-ovs-db",
-             "image": "{{ $openvswitchDBFull }}",
-             "imagePullPolicy": {{ .Values.image_pull_policy | quote }},
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
                  "-xec",
@@ -49,9 +56,9 @@ spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
-          {{ .Values.selector_key }}: {{ .Values.selector_value | quote }}
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-        - image: "{{ $openvswitchDBFull }}"
+        - image: "{{ $imageFull }}"
           name: main
           securityContext:
             privileged: true
