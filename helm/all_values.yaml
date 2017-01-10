@@ -102,6 +102,7 @@ keystone-create-endpoints-job:
                     all:
                         port: 5000
                         admin_port: 35357
+                        admin_port_external: false
 
 keystone-api-deployment:
         global:

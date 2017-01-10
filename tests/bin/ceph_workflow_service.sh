@@ -5,7 +5,11 @@ VERSION=0.4.0-1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
-. "$DIR/tests/bin/setup_helm_entrypint_config.sh"
+. "$DIR/tests/bin/common_workflow_config.sh"
+
+function general_config {
+    common_workflow_config $IP $base_distro $tunnel_interface
+}
 
 function ceph_values {
     echo "global:"
@@ -41,6 +45,9 @@ function helm_entrypoint_general {
     echo "         pool: kollavolumes"
     echo "         secret_name: ceph-kolla"
     echo "         user: kolla"
+    echo "    keystone:"
+    echo "      all:"
+    echo "        admin_port_external: true"
 }
 
 tunnel_interface=docker0
@@ -103,6 +110,18 @@ helm install kolla/keystone --version $VERSION \
     --values <(helm_entrypoint_general $1)
 
 $DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/openvswitch --version $VERSION \
+  --namespace kolla --name openvswitch --values  <(helm_entrypoint_general $1)
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+kollakube res create bootstrap openvswitch-set-external-ip
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
@@ -228,19 +247,8 @@ helm install kolla/glance --version $VERSION \
     --namespace kolla --name glance --set "$common_vars,element_name=glance" \
     --values <(helm_entrypoint_general $1)
 
-helm install kolla/openvswitch --version $VERSION \
---namespace kolla --name openvswitch --values  <(helm_entrypoint_general)
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
-kollakube res create bootstrap openvswitch-set-external-ip
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
 helm install kolla/neutron --version $VERSION \
-    --namespace kolla --name neutron --values  <(helm_entrypoint_general)
+    --namespace kolla --name neutron --values  <(helm_entrypoint_general $1)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
