@@ -51,6 +51,22 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
+function setup_registry {
+    filename=${BASE_DISTRO}-${INSTALL_TYPE}-registry-${BRANCH}.tar.gz
+    wget -q -c -O /tmp/$filename \
+        http://tarballs.openstack.org/kolla/images/$filename
+    sudo mkdir /tmp/kolla_registry
+    sudo chmod -R 644 /tmp/kolla_registry
+    sudo tar xzf /tmp/$filename -C /tmp/kolla_registry
+    sudo chmod -R +x /tmp/kolla_registry
+    sudo docker run -d -p 4000:5000 --restart=always -v /tmp/kolla_registry/:/var/lib/registry --name registry registry:2
+}
+setup_registry
+sleep 10  # wait for registry to start
+
 if [ "$1" == "master" ]; then
     count=0
     while true; do
