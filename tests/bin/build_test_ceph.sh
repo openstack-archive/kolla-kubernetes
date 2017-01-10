@@ -2,12 +2,12 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
-function wait_for_ceph_bootstrap {
+function wait_for_ceph_osd {
     set +x
     end=$(date +%s)
     end=$((end + 120))
     while true; do
-        kubectl get pods --namespace=$1 | grep ceph-bootstrap-osd && \
+        kubectl get pods --namespace=$1 | grep ceph-osd && \
             PENDING=True || PENDING=False
         [ $PENDING == "False" ] && break
         sleep 1
@@ -37,7 +37,7 @@ helm install kolla/ceph-bootstrap-osd-job --version 3.0.0-1 \
     --set "node=$(hostname -s),osd_number=0,osd_dev=/dev/loop0,osd_part_num=1,osd_journal_dev=/dev/loop0,osd_journal_part_num=2"
 
 $DIR/tools/wait_for_pods.sh kolla
-wait_for_ceph_bootstrap kolla
+wait_for_ceph_osd kolla
 
 helm install kolla/ceph-bootstrap-osd-job --version 3.0.0-1 \
     --namespace kolla \
@@ -46,7 +46,7 @@ helm install kolla/ceph-bootstrap-osd-job --version 3.0.0-1 \
     --set "node=$(hostname -s),osd_number=1,osd_dev=/dev/loop1,osd_part_num=1,osd_journal_dev=/dev/loop1,osd_journal_part_num=2"
 
 $DIR/tools/wait_for_pods.sh kolla
-wait_for_ceph_bootstrap kolla
+wait_for_ceph_osd kolla
 
 kollakube res create pod ceph-osd0
 kollakube res create pod ceph-osd1
