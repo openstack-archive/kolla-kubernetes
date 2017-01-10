@@ -1,5 +1,8 @@
 #!/bin/bash -xe
 
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
     tools/setup_gate_iscsi.sh $1 $2 $3 $4
@@ -88,6 +91,19 @@ if [ "x$4" == "xexternal-ovs" ]; then
     sudo ovs-vsctl add-br br-ex
 fi
 
+function setup_registry {
+    filename=${BASE_DISTRO}-${INSTALL_TYPE}-${ZUUL_BRANCH}-registry.tar.gz
+    wget -q -c -O /tmp/$filename \
+        http://tarballs.openstack.org/kolla/images/$filename
+    sudo mkdir /tmp/kolla_registry
+    sudo chmod -R 644 /tmp/kolla_registry
+    sudo tar xzf /tmp/$filename -C /tmp/kolla_registry
+    docker run -d -p 4000:5000 --restart=always -v /tmp/kolla_registry/:/var/lib/registry --name registry registry:2
+}
+
+setup_registry
+docker pull 127.0.0.1:4000/kolla/ubuntu-source-base:4.0.0
+
 tests/bin/setup_config.sh "$2" "$4"
 
 tests/bin/setup_gate_loopback.sh
@@ -100,6 +116,7 @@ kubectl taint nodes --all dedicated-
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
+
 
 if [ "x$4" == "xceph-multi" ]; then
     NODES=1
