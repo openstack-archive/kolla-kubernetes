@@ -85,7 +85,7 @@ keystone-public-svc:
                         port_external: false
                         node_port_enabled: false
 
-keystone-create-db:
+keystone-create-db-job:
         global:
             kolla:
                 keystone:
@@ -95,7 +95,7 @@ keystone-create-db:
                         database_name: "keystone"
                         database_user: "keystone"
 
-keystone-create-endpoints:
+keystone-create-endpoints-job:
         global:
             kolla:
                 all:
@@ -105,7 +105,7 @@ keystone-create-endpoints:
                         port: 5000
                         admin_port: 35357
 
-keystone-api:
+keystone-api-deployment:
         global:
             kolla:
                 keystone:
@@ -124,7 +124,7 @@ neutron-server-svc:
                             port_external: false
                             node_port_enabled: false
 
-neutron-create-db:
+neutron-create-db-job:
         global:
             kolla:
                 neutron:
@@ -134,7 +134,7 @@ neutron-create-db:
                         database_name: "neutron"
                         database_user: "neutron"
 
-neutron-create-keystone-user:
+neutron-create-keystone-user-job:
         global:
             kolla:
                 all:
@@ -146,7 +146,7 @@ neutron-create-keystone-user:
                     all:
                         keystone_user_name: neutron
 
-neutron-create-keystone-endpoint-public:
+neutron-create-keystone-endpoint-public-job:
         global:
             kolla:
                 all:
@@ -156,7 +156,7 @@ neutron-create-keystone-endpoint-public:
                         all:
                             port: 9696
 
-neutron-create-keystone-endpoint-internal:
+neutron-create-keystone-endpoint-internal-job:
         global:
             kolla:
                 neutron:
@@ -167,7 +167,7 @@ neutron-create-keystone-endpoint-internal:
                         all:
                             service: neutron-server
 
-neutron-create-keystone-endpoint-admin:
+neutron-create-keystone-endpoint-admin-job:
         global:
             kolla:
                 neutron:
@@ -178,7 +178,7 @@ neutron-create-keystone-endpoint-admin:
                         all:
                             service: neutron-server
 
-neutron-server:
+neutron-server-deployment:
         global:
             kolla:
                 neutron:
@@ -186,7 +186,7 @@ neutron-server:
                         all:
                             port: 9696
 
-neutron-openvswitch-agent:
+neutron-openvswitch-agent-daemonset:
         type: network
         global:
             kolla:
@@ -197,7 +197,7 @@ neutron-openvswitch-agent:
                         daemonset:
                             logger_configmap_name: neutron-openvswitch-agent-logger
 
-neutron-l3-agent:
+neutron-l3-agent-daemonset:
         type: network
         global:
             kolla:
@@ -210,7 +210,7 @@ neutron-l3-agent:
                         daemonset:
                             logger_configmap_name: neutron-l3-agent-logger
 
-neutron-dhcp-agent:
+neutron-dhcp-agent-daemonset:
         global:
             kolla:
                 all:
@@ -221,7 +221,7 @@ neutron-dhcp-agent:
                             logger_configmap_name: neutron-dhcp-agent-logger
 
 
-neutron-metadata-agent:
+neutron-metadata-agent-daemonset:
         type: network
         global:
             kolla:
@@ -230,10 +230,10 @@ neutron-metadata-agent:
                         daemonset:
                             logger_configmap_name: neutron-metadata-agent-logger
 
-openvswitch-ovsdb:
+openvswitch-ovsdb-daemonset:
         type: network
 
-openvswitch-vswitchd:
+openvswitch-vswitchd-daemonset:
         type: network
         global:
             kolla:
@@ -244,14 +244,14 @@ openvswitch-vswitchd:
                         ext_bridge_name: br-ex
                         ext_interface_name: eth1
 
-rabbitmq-init-element:
+rabbitmq-init-element-job:
         global:
             kolla:
                 rabbitmq:
                     all:
                         cookie:
 
-rabbitmq-pod:
+rabbitmq-statefulset:
         global:
             kolla:
                 rabbitmq:
@@ -288,7 +288,7 @@ memcached-svc:
                         port_external: false
                         node_port_enabled: false
 
-memcached:
+memcached-deployment:
         global:
             kolla:
                 memcached:
@@ -296,14 +296,14 @@ memcached:
                         enabled: true
                         port: 11211
 
-mariadb-init-element:
+mariadb-init-element-job:
         global:
             kolla:
                 mariadb:
                     all:
                         image_tag: 3.0.1
 
-mariadb-pod:
+mariadb-statefulset:
         global:
             kolla:
                 mariadb:
@@ -355,7 +355,7 @@ nova-novncproxy-svc:
                             port_external: false
                             node_port_enabled: false
 
-nova-create-db:
+nova-create-db-job:
         global:
             kolla:
                 nova:
@@ -365,7 +365,7 @@ nova-create-db:
                         database_name: "nova"
                         database_user: "nova"
 
-nova-api-create-db:
+nova-api-create-db-job:
         global:
             kolla:
                 nova:
@@ -375,7 +375,7 @@ nova-api-create-db:
                         database_name: "nova_api"
                         database_user: "nova_api"
 
-nova-api:
+nova-api-deployment:
         global:
             kolla:
                 nova:
@@ -386,7 +386,7 @@ nova-api:
                         all:
                             port: 8775
 
-nova-novncproxy:
+nova-novncproxy-deployment:
         global:
             kolla:
                 nova:
@@ -394,7 +394,7 @@ nova-novncproxy:
                         all:
                             port: 6080
 
-nova-compute:
+nova-compute-daemonset:
         global:
             kolla:
                 all:
@@ -410,7 +410,7 @@ nova-compute:
                             selector_key: kolla_compute
                             libvirt_tcp: false
 
-nova-libvirt:
+nova-libvirt-daemonset:
         global:
             kolla:
                 all:
@@ -421,7 +421,7 @@ nova-libvirt:
                             selector_key: kolla_compute
                             libvirt_tcp: false
 
-nova-create-keystone-user:
+nova-create-keystone-user-job:
         global:
             kolla:
                 all:
@@ -433,7 +433,7 @@ nova-create-keystone-user:
                     all:
                         keystone_user_name: nova
 
-nova-create-keystone-endpoint-admin:
+nova-create-keystone-endpoint-admin-job:
         global:
             kolla:
                 nova:
@@ -444,7 +444,7 @@ nova-create-keystone-endpoint-admin:
                         all:
                             service: nova-api
 
-nova-create-keystone-endpoint-internal:
+nova-create-keystone-endpoint-internal-job:
         global:
             kolla:
                 nova:
@@ -455,7 +455,7 @@ nova-create-keystone-endpoint-internal:
                         all:
                             service: nova-api
 
-nova-create-keystone-endpoint-public:
+nova-create-keystone-endpoint-public-job:
         global:
             kolla:
                 all:
@@ -487,7 +487,7 @@ heat-cfn-api-svc:
                             port_external: false
                             node_port_enabled: false
 
-heat-api:
+heat-api-deployment:
         global:
             kolla:
                 heat:
@@ -495,7 +495,7 @@ heat-api:
                         all:
                             port: 8004
 
-heat-api-cfn:
+heat-api-cfn-deployment:
         global:
             kolla:
                 heat:
@@ -525,7 +525,7 @@ glance-registry-svc:
                             port_external: false
                             node_port_enabled: false
 
-cinder-create-db:
+cinder-create-db-job:
         global:
             kolla:
                 cinder:
@@ -546,7 +546,7 @@ cinder-api-svc:
                             port_external: false
                             node_port_enabled: false
 
-cinder-api:
+cinder-api-deployment:
         global:
             kolla:
                 cinder:
@@ -564,7 +564,7 @@ horizon-svc:
                         port_external: false
                         node_port_enabled: false
 
-glance-create-db:
+glance-create-db-job:
         global:
             kolla:
                 glance:
@@ -574,7 +574,7 @@ glance-create-db:
                         database_name: "glance"
                         database_user: "glance"
 
-glance-manage-db:
+glance-manage-db-job:
         global:
             kolla:
                 all:
@@ -584,7 +584,7 @@ glance-manage-db:
                         all:
                             pvc_name: glance
 
-glance-create-keystone-user:
+glance-create-keystone-user-job:
         global:
             kolla:
                 all:
@@ -596,7 +596,7 @@ glance-create-keystone-user:
                     all:
                         keystone_user_name: glance
 
-glance-create-keystone-endpoint-public:
+glance-create-keystone-endpoint-public-job:
         global:
             kolla:
                 all:
@@ -606,7 +606,7 @@ glance-create-keystone-endpoint-public:
                         all:
                             port: 9292
 
-glance-create-keystone-endpoint-internal:
+glance-create-keystone-endpoint-internal-job:
         global:
             kolla:
                 glance:
@@ -617,7 +617,7 @@ glance-create-keystone-endpoint-internal:
                         all:
                             service: glance-api
 
-glance-create-keystone-endpoint-admin:
+glance-create-keystone-endpoint-admin-job:
         global:
             kolla:
                 glance:
@@ -628,7 +628,7 @@ glance-create-keystone-endpoint-admin:
                         all:
                             service: glance-api
 
-glance-api:
+glance-api-deployment:
         global:
             kolla:
                 all:
@@ -639,7 +639,7 @@ glance-api:
                             port: 9292
                             pvc_name: glance
 
-glance-registry:
+glance-registry-deployment:
         global:
             kolla:
                 glance:
@@ -647,7 +647,7 @@ glance-registry:
                         all:
                             port: 9191
 
-cinder-create-keystone-user:
+cinder-create-keystone-user-job:
         global:
             kolla:
                 all:
@@ -659,7 +659,7 @@ cinder-create-keystone-user:
                     all:
                         keystone_user_name: cinder
 
-cinder-create-keystone-endpoint-admin:
+cinder-create-keystone-endpoint-admin-job:
         global:
             kolla:
                 cinder:
@@ -670,7 +670,7 @@ cinder-create-keystone-endpoint-admin:
                         all:
                             service: cinder-api
 
-cinder-create-keystone-endpoint-adminv2:
+cinder-create-keystone-endpoint-adminv2-job:
         global:
             kolla:
                 cinder:
@@ -681,7 +681,7 @@ cinder-create-keystone-endpoint-adminv2:
                         all:
                             service: cinder-api
 
-cinder-create-keystone-endpoint-public:
+cinder-create-keystone-endpoint-public-job:
         global:
             kolla:
                 all:
@@ -691,7 +691,7 @@ cinder-create-keystone-endpoint-public:
                         all:
                             port: 8776
 
-cinder-create-keystone-endpoint-publicv2:
+cinder-create-keystone-endpoint-publicv2-job:
         global:
             kolla:
                 all:
@@ -701,7 +701,7 @@ cinder-create-keystone-endpoint-publicv2:
                         all:
                             port: 8776
 
-cinder-create-keystone-endpoint-internal:
+cinder-create-keystone-endpoint-internal-job:
         global:
             kolla:
                 cinder:
@@ -712,7 +712,7 @@ cinder-create-keystone-endpoint-internal:
                         all:
                             service: cinder-api
 
-cinder-create-keystone-endpoint-internalv2:
+cinder-create-keystone-endpoint-internalv2-job:
         global:
             kolla:
                 cinder:
@@ -723,7 +723,7 @@ cinder-create-keystone-endpoint-internalv2:
                         all:
                             service: cinder-api
 
-tgtd:
+tgtd-daemonset:
         global:
             kolla:
                 all:
@@ -733,14 +733,14 @@ tgtd:
                     all:
                         image_tag: 3.0.1
 
-iscsid:
+iscsid-daemonset:
         global:
             kolla:
                 iscsid:
                     all:
                         image_tag: 3.0.1
 
-cinder-volume-lvm:
+cinder-volume-lvm-daemonset:
         global:
             kolla:
                 cinder:
