@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+PACKAGE_VERSION=3.0.0-1
+
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
     tools/setup_gate_iscsi.sh $1 $2 $3 $4
@@ -162,7 +164,12 @@ timeout 240s tools/setup-resolv-conf.sh
 
 tests/bin/build_test_ceph.sh
 
-kollakube res create pod ceph-admin ceph-rbd
+helm install kolla/ceph-admin-pod --version $PACKAGE_VERSION \
+    --namespace kolla --name ceph-admin-pod --set kube_logger=false
+
+helm install kolla/ceph-rbd-daemonset --version $PACKAGE_VERSION \
+    --namespace kolla --name ceph-rbd-daemonset --set kube_logger=false
+
 tools/wait_for_pods.sh kolla
 
 str="ceph -w"
