@@ -10,13 +10,17 @@ function lvmbackend_values {
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
-. "$DIR/tests/bin/setup_helm_entrypint_config.sh"
+. "$DIR/tests/bin/tests/bin/common_workflow_config.sh"
 
 tunnel_interface=docker0
 
 base_distro="$2"
 
-common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro"
+function general_config {
+    common_workflow_config $IP $base_distro $tunnel_interface
+}
+
+common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
