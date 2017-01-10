@@ -51,10 +51,35 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
+function setup_registry {
+    filename=${BASE_DISTRO}-${INSTALL_TYPE}-registry-${ZUUL_BRANCH}.tar.gz
+    wget -q -c -O /tmp/$filename \
+        http://tarballs.openstack.org/kolla/images/$filename
+    sudo mkdir /tmp/kolla_registry
+    sudo chmod -R 644 /tmp/kolla_registry
+    sudo tar xzf /tmp/$filename -C /tmp/kolla_registry
+    sudo chmod -R +x /tmp/kolla_registry
+    sudo docker run -d -p 4000:5000 --restart=always -v /tmp/kolla_registry/:/var/lib/registry --name registry registry:2
+}
+setup_registry
+
 if [ "$1" == "master" ]; then
     count=0
     while true; do
         kubectl get pods > /dev/null 2>&1 && break || true
+        sleep 1
+        count=$((count + 1))
+        [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
+    done
+fi
+
+if [ "$1" == "master" ]; then
+    count=0
+    while true; do
+        curl -sq http://127.0.0.1:4000 > /dev/null 2>&1 && break || true
         sleep 1
         count=$((count + 1))
         [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
