@@ -1,5 +1,8 @@
 #!/bin/bash -xe
 
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
     tools/setup_gate_iscsi.sh $1 $2 $3 $4
@@ -88,11 +91,12 @@ if [ "x$4" == "xexternal-ovs" ]; then
     sudo ovs-vsctl add-br br-ex
 fi
 
+
 tests/bin/setup_config.sh "$2" "$4"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $BASE_DISTRO $INSTALL_TYPE
 
 kubectl taint nodes --all dedicated-
 
@@ -100,6 +104,7 @@ kubectl taint nodes --all dedicated-
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
+
 
 if [ "x$4" == "xceph-multi" ]; then
     NODES=1
@@ -155,6 +160,7 @@ helm search
 
 kubectl create namespace kolla
 tools/secret-generator.py create
+
 
 TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
 sudo docker pull $TOOLBOX > /dev/null
