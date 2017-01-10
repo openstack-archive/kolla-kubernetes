@@ -51,6 +51,30 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 
+sudo service docker status
+
+export BASE_DISTRO=$2
+export INSTALL_TYPE=$3
+
+function setup_registry {
+    filename=${BASE_DISTRO}-${INSTALL_TYPE}-${ZUUL_BRANCH}-registry.tar.gz
+    wget -q -c -O /tmp/$filename \
+        http://tarballs.openstack.org/kolla/images/$filename
+    sudo mkdir /tmp/kolla_registry
+    sudo chmod -R 644 /tmp/kolla_registry
+    sudo tar xzf /tmp/$filename -C /tmp/kolla_registry
+    echo $filename
+    ls /tmp/kolla_registry/docker/registry/v2/repositories/lokolla
+    sudo docker run -d -p 4000:5000 --restart=always -v /tmp/kolla_registry/:/var/lib/registry --name registry registry:2
+}
+setup_registry
+sleep 10  # wait for registry to start
+
+sudo docker ps
+sudo docker info
+
+sudo docker pull 127.0.0.1:4000/lokolla/ubuntu-source-base:4.0.0
+
 if [ "$1" == "master" ]; then
     count=0
     while true; do
