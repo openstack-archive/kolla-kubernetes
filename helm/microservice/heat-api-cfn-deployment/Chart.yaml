@@ -1,5 +1,5 @@
 name: heat-api-cfn-deployment
-version: 3.0.0-1 #FIXME make this changable
+version: 0.4.0-1 #FIXME make this changable
 description: Heat-api-cfn service for kolla-kubernetes
 keywords:
   - openstack
