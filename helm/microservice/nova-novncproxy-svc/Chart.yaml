@@ -1,5 +1,5 @@
 name: nova-novncproxy-svc
-version: 3.0.0-1 #FIXME make this changable
+version: 0.4.0-1 #FIXME make this changable
 description: FIXME
 keywords:
   - openstack
