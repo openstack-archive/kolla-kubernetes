@@ -1,5 +1,5 @@
 name: helm-repo-deployment
-version: 3.0.0-1
+version: 0.4.0-1
 description: Helm chart for the helm repository container
 keywords:
   - openstack
