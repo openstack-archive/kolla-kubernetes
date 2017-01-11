@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-PACKAGE_VERSION=3.0.0-1
+PACKAGE_VERSION=0.4.0-1
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
