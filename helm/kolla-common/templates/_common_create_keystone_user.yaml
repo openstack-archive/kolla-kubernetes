@@ -30,12 +30,8 @@ spec:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
           name: main
           command: ["sh", "-xec"]
-#FIXME the current kolla-toolbox is broken. This works around it for now.
-          securityContext:
-            runAsUser: 0
           args:
             - |
-                pip install --upgrade python-openstackclient;
                 USER_PROJECT_ID=$(/usr/bin/openstack project create --or-show --enable -f value -c id \
                     --domain="{{ .userDomain }}" \
                     --description="Service Project for {{ $region }}/{{ .userDomain }}" \
