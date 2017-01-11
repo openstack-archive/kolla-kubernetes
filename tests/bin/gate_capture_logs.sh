@@ -96,4 +96,5 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
     ssh $line sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet-$line.txt
     ssh $line ps ax > $WORKSPACE/logs/ps-$line.txt
 done
+ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 exit -1
