@@ -1,5 +1,5 @@
 name: helm-repo-pvc
-version: 3.0.0-1 #FIXME make this changable
+version: 0.4.0-1 #FIXME make this changable
 description: Helm chart for helm repository persistent volume claim
 keywords:
   - openstack

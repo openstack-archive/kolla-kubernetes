@@ -85,6 +85,8 @@ neutron security-group-rule-create --protocol tcp \
     --port-range-min 22 --port-range-max 22 \
     --direction ingress default
 
+openstack flavor create --private --id 1 --ram 512 --disk 1 --vcpus 1 m1.tiny || true
+
 openstack server create --flavor=m1.tiny --image CirrOS \
      --nic net-id=admin test
 openstack server create --flavor=m1.tiny --image CirrOS \

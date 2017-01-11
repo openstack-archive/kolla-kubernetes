@@ -1,5 +1,5 @@
 name: keystone-api-deployment
-version: 3.0.0-1 #FIXME make this changable
+version: 0.4.0-1 #FIXME make this changable
 description: keystone-api service for kolla-kubernetes
 keywords:
   - openstack

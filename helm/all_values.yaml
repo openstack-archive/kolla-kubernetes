@@ -8,12 +8,10 @@ common:
                     base_distro: centos
                     install_type: binary
                     container_config_directory: /var/lib/kolla/config_files
-                    image_tag: 2.0.2
-                    fluentd_image_tag: 3.0.1
-                    kolla_toolbox_image_tag: 3.0.1
-                    kubernetes_entrypoint_image_tag: 3.0.1
-#FIXME remove once 3.0.2 is released
-                    kubernetes_entrypoint_image_full: docker.io/kolla/centos-binary-kubernetes-entrypoint:3.0.1
+                    image_tag: 3.0.2
+                    fluentd_image_tag: 3.0.2
+                    kolla_toolbox_image_tag: 3.0.2
+                    kubernetes_entrypoint_image_tag: 3.0.2
                     openvswitch_tcp: false
                     selector_key: kolla_controller
                     selector_value: "true"
@@ -40,7 +38,7 @@ pod-http-termination:
             kolla:
                 all:
                     haproxy_python_termination: true
-                    haproxy_image_tag: 2.0.2
+                    haproxy_image_tag: 3.0.2
 
 stateful-service:
         global:
@@ -301,7 +299,7 @@ mariadb-init-element-job:
             kolla:
                 mariadb:
                     all:
-                        image_tag: 3.0.1
+                        image_tag: 3.0.2
 
 mariadb-statefulset:
         global:
@@ -310,7 +308,7 @@ mariadb-statefulset:
                     all:
                         database_user: root
                         port: 3306
-                        image_tag: 3.0.1
+                        image_tag: 3.0.2
 
 mariadb-svc:
         global:
@@ -731,14 +729,14 @@ tgtd-daemonset:
             kolla:
                 tgtd:
                     all:
-                        image_tag: 3.0.1
+                        image_tag: 3.0.2
 
 iscsid-daemonset:
         global:
             kolla:
                 iscsid:
                     all:
-                        image_tag: 3.0.1
+                        image_tag: 3.0.2
 
 cinder-volume-lvm-daemonset:
         global:
@@ -746,7 +744,7 @@ cinder-volume-lvm-daemonset:
                 cinder:
                     volume_lvm:
                         all:
-                            image_tag: 3.0.1
+                            image_tag: 3.0.2
                         daemonset:
                             lvm_backends: []
 
