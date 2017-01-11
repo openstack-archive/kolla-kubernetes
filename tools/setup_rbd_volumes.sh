@@ -6,12 +6,14 @@ if [ "x$1" != "x--yes-i-really-really-mean-it" ]; then
     exit -1
 fi
 
+RBD_ARGS="--image-feature layering"
+
 #FIXME may need different flags for testing jewel
-str="timeout 240s rbd create kollavolumes/mariadb --size 1024"
+str="timeout 240s rbd create kollavolumes/mariadb $RBD_ARGS --size 1024"
 kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
-str="timeout 60s rbd create kollavolumes/rabbitmq --size 1024"
+str="timeout 60s rbd create kollavolumes/rabbitmq $RBD_ARGS --size 1024"
 kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
-str="timeout 60s rbd create kollavolumes/helm-repo --size 1024"
+str="timeout 60s rbd create kollavolumes/helm-repo $RBD_ARGS --size 1024"
 kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c "$str"
 
 for volume in mariadb rabbitmq helm-repo; do

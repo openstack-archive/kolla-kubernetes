@@ -1,5 +1,5 @@
 name: heat-engine-statefulset
-version: 3.0.0-1 #FIXME make this changable
+version: 0.4.0-1 #FIXME make this changable
 description: Heat-engine service for kolla-kubernetes
 keywords:
   - openstack

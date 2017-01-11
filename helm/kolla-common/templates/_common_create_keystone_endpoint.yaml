@@ -31,12 +31,8 @@ spec:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
           name: main
           command: ["sh", "-xec"]
-#FIXME the current kolla-toolbox is broken. This works around it for now.
-          securityContext:
-            runAsUser: 0
           args:
             - |
-                pip install --upgrade python-openstackclient;
                 /usr/bin/openstack endpoint create --region {{ $region | quote }} {{ printf "%s%s" .serviceType $postfix | quote }} {{ .interface | quote }} {{ .endpointURLFull | quote }};
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
