@@ -17,12 +17,15 @@ function wait_for_ceph_bootstrap {
     done
 }
 
-kollakube res create configmap ceph-mon ceph-osd
-
-kollakube res create bootstrap ceph-bootstrap-initial-mon
+kollakube res create configmap ceph-rgw
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/ceph-rgw-daemonset --version 3.0.0-1 \
+    --namespace kolla \
+    --name ceph-rgw \
+    --debug \
 
 $DIR/tools/setup-ceph-secrets.sh
 kollakube res delete bootstrap ceph-bootstrap-initial-mon
