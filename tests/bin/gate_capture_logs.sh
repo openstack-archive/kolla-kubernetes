@@ -47,6 +47,12 @@ kubectl get pods -a --all-namespaces -o json | jq -r \
         kubectl logs $NAME -c $CON --namespace $NAMESPACE > \
             $WORKSPACE/logs/pods/$NAMESPACE-$NAME-$CON.txt
     done
+    kubectl get pod $NAME --namespace $NAMESPACE -o json | jq -r \
+        '.metadata.annotations."pod.beta.kubernetes.io/init-containers"' \
+        | grep -v '^null$' | jq -r '.[].name' | while read CON; do
+        kubectl logs $NAME -c $CON --namespace $NAMESPACE > \
+            $WORKSPACE/logs/pods/$NAMESPACE-$NAME-$CON.txt
+    done
 done
 kubectl get svc -o json --all-namespaces | jq -r \
     '.items[].metadata | .namespace + " " + .name' | while read line; do
