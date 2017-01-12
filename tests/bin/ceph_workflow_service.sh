@@ -112,9 +112,9 @@ helm install kolla/glance-api-svc --version $VERSION \
 helm install kolla/glance-registry-svc --version $VERSION \
     --namespace kolla --name glance-registry-svc
 
-helm install kolla/neutron-server-svc --version $VERSION \
-    --namespace kolla --name neutron-server-svc \
-    --set "port_external=true,external_vip=$IP"
+#helm install kolla/neutron-server-svc --version $VERSION \
+#    --namespace kolla --name neutron-server-svc \
+#    --set "port_external=true,external_vip=$IP"
 
 helm install kolla/cinder-api-svc --version $VERSION \
     --namespace kolla --name cinder-api-svc \
@@ -202,6 +202,34 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
+
+if [ "x$1" == "xhelm-entrypoint" ]; then
+    helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
+    --set "$common_vars,type=network,selector_key=kolla_controller" \
+    --namespace kolla --name openvswitch-ovsdb-network &&
+    helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
+    --set $common_vars,kube_logger=false,type=network,selector_key=kolla_controller \
+    --namespace kolla --name openvswitch-vswitchd-network
+
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    kollakube res create bootstrap openvswitch-set-external-ip
+
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    helm install --debug kolla/neutron --version $VERSION \
+        --namespace kolla --name neutron --values  <(helm_entrypoint_general)
+
+    $DIR/tools/pull_containers.sh kolla
+    $DIR/tools/wait_for_pods.sh kolla
+
+    neutron agent-list
+    neutron net-list
+
+    exit 0
+fi
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
