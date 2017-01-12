@@ -131,6 +131,33 @@ neutron-create-db-job:
                         database_port: 3306
                         database_name: "neutron"
                         database_user: "neutron"
+                    create_db:
+                        job:
+                            dependencies:
+                                service:
+                                - mariadb
+
+neutron-manage-db-job:
+        global:
+            kolla:
+                neutron:
+                    manage_db:
+                        job:
+                            dependencies:
+                                jobs:
+                                - neutron-create-db
+                                service:
+                                - keystone-admin
+
+neutron-create-keystone-service-job:
+        global:
+            kolla:
+                neutron:
+                    create_keystone_service:
+                        job:
+                            dependencies:
+                                service:
+                                - keystone-admin
 
 neutron-create-keystone-user-job:
         global:
@@ -153,6 +180,13 @@ neutron-create-keystone-endpoint-public-job:
                     server:
                         all:
                             port: 9696
+                    create_keystone_endpoint:
+                        all:
+                            dependencies:
+                                jobs:
+                                - neutron-create-keystone-service
+                                service:
+                                - keystone-admin
 
 neutron-create-keystone-endpoint-internal-job:
         global:
@@ -164,6 +198,11 @@ neutron-create-keystone-endpoint-internal-job:
                     create_keystone_endpoint:
                         all:
                             service: neutron-server
+                            dependencies:
+                                jobs:
+                                - neutron-create-keystone-service
+                                service:
+                                - keystone-admin
 
 neutron-create-keystone-endpoint-admin-job:
         global:
@@ -175,6 +214,11 @@ neutron-create-keystone-endpoint-admin-job:
                     create_keystone_endpoint:
                         all:
                             service: neutron-server
+                            dependencies:
+                                jobs:
+                                - neutron-create-keystone-service
+                                service:
+                                - keystone-admin
 
 neutron-server-deployment:
         global:
@@ -183,6 +227,16 @@ neutron-server-deployment:
                     server:
                         all:
                             port: 9696
+                        deployment:
+                            dependencies:
+                                jobs:
+                                - neutron-manage-db
+                                - neutron-create-keystone-user
+                                - neutron-create-keystone-endpoint-public
+                                - neutron-create-keystone-endpoint-internal
+                                - neutron-create-keystone-endpoint-admin
+                                service:
+                                - keystone-admin
 
 neutron-openvswitch-agent-daemonset:
         type: network
@@ -192,8 +246,12 @@ neutron-openvswitch-agent-daemonset:
                     tunnel_interface: eth0
                 neutron:
                     openvswitch_agent:
-                        daemonset:
+                        all:
                             logger_configmap_name: neutron-openvswitch-agent-logger
+                            dependencies:
+                                service:
+                                - keystone-admin
+                                - neutron-server
 
 neutron-l3-agent-daemonset:
         type: network
@@ -205,8 +263,12 @@ neutron-l3-agent-daemonset:
                     all:
                         dvr: false
                     l3_agent:
-                        daemonset:
+                        all:
                             logger_configmap_name: neutron-l3-agent-logger
+                            dependencies:
+                                service:
+                                - keystone-admin
+                                - neutron-server
 
 neutron-dhcp-agent-daemonset:
         global:
@@ -215,18 +277,25 @@ neutron-dhcp-agent-daemonset:
                     tunnel_interface: eth0
                 neutron:
                     dhcp_agent:
-                        daemonset:
+                        all:
                             logger_configmap_name: neutron-dhcp-agent-logger
-
+                            dependencies:
+                                service:
+                                - keystone-admin
+                                - neutron-server
 
 neutron-metadata-agent-daemonset:
         type: network
         global:
             kolla:
                 neutron:
-                    dhcp_agent:
-                        daemonset:
+                    metadata_agent:
+                        all:
                             logger_configmap_name: neutron-metadata-agent-logger
+                            dependencies:
+                                service:
+                                - keystone-admin
+                                - neutron-server
 
 openvswitch-ovsdb-daemonset:
         type: network
