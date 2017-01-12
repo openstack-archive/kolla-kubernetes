@@ -119,7 +119,7 @@ neutron-server-svc:
                         all:
                             port: 9696
                             node_port: 9696
-                            port_external: false
+                            port_external: true
                             node_port_enabled: false
 
 neutron-create-db-job:
