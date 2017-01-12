@@ -1,0 +1,14 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        neutron:
+            create_db:
+                job:
+                    kubernetes_entrypoint: false
+            create_keystone_user:
+                job:
+                    kubernetes_entrypoint: false
+            create_keystone_service:
+                job:
+                    kubernetes_entrypoint: false
