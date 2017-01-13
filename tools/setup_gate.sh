@@ -196,3 +196,4 @@ else
 
     tests/bin/basic_tests.sh
 fi
+echo hi
