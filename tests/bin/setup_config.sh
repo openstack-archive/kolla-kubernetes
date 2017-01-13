@@ -36,6 +36,7 @@ kolla-ansible/tools/kolla-ansible genconfig
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_user nova
+crudini --set /etc/kolla/nova-compute/nova.conf cpu_monde none
 UUID=$(awk '{if($1 == "rbd_secret_uuid:"){print $2}}' /etc/kolla/passwords.yml)
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_secret_uuid $UUID
 
