@@ -1,11 +1,18 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.4.0-1
-BRANCH="$6"
+BRANCH="$7"
 
-if [ "x$BRANCH" != "x2" ]; then
+if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
+    exit 0
 fi
+
+# FIXME manually updated gate to test pinning nova.
+#if [ "x$BRANCH" == "x3" ]; then
+#    sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
+#fi
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
@@ -189,7 +196,7 @@ kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash \
     -c "ceph osd pool delete rbd rbd --yes-i-really-really-mean-it"
 
 tools/setup_simple_ceph_users.sh
-tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
+tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it "$BRANCH"
 
 if [ "x$4" == "xhelm-entrypoint" ]; then
    tests/bin/ceph_workflow_service.sh "$4" "$2" "$BRANCH"
