@@ -1,0 +1,9 @@
+Code-Review+2: Pete Birley <pete@port.direct>
+Code-Review+2: Steve Wilkerson <sw5822@att.com>
+Workflow+1: Steve Wilkerson <sw5822@att.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 13 Jan 2017 15:32:38 +0000
+Reviewed-on: https://review.openstack.org/419082
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
