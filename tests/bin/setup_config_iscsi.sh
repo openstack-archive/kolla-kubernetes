@@ -21,6 +21,7 @@ kolla-ansible/tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
+crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
 
 # Keystone does not seem to invalidate its cache on entry point addition.
 crudini --set /etc/kolla/keystone/keystone.conf cache enabled False
