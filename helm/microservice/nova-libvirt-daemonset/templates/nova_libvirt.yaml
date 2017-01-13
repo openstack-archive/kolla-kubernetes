@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.nova.libvirt.deployment:global.kolla.nova.libvirt.all:global.kolla.nova.compute.all:global.kolla.nova.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.nova.libvirt.daemonset:global.kolla.nova.libvirt.all:global.kolla.nova.compute.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $resourceName := "nova-libvirt" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
