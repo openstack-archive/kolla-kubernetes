@@ -6,9 +6,7 @@ if [ "x$1" != "x--yes-i-really-really-mean-it" ]; then
     exit -1
 fi
 
-#FIXME This seems to be needed for 3.0.2
-#RBD_ARGS="--image-feature layering"
-RBD_ARGS=""
+RBD_ARGS="--image-feature layering"
 
 #FIXME may need different flags for testing jewel
 str="timeout 240s rbd create kollavolumes/mariadb $RBD_ARGS --size 1024"
