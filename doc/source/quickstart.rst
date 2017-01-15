@@ -4,6 +4,21 @@
 Kolla Kubernetes Quickstart Guide
 =================================
 
+Install Kolla-Ansible
+=====================
+
+The kolla-ansible deliverable is a required dependency for generating the
+default configuration consumed by kolla-kubernetes.  This is a short-term
+development solution.  The medium term solution (Prior to May 2017) is to
+entirely remove genconfig from the system and all reliance upon kolla-ansible
+as a dependency such that kolla-kubernetes stands alone as a Kolla deliverable.
+
+Install kolla-ansible:
+
+::
+
+    sudo pip install kolla-ansible
+
 Configure Kolla-Kubernetes
 ==========================
 
@@ -27,10 +42,8 @@ Then, generate the Kolla configuration files:
 ::
 
     # Generate Kolla Configuration Files
-    pushd kolla
-    sudo ./tools/generate_passwords.py
-    sudo ./tools/kolla-ansible genconfig
-    popd
+    sudo kolla-genpwd
+    sudo kolla-ansible genconfig
 
 If using a virt setup, set nova to use qemu unless your environment has
 nested virt capabilities enabled::
