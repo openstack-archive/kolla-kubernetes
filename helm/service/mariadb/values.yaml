@@ -1,0 +1,18 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        mariadb:
+            init-element:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - mariadb
+            statefulset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        jobs:
+                        - mariadb-init-element
+                        service:
+                        - mariadb

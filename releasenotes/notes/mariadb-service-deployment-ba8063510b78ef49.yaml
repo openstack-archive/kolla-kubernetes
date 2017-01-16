@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Mariadb service level deploymnet with kubernetes entrypoint.
