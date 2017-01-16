@@ -85,19 +85,7 @@ helm install kolla/memcached-svc --version $VERSION \
 helm install kolla/rabbitmq-svc --version $VERSION \
     --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
-helm install kolla/keystone-admin-svc --version $VERSION \
-    --namespace kolla --name keystone-admin-svc \
-    --set "element_name=keystone-admin"
-
-helm install kolla/keystone-public-svc --version $VERSION \
-    --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,port_external=true,external_vip=$IP"
-
-helm install kolla/keystone-internal-svc --version $VERSION \
-    --namespace kolla --name keystone-internal-svc \
-    --set "element_name=keystone-internal"
-
-helm install kolla/neutron-server-svc --version $VERSION \
+helm install kolla/neutron-server-svc --version 0.4.0-1 \
     --namespace kolla --name neutron-server-svc \
     --set "port_external=true,external_vip=$IP"
 
@@ -140,41 +128,9 @@ helm install kolla/rabbitmq-statefulset --version $VERSION \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install --debug kolla/keystone-create-db-job --version $VERSION \
-    --set element_name=keystone \
-    --namespace kolla \
-    --name keystone-create-db \
-    --set "$common_vars"
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
-helm delete keystone-create-db
-
-helm install --debug kolla/keystone-manage-db-job --version $VERSION \
-    --namespace kolla \
-    --name keystone-manage-db \
-    --set "$common_vars"
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
-helm delete keystone-manage-db --purge
-
-kollakube template bootstrap keystone-endpoints
-
-helm install --debug kolla/keystone-create-endpoints-job --version $VERSION \
-    --namespace kolla \
-    --set $common_vars,element_name=keystone,public_host=$IP \
-    --name keystone-create-endpoints-job
-
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
-helm install --debug kolla/keystone-api-deployment --version $VERSION \
-    --set "$common_vars" \
-    --namespace kolla \
-    --name keystone
+helm install kolla/keystone --debug  --version $VERSION \
+    --namespace kolla --name keystone --set "$common_vars,element_name=keystone" \
+    --values <(helm_entrypoint_general $1)
 
 $DIR/tools/wait_for_pods.sh kolla
 

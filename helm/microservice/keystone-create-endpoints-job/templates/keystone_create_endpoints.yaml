@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.keystone.create_keystone_endpoint.job:global.kolla.keystone.create_keystone_endpoint.all:global.kolla.keystone.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.keystone.create_keystone_endpoints.job:global.kolla.keystone.create_keystone_endpoints.all:global.kolla.keystone.all:global.kolla.all" }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keystone-endpoints
+  name: keystone-create-endpoints
 spec:
   template:
 {{- include "init_container_header" $env | indent 4 }}
