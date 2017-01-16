@@ -1,0 +1,22 @@
+dependencies:
+  - name: keystone-admin-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-intrnal-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-public-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-create-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-manage-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-create-keystone-endpoints-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone-api-deployment
+    repository: http://localhost:10191
+    version: 0.4.0-1

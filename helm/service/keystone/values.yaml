@@ -1,0 +1,49 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        keystone:
+            create_db:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+            manage_db:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+                        JOBS:
+                        - keystone-create-db
+            create_keystone_endpoints:
+                job:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        JOBS:
+                        - keystone-create-db
+                        - keystone-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin
+                        - keystone-public
+                        - keyston-internal
+            api:
+                deployment:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        JOBS:
+                        - keystone-create-endpoints
+                        - keystone-create-db
+                        - keystone-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin
+                        - keystone-public
+                        - keyston-internal
+            public:
+                svc:
+                    public:
+                        port: 5000
+                        port_external: true
