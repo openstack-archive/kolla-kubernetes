@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keystone-endpoints
+  name: keystone-create-endpoints
 spec:
   template:
 {{- include "init_container_header" $env | indent 4 }}
