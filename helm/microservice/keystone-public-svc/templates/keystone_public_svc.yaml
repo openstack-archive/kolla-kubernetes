@@ -1,6 +1,6 @@
 {{- $searchPath := ":global.kolla.keystone.public.svc:global.kolla.keystone.public.all:global.kolla.keystone.all:global.kolla.all" }}
 {{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
-{{- $elementSuffix := .Values.element_compoenent | default "public" }}
+{{- $elementSuffix := .Values.element_component | default "public" }}
 {{- $elementServiceType := .Values.element_service_type | default "api" }}
 {{- $elementService := .Values.element_service | default "keystone"  }}
 {{- $elementNameComp := printf "%s-%s" $elementService $elementSuffix }}
