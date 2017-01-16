@@ -4,6 +4,8 @@ NODE=$(hostname -s)
 
 TYPE="$2"
 
+BRANCH="$6"
+
 echo "kolla_base_distro: $1" >> kolla-ansible/etc/kolla/globals.yml
 cat tests/conf/iscsi-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
 IP=172.18.0.1

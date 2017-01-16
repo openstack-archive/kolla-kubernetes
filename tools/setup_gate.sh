@@ -1,10 +1,15 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.4.0-1
+BRANCH="$6"
+
+if [ "x$BRANCH" != "x2" ]; then
+    echo Version: $BRANCH is not enabled yet.
+fi
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
-    tools/setup_gate_iscsi.sh $1 $2 $3 $4
+    tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH
     exit 0
 fi
 
@@ -90,7 +95,7 @@ if [ "x$4" == "xexternal-ovs" ]; then
     sudo ovs-vsctl add-br br-ex
 fi
 
-tests/bin/setup_config.sh "$2" "$4"
+tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
@@ -187,9 +192,9 @@ tools/setup_simple_ceph_users.sh
 tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it
 
 if [ "x$4" == "xhelm-entrypoint" ]; then
-   tests/bin/ceph_workflow_service.sh "$4" "$2"
+   tests/bin/ceph_workflow_service.sh "$4" "$2" "$BRANCH"
 else
-   tests/bin/ceph_workflow.sh "$4" "$2"
+   tests/bin/ceph_workflow.sh "$4" "$2" "$BRANCH"
 fi
 
 . ~/keystonerc_admin
