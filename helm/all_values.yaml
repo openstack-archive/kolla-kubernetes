@@ -80,7 +80,7 @@ keystone-public-svc:
                     all:
                         port: 5000
                         node_port: 5000
-                        port_external: false
+                        port_external: true
                         node_port_enabled: false
 
 keystone-create-db-job:
