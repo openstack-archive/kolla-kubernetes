@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+BRANCH="$6"
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
@@ -73,7 +75,7 @@ popd
 pip install -r requirements.txt
 pip install .
 
-tests/bin/setup_config_iscsi.sh "$2" "$4"
+tests/bin/setup_config_iscsi.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback_lvm.sh
 
@@ -108,7 +110,7 @@ sudo docker pull $TOOLBOX > /dev/null
 timeout 240s tools/setup-resolv-conf.sh
 
 echo "Starting iscsi workflow..."
-tests/bin/iscsi_workflow.sh "$4" "$2"
+tests/bin/iscsi_workflow.sh "$4" "$2" "$BRANCH"
 . ~/keystonerc_admin
 
 kubectl get pods --namespace=kolla
