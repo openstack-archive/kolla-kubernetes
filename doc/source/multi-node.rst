@@ -56,13 +56,13 @@ the images correctly, so that we may easily push the images to the
 right Docker registry.
 
 Add your Docker registry settings in the kolla configuration file
-```./etc/kolla/globals.yaml```.
+```./etc/kolla/globals.yml```.
 
 ::
 
   # Edit kolla config ./etc/kolla/globals.yml
   docker_registry: "<registry_url>"  # e.g. "gcr.io"
-  docker_namespace: "<registry_namespace>  # e.g. "annular-reef-123"
+  docker_namespace: "<registry_namespace>"  # e.g. "annular-reef-123"
 
 Generate the kolla configurations, build the kolla images, and push
 the kolla images to your Docker registry.
