@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Memcached service level deployment with kubernetes entrypoint.
