@@ -47,5 +47,5 @@ spec:
             claimName: {{ $elementName }}
       restartPolicy: OnFailure
 metadata:
-  name: {{ $elementName }}-bootstrap
+  name: {{ $elementName }}-init-element
 {{- end }}
