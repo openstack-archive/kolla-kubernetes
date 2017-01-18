@@ -48,7 +48,7 @@ spec:
                   key: password
           ports:
             - containerPort: {{ $port }}
-              name: {{ $elementName }}
+              name: {{ $elementName | trunc 15 | quote }}
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
