@@ -114,7 +114,7 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           ports:
             - containerPort: {{ $port }}
-              name: {{ $resourceName | quote }}
+              name: {{ $resourceName | trunc 15 | quote }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
 {{- if $persistent }}

@@ -142,7 +142,7 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           ports:
             - containerPort: {{ $port }}
-              name: {{ $portName }}
+              name: {{ $portName | trunc 15 }}
         - name: main
           image: "{{ $imageFull }}"
           lifecycle:
