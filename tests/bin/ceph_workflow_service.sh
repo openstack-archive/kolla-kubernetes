@@ -71,19 +71,12 @@ helm install kolla/mariadb --version $VERSION \
     --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
     --values <(helm_entrypoint_general $1)
 
-for x in rabbitmq ; do
-    helm install kolla/$x-pv --version $VERSION \
-        --name $x-pv --set "element_name=$x,storage_provider=ceph" \
-        --values <(ceph_values $1)
-    helm install kolla/$x-pvc --version $VERSION --namespace kolla \
-        --name $x-pvc --set "element_name=$x,storage_provider=ceph"
-done
+helm install kolla/rabbitmq --debug --version $VERSION \
+    --namespace kolla --name rabbitmq --set "$common_vars,element_name=rabbitmq" \
+    --values <(helm_entrypoint_general $1)
 
 helm install kolla/memcached-svc --version $VERSION \
     --namespace kolla --name memcached-svc --set element_name=memcached
-
-helm install kolla/rabbitmq-svc --version $VERSION \
-    --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
 
 helm install kolla/cinder-api-svc --version $VERSION \
     --namespace kolla --name cinder-api-svc \
@@ -103,23 +96,12 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
 helm install kolla/horizon-svc --version $VERSION \
     --namespace kolla --name horizon-svc --set element_name=horizon
 
-helm install kolla/rabbitmq-init-element-job --version $VERSION \
-    --namespace kolla --name rabbitmq-init-element-job \
-    --set "$common_vars,element_name=rabbitmq,cookie=67"
-
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
-
-for x in rabbitmq; do
-    helm delete $x-init-element-job --purge
-done
 
 helm install kolla/memcached-deployment --version $VERSION \
     --set "$common_vars,element_name=memcached" \
     --namespace kolla --name memcached-deployment
-
-helm install kolla/rabbitmq-statefulset --version $VERSION \
-    --namespace kolla --name rabbitmq-statefulset --set "$common_vars,element_name=rabbitmq"
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla

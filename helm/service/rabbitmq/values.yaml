@@ -1,0 +1,19 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        rabbitmq:
+            init_element:
+                job:
+                    cookie: 67
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - rabbitmq
+            statefulset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        jobs:
+                        - rabbitmq-init-element
+                        service:
+                        - rabbitmq
