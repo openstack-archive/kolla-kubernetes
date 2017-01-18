@@ -49,7 +49,7 @@ spec:
               value: COPY_ONCE
           ports:
             - containerPort: {{ $port }}
-              name: {{ $elementName }}
+              name: {{ $elementName | trunc 15 | quote }}
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}

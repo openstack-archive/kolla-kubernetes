@@ -65,9 +65,9 @@ spec:
 {{- include "common_env_vars" $env | indent 12 }}
           ports:
             - containerPort: {{ $port }}
-              name: {{ $elementName }}
+              name: {{ $elementName | trunc 15 | quote }}
             - containerPort: {{ $mgmt_port }}
-              name: {{ $elementName }}-mgmt
+              name: "{{ $elementName | trunc 10 }}-mgmt"
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
