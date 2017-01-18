@@ -103,4 +103,5 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
     ssh $line ps ax > $WORKSPACE/logs/ps-$line.txt
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
+arp -a > $WORKSPACE/logs/arp.txt
 exit -1
