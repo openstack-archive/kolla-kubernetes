@@ -303,7 +303,6 @@ class Resource(ResourceTemplate):
                 s = "kubectl {} -f {}{}".format(
                     action, tf.name, nsflag)
                 subprocess.call(s, shell=True)
-                tf.close()
         elif action == "delete":
             s = "kubectl delete {} {}{}".format(
                 kind, names, nsflag)

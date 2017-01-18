@@ -70,7 +70,6 @@ class FileUtils(object):
         # Allows emit exception in error
         with open(file, "w") as f:
             f.write(s)
-            f.close()
 
     @staticmethod
     def read_string_from_file(file):
@@ -78,7 +77,6 @@ class FileUtils(object):
         data = ""
         with open(file, "r") as f:
             data = f.read()
-            f.close()
         return data
 
 
