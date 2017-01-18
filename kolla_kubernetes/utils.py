@@ -231,7 +231,7 @@ class YamlUtils(object):
     @staticmethod
     def yaml_dict_from_string(string_):
         # Use BaseLoader to keep "True|False" strings as strings
-        return yaml.load(string_, Loader=yaml.loader.BaseLoader)
+        return yaml.safe_load(string_, Loader=yaml.loader.BaseLoader)
 
     @staticmethod
     def yaml_dict_normalize(dict_):
