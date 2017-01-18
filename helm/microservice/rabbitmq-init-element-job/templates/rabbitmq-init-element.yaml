@@ -1,5 +1,6 @@
 {{- $resourceName := "rabbitmq-bootstrap" }}
-{{- $elementName := .Values.element_name | default "rabbitmq" }}
+{{- $elementSearchPath := ":global.kolla.rabbitmq.init_element:global.kolla.rabbitmq.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
 {{- $searchPath := printf ":global.kolla.%s.init_element.job:global.kolla.%s.init_element.all:global.kolla.%s.all:global.kolla.rabbitmq.init_element.job:global.kolla.rabbitmq.init_element.all:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName $elementName }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
@@ -47,5 +48,5 @@ spec:
             claimName: {{ $elementName }}
       restartPolicy: OnFailure
 metadata:
-  name: {{ $elementName }}-bootstrap
+  name: {{ $elementName }}-init-element
 {{- end }}
