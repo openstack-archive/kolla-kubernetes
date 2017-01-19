@@ -17,7 +17,8 @@ import json
 
 def process(json_file, key):
     try:
-        j = json.load(open(json_file))
+        with open(json_file) as _json:
+            j = json.load(_json)
         a = []
         for v in j['config_files']:
             if v['source'] == '/var/lib/kolla/config_files/ceph.*':
@@ -34,9 +35,8 @@ def process(json_file, key):
                 a.append(v)
         if len(a) != len(j['config_files']):
             j['config_files'] = a
-            f = open(json_file, 'w')
-            f.write(json.dumps(j, indent=4))
-            f.close()
+            with open(json_file, 'w') as f:
+                f.write(json.dumps(j, indent=4, separators=(',', ': ')))
     except Exception:
         pass
 

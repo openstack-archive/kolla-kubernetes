@@ -137,9 +137,8 @@ class JinjaUtils(object):
             else:
                 kkdir = pathfinder.PathFinder.find_kolla_kubernetes_dir()
                 path = os.path.join(kkdir, n)
-                f = open(path)
-                d = f.read()
-                f.close
+                with open(path) as f:
+                    d = f.read()
                 return d
 
         j2env = jinja2.Environment(
