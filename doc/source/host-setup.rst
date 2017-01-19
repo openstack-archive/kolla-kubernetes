@@ -29,7 +29,7 @@ packaged version of Docker for maximum stability and compatibility with the
 following command:
 
 .. NOTE:: Docker 1.11.0 is not compatible with Kubernetes due to some issues in
-  Docker. The below command will install the latest docker and revert back to
+  Docker. The below command will install the latest Docker and revert back to
   1.10.3.  For different Debian or Ubuntu distributions, you may need to use
   ``apt-cache madison docker-engine`` to get the correct version.
 
