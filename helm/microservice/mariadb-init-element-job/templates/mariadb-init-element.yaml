@@ -1,5 +1,6 @@
 {{- $resourceName := "mariadb-bootstrap" }}
-{{- $elementName := .Values.element_name | default "mariadb" }}
+{{- $elementSearchPath := ":global.kolla.mariadb.init_element.job:global.kolla.mariadb.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
 {{- $searchPath := printf ":global.kolla.%s.init_element.job:global.kolla.%s.init_element.all:global.kolla.%s.all:global.kolla.mariadb.init_element.job:global.kolla.mariadb.init_element.all:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName $elementName }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "mariadb" }}
