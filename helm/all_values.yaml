@@ -244,6 +244,7 @@ openvswitch-vswitchd-daemonset:
 
 rabbitmq-init-element-job:
         global:
+            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
@@ -251,6 +252,7 @@ rabbitmq-init-element-job:
 
 rabbitmq-statefulset:
         global:
+            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
@@ -263,6 +265,7 @@ rabbitmq-statefulset:
 
 rabbitmq-svc:
         global:
+            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:

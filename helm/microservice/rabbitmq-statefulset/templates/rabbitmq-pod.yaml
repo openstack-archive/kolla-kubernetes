@@ -1,6 +1,7 @@
 {{- $resourceName := "rabbitmq" }}
-{{- $elementName := .Values.element_name | default $resourceName }}
-{{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.all:global.kolla.rabbitmq.statefulset:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName }}
+{{- $elementSearchPath := ":global.kolla.rabbitmq.statefulset:global.kolla.rabbitmq.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
+{{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.statefulset.all:global.kolla.%s.all:global.kolla.rabbitmq.statefulset:global.kolla.rabbitmq.statefulset.all:global.kolla.rabbitmq.all:global.kolla.all" $elementName $elementName $elementName }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
