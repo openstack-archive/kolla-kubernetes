@@ -1,6 +1,7 @@
 {{- $resourceName := "mariadb" }}
-{{- $elementName := .Values.element_name | default $resourceName }}
-{{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.all:global.kolla.mariadb.statefulset:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
+{{- $elementSearchPath := ":global.kolla.mariadb.statefulset:global.kolla.mariadb.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
+{{- $searchPath := printf ":global.kolla.%s.statefulset:global.kolla.%s.statefulset.all:global.kolla.%s.all:global.kolla.mariadb.statefulset:global.kolla.mariadb.statefulset.all:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName $elementName }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "mariadb" }}
 {{- $_ := set $c "imageName" "image_full" }}

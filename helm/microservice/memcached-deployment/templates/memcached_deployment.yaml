@@ -3,12 +3,12 @@
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
 {{- $name :=  .Release.Name }}
-{{- $serviceName := "memcached" }}
+{{- $elementSearchPath := ":global.kolla.memcached.deployment:global.kolla.memcached.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
+{{- $searchPath := printf ":global.kolla.%s.deployment:global.kolla.%s.deployment.all:global.kolla.%s.all:global.kolla.memcached.deployment:global.kolla.memcached.deployment.all:global.kolla.memcached.all:global.kolla.all" $elementName $elementName $elementName }}
+{{- $serviceName := $elementName }}
 {{- $serviceType := "deployment" }}
-{{- $elementName := .Values.element_name | default $serviceName }}
-{{- $elementType := .Values.element_type | $serviceType }}
-{{- $searchPath := printf ":global.kolla.%s.deployment:global.kolla.%s.all:global.kolla.memcached.deployment:global.kolla.memcached.all:global.kolla.all" .Values.element_name .Values.element_name }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "elementType" $elementType "searchPath" $searchPath "Values" .Values "Release" .Release }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "searchPath" $searchPath "Values" .Values "Release" .Release }}
 {{- $c := dict "searchPath" $searchPath "key" "enabled" "retDict" $localVals "retKey" "enabled" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
 {{- $ci := dict "searchPath" $searchPath "Values" .Values "contName" "memcached" }}
