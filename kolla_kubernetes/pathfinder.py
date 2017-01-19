@@ -109,7 +109,7 @@ KOLLA_SEARCH_PATHS = [
     # Search installation paths first
     os.path.abspath(os.path.join(PathFinder.find_installed_root(),
                                  './share/kolla')),
-    '/usr/share/kolla',
+    '/usr/share/kolla', '/usr/local/share/kolla',
     # Then search development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla')),
@@ -122,7 +122,7 @@ KOLLA_KUBERNETES_SEARCH_PATHS = [
     # Search installation paths first
     os.path.abspath(os.path.join(PathFinder.find_installed_root(),
                                  './share/kolla-kubernetes')),
-    '/usr/share/kolla-kubernetes',
+    '/usr/share/kolla-kubernetes', '/usr/local/share/kolla-kubernetes',
     # Then search development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root())),
 ]
