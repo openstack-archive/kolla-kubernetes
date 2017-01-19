@@ -3,7 +3,6 @@ cat > /tmp/setup.$$ <<"EOF"
 mkdir -p /data/kolla
 df -h
 dd if=/dev/zero of=/data/kolla/ceph-osd0.img bs=5M count=1024
-dd if=/dev/zero of=/data/kolla/ceph-osd1.img bs=5M count=1024
 LOOP=$(losetup -f)
 losetup $LOOP /data/kolla/ceph-osd0.img
 parted $LOOP mklabel gpt
