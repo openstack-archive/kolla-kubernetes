@@ -433,10 +433,12 @@ To test that helm is working you can run the following:
 
     helm init --client-only
     helm repo update
-    helm install stable/mysql
+    helm install stable/mysql --name helm-test
     helm ls
     # and to check via kubectl
     kubectl get all
+    # and finally remove the test mysql chart
+    helm delete helm-test
 
 .. end
 
