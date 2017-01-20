@@ -1,0 +1,10 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        horizon:
+            deployment:
+                dependencies:
+                    service:
+                    - keystone-internal
+

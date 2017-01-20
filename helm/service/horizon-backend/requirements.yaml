@@ -1,7 +1,7 @@
 dependencies:
-  - name: horizon-svc
+  - name: horizon-backend-svc
     repository: http://localhost:10191
     version: 0.4.0-1
-  - name: horizon-deployment
+  - name: horizon-backend-deployment
     repository: http://localhost:10191
     version: 0.4.0-1
