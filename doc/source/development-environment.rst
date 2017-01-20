@@ -272,11 +272,12 @@ Clone the repo containing the dev environment:
 .. end
 
 
-Move into the ```halcyon-vagrant-kubernetes``` directory and run:
+Initialize the ```halcyon-vagrant-kubernetes``` repository:
 
 .. path .
 .. code-block:: console
 
+    cd halcyon-vagrant-kubernetes
     git submodule init
     git submodule update
 
