@@ -54,6 +54,8 @@ function wait_for_cinder {
     done
 }
 
+curl -sf http://logs.openstack.org/32/422932/2/check/gate-kolla-kubernetes-deploy-ubuntu-binary-2-ceph-nv/cff0e5a/logs/horizon.html | grep 'OpenStack Dashboard'
+
 curl -o cirros.qcow2 \
     http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 echo testing cluster glance-api
