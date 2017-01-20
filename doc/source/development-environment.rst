@@ -4,6 +4,16 @@
 Kolla Kubernetes Development Environment
 ==========================================
 
+Overview
+========
+
+This development environment is intended to run on bare metal rather than
+a virtual machine.  This guide will impact the host operating system in
+some minimal way, however, the development environment  doesn't totally
+destroy the operaing system as some other development environments might.
+The Kolla project does recommend a dedicated development machine such as
+workstation or laptop to minimize impact to daily work.
+
 Install Vagrant and Ansible
 ===========================
 
