@@ -1,0 +1,11 @@
+name: horizon-frontend-deployment
+version: 0.4.0-1 #FIXME make this changable
+description: Horizon frontend deployment for kolla-kubernetes
+keywords:
+  - openstack
+  - horizon
+  - frontend
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
