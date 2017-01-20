@@ -1,0 +1,11 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        horizon:
+            deployment:
+                kubernetes_entrypoint: true
+                dependencies:
+                    service:
+                    - horizon
+
