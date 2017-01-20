@@ -277,6 +277,7 @@ Move into the ```halcyon-vagrant-kubernetes``` directory and run:
 .. path .
 .. code-block:: console
 
+    cd halcyon-vagrant-kubernetes
     git submodule init
     git submodule update
 
