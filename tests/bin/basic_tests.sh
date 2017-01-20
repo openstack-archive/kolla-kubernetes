@@ -54,6 +54,9 @@ function wait_for_cinder {
     done
 }
 
+curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
+    jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
+
 curl -o cirros.qcow2 \
     http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 echo testing cluster glance-api
