@@ -1,0 +1,67 @@
+{{- $searchPath := ":global.kolla.horizon.frontend.deployment:global.kolla.horizon.frontend.all:global.kolla.horizon.all:global.kolla.all" }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $version := include "kolla_val_get_str" (dict "key" "version" "searchPath" $searchPath "Values" .Values ) }}
+{{- $defaultVersion := include "kolla_val_get_str" (dict "key" "default_version" "searchPath" $searchPath "Values" .Values ) }}
+{{- $localVals := dict }}
+{{- $c := dict "searchPath" $searchPath "key" "versions" "retDict" $localVals "retKey" "versions" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: horizon-frontend-{{ $version }}
+data:
+  haproxy.cfg: |
+    global
+      chroot /var/lib/haproxy
+      user haproxy
+      group haproxy
+      daemon
+      log /var/lib/kolla/heka/log local0
+      maxconn 4000
+      stats socket /var/lib/kolla/haproxy/haproxy.sock
+
+    defaults
+      log global
+      mode http
+      option redispatch
+      option httplog
+      option forwardfor
+      retries 3
+      timeout http-request 10s
+      timeout queue 1m
+      timeout connect 10s
+      timeout client 1m
+      timeout server 1m
+      timeout check 10s
+
+    frontend horizon
+      bind 0.0.0.0:{{ $port }}
+      default_backend horizon
+
+    backend horizon
+      balance roundrobin
+      cookie HORIZVER insert indirect nocache maxlife 8h
+
+{{- range $localVals.versions }}
+    server horizon-{{ . }} horizon-{{ . }}:{{ $port }} check cookie {{ . }} {{ if ne . $defaultVersion }}backup{{ end }}
+{{- end }}
+
+  config.json: |
+    {
+        "command": "/usr/sbin/haproxy-systemd-wrapper -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid",
+        "config_files": [
+            {
+                "source": "/var/lib/kolla/config_files/haproxy.cfg",
+                "dest": "/etc/haproxy/haproxy.cfg",
+                "owner": "root",
+                "perm": "0644"
+            },
+            {
+                "source": "/var/lib/kolla/config_files/haproxy.pem",
+                "dest": "/etc/haproxy/haproxy.pem",
+                "owner": "root",
+                "perm": "0600",
+                "optional": true
+            }
+        ]
+    }

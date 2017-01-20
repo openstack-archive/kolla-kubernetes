@@ -1,0 +1,71 @@
+digraph G {
+    node [nodesep=2.0, fontsize=11];
+    graph [splines=false];
+    subgraph cluster_horizon {
+        label="Horizon"
+        graph [style=invis];
+    subgraph cluster_elements {
+        graph [style=invis];
+        brow2 [shape=plaintext,label="..."];
+        brow1 [shape=box,label="Web Browser - User B - Version 2"];
+        brow0 [shape=box,label="Web Browser - User A - Version 1"];
+    }
+    subgraph cluster_k8s {
+        label="Kubernetes"
+        graph [style=dashed];
+        hfsvc [shape=diamond,label="Service"];
+        fdep0 [shape=box,label="Horizon Frontend A"];
+        fdep1 [shape=box,label="Horizon Frontend B"];
+        fdep2 [shape=plaintext,label="..."];
+    subgraph cluster_backends {
+        label=""
+        graph [style=invis];
+    subgraph cluster_backend2 {
+        graph [style=dotted];
+        label="Backend Version 2"
+        bcfg2  [shape=oval,label="Config 2"];
+        hfsvc2 [shape=diamond,label="Service 2"];
+        b2dep0 [shape=box,label="Horizon Backend 2A"];
+        b2dep1 [shape=box,label="Horizon Backend 2B"];
+        b2dep2 [shape=plaintext,label="..."];
+    }
+    subgraph cluster_backend1 {
+        graph [style=dotted];
+        label="Backend Version 1"
+        hfsvc1 [shape=diamond,label="Service 1"];
+        bcfg1  [shape=oval,label="Config 1"];
+        b1dep0 [shape=box,label="Horizon Backend 1A"];
+        b1dep1 [shape=box,label="Horizon Backend 1B"];
+        b1dep2 [shape=plaintext,label="..."];
+    }
+    subgraph cluster_backend3 {
+        label=""
+        graph [style=invis];
+        b3dep2 [shape=plaintext,label="..."];
+    }
+}
+    subgraph links {
+        hfsvc -> fdep2 [style=invis];
+        brow0:s -> hfsvc:n;
+        brow1:s -> hfsvc:n;
+        hfsvc:s -> fdep0:n;
+        hfsvc:s -> fdep1:n;
+        fdep0:s -> hfsvc1:n;
+        fdep1:s -> hfsvc1:n;
+        fdep0:s -> hfsvc2:n;
+        fdep1:s -> hfsvc2:n;
+        fdep1 -> b3dep2 [style=invis];
+        hfsvc1:s -> b1dep0:n;
+        hfsvc1:s -> b1dep1:n;
+        hfsvc2:s -> b2dep0:n;
+        hfsvc2:s -> b2dep1:n;
+        bcfg1:s -> b1dep0:n;
+        bcfg1:s -> b1dep1:n;
+        bcfg1 -> b1dep2 [style=invis];
+        bcfg2:s -> b2dep0:n;
+        bcfg2:s -> b2dep1:n;
+        bcfg2 -> b2dep2 [style=invis];
+    }
+    }
+    }
+}
