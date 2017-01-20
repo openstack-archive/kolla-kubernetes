@@ -199,7 +199,6 @@ Before continuing, log out and back in again for your session to have the correc
 permissions applied.
 
 
-
 MacOS
 ----------
 
@@ -258,6 +257,67 @@ Now we can install Ansible:
    this is by running ``ulimit -n 4048`` from the CLI before bringing the
    environment up.
 
+Install Kubernetes and Helm clients
+===================================
+
+To complete the development environment setup, it is mandatory to have
+both a kubernetes client (kubectl) and a helm client (helm) installed on
+the host operating system.
+
+Installing Clients on CentOS or Ubuntu
+--------------------------------------
+
+To install the kubernetes clients:
+
+.. code-block:: console
+
+     curl -L https://dl.k8s.io/v1.5.1/kubernetes-client-linux-amd64.tar.gz | tar -xzv
+     sudo cp kubernetes/client/bin/* /usr/bin
+     sudo chmod 755 /usr/bin/kubefed /usr/bin/kubectl
+     sudo chown root: /usr/bin/kubefed /usr/bin/kubectl
+
+.. end
+
+To install the helm client:
+
+.. code-block:: console
+
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-linux-amd64.tar.gz | tar -xvf
+     sudo cp linux-amd64/helm /usr/bin/helm
+     sudo chmod 755 /usr/bin/helm
+     sudo chown root: /usr/bin/helm
+
+.. end
+
+Installing Clients on MacOS
+---------------------------
+
+.. warning::
+
+   Client installation on MacOS is untested as of Jan 19th, 2017 on MacOS. This
+   section should however, work correctly.  If you as a developer can confirm
+   installing clients works on MacOS remove this warning please.
+
+To install the kubernetes clients:
+
+.. code-block:: console
+
+     sudo cp kubernetes/client/bin/* /usr/bin
+     sudo chmod 755 /usr/bin/kubefed /usr/bin/kubectl
+     sudo chown root: /usr/bin/kubefed /usr/bin/kubectl
+
+.. end
+
+To install the helm client:
+
+.. code-block:: console
+
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-darwin-amd64.tar.gz | tar -xvf
+    sudo cp linux-amd64/helm /usr/bin/helm
+    sudo chmod 755 /usr/bin/helm
+     sudo chown root: /usr/bin/helm
+
+.. end
 
 Setup environment
 =================
