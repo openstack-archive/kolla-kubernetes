@@ -1,33 +1,28 @@
-{{- $searchPath := ":global.kolla.horizon.deployment:global.kolla.horizon.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.horizon.frontend.deployment:global.kolla.horizon.frontend.all:global.kolla.horizon.all:global.kolla.all" }}
 {{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
-{{- $c := dict "searchPath" $searchPath "Values" .Values }}
-{{- $_ := set $c "contName" "horizon" }}
-{{- $_ := set $c "imageName" "image_full" }}
-{{- $_ := set $c "tagName" "image_tag" }}
-{{- $imageFull := include "kolla_build_image_full" $c }}
-{{- $resourceName := "horizon" }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $resourceName := "horizon-frontend" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ $elementName }}
+  name: horizon-frontend
 spec:
   replicas: {{ $replicas }}
   selector:
-    matchLabels:
-      service: {{ $elementName }}
+      service: horizon-frontend
   template:
     metadata:
       labels:
-        service: {{ $elementName }}
+        service: horizon-frontend
       annotations:
+        kolla_upgrade: minor_rolling_safe
         pod.beta.kubernetes.io/init-containers: '[
 {{- include "common_dependency_container_single" $env | indent 10 }}
         ]'
@@ -35,26 +30,40 @@ spec:
       nodeSelector:
         {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-      - name: main
-        image: "{{ $imageFull }}"
-        volumeMounts:
+        - name: horizon-frontend
+          image: {{ include "haproxy_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          volumeMounts:
 {{- include "common_volume_mounts" $env | indent 10 }}
-          - mountPath: {{ $containerConfigDirectory }}
-            name: horizon-config
-        env:
+            - mountPath: {{ container_config_directory }}
+              name: horizon-frontend-configmap
+          env:
 {{- include "common_env_vars" $env | indent 10 }}
+          ports:
+            - containerPort: {{ $port }}
+              name: http
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - killall -s SIGUSR1 haproxy
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ $port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
 {{- include "common_containers" $env | indent 6 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
-        - name: horizon-config
+        - name: horizon-frontend-configmap
           configMap:
-            name: horizon
+            name: horizon-frontend
             items:
-            - key: horizon.conf
-              path: horizon.conf
             - key: config.json
               path: config.json
-            - key: local-settings
-              path: local_settings
+            - key: haproxy.cfg
+              path: haproxy.cfg
 {{- end }}
-

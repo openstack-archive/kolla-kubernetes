@@ -1,10 +1,11 @@
-name: horizon-deployment
+name: horizon-frontend-svc
 version: 0.4.0-1 #FIXME make this changable
 description: Horizon service for kolla-kubernetes
 keywords:
   - openstack
   - horizon
-  - api
+  - frontend
+  - svc
 sources:
   - http://github.com/openstack
 engine: gotpl
