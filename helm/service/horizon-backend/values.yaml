@@ -6,6 +6,5 @@ global:
             deployment:
                 dependencies:
                     service:
-                    - horizon
                     - keystone-internal
 
