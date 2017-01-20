@@ -65,11 +65,17 @@ function wait_for_cinder {
     done
 }
 
-HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
-    jsonpath='{.spec.clusterIP}'):80/
-wait_for_http $HORIZON_URL
-curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
-    jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
+HORIZON_BACKEND_URL=http://$(kubectl get svc horizon-backend-1 \
+    --namespace=kolla -o jsonpath='{.spec.clusterIP}'):80/
+wait_for_http $HORIZON_BACKEND_URL
+curl -Lsf $HORIZON_BACKEND_URL | \
+    grep 'OpenStack Dashboard'
+
+HORIZON_FRONTEND_URL=http://$(kubectl get svc horizon-frontend \
+    --namespace=kolla -o jsonpath='{.spec.clusterIP}'):80/
+wait_for_http $HORIZON_FRONTEND_URL
+curl -Lsf $HORIZON_FRONTEND_URL | \
+    grep 'OpenStack Dashboard'
 
 curl -o cirros.qcow2 \
     http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img

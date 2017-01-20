@@ -4,9 +4,7 @@ global:
             kubernetes_entrypoint: true
         horizon:
             deployment:
-                kubernetes_entrypoint: true
                 dependencies:
                     service:
-                    - horizon
                     - keystone-internal
 
