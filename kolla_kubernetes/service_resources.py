@@ -359,10 +359,16 @@ class Container(object):
     def _ensureConfigMaps(self, action):
         assert action in Service.VALID_ACTIONS
 
+        c = KollaKubernetesResources.GetJinjaDict()
+        name = self.getName()
+        if name == 'horizon':
+            name = 'horizon-backend'
+            if 'configmap_version' in c:
+                name = 'horizon-backend-%s' % (
+                    c['configmap_version'])
         nsname = 'kolla_kubernetes_namespace'
         cmd = ("kubectl {} configmap {} --namespace={}".format(
-            action, self.getName(),
-            KollaKubernetesResources.GetJinjaDict()[nsname]))
+            action, name, c[nsname]))
 
         # For the create action, add some more arguments
         if action == 'create':

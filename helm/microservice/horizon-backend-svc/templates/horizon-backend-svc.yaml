@@ -1,0 +1,9 @@
+{{- $searchPath := ":global.kolla.horizon.backend.svc:global.kolla.horizon.backend.all:global.kolla.horizonall:.global.kolla.all" }}
+{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
+{{- $instanceVersion := include "kolla_val_get_str" (dict "key" "instance_version" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default "horizon" }}
+{{- $elementService := .Values.element_name | default "horizon" }}
+{{- $elementServiceType := $instanceVersion }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- include "common_svc" $env }}
+{{- end }}
