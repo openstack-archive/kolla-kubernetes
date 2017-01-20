@@ -54,7 +54,10 @@ function wait_for_cinder {
     done
 }
 
-curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
+curl -Lsf http://`kubectl get svc horizon-backend --namespace=kolla -o \
+    jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
+
+curl -Lsf http://`kubectl get svc horizon-frontend --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
 
 curl -o cirros.qcow2 \
