@@ -333,6 +333,21 @@ network performance. This is as it takes time for the images to be pulled, and
 CNI networking to come up, DNS being usually the last service to become active.
 
 
+Install Kubernetes Client
+=========================
+
+Install the kubernetes client to access the vagrant cluster from the host
+system.
+
+.. code-block:: console
+
+     curl -L https://dl.k8s.io/v1.5.1/kubernetes-client-linux-amd64.tar.gz | tar -xzv
+     sudo cp -a kubernetes/client/bin/* /usr/bin
+     sudo chmod 755 /usr/bin/kubefed /usr/bin/kubectl
+     sudo chown root: /usr/bin/kubefed /usr/bin/kubectl
+
+.. end
+
 Testing the deployed environment
 ================================
 
