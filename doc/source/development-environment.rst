@@ -31,8 +31,10 @@ repositories:
 .. note::
 
    Currently, the following versions are tested and required:
-     * Vagrant <1.9.0
-     * Ansible >=2.2.0
+     * ansible >= 2.2.0
+     * helm >= 2.1.3
+     * kubernetes >= 1.5.2
+     * vagrant <1.9.0
 
 
 
@@ -257,6 +259,21 @@ Now we can install Ansible:
    this is by running ``ulimit -n 4048`` from the CLI before bringing the
    environment up.
 
+Set environment variable versions for easy copy and pasting
+===========================================================
+
+The contents of this document are designed to be easily copy and pasted
+into a terminal window.  To facilitate the maintenance of this document,
+we use environment variables to specify the helm and kubernetes versions
+under use.
+
+.. code-block:: console
+
+    export KOLLA_HELM_VERSION=2.1.3
+    export KOLLA_KUBERNETES_VERSION=1.5.2
+
+.. end
+
 Install Kubernetes and Helm clients
 ===================================
 
@@ -271,7 +288,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v1.5.1/kubernetes-client-linux-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v$(KOLLA_KUBERNETES_VERSION)/kubernetes-client-linux-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usrlocal//bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -282,7 +299,7 @@ To install the helm client:
 
 .. code-block:: console
 
-    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-linux-amd64.tar.gz | tar -xzv
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$(KOLLA_HELM_VERSION)-linux-amd64.tar.gz | tar -xzv
     sudo cp linux-amd64/helm /usr/local/bin/helm
     sudo chmod 755 /usr/local/bin/helm
     sudo chown root: /usr/local/bin/helm
@@ -296,7 +313,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v1.5.1/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v$(KOLLA_KUBERNTES_VERSION)/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -307,7 +324,7 @@ To install the helm client:
 
 .. code-block:: console
 
-    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$(KOLLA_HELM_VERSION)-darwin-amd64.tar.gz | tar -xzv
     sudo cp darwin-amd64/helm /usr/local/bin/helm
     sudo chmod 755 /usr/local/bin/helm
     sudo chown root: /usr/local/bin/helm
@@ -347,7 +364,7 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v1.5.1 \
+        --k8s-version v$(KOLLA_KUBERNTES_VERSION) \
         --guest-os centos
 
 .. end
