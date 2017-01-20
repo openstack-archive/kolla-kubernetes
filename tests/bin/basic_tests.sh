@@ -28,6 +28,17 @@ function wait_for_vm_ssh {
     set -ex
 }
 
+function wait_for_http {
+    count=0
+    while true; do
+        st=$(curl -Lsf "$1" > /dev/null )
+        [ $? -eq 0 ] && break
+        sleep 1
+        count=$((count+1))
+        [ $count -gt 30 ] && echo Failed to contact "$1". && exit -1
+    done
+}
+
 function scp_to_vm {
     sshpass -p 'cubswin:)' scp -o UserKnownHostsFile=/dev/null -o \
         StrictHostKeyChecking=no "$2" cirros@$1:"$3"
@@ -54,6 +65,9 @@ function wait_for_cinder {
     done
 }
 
+HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
+    jsonpath='{.spec.clusterIP}'):80/
+wait_for_http $HORIZON_URL
 curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
 
