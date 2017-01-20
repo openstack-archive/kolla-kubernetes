@@ -150,9 +150,14 @@ helm install kolla/nova-compute --version $VERSION  --namespace kolla \
     --name nova-compute --set "$common_vars,element_name=nova" \
     --values <(helm_entrypoint_general $1)
 
-helm install kolla/horizon --version $VERSION \
-    --namespace kolla --name horizon \
-    --set "$common_vars,element_name=horizon" \
+helm install kolla/horizon-backend --version $VERSION \
+    --namespace kolla --name horizon-backend \
+    --set "$common_vars" \
+    --values <(helm_entrypoint_general $1)
+
+helm install kolla/horizon-frontend --version $VERSION \
+    --namespace kolla --name horizon-frontend \
+    --set "$common_vars" \
     --values <(helm_entrypoint_general $1)
 
 #kollakube res create pod keepalived
