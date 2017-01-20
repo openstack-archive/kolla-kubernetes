@@ -67,6 +67,11 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
+helm install kolla/horizon --version $VERSION \
+    --namespace kolla --name horizon \
+    --set "$common_vars,element_name=horizon" \
+    --values <(helm_entrypoint_general $1)
+
 helm install kolla/mariadb --version $VERSION \
     --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
     --values <(helm_entrypoint_general $1)
@@ -94,9 +99,6 @@ helm install kolla/nova-metadata-svc --version $VERSION \
 
 helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc --set element_name=nova
-
-helm install kolla/horizon-svc --version $VERSION \
-    --namespace kolla --name horizon-svc --set element_name=horizon
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -265,10 +267,6 @@ for x in nova-conductor nova-scheduler nova-consoleauth; do
       --set "$common_vars,element_name=$x" \
       --namespace kolla --name $x
 done
-
-helm install kolla/horizon-deployment --version $VERSION \
-    --set "$common_vars,element_name=horizon" \
-    --namespace kolla --name horizon-deployment
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
