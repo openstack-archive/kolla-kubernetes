@@ -560,7 +560,7 @@ cinder-api-deployment:
                         all:
                             port: 8776
 
-horizon-svc:
+horizon-frontend-svc:
         global:
             kolla:
                 horizon:
@@ -569,6 +569,41 @@ horizon-svc:
                         node_port: 80
                         port_external: false
                         node_port_enabled: false
+
+horizon-frontend-configmap:
+        global:
+            kolla:
+                horizon:
+                    all:
+                        port: 80
+                        version: "1"
+                        default_version: "1"
+                        versions:
+                        - "1"
+
+horizon-frontend-deployment:
+        global:
+            kolla:
+                horizon:
+                    all:
+                        version: "1"
+                        port: 80
+
+horizon-backend-svc:
+        global:
+            kolla:
+                horizon:
+                    all:
+                        version: 1
+                        port: 80
+
+horizon-backend-deployment:
+        global:
+            kolla:
+                horizon:
+                    all:
+                        version: 1
+                        port: 80
 
 glance-create-db-job:
         global:

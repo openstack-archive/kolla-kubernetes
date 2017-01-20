@@ -1,10 +1,10 @@
-name: horizon-svc
-version: 0.4.0-1 #FIXME make this changable
-description: Horizon service for kolla-kubernetes
+name: horizon-frontend
+version: 0.4.0-1
+description: Helm chart for horizon
 keywords:
   - openstack
   - horizon
-  - svc
+  - frontend
 sources:
   - http://github.com/openstack
 engine: gotpl
