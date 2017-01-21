@@ -448,6 +448,18 @@ To test that helm is working you can run the following:
 
 .. end
 
+Because of a defect in docker-engine 1.13.0 and its interaction with helm
+as described in https://github.com/mitchellh/vagrant/issues/7997 it is
+recommended to use the following workaround:
+
+.. path .
+.. code-block:: console
+
+kubectl delete --namespace=kube-system deploy tiller-deploy
+helm init --tiller-image docker.io/port/tiller:v2.1.3
+
+.. end
+
 After waiting for the tiller image to be pulled to the kubernetes cluster:
 
 .. path .
