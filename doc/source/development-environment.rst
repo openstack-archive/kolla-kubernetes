@@ -448,6 +448,21 @@ To test that helm is working you can run the following:
 
 .. end
 
+Tiller, which is Helm's server container for starting helm charts, doesn't
+work correctly as of January 21st, 2017 with docker-engine-1.13.0.  This
+problem occurs because docker-engine 1.13.0 doesn't interact correctly
+with third party registries as described in:
+https://github.com/mitchellh/vagrant/issues/7997.  The Kolla community
+recommends using the following workaround: 
+
+.. path .
+.. code-block:: console
+
+kubectl delete --namespace=kube-system deploy tiller-deploy
+helm init --tiller-image docker.io/port/tiller:v2.1.3
+
+.. end
+
 After waiting for the tiller image to be pulled to the kubernetes cluster:
 
 .. path .
