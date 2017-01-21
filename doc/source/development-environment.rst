@@ -444,7 +444,7 @@ To test that helm is working you can run the following:
 
     helm init --client-only
     helm repo update
-    helm install stable/mysql --name helm-test
+    helm install stable/memcached --name helm-test
     helm ls
     # and to check via kubectl
     kubectl get all
@@ -452,9 +452,6 @@ To test that helm is working you can run the following:
     helm delete helm-test --purge
 
 .. end
-
-The pods in the above example will not provision and be shown as pending as
-there is no dynamic PVC creation within the cluster *yet*.
 
 
 Setting up Kubernetes for Kolla-Kubernetes deployment
