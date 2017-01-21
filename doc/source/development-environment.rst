@@ -445,6 +445,14 @@ To test that helm is working you can run the following:
     helm init --client-only
     helm repo update
     helm install stable/memcached --name helm-test
+
+.. end
+
+After waiting for the tiller image to be pulled to the kubernetes cluster:
+
+.. path .
+.. code-block:: console
+
     helm ls
     # and to check via kubectl
     kubectl get all
@@ -452,6 +460,13 @@ To test that helm is working you can run the following:
     helm delete helm-test --purge
 
 .. end
+
+.. note::
+
+    If you receive the error ```Error: could not find a ready tiller pod```
+    helm is likely pulling the image to the kubernetes cluster.  This error
+    may also be returned if you have a proxy server environment and the
+    development environment is not setup properly for the proxy server.
 
 
 Setting up Kubernetes for Kolla-Kubernetes deployment
