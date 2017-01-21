@@ -4,6 +4,16 @@
 Kolla Kubernetes Development Environment
 ==========================================
 
+Overview
+========
+
+The kolla-kubernetes development environment is intended to run on a dedicated
+development machine such as a workstation or laptop. This development
+environment is not intended to run on a virtual machine although that
+is feasible.  Following this guide will have a minimal impact to the host
+operating system. Some software and libraries will be installed and some
+configuration changes will be required.
+
 Install Vagrant and Ansible
 ===========================
 
