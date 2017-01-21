@@ -1,0 +1,11 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: Qin Wang (qwang) <qin.wang@intel.com>
+Code-Review+1: BorneMace <borne.mace@oracle.com>
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Workflow+1: Steven Dake <stdake@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sat, 21 Jan 2017 00:55:12 +0000
+Reviewed-on: https://review.openstack.org/422932
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
