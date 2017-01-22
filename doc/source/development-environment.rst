@@ -290,7 +290,7 @@ To install the kubernetes clients:
 
     curl -L https://dl.k8s.io/v$KOLLA_KUBERNETES_VERSION/kubernetes-client-linux-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
-    sudo chmod 755 /usr/local/bin/kubefed /usrlocal//bin/kubectl
+    sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
 
 .. end
