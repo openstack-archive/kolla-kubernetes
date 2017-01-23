@@ -130,11 +130,10 @@ def main():
             merge_dict(pkg_values, values['stateful-service'])
         if package in values:
             merge_dict(pkg_values, values[package])
-        f = open(os.path.join(microdir, package, "values.yaml"), "w")
-        f.write("# This file is generated. Please edit all_values.yaml\n")
-        f.write("# and rerun tools/helm_prebuild.py\n")
-        f.write(yaml.safe_dump(pkg_values, default_flow_style=False))
-        f.close()
+        with open(os.path.join(microdir, package, "values.yaml"), "w") as f:
+            f.write("# This file is generated. Please edit all_values.yaml\n")
+            f.write("# and rerun tools/helm_prebuild.py\n")
+            f.write(yaml.safe_dump(pkg_values, default_flow_style=False))
     if sys.stdout.isatty():
             sys.stdout.write("\r                             \n")
             sys.stdout.flush()
