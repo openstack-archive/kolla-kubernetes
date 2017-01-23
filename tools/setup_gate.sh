@@ -122,17 +122,17 @@ if [ "x$4" == "xceph-multi" ]; then
         scp tools/setup_kubernetes.sh $line:
         scp tests/bin/fix_gate_iptables.sh $line:
         scp /usr/bin/kubectl $line:kubectl
-        NODENAME=$(ssh $line hostname)
-        ssh $line bash fix_gate_iptables.sh
-        ssh $line sudo iptables-save > $WORKSPACE/logs/iptables-$line.txt
-        ssh $line sudo setenforce 0
+        NODENAME=$(ssh -n $line hostname)
+        ssh -n $line bash fix_gate_iptables.sh
+        ssh -n $line sudo iptables-save > $WORKSPACE/logs/iptables-$line.txt
+        ssh -n $line sudo setenforce 0
         if [ "x$2" == "xubuntu" ]; then
-           ssh $line sudo apt-get -y remove open-iscsi
+           ssh -n $line sudo apt-get -y remove open-iscsi
         else
-           ssh $line sudo yum remove -y iscsi-initiator-utils
+           ssh -n $line sudo yum remove -y iscsi-initiator-utils
         fi
-        ssh $line sudo mv kubectl /usr/bin/
-        ssh $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        ssh -n $line sudo mv kubectl /usr/bin/
+        ssh -n $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
         set +xe
         count=0
         while true; do
