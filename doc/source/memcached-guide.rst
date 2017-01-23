@@ -7,7 +7,7 @@ Memcached in Kolla-Kubernetes
 Overview
 ========
 
-`Memcached <https://memcached.org/>_ is the default persistant cache for a
+`Memcached <https://memcached.org/>_ is the default persistent cache for a
 `Kolla-Kubernetes cluster.
 
 Preparation and Deployment

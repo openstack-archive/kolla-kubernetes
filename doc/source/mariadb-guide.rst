@@ -7,7 +7,7 @@ MariaDB in Kolla-Kubernetes
 Overview
 ========
 
-`MariaDB <https://mariadb.org/>_ is the default persistant storage option for
+`MariaDB <https://mariadb.org/>_ is the default persistent storage option for
 `a Kolla-Kubernetes cluster.
 
 Preparation and Deployment
