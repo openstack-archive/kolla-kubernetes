@@ -207,3 +207,4 @@ fi
 kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
+sudo docker images | sort > "$WORKSPACE/logs/docker_images.txt
