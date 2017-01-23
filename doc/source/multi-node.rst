@@ -4,22 +4,22 @@
 Kolla Kubernetes Multi-Node Guide
 =================================
 
-This guide documents how to deploy kolla-kubernetes within a
+This guide documents how to deploy Kolla-Kubernetes within a
 multi-node Kubernetes cluster.  It will guide you through all of the
-dependencies required to deploy Horizon, the Openstack Admin Web
-Interface.  It works for kubernetes clusters supporting various
+dependencies required to deploy Horizon, the OpenStack Admin Web
+Interface.  It works for Kubernetes clusters supporting various
 storage providers including GCE compute disks, AWS EBS, Ceph RBD, and
 even local host mounts if you are developing multi-node on an
 all-in-one system.
 
 This is an advanced guide.  Before attempting to deploy on a
 multi-node cluster, please follow the :doc:`quickstart` and ensure
-that you have successfully deployed kolla-kubernetes on a single host
+that you have successfully deployed Kolla-Kubernetes on a single host
 using the :doc:`kubernetes-all-in-one`.  This multi-node guide
 requires quite a few system dependencies to be addressed by the
 :doc:`quickstart`.
 
-Following this guide will result in a minimal kolla-kubernetes
+Following this guide will result in a minimal Kolla-Kubernetes
 multi-node deployment consisting of:
 
 - 1 mariadb instance
@@ -29,10 +29,10 @@ multi-node deployment consisting of:
 
 The end result will be a working Horizon admin interface and its
 dependencies deployed with all of the self-healing and auto-wiring
-benefits that a kubernetes cluster has to offer.  You should be able
-to destroy kubernetes nodes at will, and the system should self-heal
+benefits that a Kubernetes cluster has to offer.  You should be able
+to destroy Kubernetes nodes at will, and the system should self-heal
 and maintain state as pods migrate from destroyed nodes to new nodes.
-You may also destroy *all* kubernetes nodes, then bring some back, and
+You may also destroy *all* Kubernetes nodes, then bring some back, and
 the system should again self-heal.  Because we are using network
 volumes, mariadb state is maintained since its network volume will
 follow the pod as it is rescheduled from one node to the next.
@@ -42,7 +42,7 @@ Pre-Requisites
 ==============
 
 Follow the :doc:`quickstart`, configure your system, and do a
-"Development Install" of kolla and kolla-kubernetes.  This is
+"Development Install" of Kolla and Kolla-Kubernetes.  This is
 absolutely required.
 
 
@@ -50,27 +50,27 @@ Configure Kolla
 ===============
 
 For multi-node deployments, a Docker registry is required since the
-kubernetes nodes will not be able to find the kolla images that your
-development machine has built.  Thus, we must configure kolla to name
+Kubernetes nodes will not be able to find the Kolla images that your
+development machine has built.  Thus, we must configure Kolla to name
 the images correctly, so that we may easily push the images to the
 right Docker registry.
 
-Add your Docker registry settings in the kolla configuration file
-```./etc/kolla/globals.yaml```.
+Add your Docker registry settings in the Kolla-Ansible configuration file
+```./etc/kolla/globals.yml```.
 
 ::
 
-  # Edit kolla config ./etc/kolla/globals.yml
+  # Edit Kolla-Ansible config ./etc/kolla/globals.yml
   docker_registry: "<registry_url>"  # e.g. "gcr.io"
-  docker_namespace: "<registry_namespace>  # e.g. "annular-reef-123"
+  docker_namespace: "<registry_namespace>"  # e.g. "annular-reef-123"
 
-Generate the kolla configurations, build the kolla images, and push
-the kolla images to your Docker registry.
+Generate the Kolla configurations, build the Kolla images, and push
+the Kolla images to your Docker registry.
 
 ::
 
-  # Generate the kolla configurations
-  pushd kolla
+  # Generate the Kolla-Ansible configurations
+  pushd kolla-ansible
   sudo ./tools/generate_passwords.py  # (Optional: will overwrite)
   sudo ./tools/kolla-ansible genconfig
   popd
@@ -84,17 +84,17 @@ Build Kolla Images and Push to Docker Registry
   # Set env variables to make subsequent commands cut-and-pasteable
   export DOCKER_REGISTRY="<registry_url>"
   export DOCKER_NAMESPACE="<registry_namespace>"
-  export DOCKER_TAG="3.0.0"
+  export DOCKER_TAG="4.0.0"
   export KOLLA_CONTAINERS="mariadb memcached kolla-toolbox keystone horizon"
 
-  # Build the kolla containers
+  # Build the Kolla containers
   kolla-build $KOLLA_CONTAINERS --registry $DOCKER_REGISTRY --namespace $DOCKER_NAMESPACE
 
   # Authenticate with your Docker registry
   #   This may not be necessary if you are using a cloud provider
   docker login
 
-  # Push the newly-built kolla containers to your Docker registry
+  # Push the newly-built Kolla containers to your Docker registry
   #   For GKE, change the command below to be "gcloud docker push"
   for i in $KOLLA_CONTAINERS; do
     docker push "$DOCKER_REGISTRY/$DOCKER_NAMESPACE/centos-binary-$i:$DOCKER_TAG"
@@ -104,14 +104,14 @@ Build Kolla Images and Push to Docker Registry
 Configure Kolla-Kubernetes
 ==========================
 
-Modify the kolla-kubernetes configuration file
+Modify the Kolla-Kubernetes configuration file
 ```./etc/kolla-kubernetes/kolla-kubernetes.yml``` to set the number of
 instance replicas.  In addition, set the storage_provider settings to
 match your environment.
 
 ::
 
-  # Edit kolla-kubernetes config ./etc/kolla-kubernetes/kolla-kubernetes.yml
+  # Edit Kolla-Kubernetes config ./etc/kolla-kubernetes/kolla-kubernetes.yml
 
   ########################
   # Kubernetes Cluster
@@ -153,7 +153,7 @@ request <https://github.com/kubernetes/kubernetes/pull/26351>`_.
 Create all Kolla-Kubernetes Resources
 =====================================
 
-Execute the following commands to create the kolla-kubernetes
+Execute the following commands to create the Kolla-Kubernetes
 multi-node cluster.  There are two unique perspectives, that of an
 operator and that of a workflow engine.  The workflow engine drives
 the same CLI subcommands that are accessible to operators.
