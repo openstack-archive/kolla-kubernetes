@@ -1,0 +1,7 @@
+dependencies:
+  - name: openvswitch-ovsdb
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: openvswitch-vswitchd
+    repository: http://localhost:10191
+    version: 0.4.0-1

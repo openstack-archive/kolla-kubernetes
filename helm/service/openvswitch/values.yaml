@@ -1,0 +1,19 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        openvswitch:
+            db_network:
+                daemonset:
+            db_compute:
+                daemonset:
+            vswitchd_network:
+                daemonset:
+                    dependencies:
+                        socket:
+                        - /var/run/openvswitch/db.sock
+            vswitchd_compute:
+                daemonset:
+                    dependencies:
+                        socket:
+                        - /var/run/openvswitch/db.sock
