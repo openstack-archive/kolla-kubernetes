@@ -228,12 +228,8 @@ helm install kolla/glance --version $VERSION \
     --namespace kolla --name glance --set "$common_vars,element_name=glance" \
     --values <(helm_entrypoint_general $1)
 
-helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
---set "$common_vars,type=network,selector_key=kolla_controller" \
---namespace kolla --name openvswitch-ovsdb-network &&
-helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
---set $common_vars,kube_logger=false,type=network,selector_key=kolla_controller \
---namespace kolla --name openvswitch-vswitchd-network
+helm install kolla/openvswitch --debug --version $VERSION \
+--namespace kolla --name openvswitch --values  <(helm_entrypoint_general)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla

@@ -1,5 +1,5 @@
 {{- $restype := .Values.type }}
-{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.deployment:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
+{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.daemonset:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "openvswitch-vswitchd" }}
 {{- $_ := set $c "imageName" "image_full" }}
