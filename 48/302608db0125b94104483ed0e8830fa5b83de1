@@ -1,0 +1,10 @@
+Code-Review+1: sayantani <sayantani.goswami@intel.com>
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+2: Steve Wilkerson <sw5822@att.com>
+Workflow+1: Steve Wilkerson <sw5822@att.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 23 Jan 2017 16:25:46 +0000
+Reviewed-on: https://review.openstack.org/421054
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
