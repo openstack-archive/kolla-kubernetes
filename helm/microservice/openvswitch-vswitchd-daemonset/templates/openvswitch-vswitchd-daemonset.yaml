@@ -1,5 +1,5 @@
 {{- $restype := .Values.type }}
-{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.deployment:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
+{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.daemonset:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "openvswitch-vswitchd" }}
 {{- $_ := set $c "imageName" "image_full" }}
@@ -23,7 +23,14 @@
 {{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- define "openvswitch_vswitchd__extra_dep_volume_mounts" }}
+{
+  "name": "openvswitch-run",
+  "mountPath": "/var/run/openvswitch/"
+}
+{{- end }}
+{{- $extraDepVolumeMounts := "openvswitch_vswitchd__extra_dep_volume_mounts" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
