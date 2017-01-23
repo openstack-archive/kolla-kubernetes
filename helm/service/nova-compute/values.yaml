@@ -1,0 +1,21 @@
+global:
+    kolla:
+        nova:
+            all:
+                ceph_backend: true
+            compute:
+                daemonset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-metadata
+                        - nova-api
+                        socket:
+                        - /var/run/libvirt/libvirt-sock
+            libvirt:
+                daemonset:
+                    kubernetes_entrypoint: true
+                    dependencies:
+                        service:
+                        - nova-metadata
+                        - nova-api

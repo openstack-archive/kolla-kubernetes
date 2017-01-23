@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    nova-compute service level package using kubernetes entrypoint.

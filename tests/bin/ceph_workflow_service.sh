@@ -266,13 +266,9 @@ done
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/nova-libvirt-daemonset --version $VERSION \
-    --set "$common_vars,ceph_backend=true,element_name=nova-libvirt" \
-    --namespace kolla --name nova-libvirt-daemonset
-
-helm install kolla/nova-compute-daemonset --version $VERSION \
-    --set "$common_vars,ceph_backend=true,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
-    --namespace kolla --name nova-compute-daemonset
+helm install kolla/nova-compute --version $VERSION  --namespace kolla \
+    --name nova-compute --set "$common_vars,element_name=nova" \
+    --values <(helm_entrypoint_general $1)
 
 helm install kolla/horizon --version $VERSION \
     --namespace kolla --name horizon \
