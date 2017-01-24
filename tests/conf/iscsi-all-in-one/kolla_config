@@ -39,8 +39,7 @@ nova_backend_ceph: "no"
 
 set_sysctl: "no"
 
-#Using snapshot for now, since compatible container is not released yet.
-kolla_toolbox_image_full: kfox1111/centos-binary-kolla-toolbox:trunk-sometime
+kolla_toolbox_tag: '3.0.2'
 
 #Using mitaka for now, as it has pull'able containers
 mariadb_tag: '2.0.2'
