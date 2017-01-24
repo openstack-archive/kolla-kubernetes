@@ -4,8 +4,8 @@ global:
             kubernetes_entrypoint: true
             type: network
         openvswitch:
-            vswitchd_network:
-                daemonset:
+            vswitchd:
+                all:
                     dependencies:
                         socket:
                         - /var/run/openvswitch/db.sock
