@@ -470,7 +470,7 @@ After waiting for the tiller image to be pulled to the kubernetes cluster:
     helm ls
     # and to check via kubectl
     kubectl get all
-    # and finally remove the test mysql chart
+    # and finally remove the test memcached chart
     helm delete helm-test --purge
 
 .. end
