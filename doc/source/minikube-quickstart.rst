@@ -92,7 +92,7 @@ Run the following command, replacing <ip> with the ip you noted previously.
 
     ~/set_external_ip.sh <ip>
 
-Run the folowing commands
+Run the following commands
 
 ::
 
