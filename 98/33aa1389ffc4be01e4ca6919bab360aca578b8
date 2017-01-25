@@ -1,0 +1,10 @@
+Code-Review+1: Trinath Somanchi <trinath.somanchi@nxp.com>
+Code-Review+2: Pete Birley <pete@port.direct>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 25 Jan 2017 17:30:07 +0000
+Reviewed-on: https://review.openstack.org/425008
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
