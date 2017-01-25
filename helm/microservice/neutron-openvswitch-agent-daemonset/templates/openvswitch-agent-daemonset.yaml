@@ -69,21 +69,43 @@ spec:
               ]
           },
           {
-              "name": "update-permissions",
+              "name": "deps-and-update-permissions",
               "image": "{{ $imageFull }}",
               "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "securityContext": {
-                  "runAsUser": 0
+                  "runAsUser": 0,
+                  "privileged": true
               },
               "command": [
                   "/bin/sh",
                   "-c",
-                  "chown --recursive neutron.kolla /var/log/kolla;"
+                  "chown --recursive neutron.kolla /var/log/kolla;
+                   echo Waiting for openvswitch kernel module to load;
+                   while true; do
+                     loaded=$(lsmod | grep openvswitch | wc -l);
+                     [ $loaded -ne 0 ] && break;
+                     sleep 1;
+                   done;
+                   echo Done.;
+                   timeout 5s ovs-dpctl show;
+                   echo Waiting for openvswitch daemon to be responsive;
+                   while true; do
+                     timeout 5s ovs-appctl version;
+                     [ $? -eq 0 ] && break;
+                     sleep 1;
+                     echo Trying again.;
+                   done;
+                   echo Done.;
+                  "
               ],
               "volumeMounts": [
                   {
                       "name": "kolla-logs",
                       "mountPath": "/var/log/kolla"
+                  },
+                  {
+                      "name": "host-run",
+                      "mountPath": "/var/run"
                   }
               ]
            }
@@ -91,6 +113,7 @@ spec:
     spec:
       hostNetwork: True
       hostIPC: True
+      hostPID: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
