@@ -1,3 +1,4 @@
+docker_registry: docker.io
 api_interface_address: 0.0.0.0
 tunnel_interface_address: 0.0.0.0
 orchestration_engine: KUBERNETES
