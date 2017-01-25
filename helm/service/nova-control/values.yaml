@@ -1,23 +1,22 @@
 global:
     kolla:
+        all:
+            kubernetes_entrypoint: true
         nova:
             api:
                 create_db:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             service:
                             - mariadb
                 manage_db:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             jobs:
                             - nova-api-create-db
                             service:
                             - mariadb
                 deployment:
-                    kubernetes_entrypoint: true
                     dependencies:
                         jobs:
                         - nova-api-create-db
@@ -31,19 +30,16 @@ global:
                         - nova-api
             create_db:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - mariadb
             create_keystone_service:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - keystone-admin
             create_keystone_user:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         jobs:
                         - nova-create-keystone-service
@@ -52,7 +48,6 @@ global:
             create_keystone_endpoint:
                 admin:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             jobs:
                             - nova-create-keystone-service
@@ -61,7 +56,6 @@ global:
                             - keystone-admin
                 internal:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             jobs:
                             - nova-create-keystone-service
@@ -71,7 +65,6 @@ global:
                             - keystone-admin
                 public:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             jobs:
                             - nova-create-keystone-service
@@ -82,25 +75,21 @@ global:
                             - keystone-admin
             conductor:
                 statefulset:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - nova-api
             scheduler:
                 statefulset:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - nova-api
             consoleauth:
                 statefulset:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - nova-api
             novncproxy:
                 deployment:
-                    kubernetes_entrypoint: true
                     dependencies:
                         service:
                         - nova-novncproxy
