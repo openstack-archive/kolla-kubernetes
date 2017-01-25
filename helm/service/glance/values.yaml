@@ -5,14 +5,12 @@ global:
         glance:
             create_db:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         SERVICE:
                         - mariadb
             manage_db:
                 job:
                     ceph_backend: true
-                    kubernetes_entrypoint: true
                     dependencies:
                         SERVICE:
                         - mariadb
@@ -20,7 +18,6 @@ global:
                         - glance-create-db
             create_keystone_user:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         JOBS:
                         - glance-create-keystone-service
@@ -28,14 +25,12 @@ global:
                         - keystone-admin
             create_keystone_service:
                 job:
-                    kubernetes_entrypoint: true
                     dependencies:
                         SERVICE:
                         - keystone-admin
             create_keystone_endpoint:
                 public:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             JOBS:
                             - glance-create-keystone-service
@@ -46,7 +41,6 @@ global:
                             - keystone-admin
                 internal:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             JOBS:
                             - glance-create-keystone-service
@@ -56,7 +50,6 @@ global:
                             - keystone-admin
                 admin:
                     job:
-                        kubernetes_entrypoint: true
                         dependencies:
                             JOBS:
                             - glance-create-keystone-service
@@ -67,7 +60,6 @@ global:
                 all:
                     ceph_backend: true
                 deployment:
-                    kubernetes_entrypoint: true
                     dependencies:
                         JOBS:
                         - glance-create-keystone-endpoint-public
@@ -83,7 +75,6 @@ global:
 
             registry:
                 deployment:
-                    kubernetes_entrypoint: true
                     dependencies:
                         JOBS:
                         - glance-create-keystone-endpoint-public

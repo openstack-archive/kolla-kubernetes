@@ -4,7 +4,6 @@ global:
             kubernetes_entrypoint: true
         memcached:
             deployment:
-                kubernetes_entrypoint: true
                 dependencies:
                     service:
                     - memcached
