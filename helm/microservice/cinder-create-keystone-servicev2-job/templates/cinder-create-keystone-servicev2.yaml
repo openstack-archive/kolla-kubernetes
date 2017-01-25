@@ -6,7 +6,7 @@
 {{- $serviceType := "volume" }}
 {{- $description := "Openstack Block Storage" }}
 {{- $postfix := "v2" }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "postfix" $postfix "Values" .Values "searchPath" $searchPath }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "postfix" $postfix "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_create_keystone_service" $env }}
 {{- end }}
 

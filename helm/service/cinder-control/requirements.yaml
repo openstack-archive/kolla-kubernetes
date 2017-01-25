@@ -1,0 +1,43 @@
+dependencies:
+  - name: cinder-api-svc
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-manage-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-service-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-servicev2-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-user-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-public-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-internal-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-admin-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-publicv2-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-internalv2-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-create-keystone-endpoint-adminv2-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-api-deployment
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-scheduler-statefulset
+    repository: http://localhost:10191
+    version: 0.4.0-1
