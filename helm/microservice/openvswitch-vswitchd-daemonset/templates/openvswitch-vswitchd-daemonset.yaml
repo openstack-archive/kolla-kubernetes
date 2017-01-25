@@ -48,6 +48,23 @@ spec:
         pod.beta.kubernetes.io/init-containers: '[
 {{- include "common_dependency_container_multi" $env | indent 10 }}
           {
+             "name": "reqdependencies",
+             "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "env": [
+                {
+                   "name": "DEPENDENCY_SOCKET",
+                   "value": "/var/run/openvswitch/db.sock"
+                }
+             ],
+             "volumeMounts": [
+                {
+                   "name": "openvswitch-run",
+                   "mountPath": "/var/run/openvswitch/"
+                }
+             ]
+          },
+          {
              "name": "initialize-ovs-vswitchd",
              "image": "{{ $imageFull }}",
              "imagePullPolicy": {{ $imagePullPolicy | quote }},
@@ -67,23 +84,6 @@ spec:
                    "name": "kolla-logs",
                    "mountPath": "/var/log/kolla/"
                 },
-                {
-                   "name": "openvswitch-run",
-                   "mountPath": "/var/run/openvswitch/"
-                }
-             ]
-          },
-          {
-             "name": "reqdependencies",
-             "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "env": [
-                {
-                   "name": "DEPENDENCY_SOCKET",
-                   "value": "/var/run/openvswitch/db.sock"
-                }
-             ],
-             "volumeMounts": [
                 {
                    "name": "openvswitch-run",
                    "mountPath": "/var/run/openvswitch/"
@@ -127,6 +127,7 @@ spec:
               -vfile:info
               --mlockall
               --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
+              --pidfile=/var/run/openvswitch/ovs-vswitchd.pid
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
