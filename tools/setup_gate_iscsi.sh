@@ -124,3 +124,4 @@ sudo vgs >> $WORKSPACE/logs/vgs.txt
 sudo lvs >> $WORKSPACE/logs/lvs.txt
 
 tests/bin/basic_tests.sh
+tests/bin/build_docker_images.sh $WORKSPACE/logs
