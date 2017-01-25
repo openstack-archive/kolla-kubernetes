@@ -270,7 +270,7 @@ under use.
 .. code-block:: console
 
     export KOLLA_HELM_VERSION=2.1.3
-    export KOLLA_KUBERNETES_VERSION=1.5.2
+    export KOLLA_KUBERNETES_VERSION=1.5.1
 
 .. end
 
@@ -445,28 +445,7 @@ To test that helm is working you can run the following:
     helm init --client-only
     helm repo update
     helm install stable/memcached --name helm-test
-
-.. end
-
-Tiller, which is Helm's server container for starting helm charts, doesn't
-work correctly as of January 21st, 2017 with docker-engine-1.13.0.  The root
-cause and resolution is being tracked in this ssue tracker:
-https://github.com/kubernetes/helm/issues/1838. The Kolla community
-recommends using the following workaround:
-
-.. path .
-.. code-block:: console
-
-kubectl delete --namespace=kube-system deploy tiller-deploy
-helm init --tiller-image docker.io/port/tiller:v2.1.3
-
-.. end
-
-After waiting for the tiller image to be pulled to the kubernetes cluster:
-
-.. path .
-.. code-block:: console
-
+    # check the deployment has succeded
     helm ls
     # and to check via kubectl
     kubectl get all
