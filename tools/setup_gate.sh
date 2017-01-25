@@ -1,7 +1,15 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.4.0-1
+DISTRO="$2"
+TYPE="$3"
+CONFIG="$4"
 BRANCH="$7"
+PIPELINE="$8"
+
+if [ "x$PIPELINE" == "xperiodic" ]; then
+    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
+fi
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
@@ -15,7 +23,7 @@ fi
 
 if [ "x$4" == "xiscsi" ]; then
     echo "Starting iscsi setup script..."
-    tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH
+    tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
     exit 0
 fi
 
@@ -207,4 +215,4 @@ fi
 kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
-sudo docker images | sort > "$WORKSPACE/logs/docker_images.txt"
+tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $PIPELINE
