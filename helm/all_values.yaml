@@ -540,6 +540,16 @@ cinder-create-db-job:
                         database_name: "cinder"
                         database_user: "cinder"
 
+cinder-delete-db-job:
+        global:
+            kolla:
+                cinder:
+                    all:
+                        database_host: "mariadb"
+                        database_port: 3306
+                        database_name: "cinder"
+                        database_user: "cinder"
+
 cinder-api-svc:
         global:
             kolla:
@@ -651,6 +661,18 @@ glance-registry-deployment:
                             port: 9191
 
 cinder-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                cinder:
+                    all:
+                        keystone_user_name: cinder
+
+cinder-delete-keystone-user-job:
         global:
             kolla:
                 all:
