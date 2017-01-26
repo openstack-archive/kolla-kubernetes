@@ -29,14 +29,16 @@ function wait_for_vm_ssh {
 }
 
 function wait_for_http {
+    set +ex
     count=0
     while true; do
-        st=$(curl -Lsf "$1" > /dev/null )
+        curl -Lsf "$1" > /dev/null
         [ $? -eq 0 ] && break
         sleep 1
         count=$((count+1))
         [ $count -gt 30 ] && echo Failed to contact "$1". && exit -1
     done
+    set -ex
 }
 
 function scp_to_vm {
@@ -55,6 +57,7 @@ function ssh_to_vm {
 }
 
 function wait_for_cinder {
+    set +ex
     count=0
     while true; do
         st=$(openstack volume show $1 -f value -c status)
@@ -63,6 +66,7 @@ function wait_for_cinder {
         count=$((count+1))
         [ $count -gt 30 ] && echo Cinder volume failed. && exit -1
     done
+    set -ex
 }
 
 HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
