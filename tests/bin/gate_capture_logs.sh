@@ -99,8 +99,8 @@ openstack volume list > $WORKSPACE/logs/volumes.txt
 cp -a /etc/kolla $WORKSPACE/logs/
 cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
 [ -f /etc/nodepool/sub_nodes_private ] && cat /etc/nodepool/sub_nodes_private | while read line; do
-    ssh $line sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet-$line.txt
-    ssh $line ps ax > $WORKSPACE/logs/ps-$line.txt
+    ssh -n $line sudo journalctl -u kubelet > $WORKSPACE/logs/kubelet-$line.txt
+    ssh -n $line ps ax > $WORKSPACE/logs/ps-$line.txt
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 arp -a > $WORKSPACE/logs/arp.txt
