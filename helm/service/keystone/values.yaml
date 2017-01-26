@@ -21,11 +21,6 @@ global:
                         jobs:
                         - keystone-create-db
                         - keystone-manage-db
-                        service:
-                        - mariadb
-                        - keystone-admin
-                        - keystone-public
-                        - keystone-internal
             api:
                 deployment:
                     dependencies:
@@ -35,6 +30,3 @@ global:
                         - keystone-manage-db
                         service:
                         - mariadb
-                        - keystone-admin
-                        - keystone-public
-                        - keystone-internal
