@@ -13,9 +13,9 @@
 {{- $resourceName := "keystone" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
-{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $searchPath "Values" .Values ) | default $resourceName }}
 {{- $defaultPublicHost := printf "%s-public" $elementName }}
-{{- $publicHost := .Values.public_host | default $defaultPublicHost }}
+{{- $publicHost :=  include "kolla_val_get_str" (dict "key" "public_host" "searchPath" $searchPath "Values" .Values ) | default $defaultPublicHost }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: batch/v1
 kind: Job
