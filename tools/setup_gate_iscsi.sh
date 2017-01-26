@@ -1,6 +1,10 @@
 #!/bin/bash -xe
 
+DISTRO="$2"
+TYPE="$3"
+CONFIG="$4"
 BRANCH="$6"
+PIPELINE="$7"
 
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
@@ -124,3 +128,4 @@ sudo vgs >> $WORKSPACE/logs/vgs.txt
 sudo lvs >> $WORKSPACE/logs/lvs.txt
 
 tests/bin/basic_tests.sh
+tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $PIPELINE
