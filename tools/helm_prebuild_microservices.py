@@ -65,7 +65,10 @@ common_create_keystone_admin = [
     'cinder-create-keystone-endpoint-admin-job',
     'cinder-create-keystone-endpoint-publicv2-job',
     'cinder-create-keystone-endpoint-internalv2-job',
-    'cinder-create-keystone-endpoint-adminv2-job'
+    'cinder-create-keystone-endpoint-adminv2-job',
+    'cinder-delete-keystone-service-job',
+    'cinder-delete-keystone-servicev2-job',
+    'cinder-delete-keystone-user-job'
 ]
 
 
