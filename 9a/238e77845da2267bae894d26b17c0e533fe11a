@@ -1,0 +1,10 @@
+Code-Review+1: Balaji G Pattewar <balaji.pattewar@gmail.com>
+Code-Review+2: Steve Wilkerson <sw5822@att.com>
+Code-Review+2: Pete Birley <pete@port.direct>
+Workflow+1: Pete Birley <pete@port.direct>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 27 Jan 2017 19:05:38 +0000
+Reviewed-on: https://review.openstack.org/425946
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
