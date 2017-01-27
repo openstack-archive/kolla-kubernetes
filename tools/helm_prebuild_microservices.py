@@ -49,7 +49,8 @@ common_mariadb = [
     'cinder-create-db-job',
     'glance-create-db-job',
     'cinder-delete-db-job',
-    'glance-delete-db-job'
+    'glance-delete-db-job',
+    'keystone-delete-db-job'
 ]
 
 common_create_keystone_admin = [

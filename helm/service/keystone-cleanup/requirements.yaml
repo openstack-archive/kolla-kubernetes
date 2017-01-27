@@ -1,0 +1,4 @@
+dependencies:
+  - name: keystone-delete-db-job
+    repository: http://localhost:10191
+    version: 0.4.0-1
