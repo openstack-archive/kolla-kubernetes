@@ -96,6 +96,7 @@ pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
 pip install "python-neutronclient"
+pip install "selenium"
 pip install -r requirements.txt
 pip install pyyaml
 popd
@@ -215,4 +216,5 @@ fi
 kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
+tests/bin/horizon_test.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $PIPELINE
