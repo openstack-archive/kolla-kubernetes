@@ -21,6 +21,13 @@ common:
                     resolve_conf_net_host_workaround: true
                     kube_logger: true
 
+common-mariadb:
+        global:
+            kolla:
+                all:
+                    database_host: mariadb
+                    database_port: 3306
+
 common-create-keystone-admin:
         global:
             kolla:
@@ -88,8 +95,6 @@ keystone-create-db-job:
             kolla:
                 keystone:
                     all:
-                        database_host: "mariadb"
-                        database_port: 3306
                         database_name: "keystone"
                         database_user: "keystone"
 
@@ -128,8 +133,6 @@ neutron-create-db-job:
             kolla:
                 neutron:
                     all:
-                        database_host: "mariadb"
-                        database_port: 3306
                         database_name: "neutron"
                         database_user: "neutron"
 
@@ -367,8 +370,6 @@ nova-create-db-job:
             kolla:
                 nova:
                     all:
-                        database_host: "mariadb"
-                        database_port: 3306
                         database_name: "nova"
                         database_user: "nova"
 
@@ -378,8 +379,6 @@ nova-api-create-db-job:
                 nova:
                     api:
                         all:
-                            database_host: "mariadb"
-                            database_port: 3306
                             database_name: "nova_api"
                             database_user: "nova_api"
 
@@ -538,8 +537,6 @@ cinder-create-db-job:
             kolla:
                 cinder:
                     all:
-                        database_host: "mariadb"
-                        database_port: 3306
                         database_name: "cinder"
                         database_user: "cinder"
 
@@ -577,8 +574,6 @@ glance-create-db-job:
             kolla:
                 glance:
                     all:
-                        database_host: "mariadb"
-                        database_port: 3306
                         database_name: "glance"
                         database_user: "glance"
 

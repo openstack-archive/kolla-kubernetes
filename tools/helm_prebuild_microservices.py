@@ -41,6 +41,15 @@ pod_http_termination = [
     'heat-api-deployment'
 ]
 
+common_mariadb = [
+    'keystone-create-db-job',
+    'neutron-create-db-job',
+    'nova-create-db-job',
+    'nova-api-create-db-job',
+    'cinder-create-db-job',
+    'glance-create-db-job'
+]
+
 common_create_keystone_admin = [
     'neutron-create-keystone-service-job',
     'neutron-create-keystone-endpoint-public-job',
@@ -128,6 +137,8 @@ def main():
             merge_dict(pkg_values, values['pod-http-termination'])
         if package in stateful_services:
             merge_dict(pkg_values, values['stateful-service'])
+        if package in common_mariadb:
+            merge_dict(pkg_values, values['common-mariadb'])
         if package in values:
             merge_dict(pkg_values, values[package])
         with open(os.path.join(microdir, package, "values.yaml"), "w") as f:
