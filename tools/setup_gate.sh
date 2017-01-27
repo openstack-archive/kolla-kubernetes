@@ -86,10 +86,10 @@ sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 
 if [ -f /etc/redhat-release ]; then
-    sudo yum install -y crudini jq sshpass
+    sudo yum install -y crudini jq sshpass bzip2
 else
     sudo apt-get update
-    sudo apt-get install -y crudini jq sshpass
+    sudo apt-get install -y crudini jq sshpass bzip2
 fi
 pushd kolla-ansible;
 pip install pip --upgrade
