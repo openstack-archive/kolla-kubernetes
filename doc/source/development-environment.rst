@@ -270,7 +270,7 @@ under use.
 .. code-block:: console
 
     export HELM_VERSION=2.1.3
-    export KUBERNETES_VERSION=1.5.1
+    export KUBERNETES_VERSION=1.5.2
 
 .. end
 
