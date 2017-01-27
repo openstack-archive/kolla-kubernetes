@@ -174,6 +174,8 @@ tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
 helm update
 helm search
 
+tools/build_example_yaml.py
+
 kubectl create namespace kolla
 tools/secret-generator.py create
 
