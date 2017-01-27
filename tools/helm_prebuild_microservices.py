@@ -48,7 +48,8 @@ common_mariadb = [
     'nova-api-create-db-job',
     'cinder-create-db-job',
     'glance-create-db-job',
-    'cinder-delete-db-job'
+    'cinder-delete-db-job',
+    'keystone-delete-db-job'
 ]
 
 common_create_keystone_admin = [
