@@ -313,7 +313,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v$KOLLA_KUBERNTES_VERSION/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v$KOLLA_KUBERNETES_VERSION/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -364,7 +364,7 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v$KOLLA_KUBERNTES_VERSION \
+        --k8s-version v$KOLLA_KUBERNETES_VERSION \
         --guest-os centos
 
 .. end
