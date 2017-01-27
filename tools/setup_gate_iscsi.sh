@@ -73,6 +73,7 @@ pip install "ansible<2.1"
 pip install "python-openstackclient"
 pip install "python-neutronclient"
 pip install "python-cinderclient"
+pip install "selenium"
 pip install -r requirements.txt
 pip install pyyaml
 popd
@@ -128,5 +129,6 @@ sudo vgs >> $WORKSPACE/logs/vgs.txt
 sudo lvs >> $WORKSPACE/logs/lvs.txt
 
 tests/bin/basic_tests.sh
+tests/bin/horizon_test.sh
 tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $PIPELINE
