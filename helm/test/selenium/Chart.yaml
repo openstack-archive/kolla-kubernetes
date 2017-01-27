@@ -1,0 +1,8 @@
+name: selenium
+version: 0.6.0-1
+description: selenium
+keywords:
+  - selenium
+sources:
+  - http://github.com/openstack
+engine: gotpl
