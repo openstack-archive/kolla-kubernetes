@@ -19,6 +19,7 @@ if [ "x$2" == "xubuntu" ]; then
     sudo apt-get install lvm2
     sudo apt-get remove -y open-iscsi
     sudo apt-get install -y bridge-utils
+    sudo apt-get install -y mysql
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
 else
@@ -26,6 +27,7 @@ else
     sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils
     sudo yum install -y lvm2
+    sudo yum install -y mysql
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
 fi
@@ -128,4 +130,5 @@ sudo vgs >> $WORKSPACE/logs/vgs.txt
 sudo lvs >> $WORKSPACE/logs/lvs.txt
 
 tests/bin/basic_tests.sh
+tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $PIPELINE
