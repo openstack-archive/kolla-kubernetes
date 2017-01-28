@@ -34,7 +34,7 @@ function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
 
-common_vars="kube_logger=false,base_distro=$base_distro"
+common_vars="kube_logger=false,base_distro=$base_distro,grace_period_seconds=0"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
