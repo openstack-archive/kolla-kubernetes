@@ -16,6 +16,9 @@
 {{- $_ := set $c1 "retDict" $localVals }}
 {{- $_ := set $c1 "retKey" "ceph_backend" }}
 {{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $lv := dict }}
+{{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $lv "retKey" "haproxy" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
 {{- $resourceName := "glance-api" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
@@ -26,7 +29,7 @@
 {{- $portName := "glance-api" }}
 {{- $checkPath := "/healthcheck" }}
 {{- $privileged := false }}
-{{- $gracePeriodSeconds := 172800 }}
+{{- $gracePeriodSeconds := nclude "kolla_val_get_str" (dict "key" "grace_period_seconds" "searchPath" $searchPath "Values" .Values ) | default 172800 }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -69,10 +72,12 @@ spec:
                    cp -a /srv/ceph.conf /srv/pod-main-config/;
                    cp -a /srv/ceph.client.glance.keyring /srv/pod-main-config/;
 {{- end }}
+{{- if $lv.haproxy }}
                    CONF=/srv/pod-main-config/glance-api.conf;
                    crudini --set $CONF DEFAULT bind_host 127.0.0.1;
-                   crudini --set $CONF DEFAULT bind_port 8080;"
-              ],
+                   crudini --set $CONF DEFAULT bind_port 8080;
+{{- end }}
+              "],
               "volumeMounts": [
 {{- if $localVals.ceph_backend }}
                   {
@@ -104,8 +109,11 @@ spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
 #You've got 2 days to drain or figure out why it won't.
+{{- if $lv.haproxy }}
       terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
+{{- end }}
       containers:
+{{- if $lv.haproxy }}
         - name: haproxy
           image: {{ include "haproxy_image_full" . | quote }}
           command:
@@ -143,8 +151,10 @@ spec:
           ports:
             - containerPort: {{ $port }}
               name: {{ $portName | trunc 15 | quote }}
+{{- end }}
         - name: main
           image: "{{ $imageFull }}"
+{{- if $lv.haproxy }}
           lifecycle:
             preStop:
               exec:
@@ -152,6 +162,7 @@ spec:
                 - /bin/bash
                 - -c
                 - while true; do sleep 1; [ -f /var/lib/kolla-kubernetes/event/shutdown ] && break; done
+{{- end }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
@@ -173,9 +184,11 @@ spec:
         - name: service-configmap
           configMap:
             name: {{ $resourceName }}
+{{- if $lv.haproxy }}
         - name: haproxy-config
           configMap:
             name: glance-api-haproxy
+{{- end }}
 {{- if not $localVals.ceph_backend }}
         - name: glance-persistent-storage
           persistentVolumeClaim:
