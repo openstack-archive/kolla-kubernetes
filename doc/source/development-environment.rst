@@ -269,8 +269,8 @@ under use.
 
 .. code-block:: console
 
-    export KOLLA_HELM_VERSION=2.1.3
-    export KOLLA_KUBERNETES_VERSION=1.5.1
+    export HELM_VERSION=2.1.3
+    export KUBERNETES_VERSION=1.5.1
 
 .. end
 
@@ -288,7 +288,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v$KOLLA_KUBERNETES_VERSION/kubernetes-client-linux-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v$KUBERNETES_VERSION/kubernetes-client-linux-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -299,7 +299,7 @@ To install the helm client:
 
 .. code-block:: console
 
-    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$KOLLA_HELM_VERSION-linux-amd64.tar.gz | tar -xzv
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$HELM_VERSION-linux-amd64.tar.gz | tar -xzv
     sudo cp linux-amd64/helm /usr/local/bin/helm
     sudo chmod 755 /usr/local/bin/helm
     sudo chown root: /usr/local/bin/helm
@@ -313,7 +313,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v$KOLLA_KUBERNETES_VERSION/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v$KUBERNETES_VERSION/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -324,7 +324,7 @@ To install the helm client:
 
 .. code-block:: console
 
-    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$KOLLA_HELM_VERSION-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v$HELM_VERSION-darwin-amd64.tar.gz | tar -xzv
     sudo cp darwin-amd64/helm /usr/local/bin/helm
     sudo chmod 755 /usr/local/bin/helm
     sudo chown root: /usr/local/bin/helm
@@ -364,7 +364,7 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v$KOLLA_KUBERNETES_VERSION \
+        --k8s-version v$KUBERNETES_VERSION \
         --guest-os centos
 
 .. end
