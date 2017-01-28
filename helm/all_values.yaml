@@ -585,6 +585,14 @@ glance-create-db-job:
                         database_name: "glance"
                         database_user: "glance"
 
+glance-delete-db-job:
+        global:
+            kolla:
+                glance:
+                    all:
+                        database_name: "glance"
+                        database_user: "glance"
+
 glance-manage-db-job:
         global:
             kolla:
@@ -596,6 +604,18 @@ glance-manage-db-job:
                             pvc_name: glance
 
 glance-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                glance:
+                    all:
+                        keystone_user_name: glance
+
+glance-delete-keystone-user-job:
         global:
             kolla:
                 all:
