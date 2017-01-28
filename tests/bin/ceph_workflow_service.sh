@@ -61,7 +61,7 @@ fi
 
 base_distro="$2"
 
-common_vars="kube_logger=false,base_distro=$base_distro"
+common_vars="kube_logger=false,base_distro=$base_distro,grace_period_seconds=0"
 
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
