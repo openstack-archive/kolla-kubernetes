@@ -7,6 +7,7 @@
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
 {{- $novaMetadataSearchPath := ":global.kolla.nova.metadata.deployment:global.kolla.nova.metadata.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $novaMetadataPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $novaMetadataSearchPath "Values" .Values ) }}
+{{- $gracePeriodSeconds := include "kolla_val_get_str" (dict "key" "grace_period_seconds" "searchPath" .searchPath "Values" .Values ) | default 172800 }}
 {{- $localVals := dict }}
 {{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $localVals "retKey" "haproxy" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
@@ -76,7 +77,7 @@ spec:
       ]'
     spec:
 #You've got 2 days to drain or figure out why it won't.
-      terminationGracePeriodSeconds: 172800
+      terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
