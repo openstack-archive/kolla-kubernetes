@@ -45,6 +45,7 @@ pod-http-termination:
             kolla:
                 all:
                     haproxy_python_termination: true
+                    grace_period_seconds: 172800
                     haproxy_image_tag: 3.0.2
 
 stateful-service:
@@ -585,6 +586,14 @@ glance-create-db-job:
                         database_name: "glance"
                         database_user: "glance"
 
+glance-delete-db-job:
+        global:
+            kolla:
+                glance:
+                    all:
+                        database_name: "glance"
+                        database_user: "glance"
+
 glance-manage-db-job:
         global:
             kolla:
@@ -596,6 +605,18 @@ glance-manage-db-job:
                             pvc_name: glance
 
 glance-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                glance:
+                    all:
+                        keystone_user_name: glance
+
+glance-delete-keystone-user-job:
         global:
             kolla:
                 all:
