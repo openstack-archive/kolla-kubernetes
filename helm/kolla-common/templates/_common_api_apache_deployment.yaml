@@ -6,6 +6,7 @@
 {{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" .searchPath "Values" .Values ) }}
 {{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" .searchPath "Values" .Values ) }}
 {{- $adminPort := include "kolla_val_get_str" (dict "key" "admin_port" "searchPath" .searchPath "Values" .Values ) }}
+{{- $gracePeriodSeconds := include "kolla_val_get_str" (dict "key" "grace_period_seconds" "searchPath" .searchPath "Values" .Values ) }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -29,7 +30,7 @@ spec:
 {{- end }}
     spec:
 #You've got 2 days to drain or figure out why it won't.
-      terminationGracePeriodSeconds: 172800
+      terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
