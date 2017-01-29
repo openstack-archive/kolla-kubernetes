@@ -11,6 +11,22 @@ if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi
 
+
+if [ "x$PIPELINE" != "xperiodic" ]; then
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers/
+    FILENAME="$DISTRO-$TYPE-$CONFIG"
+    FILENAME=$(echo "$FILENAME" | sed 's/-multi//')
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/"$FILENAME".tar.bz2 \
+        "$BASE_URL/$FILENAME.tar.bz2"
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/"$FILENAME"-containers.txt \
+        "$BASE_URL/$FILENAME-containers.txt"
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.bz2 \
+        "$BASE_URL/kubernetes.tar.bz2"
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes-containers.txt \
+        "$BASE_URL/kubernetes-containers.txt"
+fi
+
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
     exit 0
@@ -140,6 +156,7 @@ if [ "x$4" == "xceph-multi" ]; then
            ssh -n $line sudo yum remove -y iscsi-initiator-utils
         fi
         ssh -n $line sudo mv kubectl /usr/bin/
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
         ssh -n $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
         set +xe
         count=0
