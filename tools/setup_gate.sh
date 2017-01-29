@@ -7,14 +7,69 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
-if [ "x$PIPELINE" == "xperiodic" ]; then
-    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
-fi
+# TODO(sdake): install wget via ansible as per kolla-ansible deliverable
+#              gating tools in the future
+function install_wget {
+    # NOTE(sdake) wget is far more reliable than curl
+    if [ "$DISTRO == "centos" -o "$DISTRO == "oraclelinux" ]; then
+        sudo yum -y install wget
+    else
+        sudo apt-get -y install wget
+   fi
+}
+
+function prepare_images {
+    if [ "x$PIPELINE" != "xperiodic" ]; then
+        C=$CONFIG
+        if [ "x$CONFIG" == "xexternal-ovs" -o "x$CONFIG" == "xceph-multi" -o \
+            "x$CONFIG" == "xhelm-entrypoint" -o "x$CONFIG" == "xhelm-operator" \
+            ]; then
+            C="ceph"
+        fi
+    fi
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers/
+
+    # TODO(sdake): Cross-repo depends-on is completely broken
+
+    FILENAME="$DISTRO-$TYPE-$BRANCH-$C.tar.bz2"
+
+    # NOTE(sdake): This includes both a set of kubernetes containers
+    #              for running kubernetes infrastructure as well as
+    #              kolla containers for 2.0.2 and 3.0.2.  master images
+    #              are not yet available via this mechanism.
+
+    # NOTE(sdake): Obtain pre-built containers to load into docker
+    #              via docker load
+
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME" \
+        "$BASE_URL/$FILENAME"
+    wget -q -c -O \
+          "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.gz" \
+        "$BASE_URL/containers/kubernetes.tar.gz"
+
+    # NOTE(sdake): Obtain lists of containers
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME-containers.txt" \
+        "$BASE_URL/$FILENAME-containers.txt"
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes-containers.txt" \
+        "$BASE_URL/containers/kubernetes-containers.txt"
+}
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
     exit 0
 fi
+
+# NOTE(sdake): This seems disturbing (see note at end of file)
+if [ "x$PIPELINE" == "xperiodic" ]; then
+    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
+fi
+
+install_wget
+prepare_images
 
 if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
@@ -108,6 +163,12 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
+    done
+fi
+
 tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
@@ -175,6 +236,7 @@ kubectl create namespace kolla
 tools/secret-generator.py create
 
 TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
+
 sudo docker pull $TOOLBOX > /dev/null
 timeout 240s tools/setup-resolv-conf.sh
 
@@ -213,4 +275,22 @@ kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/cleanup_tests.sh
+
+# TODO(sdake): There is still a little bit of logic missing from
+#              build_docker_images.sh.  The idea of the *-containers.txt
+#              files, such as:
+#              http://tarballs.openstack.org/kolla-kubernetes/gate/containers/kubernetes-containers.txt
+#              Was to be able to be able to detect when changes to the
+#              tarballs were made and avoid extraneous uploads when not
+#              needed.  The build_docker_images.sh at the end of the
+#              script needs to compare the list of containers for each
+#              tarball from DOWNLOAD_CONTAINERS and UPLOAD_CONTAINERS. If
+#              they compare the same, then we just delete that
+#              tarball/-container.txt from UPLOAD_CONTAINERS and Zuul will
+#              skip it.
+#              Personal CI is a feature that still needs designing.  Most of
+#              this logic could be reused for that case, but will need
+#              additional work.
+
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+
