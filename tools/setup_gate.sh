@@ -7,13 +7,35 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
+if [ "x$BRANCH" == "xt" ]; then
+    echo Version: $BRANCH is not enabled yet.
+    exit 0
+fi
+
 if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi
 
-if [ "x$BRANCH" == "xt" ]; then
-    echo Version: $BRANCH is not enabled yet.
-    exit 0
+if [ "x$PIPELINE" != "xperiodic" ]; then
+    C=$CONFIG
+    if [ "x$CONFIG" == "xexternal-ovs" -o "x$CONFIG" == "xceph-multi" -o \
+        "x$CONFIG" == "xhelm-entrypoint" -o "x$CONFIG" == "xhelm-operator" \
+        ]; then
+        C="ceph"
+    fi
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers/
+    FILENAME="$DISTRO-$TYPE-$BRANCH-$C"
+    FILENAME=$(echo "$FILENAME" | sed 's/-multi//')
+    time curl -y 10 -Y 10 --retry 10 -o $WORKSPACE/DOWNLOAD_CONTAINERS/"$FILENAME".tar.bz2 \
+        "$BASE_URL/$FILENAME.tar.bz2"
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/"$FILENAME"-containers.txt \
+        "$BASE_URL/$FILENAME-containers.txt"
+    time curl -y 10 -Y 10 --retry 10 -o $WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.bz2 \
+        "$BASE_URL/kubernetes.tar.bz2"
+    curl -o $WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes-containers.txt \
+        "$BASE_URL/kubernetes-containers.txt"
+    ls -l $WORKSPACE/DOWNLOAD_CONTAINERS/
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
@@ -112,6 +134,12 @@ fi
 tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
+
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
+    done
+fi
 
 tools/setup_kubernetes.sh master
 
