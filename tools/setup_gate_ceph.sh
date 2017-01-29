@@ -34,6 +34,13 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
+if [ "x$CONFIG" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
+    done
+fi
+
+
 tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
@@ -153,4 +160,21 @@ kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/cleanup_tests.sh
+
+# TODO(sdake): There is still a little bit of logic missing from
+#              build_docker_images.sh.  The idea of the *-containers.txt
+#              files, such as:
+#              http://tarballs.openstack.org/kolla-kubernetes/gate/containers/kubernetes-containers.txt
+#              Was to be able to be able to detect when changes to the
+#              tarballs were made and avoid extraneous uploads when not
+#              needed.  The build_docker_images.sh at the end of the
+#              script needs to compare the list of containers for each
+#              tarball from DOWNLOAD_CONTAINERS and UPLOAD_CONTAINERS. If
+#              they compare the same, then we just delete that
+#              tarball/-container.txt from UPLOAD_CONTAINERS and Zuul will
+#              skip it.
+#              Personal CI is a feature that still needs designing.  Most of
+#              this logic could be reused for that case, but will need
+#              additional work.
+
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
