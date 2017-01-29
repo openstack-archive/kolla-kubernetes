@@ -28,8 +28,22 @@ fi
 cat >> /tmp/setup.$$ <<"EOF"
 systemctl start docker
 EOF
+
+sudo bash /tmp/setup.$$
+sudo docker ps -a
+
+if [ "x$WORKSPACE" == "x" ]; then
+    WORKSPACE="$HOME"
+fi
+if [ -d "$WORKSPACE/DOWNLOAD_CONTAINERS" ]; then
+    ls "$WORKSPACE/DOWNLOAD_CONTAINERS"/*.bz2 | sudo xargs -i bunzip2 {}
+    ls "$WORKSPACE/DOWNLOAD_CONTAINERS"/*.tar | sudo xargs -i docker load -i {}
+    rm -f "$WORKSPACE/DOWNLOAD_CONTAINERS"/*.tar
+fi
+sudo docker images
+
 if [ "$1" == "master" ]; then
-    cat >> /tmp/setup.$$ <<"EOF"
+    cat > /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
 kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
@@ -37,7 +51,7 @@ grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip
 rm -f /tmp/kubeout
 EOF
 else
-    cat >> /tmp/setup.$$ <<EOF
+    cat > /tmp/setup.$$ <<EOF
 kubeadm join --token "$2" "$3" --skip-preflight-checks
 EOF
 fi
