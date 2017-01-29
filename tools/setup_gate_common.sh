@@ -1,5 +1,59 @@
 #!/bin/bash -xe
 
+function install_wget {
+    DISTRO="$1"
+    if [ "$DISTRO" == "centos" -o "$DISTRO" == "oraclelinux" ]; then
+        sudo yum -y install wget
+    else
+        sudo apt-get -y install wget
+   fi
+}
+
+function prepare_images {
+    DISTRO="$1"
+    TYPE="$2"
+    CONFIG="$3"
+    BRANCH="$4"
+    PIPELINE="$5"
+    if [ "x$PIPELINE" != "xperiodic" ]; then
+        C=$CONFIG
+        if [ "x$CONFIG" == "xexternal-ovs" -o "x$CONFIG" == "xceph-multi" -o \
+            "x$CONFIG" == "xhelm-entrypoint" -o "x$CONFIG" == "xhelm-operator" \
+            ]; then
+            C="ceph"
+        fi
+    fi
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers
+
+    # TODO(sdake): Cross-repo depends-on is completely broken
+
+    FILENAME="$DISTRO-$TYPE-$BRANCH-$C.tar.bz2"
+
+    # NOTE(sdake): This includes both a set of kubernetes containers
+    #              for running kubernetes infrastructure as well as
+    #              kolla containers for 2.0.2 and 3.0.2.  master images
+    #              are not yet available via this mechanism.
+
+    # NOTE(sdake): Obtain pre-built containers to load into docker
+    #              via docker load
+
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME" \
+        "$BASE_URL/$FILENAME"
+    wget -q -c -O \
+          "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.gz" \
+        "$BASE_URL/kubernetes.tar.gz"
+
+    # NOTE(sdake): Obtain lists of containers
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME-containers.txt" \
+        "$BASE_URL/$FILENAME-containers.txt"
+    wget -q -c -O \
+        "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes-containers.txt" \
+        "$BASE_URL/kubernetes-containers.txt"
+}
+
 function setup_iptables {
 sudo iptables-save > $WORKSPACE/logs/iptables-before.txt
 tests/bin/fix_gate_iptables.sh
