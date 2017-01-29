@@ -7,18 +7,26 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
-
-if [ "x$PIPELINE" == "xperiodic" ]; then
-    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
-fi
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not implemented yet.
     exit -1
 fi
+
+# NOTE(sdake): This seems disturbing (see note at end of file)
+if [ "x$PIPELINE" == "xperiodic" ]; then
+    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
+fi
+
+. $DIR/setup_gate_common.sh
+
+install_wget
+prepare_images
 
 if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
