@@ -7,14 +7,62 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
-if [ "x$PIPELINE" == "xperiodic" ]; then
-    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
-fi
+# TODO(sdake): install wget via ansible as per kolla-ansible deliverable
+#              in the future
+function install_wget {
+    # NOTE(sdake) wget is far more reliable than curl
+    if [ "$DISTRO == "centos" -o "$DISTRO=="oraclelinux" ]; then
+        sudo yum -y install wget
+    else
+        sudo apt-get -y install wget
+   fi
+}
+
+function prepare_images {
+    if [ "x$PIPELINE" != "xperiodic" ]; then
+        C=$CONFIG
+        if [ "x$CONFIG" == "xexternal-ovs" -o "x$CONFIG" == "xceph-multi" -o \
+            "x$CONFIG" == "xhelm-entrypoint" -o "x$CONFIG" == "xhelm-operator" \
+            ]; then
+            C="ceph"
+        fi
+    fi
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers/
+
+    # TODO(sdake): Cross-repo depends-on is probably broken
+
+    # NOTE(Jeffrey4l): Zuul adds all changes depend on to ZUUL_CHANGES
+    # variable. if find "openstack/kolla:" string, it means this patch depends
+    # on one of Kolla patch. Then build image by using Kolla's code.
+    # Otherwise, pull images from tarballs.openstack.org site.
+    if echo "$ZUUL_CHANGES" | grep -q -i "openstack/kolla:"; then
+        pushd "${GIT_PROJECT_DIR}/kolla"
+        sudo tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
+        popd
+    else
+# TODO (sdake): branch defined on line 7 - this probably needs to somehow
+# override # cross repo depends-on logic
+# BRANCH=$(echo "$ZUUL_BRANCH" | cut -d/ -f2
+        FILENAME="$DISTRO-$TYPE-$BRANCH-$C.tar.bz2"
+        wget -q -c -O "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME" \
+            "http://tarballs.openstack.org/kolla-kubernetes/gate/containers/$FILENAME"
+        wget -q -c -O "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.gz" \
+            "http://tarballs.openstack.org/kolla-kubernetes/gate/containers/kubernetes.tar.bz2"
+    fi
+}
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
     exit 0
 fi
+
+if [ "x$PIPELINE" == "xperiodic" ]; then
+    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
+fi
+
+install_wget
+prepare_images
 
 if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
@@ -107,6 +155,12 @@ fi
 tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
+
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
+    done
+fi
 
 tools/setup_kubernetes.sh master
 
@@ -213,4 +267,9 @@ kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/cleanup_tests.sh
+
+#TODO(sdake): This seems super disturbing - as it is downloading kolla
+#             containers from tarballs.oo, loading them into docker, then
+#             periodically pushing them back(?)
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+
