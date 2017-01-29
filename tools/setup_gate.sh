@@ -7,14 +7,70 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
-if [ "x$PIPELINE" == "xperiodic" ]; then
-    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
-fi
+# TODO(sdake): install wget via ansible as per kolla-ansible deliverable
+#              gating tools in the future
+function install_wget {
+    # NOTE(sdake) wget is far more reliable than curl
+    if [ "$DISTRO == "centos" -o "$DISTRO == "oraclelinux" ]; then
+        sudo yum -y install wget
+    else
+        sudo apt-get -y install wget
+   fi
+}
+
+function prepare_images {
+    if [ "x$PIPELINE" != "xperiodic" ]; then
+        C=$CONFIG
+        if [ "x$CONFIG" == "xexternal-ovs" -o "x$CONFIG" == "xceph-multi" -o \
+            "x$CONFIG" == "xhelm-entrypoint" -o "x$CONFIG" == "xhelm-operator" \
+            ]; then
+            C="ceph"
+        fi
+    fi
+    mkdir -p $WORKSPACE/DOWNLOAD_CONTAINERS
+    BASE_URL=http://tarballs.openstack.org/kolla-kubernetes/gate/containers/
+
+    # TODO(sdake): Cross-repo depends-on is completely broken
+
+        FILENAME="$DISTRO-$TYPE-$BRANCH-$C.tar.bz2"
+
+        # NOTE(sdake): This includes both a set of kubernetes containers
+                       for running kubernetes infrastructure as well as
+                       kolla containers for 2.0.2 and 3.0.2.  master images
+                       are not yet available via this mechanism.
+
+        # NOTE(sdake): Obtain pre-built containers to load into docker
+                       via docker load
+
+        wget -q -c -O \
+            "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME" \
+            "$BASE_URL/$FILENAME"
+        wget -q -c -O \
+              "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes.tar.gz" \
+            "$BASE_URL/containers/kubernetes.tar.gz"
+
+        # NOTE(sdake): Obtain lists of containers
+        wget -q -c -O \
+            "$WORKSPACE/DOWNLOAD_CONTAINERS/$FILENAME-containers.txt" \
+            "$BASE_URL/$FILENAME-containers.txt"
+        wget -q -c -O \
+            "$WORKSPACE/DOWNLOAD_CONTAINERS/kubernetes-containers.txt" \
+            "$BASE_URL/containers/kubernetes-containers.txt"
+    fi
+}
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not enabled yet.
     exit 0
 fi
+
+# NOTE(sdake): This seems disturbing (see note at end of file)
+if [ "x$PIPELINE" == "xperiodic" ]; then
+    mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
+fi
+
+install_wget
+prepare_images
 
 if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
@@ -108,6 +164,12 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
+if [ "x$4" == "xceph-multi" ]; then
+    cat /etc/nodepool/sub_nodes_private | while read line; do
+        scp -r "$WORKSPACE/DOWNLOAD_CONTAINERS" $line:
+    done
+fi
+
 tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all dedicated-
@@ -175,6 +237,7 @@ kubectl create namespace kolla
 tools/secret-generator.py create
 
 TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
+
 sudo docker pull $TOOLBOX > /dev/null
 timeout 240s tools/setup-resolv-conf.sh
 
@@ -213,4 +276,10 @@ kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/cleanup_tests.sh
+
+#TODO(sdake): This is very disturbing - as it is downloading kolla
+#             containers from tarballs.oo, loading them into docker, then
+#             uploading them.  It is completely unclear how one would
+#             bootstrap a personal CI system with what is in place.
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+
