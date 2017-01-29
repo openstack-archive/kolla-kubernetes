@@ -154,6 +154,7 @@ spec:
 {{- end }}
         - name: main
           image: "{{ $imageFull }}"
+          command: [/bin/bash, -c, 'trap "echo I am dieing" TERM; kolla_start']
 {{- if $localVals.haproxy_termination }}
           lifecycle:
             preStop:
