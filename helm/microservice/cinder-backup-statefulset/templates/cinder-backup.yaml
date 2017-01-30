@@ -52,7 +52,7 @@ spec:
           },
           {
              "name": "initialize-cinder-logs",
-             "image": "{{ cinder_backup_image_full }}",
+             "image": "{{ $imageFull }}",
              "command": [
                  "sh",
                  "-ce",
