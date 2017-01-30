@@ -392,7 +392,8 @@ completed, you can run the following commands to interact with it:
 .. path .
 .. code-block:: console
 
-    vagrant up         # To create and start your halcyon-kubernetes cluster
+    vagrant up         # To create and start your halcyon-kubernetes cluster.
+                       # You can also use --provider=libvirt
 
     ./get-k8s-creds.sh # To get the k8s credentials for the cluster and setup
                        # kubectl on your host to access it, if you have the helm
