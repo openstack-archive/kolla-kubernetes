@@ -99,6 +99,14 @@ keystone-create-db-job:
                         database_name: "keystone"
                         database_user: "keystone"
 
+keystone-delete-db-job:
+        global:
+            kolla:
+                keystone:
+                    all:
+                        database_name: "keystone"
+                        database_user: "keystone"
+
 keystone-create-endpoints-job:
         global:
             kolla:
