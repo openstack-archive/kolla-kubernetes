@@ -24,6 +24,11 @@ def _isdir(path, entry):
 
 class TestK8sTemplatesTest(base.BaseTestCase):
 
+    def _validate_image_pull_policy(self, package, pod):
+        for container in pod['spec']['containerns']:
+            if 'imagePullPolicy' not in container:
+                raise Exception("imagePullPolicy not in %s" % package)
+
     def test_validate_templates(self):
         srcdir = os.environ['HELMDIR']
         helmbin = os.environ['HELMBIN']
@@ -59,3 +64,10 @@ class TestK8sTemplatesTest(base.BaseTestCase):
                     if e.args[0] not in m:
                         raise
                 json.loads(js)
+                pod = None
+                try:
+                    pod = y['spec']['template']
+                except Exception:
+                    pass
+                if pod:
+                    self._validate_image_pull_policy(package, spec)
