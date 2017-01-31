@@ -1,4 +1,5 @@
 {{- define "common_create_db_job" }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" .searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" .searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
@@ -22,6 +23,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: "creating-{{ .serviceName }}-database"
           command: ["sh", "-c"]
           args:
@@ -44,6 +46,7 @@ spec:
                   name: database-password
                   key: password
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: "creating-{{ .serviceName }}-user-and-permissions"
           command: ["sh", "-c"]
           args:
