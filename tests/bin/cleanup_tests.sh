@@ -30,5 +30,7 @@ delete_and_cleanup glance
 
 delete_and_cleanup cinder
 
+delete_and_cleanup neutron
+
 ### All clean!!!
 exit 0

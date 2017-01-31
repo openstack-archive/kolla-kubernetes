@@ -145,7 +145,27 @@ neutron-create-db-job:
                         database_name: "neutron"
                         database_user: "neutron"
 
+neutron-delete-db-job:
+        global:
+            kolla:
+                neutron:
+                    all:
+                        database_name: "neutron"
+                        database_user: "neutron"
+
 neutron-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                neutron:
+                    all:
+                        keystone_user_name: neutron
+
+neutron-delete-keystone-user-job:
         global:
             kolla:
                 all:
