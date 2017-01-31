@@ -55,6 +55,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
