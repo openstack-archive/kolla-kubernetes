@@ -1,0 +1,27 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        nova:
+            delete_db:
+                job:
+                    dependencies:
+                        service:
+                        - mariadb
+            delete_keystone_user:
+                job:
+                    dependencies:
+                        service:
+                        - keystone-admin
+            delete_keystone_service:
+                job:
+                    dependencies:
+                        service:
+                        - keystone-admin
+            api:
+                delete_db:
+                    job:
+                        dependencies:
+                            service:
+                            - mariadb
+
