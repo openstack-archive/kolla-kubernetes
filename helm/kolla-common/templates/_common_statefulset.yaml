@@ -43,6 +43,7 @@ spec:
       containers:
         - name: main
           image: "{{ .imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           volumeMounts:
 {{- include "common_volume_mounts" . | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
