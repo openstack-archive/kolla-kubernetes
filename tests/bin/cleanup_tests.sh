@@ -26,6 +26,8 @@ if [ $(kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$passwor
 fi
 }
 
+delete_and_cleanup nova 
+
 delete_and_cleanup glance
 
 delete_and_cleanup cinder

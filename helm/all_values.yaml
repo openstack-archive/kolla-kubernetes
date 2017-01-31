@@ -402,7 +402,24 @@ nova-create-db-job:
                         database_name: "nova"
                         database_user: "nova"
 
+nova-delete-db-job:
+        global:
+            kolla:
+                nova:
+                    all:
+                        database_name: "nova"
+                        database_user: "nova"
+
 nova-api-create-db-job:
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            database_name: "nova_api"
+                            database_user: "nova_api"
+
+nova-api-delete-db-job:
         global:
             kolla:
                 nova:
@@ -458,6 +475,18 @@ nova-libvirt-daemonset:
                             libvirt_tcp: false
 
 nova-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    all:
+                        keystone_user_name: nova
+
+nova-delete-keystone-user-job:
         global:
             kolla:
                 all:
