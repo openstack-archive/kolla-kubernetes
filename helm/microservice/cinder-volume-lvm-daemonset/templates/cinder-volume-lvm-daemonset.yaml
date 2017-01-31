@@ -20,7 +20,7 @@
 {{- $_ := set $c1 "retDict" $localVals }}
 {{- $_ := set $c1 "retKey" "lvm_backends" }}
 {{- $_ := include "kolla_val_get_raw" $c1 }}
-{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $searchPath "Values" .Values ) | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
