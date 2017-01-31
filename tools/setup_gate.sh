@@ -78,7 +78,9 @@ EOF
 
 ###NOTE: (sbezverk) Temp workaround to the issue with the gate
 pushd kolla-ansible;
-git checkout 4.0.0.0b2
+git fetch https://git.openstack.org/openstack/kolla-ansible refs/changes/75/427375/2 && git format-patch -1 --stdout FETCH_HEAD > foo.patch
+git am foo.patch
+#git checkout 4.0.0.0b2
 popd
 
 sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
