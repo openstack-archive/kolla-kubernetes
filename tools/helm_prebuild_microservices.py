@@ -51,7 +51,9 @@ common_mariadb = [
     'cinder-delete-db-job',
     'glance-delete-db-job',
     'keystone-delete-db-job',
-    'neutron-delete-db-job'
+    'neutron-delete-db-job',
+    'nova-delete-db-job',
+    'nova-api-delete-db-job'
 ]
 
 common_create_keystone_admin = [
@@ -85,7 +87,9 @@ common_create_keystone_admin = [
     'glance-delete-keystone-service-job',
     'glance-delete-keystone-user-job',
     'neutron-delete-keystone-service-job',
-    'neutron-delete-keystone-user-job'
+    'neutron-delete-keystone-user-job',
+    'nova-delete-keystone-service-job',
+    'nova-delete-keystone-user-job'
 ]
 
 
