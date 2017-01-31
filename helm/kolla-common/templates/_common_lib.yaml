@@ -28,6 +28,7 @@
 {{- if $localVals.kube_logger }}
 - name: logging
   image: {{ include "fluentd_image_full" . | quote }}
+  imagePullPolicy: {{ $imagePullPolicy | quote }}
   volumeMounts:
     - mountPath: {{ $containerConfigDirectory }}
       name: logging-config

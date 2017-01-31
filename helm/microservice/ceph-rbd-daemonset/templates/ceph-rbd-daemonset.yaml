@@ -5,6 +5,7 @@
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $netHostTrue := true }}
@@ -30,6 +31,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           securityContext:
             privileged: true

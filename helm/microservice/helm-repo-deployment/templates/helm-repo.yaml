@@ -1,5 +1,4 @@
 {{- $searchPath := ":global.kolla.helm-repo.deployment:global.kolla.helm-repo.all:global.kolla.all" }}
-{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
@@ -100,6 +99,7 @@ spec:
       containers:
         - name: main
           image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
 {{- if  $persistent }}

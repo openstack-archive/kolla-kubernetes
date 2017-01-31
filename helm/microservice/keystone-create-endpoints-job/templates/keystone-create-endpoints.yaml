@@ -16,6 +16,7 @@
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $resourceName := "keystone" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
@@ -41,6 +42,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           command: ["sh", "-c", "mkdir -p /var/log/kolla/keystone; sudo -E kolla_set_configs;
                     kolla_keystone_bootstrap admin

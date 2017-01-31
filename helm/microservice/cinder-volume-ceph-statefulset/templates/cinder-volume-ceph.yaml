@@ -88,6 +88,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           env:
 {{- include "common_env_vars" $env | indent 12 }}
