@@ -1,4 +1,5 @@
 {{- define "common_delete_keystone_user" }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" .searchPath "Values" .Values ) }}
 {{- $region := include "kolla_val_get_str" (dict "key" "region" "searchPath" .searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" .searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" .searchPath "Values" .Values ) }}
@@ -28,6 +29,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           command: ["sh", "-xec"]
           args:
