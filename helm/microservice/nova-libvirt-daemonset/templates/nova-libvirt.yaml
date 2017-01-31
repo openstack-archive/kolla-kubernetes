@@ -97,6 +97,7 @@ spec:
       containers:
         - name: main
           image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           command:
             - /bin/bash
             - -c

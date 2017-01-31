@@ -33,6 +33,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           env:
 {{- include "common_bootstrap_env_vars" $env | indent 12 }}

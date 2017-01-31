@@ -115,6 +115,7 @@ spec:
 {{- if $localVals.haproxy }}
         - name: haproxy
           image: {{ include "haproxy_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           command:
           - /bin/bash
           - -c
@@ -153,6 +154,7 @@ spec:
 {{- end }}
         - name: main
           image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
 {{- if $localVals.haproxy }}
           lifecycle:
             preStop:
