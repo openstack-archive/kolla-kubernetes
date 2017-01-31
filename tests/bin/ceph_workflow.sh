@@ -194,7 +194,7 @@ kollakube template bootstrap keystone-endpoints
 
 helm install --debug kolla/keystone-create-endpoints-job --version $VERSION \
     --namespace kolla \
-    --set $common_vars,dns_name=$IP \
+    --set $common_vars,dns_name=$IP,admin_port_external=true \
     --name keystone-create-endpoints-job
 
 $DIR/tools/pull_containers.sh kolla
