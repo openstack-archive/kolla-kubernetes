@@ -56,6 +56,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
         - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           securityContext:
             privileged: true

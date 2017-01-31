@@ -72,6 +72,7 @@ spec:
       containers:
         - name: main
           image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event

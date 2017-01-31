@@ -133,6 +133,7 @@ spec:
 {{- end }}
       containers:
         - name: main
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           image: "{{ $imageFull }}"
           securityContext:
             privileged: true
