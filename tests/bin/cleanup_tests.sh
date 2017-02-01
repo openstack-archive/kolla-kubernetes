@@ -26,11 +26,9 @@ if [ $(kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$passwor
 fi
 }
 
-delete_and_cleanup glance
+for service in nova glance cinder neutron; do
+    delete_and_cleanup $service
+done
 
-delete_and_cleanup cinder
-
-delete_and_cleanup neutron
-
-### All clean!!!
+### All clean !!!
 exit 0
