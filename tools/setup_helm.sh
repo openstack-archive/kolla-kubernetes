@@ -12,3 +12,4 @@ $DIR/pull_containers.sh kube-system
 $DIR/wait_for_pods.sh kube-system
 
 helm init
+helm repo delete local
