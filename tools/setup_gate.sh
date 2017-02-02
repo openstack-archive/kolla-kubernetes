@@ -218,4 +218,9 @@ kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/cleanup_tests.sh
+if [ "x$4" == "xhelm-entrypoint" ]; then
+  tests/bin/deploy_compute_kit.sh "$4" "$2" "$BRANCH"
+  kubectl get pods --namespace=kolla
+  kubectl get svc --namespace=kolla
+fi
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
