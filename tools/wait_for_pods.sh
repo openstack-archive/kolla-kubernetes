@@ -1,8 +1,13 @@
 #!/bin/bash -e
-set +x
+set -x
 end=$(date +%s)
-end=$((end + 180))
+if [ x$2 != "x" ]; then
+ end=$((end + $2))
+else
+ end=$((end + 180))
+fi
 while true; do
+    kubectl get pods --namespace=$1 | grep -v Running | grep -v NAME || true
     kubectl get pods --namespace=$1 -o json | jq -r \
         '.items[].status.phase' | grep Pending > /dev/null && \
         PENDING=True || PENDING=False
