@@ -277,7 +277,6 @@ openvswitch-vswitchd-daemonset:
 
 rabbitmq-init-element-job:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
@@ -285,7 +284,6 @@ rabbitmq-init-element-job:
 
 rabbitmq-statefulset:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
@@ -298,7 +296,6 @@ rabbitmq-statefulset:
 
 rabbitmq-svc:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
@@ -313,7 +310,6 @@ rabbitmq-svc:
 
 memcached-svc:
         global:
-            element_name: memcached
             kolla:
                 memcached:
                     all:
@@ -325,7 +321,6 @@ memcached-svc:
 
 memcached-deployment:
         global:
-            element_name: memcached
             kolla:
                 memcached:
                     all:
@@ -334,7 +329,6 @@ memcached-deployment:
 
 mariadb-init-element-job:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
@@ -342,7 +336,6 @@ mariadb-init-element-job:
 
 mariadb-statefulset:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
@@ -352,7 +345,6 @@ mariadb-statefulset:
 
 mariadb-svc:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
