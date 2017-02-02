@@ -1,7 +1,7 @@
 function common_workflow_config {
-    $IP="$1"
-    $base_distro="$2"
-    $tunnel_interface="$3"
+    IP="$1"
+    base_distro="$2"
+    tunnel_interface="$3"
     echo "global:"
     echo "  kolla:"
     echo "    all:"
@@ -12,4 +12,5 @@ function common_workflow_config {
     echo "    keystone:"
     echo "      all:"
     echo "        admin_port_external: true"
+    echo "        dns_name: $IP"
 }
