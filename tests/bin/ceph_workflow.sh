@@ -6,19 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-
-function ceph_values {
-    echo "global:"
-    echo "  kolla:"
-    echo "    all:"
-    echo "      ceph:"
-    echo "          monitors:"
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "          - $addr"
-}
+. "$DIR/tests/bin/common_ceph_config.sh"
 
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
@@ -32,6 +20,10 @@ base_distro="$2"
 
 function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
+}
+
+function ceph_config {
+    common_ceph_config $1
 }
 
 common_vars="kube_logger=false,base_distro=$base_distro"
@@ -51,7 +43,7 @@ kollakube res create secret nova-libvirt
 for x in mariadb rabbitmq glance helm-repo; do
     helm install kolla/$x-pv --debug --version $VERSION \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
-        --values <(ceph_values $1)
+        --values <(ceph_config $1)
     helm install kolla/$x-pvc --debug --version $VERSION --namespace kolla \
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
