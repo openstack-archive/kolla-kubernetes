@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import subprocess
+import sys
+
+
+def helm_build_package(repodir, srcdir):
+    command_line = "cd %s; helm package %s" % (repodir, srcdir)
+    try:
+        res = subprocess.check_output(
+            command_line, shell=True,
+            executable='/bin/bash')
+        res = res.strip()  # strip whitespace
+        if res != "":
+            print(res)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        raise
+
+
+def _isdir(path, entry):
+    return os.path.isdir(os.path.join(path, entry))
+
+
+def main():
+    path = os.path.abspath(os.path.dirname(sys.argv[0]))
+    srcdir = os.path.join(path, "../helm")
+    if len(sys.argv) < 2:
+        sys.stderr.write("You must specify the repo directory to build in.\n")
+        sys.exit(-1)
+    repodir = sys.argv[1]
+    if not os.path.isdir(repodir):
+        sys.stderr.write("The specified repo directory does not exist.\n")
+        sys.exit(-1)
+
+    compktsdir = os.path.join(srcdir, "compute-kits")
+    compkits = os.listdir(compktsdir)
+
+    for package in [p for p in compkits if _isdir(compktsdir, p)]:
+        helm_build_package(repodir, os.path.join(compktsdir, package))
+
+if __name__ == '__main__':
+    sys.exit(main())
