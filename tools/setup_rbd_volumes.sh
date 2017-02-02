@@ -7,9 +7,16 @@ if [ "x$1" != "x--yes-i-really-really-mean-it" ]; then
 fi
 
 RBD_ARGS="--image-feature layering"
+
+echo "===================>" $RBD_ARGS
+
 if [ "x$2" == "x2" ]; then
+    echo "!!!!!!!!!!!!!!!!version 2!!!!!!!!!!!!!!!!!!!!"
     RBD_ARGS=""
+    echo "===================>" $RBD_ARGS
 fi
+
+echo "===================>" $RBD_ARGS
 
 #FIXME may need different flags for testing jewel
 str="timeout 240s rbd create kollavolumes/mariadb $RBD_ARGS --size 1024"
