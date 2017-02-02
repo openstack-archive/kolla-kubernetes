@@ -38,10 +38,10 @@ def main():
     path = os.path.abspath(os.path.dirname(sys.argv[0]))
 
     srcdir = os.path.join(path, "..", "helm")
-    svcdir = os.path.join(srcdir, "service")
-    services = os.listdir(svcdir)
-    for package in [p for p in services if _isdir(svcdir, p)]:
-        helm_dep_up(os.path.join(os.path.join(svcdir, package)))
+    compkitsdir = os.path.join(srcdir, "compute-kits")
+    compkits = os.listdir(compkitsdir)
+    for package in [p for p in compkits if _isdir(compkitsdir, p)]:
+        helm_dep_up(os.path.join(os.path.join(compkitsdir, package)))
 
 
 if __name__ == '__main__':
