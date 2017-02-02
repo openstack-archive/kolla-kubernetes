@@ -277,18 +277,18 @@ openvswitch-vswitchd-daemonset:
 
 rabbitmq-init-element-job:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
+                        element_name: rabbitmq
                         cookie:
 
 rabbitmq-statefulset:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
+                        element_name: rabbitmq
                         port: 5672
                         mgmt_port: 15672
                     statefulset:
@@ -298,10 +298,10 @@ rabbitmq-statefulset:
 
 rabbitmq-svc:
         global:
-            element_name: rabbitmq
             kolla:
                 rabbitmq:
                     all:
+                        element_name: rabbitmq
                         port: 5672
                         node_port: 9696
                         port_external: false
@@ -317,6 +317,7 @@ memcached-svc:
             kolla:
                 memcached:
                     all:
+                        element_name: memcached
                         enabled: true
                         port: 11211
                         node_port: 11211
@@ -325,37 +326,37 @@ memcached-svc:
 
 memcached-deployment:
         global:
-            element_name: memcached
             kolla:
                 memcached:
                     all:
+                        element_name: memcached
                         enabled: true
                         port: 11211
 
 mariadb-init-element-job:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
+                        element_name: mariadb
                         image_tag: 3.0.2
 
 mariadb-statefulset:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
+                        element_name: mariadb
                         database_user: root
                         port: 3306
                         image_tag: 3.0.2
 
 mariadb-svc:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
+                        element_name: mariadb
                         port: 3306
                         node_port: 3306
                         port_external: false
