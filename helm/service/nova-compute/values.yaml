@@ -3,8 +3,6 @@ global:
         all:
             kubernetes_entrypoint: true
         nova:
-            all:
-                ceph_backend: true
             compute:
                 daemonset:
                     dependencies:

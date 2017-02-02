@@ -2,15 +2,11 @@
 
 VERSION=0.5.0-1
 
-function lvmbackend_values {
-    echo "lvm_backends:"
-    echo "  - '172.18.0.1': 'cinder-volumes'"
-}
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
 . "$DIR/tests/bin/common_workflow_config.sh"
+. "$DIR/tests/bin/common_iscsi_config.sh"
 
 tunnel_interface=docker0
 
@@ -20,19 +16,12 @@ function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
 
+function iscsi_config {
+    general_config
+    common_iscsi_config
+}
+
 common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
-
-kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived;
-
-kollakube res create secret nova-libvirt
 
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
@@ -310,7 +299,7 @@ done
 
 helm install kolla/cinder-volume-lvm-daemonset --debug --version $VERSION \
     --set "$common_vars,element_name=cinder-volume" --namespace kolla \
-    --name cinder-volume-lvm-daemonset --values <(lvmbackend_values)
+    --name cinder-volume-lvm-daemonset --values <(iscsi_config)
 
 helm install kolla/cinder-api-deployment --version $VERSION \
     --set "$common_vars,image_tag=3.0.1" --namespace kolla \

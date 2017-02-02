@@ -6,19 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP=172.18.0.1
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-
-function ceph_values {
-    echo "global:"
-    echo "  kolla:"
-    echo "    all:"
-    echo "      ceph:"
-    echo "          monitors:"
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "          - $addr"
-}
+. "$DIR/tests/bin/common_ceph_config.sh"
 
 tunnel_interface=docker0
 if [ "x$1" == "xceph-multi" ]; then
@@ -34,24 +22,17 @@ function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
 
+function ceph_config {
+    general_config
+    common_ceph_config $1
+}
+
 common_vars="kube_logger=false,base_distro=$base_distro"
-
-kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume keepalived;
-
-kollakube res create secret nova-libvirt
 
 for x in mariadb rabbitmq glance helm-repo; do
     helm install kolla/$x-pv --debug --version $VERSION \
         --name $x-pv --set "element_name=$x,storage_provider=ceph" \
-        --values <(ceph_values $1)
+        --values <(ceph_config $1)
     helm install kolla/$x-pvc --debug --version $VERSION --namespace kolla \
         --name $x-pvc --set "element_name=$x,storage_provider=ceph"
 done
