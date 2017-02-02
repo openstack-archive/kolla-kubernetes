@@ -6,9 +6,10 @@ if [ "x$1" != "x--yes-i-really-really-mean-it" ]; then
     exit -1
 fi
 
-RBD_ARGS="--image-feature layering"
 if [ "x$2" == "x2" ]; then
     RBD_ARGS=""
+else
+    RBD_ARGS="--image-feature layering"
 fi
 
 #FIXME may need different flags for testing jewel
