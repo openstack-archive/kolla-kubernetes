@@ -1,0 +1,37 @@
+dependencies:
+  - name: mariadb
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: rabbitmq
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: memcached
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: keystone
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: glance
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: openvswitch
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: neutron
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-control
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: cinder-volume-ceph-statefulset
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-control
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: nova-compute
+    repository: http://localhost:10191
+    version: 0.4.0-1
+  - name: horizon
+    repository: http://localhost:10191
+    version: 0.4.0-1
