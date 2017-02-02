@@ -18,6 +18,7 @@ import sys
 
 def helm_dep_up(srcdir):
     command_line = "cd %s; helm dep up" % (srcdir)
+    print(command_line)
     try:
         res = subprocess.check_output(
             command_line, shell=True,
@@ -40,7 +41,7 @@ def main():
     srcdir = os.path.join(path, "..", "helm")
     svcdir = os.path.join(srcdir, "service")
     services = os.listdir(svcdir)
-
+    print(services)
     for package in [p for p in services if _isdir(svcdir, p)]:
         helm_dep_up(os.path.join(os.path.join(svcdir, package)))
 
