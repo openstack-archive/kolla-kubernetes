@@ -10,7 +10,6 @@ global:
                         - mariadb
             manage_db:
                 job:
-                    ceph_backend: true
                     dependencies:
                         SERVICE:
                         - mariadb
@@ -57,8 +56,6 @@ global:
                             SERVICE:
                             - keystone-admin
             api:
-                all:
-                    ceph_backend: true
                 deployment:
                     dependencies:
                         JOBS:
