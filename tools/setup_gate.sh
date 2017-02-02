@@ -32,6 +32,11 @@ if [ "x$4" == "xhelm-operator" ]; then
     exit 0
 fi
 
+if [ "x$4" == "xhelm-compute-kit" ]; then
+    tools/setup_gate_compute_kit.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    exit 0
+fi
+
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 
 mkdir -p $WORKSPACE/logs/
