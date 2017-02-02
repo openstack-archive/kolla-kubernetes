@@ -22,18 +22,6 @@ function general_config {
 
 common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
 
-kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived;
-
-kollakube res create secret nova-libvirt
-
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
         --name $x-pv --set "element_name=$x,storage_provider=host"
