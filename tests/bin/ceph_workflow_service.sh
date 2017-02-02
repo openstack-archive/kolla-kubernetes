@@ -11,44 +11,13 @@ function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
 
-function ceph_values {
-    echo "global:"
-    echo "  kolla:"
-    echo "    all:"
-    echo "      ceph:"
-    echo "          monitors:"
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "          - $addr"
+function ceph_config {
+    common_ceph_config $1
 }
 
-function helm_entrypoint_general {
-    echo "global:"
-    echo "  kolla:"
-    echo "    all:"
-    echo "      kube_logger: false"
-    echo "      external_vip: $IP"
-    echo "      base_distro: $base_distro"
-    echo "      tunnel_interface: $tunnel_interface"
-    echo "      storage_provider: ceph"
-    echo "      storage_provider_fstype: xfs"
-    echo "      ceph:"
-    echo "         monitors:"
-    ### NOTE (sbezverk)  172.17.0.1 is default ip address used by Docker
-    addr=172.17.0.1
-    if [ "x$1" == "xceph-multi" ]; then
-        addr=$(cat /etc/nodepool/primary_node_private)
-    fi
-    echo "             - $addr"
-    echo "         pool: kollavolumes"
-    echo "         secret_name: ceph-kolla"
-    echo "         user: kolla"
-    echo "    keystone:"
-    echo "      all:"
-    echo "        admin_port_external: true"
-    echo "        dns_name: $IP"
+function entry_point_config {
+    general_config
+    common_ceph_config $1
 }
 
 tunnel_interface=docker0
@@ -77,29 +46,29 @@ kollakube res create secret nova-libvirt
 
 helm install kolla/mariadb --version $VERSION \
     --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/memcached --version $VERSION \
     --namespace kolla --name memcached \
     --set "$common_vars,element_name=memcached" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/rabbitmq --version $VERSION \
     --namespace kolla --name rabbitmq --set "$common_vars" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/keystone --version $VERSION \
     --namespace kolla --name keystone --set "$common_vars,element_name=keystone" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/openvswitch --version $VERSION \
-  --namespace kolla --name openvswitch --values  <(helm_entrypoint_general $1)
+  --namespace kolla --name openvswitch --values  <(entry_point_config $1)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -128,14 +97,14 @@ helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
 
 helm install kolla/cinder-control --version $VERSION \
     --namespace kolla --name cinder --set "$common_vars,element_name=cinder" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/glance --version $VERSION \
     --namespace kolla --name glance --set "$common_vars,element_name=glance" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/neutron --version $VERSION \
-    --namespace kolla --name neutron --values  <(helm_entrypoint_general $1)
+    --namespace kolla --name neutron --values  <(entry_point_config $1)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -144,16 +113,16 @@ helm ls
 
 helm install kolla/nova-control --version $VERSION  --namespace kolla \
     --name nova-control --set "$common_vars,element_name=nova" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/nova-compute --version $VERSION  --namespace kolla \
     --name nova-compute --set "$common_vars,element_name=nova" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 helm install kolla/horizon --version $VERSION \
     --namespace kolla --name horizon \
     --set "$common_vars,element_name=horizon" \
-    --values <(helm_entrypoint_general $1)
+    --values <(entry_point_config $1)
 
 #kollakube res create pod keepalived
 
