@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Helm chart to bring up OpenStack deployment, which includes: mariadb,
+    rabbitmq, memcached, keystone, glance, cinder, neutron, nova and
+    horizon.
