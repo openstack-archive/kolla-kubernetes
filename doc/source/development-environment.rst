@@ -386,6 +386,11 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 Managing and interacting with the environment
 =============================================
 
+The kube2 system in your halcyon-vagrant environment should have a minimum
+of 4gb of ram and all others should be set to 2gb of ram.  In your
+config.rb script kube_vcpus should be set to 2 and kube_count should be
+set to 4.
+
 Once the environment's dependencies have been resolved and configuration
 completed, you can run the following commands to interact with it:
 
@@ -429,7 +434,7 @@ Test everything works by starting a container with an interactive terminal:
 .. end
 
 Once that pod has started and your terminal has connected to it, you can then
-test the Kubenetes DNS service (and by extension the CNI SDN layer) by running:
+test the Kubernetes DNS service (and by extension the CNI SDN layer) by running:
 
 .. path .
 .. code-block:: console
@@ -463,21 +468,26 @@ To test that helm is working you can run the following:
     development environment is not setup properly for the proxy server.
 
 
-Setting up Kubernetes for Kolla-Kubernetes deployment
+Containerized development environment requirements and usage
 =====================================================
 
-To set the cluster up for developing Kolla-Kubernetes: you will most likely
-want to run the following commands to label the nodes for running OpenStack
-services:
+Make sure to run the ./get-k8s-creds.sh script or the development environment
+container will not be able to connect to the vagrant kubernetes cluster.
+
+The kolla-kubernetes and kolla-ansible project should be checked out into
+the same base directory as halcyon-vagrant-kubernetes.  The default assumed
+in kolla-kubernetes/tools/Dockerfile is ~/devel.  If that is not the case
+in your environment then change that value in Dockerfile.
 
 .. path .
 .. code-block:: console
 
-    kubectl get nodes -L kubeadm.alpha.kubernetes.io/role --no-headers | awk '$NF ~ /^<none>/ { print $1}' | while read NODE ; do
-    kubectl label node $NODE --overwrite kolla_controller=true
-    kubectl label node $NODE --overwrite kolla_compute=true
-    done
+    git clone https://github.com/openstack/kolla-kubernetes.git
+    git clone https://github.com/openstack/kolla-ansible.git
+
+    # Edit kolla-kubernetes/tools/Dockerfile to match development base dir
+
+    kolla-kubernetes/tools/build_dev_image.sh
+    kolla-kubernetes/tools/run_dev_image.sh
 
 .. end
-
-This will mark all the workers as being available for both storage and API pods.
