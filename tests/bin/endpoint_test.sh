@@ -26,3 +26,4 @@ fi
 # Copy the endpoint informational logs if the logs dir exists
 [ -d $WORKSPACE/logs ] && cp /tmp/$$ $WORKSPACE/logs/endpoints.txt
 [ -d $WORKSPACE/logs ] && cp /tmp/$$.1 $WORKSPACE/logs/endpoints1.txt
+exit 0
