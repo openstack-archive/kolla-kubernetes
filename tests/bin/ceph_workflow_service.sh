@@ -3,7 +3,7 @@
 VERSION=0.5.0-1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-IP=172.18.0.1
+IP=${3:-172.18.0.1}
 
 . "$DIR/tests/bin/common_workflow_config.sh"
 
@@ -51,12 +51,16 @@ function helm_entrypoint_general {
     echo "        dns_name: $IP"
 }
 
-tunnel_interface=docker0
+tunnel_interface=${4:-docker0}
 if [ "x$1" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
         $(cat /etc/nodepool/primary_node_private) \
         | head -n 1 | awk -F: '{print $1}')
-    tunnel_interface=$interface
+    # if this is being run remotely the netstat will fail,
+    # so fallback to the passed in interface name
+    if [ ! -z "$interface" ]; then
+        tunnel_interface=$interface
+    fi
 fi
 
 base_distro="$2"
@@ -88,27 +92,22 @@ helm install kolla/rabbitmq --version $VERSION \
     --namespace kolla --name rabbitmq --set "$common_vars" \
     --values <(helm_entrypoint_general $1)
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+$DIR/tools/wait_for_pods.py mariadb,memcached,rabbitmq running,succeeded
 
 helm install kolla/keystone --version $VERSION \
     --namespace kolla --name keystone --set "$common_vars,element_name=keystone" \
     --values <(helm_entrypoint_general $1)
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+$DIR/tools/wait_for_pods.py keystone running,succeeded
 
 helm install kolla/openvswitch --version $VERSION \
   --namespace kolla --name openvswitch --values  <(helm_entrypoint_general $1)
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+$DIR/tools/wait_for_pods.py openvswitch running
 
 kollakube res create bootstrap openvswitch-set-external-ip
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
-
+$DIR/tools/wait_for_pods.py openvswitch-set-external succeeded
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
@@ -137,8 +136,8 @@ helm install kolla/glance --version $VERSION \
 helm install kolla/neutron --version $VERSION \
     --namespace kolla --name neutron --values  <(helm_entrypoint_general $1)
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+# TODO(WIP) -- needs testing + verification
+$DIR/tools/wait_for_pods.py cinder,glance,neutron running,succeeded
 
 helm ls
 
@@ -157,9 +156,7 @@ helm install kolla/horizon --version $VERSION \
 
 #kollakube res create pod keepalived
 
-$DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+# TODO(WIP) -- needs testing + verification
+$DIR/tools/wait_for_pods.py nova-control,nova-compute,horizon running,succeeded
 
 kollakube res delete bootstrap openvswitch-set-external-ip
-
-$DIR/tools/wait_for_pods.sh kolla

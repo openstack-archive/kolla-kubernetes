@@ -11,3 +11,4 @@ jq -r '.endpoints[] | .service_id' /tmp/$$ | sort | uniq -c > /tmp/$$.1
 awk '{if($1 != 3){exit -1}}' /tmp/$$.1 || endpoints_dump_and_fail
 [ -d $WORKSPACE/logs ] && cp /tmp/$$ $WORKSPACE/logs/endpoints.txt
 [ -d $WORKSPACE/logs ] && cp /tmp/$$.1 $WORKSPACE/logs/endpoints1.txt
+exit 0
