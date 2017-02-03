@@ -6,7 +6,7 @@ if [ "x$1" != "x--yes-i-really-really-mean-it" ]; then
     exit -1
 fi
 
-RBD_ARGS="--image-feature layering"
+RBD_ARGS=""
 if [ "x$2" == "x2" ]; then
     RBD_ARGS=""
 fi
