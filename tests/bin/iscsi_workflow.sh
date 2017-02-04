@@ -34,6 +34,9 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
+kubectl get configmaps -o yaml --namespace kolla > $WORKSPACE/logs/configmaps.yaml
+exit -1
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
         --name $x-pv --set "element_name=$x,storage_provider=host"
