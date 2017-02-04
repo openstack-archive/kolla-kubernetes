@@ -183,6 +183,10 @@ TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.temp
 sudo docker pull $TOOLBOX > /dev/null
 timeout 240s tools/setup-resolv-conf.sh
 
+mkdir -p $WORKSPACE/logs/
+kubectl get configmaps -o yaml > $WORKSPACE/logs/configmaps.yaml
+exit -1
+
 tests/bin/build_test_ceph.sh
 
 helm install kolla/ceph-admin-pod --version $PACKAGE_VERSION \
