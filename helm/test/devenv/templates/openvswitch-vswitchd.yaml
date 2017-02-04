@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "/usr/sbin/ovs-vswitchd unix:/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2017-02-03T18:14:25Z
+  name: openvswitch-vswitchd
+  namespace: kolla
+  resourceVersion: "1639"
+  selfLink: /api/v1/namespaces/kolla/configmaps/openvswitch-vswitchd
+  uid: 98253fe2-ea3c-11e6-aa21-003a7d69f5dc
