@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "start-ovsdb-server 0.0.0.0  br-ex enp13s0 ",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2017-02-03T18:14:25Z
+  name: openvswitch-db-server
+  namespace: kolla
+  resourceVersion: "1638"
+  selfLink: /api/v1/namespaces/kolla/configmaps/openvswitch-db-server
+  uid: 9822af59-ea3c-11e6-aa21-003a7d69f5dc
