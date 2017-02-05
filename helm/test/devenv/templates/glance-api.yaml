@@ -1,0 +1,74 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "glance-api",
+        "config_files": [
+            {
+                "source": "/var/lib/kolla/config_files/glance-api.conf",
+                "dest": "/etc/glance/glance-api.conf",
+                "owner": "glance",
+                "perm": "0600"
+            },
+            {
+                "source": "/var/lib/kolla/config_files/policy.json",
+                "dest": "/etc/glance/policy.json",
+                "owner": "glance",
+                "perm": "0600",
+                "optional": true
+            }    ],
+        "permissions": [
+            {
+                "path": "/var/lib/glance",
+                "owner": "glance:glance",
+                "recurse": true
+            },
+            {
+                "path": "/var/log/kolla/glance",
+                "owner": "glance:glance",
+                "recurse": true
+            }
+        ]
+    }
+  glance-api.conf: |+
+    [DEFAULT]
+    debug = True
+    log_file = /var/log/kolla/glance/api.log
+    use_forwarded_for = true
+    bind_host = 0.0.0.0
+    bind_port = 9292
+    workers = 1
+    registry_host = glance-registry
+    cinder_catalog_info = volume:cinder:internalURL
+    transport_url = rabbit://openstack:qx9Dzn6Ak6yo6KzFFvcS4OFWzZ9Qr2ClLz70mopf@rabbitmq:5672
+
+    [database]
+    connection = mysql+pymysql://glance:4fwWjju24SfYeBCxWYpW1Ejn86j3tC8CkfEkBxGx@mariadb/glance
+    max_retries = -1
+
+    [keystone_authtoken]
+    auth_uri = http://keystone-internal:5000/v3
+    auth_url = http://keystone-admin:35357/v3
+    auth_type = password
+    project_domain_id = default
+    user_domain_id = default
+    project_name = service
+    username = glance
+    password = DdGnbxLYEv48ZZcGeiGavsJ7J20Fd6ifERM3BIN9
+    memcache_security_strategy = ENCRYPT
+    memcache_secret_key = 2W6qqH7QKzqQPgEeEjXbM6hOv2wRstw4bucPz6Js
+    memcache_servers = memcached
+
+    [paste_deploy]
+    flavor = keystone
+
+    [glance_store]
+    default_store = file
+    filesystem_store_datadir = /var/lib/glance/images/
+
+    [oslo_messaging_notifications]
+    driver = noop
+
+kind: ConfigMap
+metadata:
+  name: glance-api
