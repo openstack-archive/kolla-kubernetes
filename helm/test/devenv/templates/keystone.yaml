@@ -132,7 +132,7 @@ data:
     secure_proxy_ssl_header = HTTP_X_FORWARDED_PROTO
 
     [database]
-    connection = mysql+pymysql://keystone:fYHbsFC6fYlMzgrepcEfExJevgg4IQ3WPtn6uRsp@mariadb/keystone
+    connection = mysql+pymysql://keystone:Mz3JMT2Yy55qyZ49dscAop6sJFIqCWvFJuW6p4ni@mariadb/keystone
     max_retries = -1
 
     [token]
@@ -140,7 +140,7 @@ data:
 
     [cache]
     backend = oslo_cache.memcache_pool
-    enabled = True
+    enabled = False
     memcache_servers = memcached
 
   wsgi-keystone.conf: |

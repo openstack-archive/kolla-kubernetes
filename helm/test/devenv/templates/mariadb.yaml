@@ -54,9 +54,9 @@ data:
     wsrep_sst_receive_address = 0.0.0.0:4444
     wsrep_provider = none
     wsrep_cluster_name = openstack
-    wsrep_node_name = oscorehost1
+    wsrep_node_name = borg
     wsrep_sst_method = xtrabackup-v2
-    wsrep_sst_auth = root:ZbCr1MPhHZBZgcHOgtEce6n6abSEjcL4BN2BqyB4
+    wsrep_sst_auth = root:ezKTank6WwMlosLvFGUHkJnFKdnrcXXG1LVFHdua
     wsrep_slave_threads = 4
     wsrep_notify_cmd = /usr/local/bin/wsrep-notify.sh
     max_connections = 10000
@@ -73,7 +73,7 @@ data:
 
     # Edit parameters below to specify the address and login to server.
     USER=root
-    PSWD=ZbCr1MPhHZBZgcHOgtEce6n6abSEjcL4BN2BqyB4
+    PSWD=ezKTank6WwMlosLvFGUHkJnFKdnrcXXG1LVFHdua
     HOST=0.0.0.0
     PORT=3306
     LB_USER=haproxy

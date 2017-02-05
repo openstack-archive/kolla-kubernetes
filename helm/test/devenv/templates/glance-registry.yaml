@@ -33,23 +33,23 @@ data:
     bind_host = 0.0.0.0
     bind_port = 9191
     workers = 1
-    transport_url = rabbit://openstack:qx9Dzn6Ak6yo6KzFFvcS4OFWzZ9Qr2ClLz70mopf@rabbitmq:5672
+    transport_url = rabbit://openstack:n8ZKhaSiHmBQgZTwJ8QsKJEkV2cbJnsyqUi6waMl@rabbitmq:5672
 
     [database]
-    connection = mysql+pymysql://glance:4fwWjju24SfYeBCxWYpW1Ejn86j3tC8CkfEkBxGx@mariadb/glance
+    connection = mysql+pymysql://glance:sgkRfkjn1oh110NcLxwUYthPOBuHDHr6KkGN0QRP@mariadb/glance
     max_retries = -1
 
     [keystone_authtoken]
-    auth_uri = http://keystone-internal:5000/v3
+    auth_uri = http://keystone-public:5000/v3
     auth_url = http://keystone-admin:35357/v3
     auth_type = password
     project_domain_id = default
     user_domain_id = default
     project_name = service
     username = glance
-    password = DdGnbxLYEv48ZZcGeiGavsJ7J20Fd6ifERM3BIN9
+    password = 3TL2Tfj1nZBuvV39I709mREyehixmHMYNJr0MVLN
     memcache_security_strategy = ENCRYPT
-    memcache_secret_key = 2W6qqH7QKzqQPgEeEjXbM6hOv2wRstw4bucPz6Js
+    memcache_secret_key = CW0S0iOgZqFMSplvMXn6A2cL6nZIBDGdAyIYjPX0
     memcache_servers = memcached
 
     [paste_deploy]

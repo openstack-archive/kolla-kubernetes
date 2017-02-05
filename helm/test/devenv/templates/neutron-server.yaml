@@ -91,7 +91,7 @@ data:
     allow_overlapping_ips = true
     core_plugin = ml2
     service_plugins = router
-    transport_url = rabbit://openstack:qx9Dzn6Ak6yo6KzFFvcS4OFWzZ9Qr2ClLz70mopf@rabbitmq:5672
+    transport_url = rabbit://openstack:n8ZKhaSiHmBQgZTwJ8QsKJEkV2cbJnsyqUi6waMl@rabbitmq:5672
 
     [nova]
     auth_url = http://keystone-admin:35357/v3
@@ -101,7 +101,7 @@ data:
     region_name = RegionOne
     project_name = service
     username = nova
-    password = KxYAMikygyQfwNbmzY3DCVshdIxECSRLFRi3fKvT
+    password = SU89bXJrW0fJiTAsFmQIsbZNjhIGm6GlROMQbLmO
     endpoint_type = internal
 
     [oslo_concurrency]
@@ -111,20 +111,20 @@ data:
     root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 
     [database]
-    connection = mysql+pymysql://neutron:luG1w24HIV5BmxABFyowmi0cXLrB18BMWDtZJzgh@mariadb/neutron
+    connection = mysql+pymysql://neutron:t3g4Mzv4BhbRg5MYiklo2pav6WRbGnPszRQt47uw@mariadb/neutron
     max_retries = -1
 
     [keystone_authtoken]
-    auth_uri = http://keystone-internal:5000/v3
+    auth_uri = http://keystone-public:5000/v3
     auth_url = http://keystone-admin:35357/v3
     auth_type = password
     project_domain_id = default
     user_domain_id = default
     project_name = service
     username = neutron
-    password = u57gEXEeXAvfUdmL15BAHJYsTiHDtc3E1bpF6tqW
+    password = JoT1bnpKjuR0lUopmIY2VaCTzBxRNN3XGrvwo9Xq
     memcache_security_strategy = ENCRYPT
-    memcache_secret_key = 2W6qqH7QKzqQPgEeEjXbM6hOv2wRstw4bucPz6Js
+    memcache_secret_key = CW0S0iOgZqFMSplvMXn6A2cL6nZIBDGdAyIYjPX0
     memcache_servers = memcached
 
     [oslo_messaging_notifications]
