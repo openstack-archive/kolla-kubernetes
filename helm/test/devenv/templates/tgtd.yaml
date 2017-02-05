@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "command": "tgtd -d 1 -f --iscsi portal=0.0.0.0:3260",
+        "config_files": []
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2017-02-03T18:14:25Z
+  name: tgtd
+  namespace: kolla
+  resourceVersion: "1653"
+  selfLink: /api/v1/namespaces/kolla/configmaps/tgtd
+  uid: 983da8da-ea3c-11e6-aa21-003a7d69f5dc
