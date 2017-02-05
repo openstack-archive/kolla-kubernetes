@@ -146,9 +146,4 @@ data:
     exit 0
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-02-03T18:14:25Z
   name: mariadb
-  namespace: kolla
-  resourceVersion: "1620"
-  selfLink: /api/v1/namespaces/kolla/configmaps/mariadb
-  uid: 97fddf28-ea3c-11e6-aa21-003a7d69f5dc

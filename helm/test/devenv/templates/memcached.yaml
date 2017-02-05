@@ -7,9 +7,4 @@ data:
     }
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-02-03T18:14:25Z
   name: memcached
-  namespace: kolla
-  resourceVersion: "1624"
-  selfLink: /api/v1/namespaces/kolla/configmaps/memcached
-  uid: 9805e1f0-ea3c-11e6-aa21-003a7d69f5dc

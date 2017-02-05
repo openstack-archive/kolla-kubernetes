@@ -102,9 +102,4 @@ data:
     % EOF
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-02-03T18:14:25Z
   name: rabbitmq
-  namespace: kolla
-  resourceVersion: "1623"
-  selfLink: /api/v1/namespaces/kolla/configmaps/rabbitmq
-  uid: 9803938d-ea3c-11e6-aa21-003a7d69f5dc

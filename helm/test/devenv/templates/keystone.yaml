@@ -176,9 +176,4 @@ data:
     </VirtualHost>
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-02-03T18:14:25Z
   name: keystone
-  namespace: kolla
-  resourceVersion: "1621"
-  selfLink: /api/v1/namespaces/kolla/configmaps/keystone
-  uid: 97fe45dd-ea3c-11e6-aa21-003a7d69f5dc

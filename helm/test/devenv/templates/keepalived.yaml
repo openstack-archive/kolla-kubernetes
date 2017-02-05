@@ -30,9 +30,4 @@ data:
     }
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-02-03T18:14:25Z
   name: keepalived
-  namespace: kolla
-  resourceVersion: "1654"
-  selfLink: /api/v1/namespaces/kolla/configmaps/keepalived
-  uid: 98404cd6-ea3c-11e6-aa21-003a7d69f5dc
