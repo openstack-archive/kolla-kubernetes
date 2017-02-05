@@ -16,7 +16,6 @@ Contents:
    installation
    host-setup
    kubernetes-setup
-   minikube-quickstart
    general-quickstart
    multi-node
    private-registry
