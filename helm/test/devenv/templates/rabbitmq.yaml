@@ -48,7 +48,7 @@ data:
         {"name": "/"}
       ],
       "users": [
-        {"name": "openstack", "password": "qx9Dzn6Ak6yo6KzFFvcS4OFWzZ9Qr2ClLz70mopf", "tags": "administrator"}
+        {"name": "openstack", "password": "n8ZKhaSiHmBQgZTwJ8QsKJEkV2cbJnsyqUi6waMl", "tags": "administrator"}
       ],
       "permissions": [
         {"user": "openstack", "vhost": "/", "configure": ".*", "write": ".*", "read": ".*"}
@@ -61,9 +61,9 @@ data:
     [
       {version, 1},
       {nodes, [
-          {'rabbit@oscorehost1', disc}    ]},
+          {'rabbit@borg', disc}    ]},
       {gospel,
-        {node, 'rabbit@oscorehost1'}}
+        {node, 'rabbit@borg'}}
     ].
   rabbitmq-env.conf: |
     RABBITMQ_NODENAME=rabbit

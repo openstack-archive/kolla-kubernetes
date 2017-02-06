@@ -44,7 +44,7 @@ data:
     allow_resize_to_same_host = true
     compute_driver = libvirt.LibvirtDriver
     my_ip = 0.0.0.0
-    transport_url = rabbit://openstack:qx9Dzn6Ak6yo6KzFFvcS4OFWzZ9Qr2ClLz70mopf@rabbitmq:5672
+    transport_url = rabbit://openstack:n8ZKhaSiHmBQgZTwJ8QsKJEkV2cbJnsyqUi6waMl@rabbitmq:5672
 
     [conductor]
     workers = 1
@@ -69,7 +69,7 @@ data:
 
     [neutron]
     url = http://neutron-server:9696
-    metadata_proxy_shared_secret = zS97AdEFMkOewH6VuAS2mK8b2gJVy7iQxXCp33OH
+    metadata_proxy_shared_secret = BPrkJkyrMUjKepsLaECUpLc9DZnsbLN03tRZozqC
     service_metadata_proxy = true
     auth_url = http://keystone-admin:35357/v3
     auth_type = password
@@ -77,16 +77,16 @@ data:
     user_domain_id = default
     project_name = service
     username = neutron
-    password = u57gEXEeXAvfUdmL15BAHJYsTiHDtc3E1bpF6tqW
+    password = JoT1bnpKjuR0lUopmIY2VaCTzBxRNN3XGrvwo9Xq
 
     [database]
-    connection = mysql+pymysql://nova:WwnD3h6x5LQxmvlD8n7rYagCg800sbxcrBq23nHP@mariadb/nova
+    connection = mysql+pymysql://nova:ei2IKBVgKJTAgOcLrc7v1hm44TBT6VYWUaOamMUV@mariadb/nova
     max_pool_size = 50
     max_overflow = 1000
     max_retries = -1
 
     [api_database]
-    connection = mysql+pymysql://nova_api:GY5Nje9LBny7kyyd1mZ4QI77ffLpahaC5Sq7bV6s@mariadb/nova_api
+    connection = mysql+pymysql://nova_api:p0wGdHYMvtXstAfhQ8pg7XebAnzbcF6FgNcCiErC@mariadb/nova_api
     max_retries = -1
 
     [cache]
@@ -95,16 +95,16 @@ data:
     memcache_servers = memcached:11211
 
     [keystone_authtoken]
-    auth_uri = http://keystone-internal:5000/v3
+    auth_uri = http://keystone-public:5000/v3
     auth_url = http://keystone-admin:35357/v3
     auth_type = password
     project_domain_id = default
     user_domain_id = default
     project_name = service
     username = nova
-    password = KxYAMikygyQfwNbmzY3DCVshdIxECSRLFRi3fKvT
+    password = SU89bXJrW0fJiTAsFmQIsbZNjhIGm6GlROMQbLmO
     memcache_security_strategy = ENCRYPT
-    memcache_secret_key = 2W6qqH7QKzqQPgEeEjXbM6hOv2wRstw4bucPz6Js
+    memcache_secret_key = CW0S0iOgZqFMSplvMXn6A2cL6nZIBDGdAyIYjPX0
     memcached_servers = memcached:11211
 
     [libvirt]

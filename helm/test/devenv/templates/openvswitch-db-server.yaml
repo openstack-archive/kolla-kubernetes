@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   config.json: |
     {
-        "command": "start-ovsdb-server 0.0.0.0  br-ex enp13s0 ",
+        "command": "start-ovsdb-server 0.0.0.0  br-ex eth1 ",
         "config_files": []
     }
 kind: ConfigMap
