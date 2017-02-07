@@ -126,7 +126,7 @@ class TestTemplatesTest(base.BaseTestCase):
 
         def func(args, o):
             # Check if template is yaml
-            y = yaml.load(o)
+            y = yaml.safe_load(o)
             js = '[]'
             try:
                 # If there is an alpha init container, validate it is proper
