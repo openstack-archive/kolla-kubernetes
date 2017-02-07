@@ -40,7 +40,7 @@ class TestK8sTemplatesTest(base.BaseTestCase):
         for package in packages:
             print("    %s" % package)
             with open(os.path.join(microdir, package, 'Chart.yaml')) as stream:
-                version = yaml.load(stream)['version']
+                version = yaml.safe_load(stream)['version']
 
             cmd = "%s template %s/%s-%s.tgz" % (helmbin, repodir,
                                                 package, version)
@@ -48,7 +48,7 @@ class TestK8sTemplatesTest(base.BaseTestCase):
             if err:
                 raise err
 
-            l = yaml.load_all(out)
+            l = yaml.safe_load_all(out)
             for y in l:
                 js = '[]'
                 try:

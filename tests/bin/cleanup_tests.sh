@@ -20,7 +20,7 @@ if [ $(openstack user list --column Name --format value | grep $1 | wc -l) -ne 0
    exit -1
 fi
 user='root'
-password=$(python -c 'import yaml; print yaml.load(open("/etc/kolla/passwords.yml"))["database_password"]')
+password=$(python -c 'import yaml; print yaml.safe(open("/etc/kolla/passwords.yml"))["database_password"]')
 if [ $(kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$password -e 'show databases;' | grep $1 | wc -l) -ne 0 ]; then
    exit -1
 fi

@@ -128,7 +128,7 @@ def main():
     srcdir = os.path.join(path, "..", "helm")
     microdir = os.path.join(srcdir, "microservice")
     microservices = os.listdir(microdir)
-    values = yaml.load(open(os.path.join(srcdir, "all_values.yaml")))
+    values = yaml.safe_load(open(os.path.join(srcdir, "all_values.yaml")))
 
     packages = [p for p in microservices if _isdir(microdir, p)]
     count = 1
