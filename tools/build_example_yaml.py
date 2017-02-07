@@ -50,7 +50,7 @@ def main():
     for package in [p for p in microservices if _isdir(microdir, p)]:
         values_file = os.path.join(microdir, package, "values.yaml")
         with open(values_file, "r") as f:
-            package_values = yaml.load(f)
+            package_values = yaml.safe_load(f)
             merge_dict(values, package_values)
 
     # Remove some package specific values:

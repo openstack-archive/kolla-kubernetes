@@ -165,7 +165,7 @@ class ResourceTemplate(ResourceBase):
 
                 # Execute the command
                 out, err = utils.ExecUtils.exec_command(cmd)
-                y = yaml.load(out)
+                y = yaml.safe_load(out)
                 y['metadata']['namespace'] = variables[nsname]
 
                 res = y
@@ -175,7 +175,7 @@ class ResourceTemplate(ResourceBase):
                     variables,
                     utils.FileUtils.read_string_from_file(
                         rt.getTemplatePath()))
-                res = yaml.load(raw_doc)
+                res = yaml.safe_load(raw_doc)
 
             if args.debug_container is not None:
                 y = res
@@ -322,7 +322,7 @@ class Resource(ResourceTemplate):
 
     def take_action(self, args):
         tmpl = super(Resource, self).take_action(args, skip_and_return=True)
-        y = yaml.load(tmpl)
+        y = yaml.safe_load(tmpl)
         kind = y['kind']
         if kind == 'List':
             first_item = y['items'][0]
