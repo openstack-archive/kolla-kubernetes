@@ -9,7 +9,7 @@
 
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
-    exit -1
+    exit 1
 }
 
 OS_TOKEN=$(openstack token issue -f value -c id)
