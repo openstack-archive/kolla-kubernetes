@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-# NOTE(sdake) This bash exits -1 during a failure. During the dev
+# NOTE(sdake) This bash exits 1 during a failure. During the dev
               environment setup, cp may is failing resulting in a >0 error
               code returned to the parent script.  This causes the dev
               env to crater.
 
 function endpoints_dump_and_fail {
     cat /tmp/$$.1
-    exit -1
+    exit 1
 }
 
 OS_TOKEN=$(openstack token issue -f value -c id)
