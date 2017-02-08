@@ -12,8 +12,8 @@ if [ "x$PIPELINE" == "xperiodic" ]; then
 fi
 
 if [ "x$BRANCH" == "xt" ]; then
-    echo Version: $BRANCH is not enabled yet.
-    exit 0
+    echo Version: $BRANCH is not implemented yet.
+    exit -1
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
@@ -29,7 +29,7 @@ fi
 
 if [ "x$4" == "xhelm-operator" ]; then
     echo "helm operator job is not yet implemented..."
-    exit 0
+    exit -1
 fi
 
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
