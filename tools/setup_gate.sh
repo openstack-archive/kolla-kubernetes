@@ -13,7 +13,7 @@ fi
 
 if [ "x$BRANCH" == "xt" ]; then
     echo Version: $BRANCH is not implemented yet.
-    exit -1
+    exit 1
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
@@ -29,7 +29,7 @@ fi
 
 if [ "x$4" == "xhelm-operator" ]; then
     echo "helm operator job is not yet implemented..."
-    exit -1
+    exit 1
 fi
 
 trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
@@ -145,7 +145,7 @@ if [ "x$4" == "xceph-multi" ]; then
           [ $count -gt 30 ] && break
           sleep 1
         done
-        [ $count -gt 30 ] && echo Node failed to join. && exit -1
+        [ $count -gt 30 ] && echo Node failed to join. && exit 1
         set -xe
         kubectl get nodes
         kubectl label node $NODENAME kolla_compute=true
