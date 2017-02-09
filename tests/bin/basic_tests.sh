@@ -121,9 +121,13 @@ wait_for_vm test2
 
 openstack volume create --size 1 test
 
+openstack volume list
+
 wait_for_cinder test creating
 
 openstack server add volume test test
+
+openstack volume list
 
 FIP=$(openstack floating ip create external -f value -c floating_ip_address)
 FIP2=$(openstack floating ip create external -f value -c floating_ip_address)
@@ -142,6 +146,7 @@ sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
     StrictHostKeyChecking=no cirros@$FIP ping -c 4 $FIP2
 
 openstack volume show test -f value -c status
+openstack volume list
 TESTSTR=$(uuidgen)
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
@@ -153,16 +158,19 @@ sudo umount /tmp/mnt
 EOF
 chmod +x /tmp/$$
 
+openstack volume list
 scp_to_vm $FIP /tmp/$$ /tmp/script
 ssh_to_vm $FIP "/tmp/script"
 
 openstack server remove volume test test
+openstack volume list
 wait_for_cinder test in-use
 wait_for_cinder test detaching
+openstack volume list
 openstack server add volume test2 test
 wait_for_cinder test available
 wait_for_cinder test attaching
-
+openstack volume list
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
@@ -172,7 +180,7 @@ sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
-
+openstack volume list
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
