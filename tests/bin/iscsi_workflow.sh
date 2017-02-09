@@ -17,76 +17,84 @@ function general_config {
 }
 
 function iscsi_config {
-    general_config
     common_iscsi_config
 }
 
 common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
 
+general_config > /tmp/general_config.yaml
+iscsi_config > /tmp/iscsi_config.yaml
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
-        --name $x-pv --set "element_name=$x,storage_provider=host"
+        --name $x-pv --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml 
     helm install kolla/$x-pvc --version $VERSION --namespace kolla \
-        --name $x-pvc --set "element_name=$x,storage_provider=host"
+        --name $x-pvc --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
 helm install kolla/memcached-svc --version $VERSION \
-    --namespace kolla --name memcached-svc --set element_name=memcached
+    --namespace kolla --name memcached-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/mariadb-svc --version $VERSION \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
+    --namespace kolla --name mariadb-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/rabbitmq-svc --version $VERSION \
-    --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+    --namespace kolla --name rabbitmq-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/keystone-admin-svc --version $VERSION \
     --namespace kolla --name keystone-admin-svc \
-    --set "admin_port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/keystone-public-svc --version $VERSION \
     --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/keystone-internal-svc --version $VERSION \
     --namespace kolla --name keystone-internal-svc \
-    --set "element_name=keystone-internal"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-api-svc --version $VERSION \
     --namespace kolla --name glance-api-svc \
-    --set "port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-registry-svc --version $VERSION \
-    --namespace kolla --name glance-registry-svc
+    --namespace kolla --name glance-registry-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-server-svc --version $VERSION \
     --namespace kolla --name neutron-server-svc \
-    --set "port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-api-svc --version $VERSION \
     --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-api-svc --version $VERSION \
     --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,port_external=true,external_vip=$IP"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-metadata-svc --version $VERSION \
     --namespace kolla --name nova-metadata-svc \
-    --set "element_name=nova"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-novncproxy-svc --version $VERSION \
-    --namespace kolla --name nova-novncproxy-svc --set element_name=nova
+    --namespace kolla --name nova-novncproxy-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/horizon-svc --version $VERSION \
-    --namespace kolla --name horizon-svc --set element_name=horizon
+    --namespace kolla --name horizon-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/mariadb-init-element-job --version $VERSION \
     --namespace kolla --name mariadb-init-element-job \
-    --set "$common_vars,element_name=mariadb"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/rabbitmq-init-element-job --version $VERSION \
     --namespace kolla --name rabbitmq-init-element-job \
-    --set "$common_vars,element_name=rabbitmq,cookie=67"
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -96,53 +104,48 @@ for x in mariadb rabbitmq; do
 done
 
 helm install kolla/mariadb-statefulset --version $VERSION \
-    --namespace kolla --name mariadb-statefulset --set "$common_vars,element_name=mariadb"
+    --namespace kolla --name mariadb-statefulset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/memcached-deployment --version $VERSION \
-    --set "$common_vars,element_name=memcached" \
-    --namespace kolla --name memcached-deployment
+    --namespace kolla --name memcached-deployment \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/rabbitmq-statefulset --version $VERSION \
-    --namespace kolla --name rabbitmq-statefulset --set "$common_vars,element_name=rabbitmq"
+    --namespace kolla --name rabbitmq-statefulset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install --debug kolla/keystone-create-db-job --version $VERSION \
-    --set element_name=keystone \
-    --namespace kolla \
-    --name keystone-create-db \
-    --set "$common_vars"
+helm install kolla/keystone-create-db-job --version $VERSION \
+    --namespace kolla --name keystone-create-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-create-db
 
-helm install --debug kolla/keystone-manage-db-job --version $VERSION \
-    --namespace kolla \
-    --name keystone-manage-db \
-    --set "$common_vars"
+helm install kolla/keystone-manage-db-job --version $VERSION \
+    --namespace kolla --name keystone-manage-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-manage-db
 
-kollakube template bootstrap keystone-endpoints
-
-helm install --debug kolla/keystone-create-endpoints-job --version $VERSION \
-    --namespace kolla \
-    --set $common_vars,dns_name=$IP \
-    --name keystone-create-endpoints-job
+helm install kolla/keystone-create-endpoints-job --version $VERSION \
+    --namespace kolla --name keystone-create-endpoints-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install --debug kolla/keystone-api-deployment --version $VERSION \
-    --set "$common_vars" \
-    --namespace kolla \
-    --name keystone
+helm install kolla/keystone-api-deployment --version $VERSION \
+    --namespace kolla --name keystone \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -150,59 +153,80 @@ $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
 
 helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
-    --set "$common_vars,type=network,selector_key=kolla_controller" \
-    --namespace kolla --name openvswitch-ovsdb-network
+    --namespace kolla --name openvswitch-ovsdb-network \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
-    --set $common_vars,type=network,selector_key=kolla_controller \
-    --namespace kolla --name openvswitch-vswitchd-network
+    --namespace kolla --name openvswitch-vswitchd-network \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 kollakube res create bootstrap openvswitch-set-external-ip
 
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-service --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-service --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/cinder-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-user --set "$common_vars"
+helm install kolla/cinder-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/glance-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name glance-create-keystone-user --set "$common_vars"
+helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-servicev2 \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/neutron-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-user --set "$common_vars"
+helm install kolla/glance-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name glance-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/nova-create-keystone-service-job --debug --version $VERSION \
-    --namespace kolla --name nova-create-keystone-service --set "$common_vars"
+helm install kolla/neutron-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name neutron-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/nova-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name nova-create-keystone-user --set "$common_vars"
+helm install kolla/nova-create-keystone-service-job --version $VERSION \
+    --namespace kolla --name nova-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-kollakube res create bootstrap \
-    cinder-create-keystone-endpoint-publicv2
+helm install kolla/nova-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name nova-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name cinder-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/cinder-create-keystone-endpoint-publicv2-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-publicv2 \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name glance-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name nova-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name neutron-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 helm install kolla/neutron-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -214,47 +238,57 @@ for x in cinder glance neutron nova; do
 done
 
 helm install kolla/glance-create-db-job --version $VERSION \
-    --namespace kolla --name glance-create-db --set "$common_vars"
+    --namespace kolla --name glance-create-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-manage-db-job --version $VERSION \
-    --namespace kolla --name glance-manage-db --set "$common_vars"
+    --namespace kolla --name glance-manage-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-db-job --version $VERSION \
-    --set "$common_vars,element_name=cinder" \
-    --namespace kolla \
-    --name cinder-create-db
+    --namespace kolla --name cinder-create-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-manage-db-job --version $VERSION \
-    --set "$common_vars,element_name=cinder,image_tag=3.0.1" \
-    --namespace kolla \
-    --name cinder-manage-db
-
-kollakube res create bootstrap \
-    cinder-create-keystone-endpoint-internalv2 \
-    cinder-create-keystone-endpoint-adminv2
+    --namespace kolla --name cinder-manage-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/cinder-create-keystone-endpoint-internalv2-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-internalv2 \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/cinder-create-keystone-endpoint-adminv2-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-adminv2 \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name nova-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name nova-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 for x in nova nova-api neutron; do
     helm install kolla/$x-create-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-create-db
+        --namespace kolla --name $x-create-db \
+        --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
 $DIR/tools/pull_containers.sh kolla
@@ -262,8 +296,8 @@ $DIR/tools/wait_for_pods.sh kolla
 
 for x in nova-api neutron; do
     helm install kolla/$x-manage-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-manage-db
+        --namespace kolla --name $x-manage-db \
+        --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
 $DIR/tools/pull_containers.sh kolla
@@ -286,9 +320,10 @@ for x in nova-api cinder neutron glance; do
     helm delete --purge $x-manage-db
 done
 
-kollakube res delete bootstrap \
-    cinder-create-keystone-endpoint-internalv2 \
-    cinder-create-keystone-endpoint-adminv2
+helm delete --purge cinder-create-keystone-servicev2
+helm delete --purge cinder-create-keystone-endpoint-publicv2
+helm delete --purge cinder-create-keystone-endpoint-internalv2
+helm delete --purge cinder-create-keystone-endpoint-adminv2
 
 for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-service
@@ -297,82 +332,82 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-helm install kolla/cinder-volume-lvm-daemonset --debug --version $VERSION \
-    --set "$common_vars,element_name=cinder-volume" --namespace kolla \
-    --name cinder-volume-lvm-daemonset --values <(iscsi_config)
+helm install kolla/cinder-volume-lvm-daemonset --version $VERSION \
+    --namespace kolla --name cinder-volume-lvm-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-api-deployment --version $VERSION \
-    --set "$common_vars,image_tag=3.0.1" --namespace kolla \
-    --name cinder-api
+    --namespace kolla --name cinder-api \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-scheduler-statefulset --version $VERSION \
-    --set "$common_vars,element_name=cinder-scheduler,image_tag=3.0.1" \
-    --namespace kolla --name cinder-scheduler
+    --namespace kolla --name cinder-scheduler \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-api-deployment --version $VERSION \
-    --set "$common_vars" \
-    --namespace kolla --name glance-api-deployment
+    --namespace kolla --name glance-api-deployment \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/glance-registry-deployment --version $VERSION \
-    --set "$common_vars" --namespace kolla \
-    --name glance-registry
+    --namespace kolla --name glance-registry \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm ls
 
 for x in nova-api nova-novncproxy; do
     helm install kolla/$x-deployment --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
+      --namespace kolla --name $x \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
+      --namespace kolla --name $x \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
 helm install kolla/horizon-deployment --version $VERSION \
-    --set "$common_vars,element_name=horizon" \
-    --namespace kolla --name horizon-deployment
+    --namespace kolla --name horizon-deployment \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-server-deployment --version $VERSION \
-    --set "$common_vars" \
-    --namespace kolla --name neutron-server
+    --namespace kolla --name neutron-server \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/neutron-dhcp-agent-daemonset --version $VERSION \
-    --set "$common_vars,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-dhcp-agent-daemonset
+    --namespace kolla --name neutron-dhcp-agent-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-metadata-agent-daemonset --version $VERSION \
-    --set "$common_vars,type=network" \
-    --namespace kolla --name neutron-metadata-agent-network
+    --namespace kolla --name neutron-metadata-agent-network \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-l3-agent-daemonset --version $VERSION \
-    --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-l3-agent-network
+    --namespace kolla --name neutron-l3-agent-network \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/neutron-openvswitch-agent-daemonset --version $VERSION \
-    --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-openvswitch-agent-network
+    --namespace kolla --name neutron-openvswitch-agent-network \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-libvirt-daemonset --version $VERSION \
-    --set "$common_vars,element_name=nova-libvirt,libvirt_ceph=false" \
-    --namespace kolla --name nova-libvirt-daemonset
+    --namespace kolla --name nova-libvirt-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/nova-compute-daemonset --version $VERSION \
-    --set "$common_vars,tunnel_interface=$tunnel_interface,element_name=nova-compute,nova_ceph=false" \
-    --namespace kolla --name nova-compute-daemonset
+    --namespace kolla --name nova-compute-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/iscsid-daemonset --version $VERSION --debug\
-    --set "$common_vars,element_name=iscsid" \
-    --namespace kolla --name iscsid-daemonset
+helm install kolla/iscsid-daemonset --version $VERSION \
+    --namespace kolla --name iscsid-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/tgtd-daemonset --version $VERSION --debug\
-    --set "$common_vars,element_name=tgtd" \
-    --namespace kolla --name tgtd-daemonset
+helm install kolla/tgtd-daemonset --version $VERSION \
+    --namespace kolla --name tgtd-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 #kollakube res create pod keepalived
 
