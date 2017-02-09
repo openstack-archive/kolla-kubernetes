@@ -2,7 +2,6 @@ global:
     kolla:
         all:
             kubernetes_entrypoint: true
-            element_name: rabbitmq
         rabbitmq:
             init_element:
                 job:
