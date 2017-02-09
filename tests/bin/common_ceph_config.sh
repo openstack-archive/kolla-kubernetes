@@ -1,4 +1,7 @@
 function common_ceph_config {
+    echo "global:"
+    echo "  kolla:"
+    echo "    all:"
     echo "      ceph_backend: true"
     echo "      storage_provider: ceph"
     echo "      storage_provider_fstype: xfs"

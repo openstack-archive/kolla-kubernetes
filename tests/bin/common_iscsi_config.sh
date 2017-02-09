@@ -1,4 +1,7 @@
 function common_iscsi_config {
+    echo "global:"
+    echo "  kolla:"
+    echo "    all:"
     echo "      storage_provider: host"
     echo "      storage_provider_fstype: xfs"
     echo "      ceph_backend: false"
