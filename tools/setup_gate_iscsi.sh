@@ -72,5 +72,4 @@ sudo lvs >> $WORKSPACE/logs/lvs.txt
 cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
 
 tests/bin/basic_tests.sh
-tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
