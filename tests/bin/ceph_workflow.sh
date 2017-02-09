@@ -17,52 +17,55 @@ if [ "x$1" == "xceph-multi" ]; then
 fi
 
 base_distro="$2"
-
+gate_job="$1"
 function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
 
 function ceph_config {
-    general_config
-    common_ceph_config $1
+    common_ceph_config $gate_job
 }
 
 common_vars="kube_logger=false,base_distro=$base_distro"
 
 for x in mariadb rabbitmq glance helm-repo; do
-    helm install kolla/$x-pv --debug --version $VERSION \
-        --name $x-pv --set "element_name=$x,storage_provider=ceph" \
-        --values <(ceph_config $1)
-    helm install kolla/$x-pvc --debug --version $VERSION --namespace kolla \
-        --name $x-pvc --set "element_name=$x,storage_provider=ceph"
+    helm install kolla/$x-pv --version $VERSION \
+        --name $x-pv --values <(general_config) --values <(ceph_config)
+    helm install kolla/$x-pvc --version $VERSION --namespace kolla \
+        --name $x-pvc --values <(general_config) --values <(ceph_config)
 done
 
-helm install kolla/helm-repo-svc --debug --version $VERSION \
-    --namespace kolla --name helm-repo-svc --set element_name=helm-repo
+helm install kolla/helm-repo-svc --version $VERSION \
+    --namespace kolla --name helm-repo-svc --set element_name=helm-repo \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/helm-repo-deployment --debug --version $VERSION \
-    --namespace kolla --name helm-repo-deployment --set "$common_vars,element_name=helm-repo"
+helm install kolla/helm-repo-deployment --version $VERSION \
+    --namespace kolla --name helm-repo-deployment --set "element_name=helm-repo" \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/memcached-svc --version $VERSION \
-    --namespace kolla --name memcached-svc --set element_name=memcached
+    --namespace kolla --name memcached-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/mariadb-svc --version $VERSION \
-    --namespace kolla --name mariadb-svc --set element_name=mariadb
+    --namespace kolla --name mariadb-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/rabbitmq-svc --version $VERSION \
-    --namespace kolla --name rabbitmq-svc --set element_name=rabbitmq
+    --namespace kolla --name rabbitmq-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/keystone-admin-svc --version $VERSION \
     --namespace kolla --name keystone-admin-svc \
-    --set "admin_port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/keystone-public-svc --version $VERSION \
     --namespace kolla --name keystone-public-svc \
-    --set "element_name=keystone-public,port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/keystone-internal-svc --version $VERSION \
     --namespace kolla --name keystone-internal-svc \
-    --set "element_name=keystone-internal"
+    --values <(general_config) --values <(ceph_config)
 
 [ "x$1" != "xexternal-ovs" ] &&
     helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
@@ -77,58 +80,53 @@ kollakube res create bootstrap openvswitch-set-external-ip
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-if [ "x$1" != "xhelm-entrypoint" ]; then
-
 helm install kolla/glance-api-svc --version $VERSION \
     --namespace kolla --name glance-api-svc \
-    --set "port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-registry-svc --version $VERSION \
-    --namespace kolla --name glance-registry-svc
+    --namespace kolla --name glance-registry-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-server-svc --version $VERSION \
     --namespace kolla --name neutron-server-svc \
-    --set "port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-api-svc --version $VERSION \
     --namespace kolla --name cinder-api-svc \
-    --set "element_name=cinder,port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-api-svc --version $VERSION \
     --namespace kolla --name nova-api-svc \
-    --set "element_name=nova,port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-metadata-svc --version $VERSION \
     --namespace kolla --name nova-metadata-svc \
-    --set "element_name=nova"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-novncproxy-svc --version $VERSION \
-    --namespace kolla --name nova-novncproxy-svc --set element_name=nova
+    --namespace kolla --name nova-novncproxy-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/horizon-svc --version $VERSION \
-    --namespace kolla --name horizon-svc --set element_name=horizon
+    --namespace kolla --name horizon-svc \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/heat-api-svc --version $VERSION \
     --namespace kolla --name heat-api-svc \
-    --set "element_name=heat,port_external=true,external_vip=$IP"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/heat-cfn-api-svc --version $VERSION \
     --namespace kolla --name heat-cfn-api-svc \
-    --set "element_name=heat-cfn,port_external=true,external_vip=$IP"
-
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-fi
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/mariadb-init-element-job --version $VERSION \
     --namespace kolla --name mariadb-init-element-job \
-    --set "$common_vars,element_name=mariadb"
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/rabbitmq-init-element-job --version $VERSION \
     --namespace kolla --name rabbitmq-init-element-job \
-    --set "$common_vars,element_name=rabbitmq,cookie=67"
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -138,113 +136,121 @@ for x in mariadb rabbitmq; do
 done
 
 helm install kolla/mariadb-statefulset --version $VERSION \
-    --namespace kolla --name mariadb-statefulset --set "$common_vars,element_name=mariadb"
+    --namespace kolla --name mariadb-statefulset \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/memcached-deployment --version $VERSION \
-    --set "$common_vars,element_name=memcached" \
-    --namespace kolla --name memcached-deployment
+    --namespace kolla --name memcached-deployment \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/rabbitmq-statefulset --version $VERSION \
-    --namespace kolla --name rabbitmq-statefulset --set "$common_vars,element_name=rabbitmq"
+    --namespace kolla --name rabbitmq-statefulset \
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install --debug kolla/keystone-create-db-job --version $VERSION \
-    --set element_name=keystone \
+helm install kolla/keystone-create-db-job --version $VERSION \
     --namespace kolla \
     --name keystone-create-db \
-    --set "$common_vars"
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-create-db
 
-helm install --debug kolla/keystone-manage-db-job --version $VERSION \
+helm install kolla/keystone-manage-db-job --version $VERSION \
     --namespace kolla \
     --name keystone-manage-db \
-    --set "$common_vars"
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm delete keystone-manage-db
 
-kollakube template bootstrap keystone-endpoints
-
-helm install --debug kolla/keystone-create-endpoints-job --version $VERSION \
+helm install kolla/keystone-create-endpoints-job --version $VERSION \
     --namespace kolla \
-    --set $common_vars,dns_name=$IP,admin_port_external=true \
-    --name keystone-create-endpoints-job
+    --name keystone-create-endpoints-job \
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install --debug kolla/keystone-api-deployment --version $VERSION \
-    --set "$common_vars" \
+helm install kolla/keystone-api-deployment --version $VERSION \
     --namespace kolla \
-    --name keystone
+    --name keystone \
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
 
-#FIXME temporary until enough service packages are around. then
-#they will get their own test file.
-if [ "x$1" == "xhelm-entrypoint" ]; then
-
-    echo Put test code here.
-
-    exit 0
-fi
-
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-service --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-service \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-service --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-service \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-service-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-service --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-service \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-servicev2 --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-servicev2 \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/cinder-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-user --set "$common_vars"
+helm install kolla/cinder-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-user \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/glance-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name glance-create-keystone-user --set "$common_vars"
+helm install kolla/glance-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name glance-create-keystone-user \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/neutron-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-user --set "$common_vars"
+helm install kolla/neutron-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name neutron-create-keystone-user \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/nova-create-keystone-service-job --debug --version $VERSION \
-    --namespace kolla --name nova-create-keystone-service --set "$common_vars"
+helm install kolla/nova-create-keystone-service-job --version $VERSION \
+    --namespace kolla --name nova-create-keystone-service \
+    --values <(general_config) --values <(ceph_config)
 
-helm install kolla/nova-create-keystone-user-job --debug --version $VERSION \
-    --namespace kolla --name nova-create-keystone-user --set "$common_vars"
+helm install kolla/nova-create-keystone-user-job --version $VERSION \
+    --namespace kolla --name nova-create-keystone-user \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name cinder-create-keystone-endpoint-public \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-publicv2-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-publicv2 --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name cinder-create-keystone-endpoint-publicv2 \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name glance-create-keystone-endpoint-public \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name nova-create-keystone-endpoint-public \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-create-keystone-endpoint-public-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-public --set "$common_vars,external_vip=172.18.0.1"
+    --namespace kolla --name neutron-create-keystone-endpoint-public \
+    --values <(general_config) --values <(ceph_config)
+
 helm install kolla/neutron-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-endpoint-internal \
+    --values <(general_config) --values <(ceph_config)
+
 helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name neutron-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name neutron-create-keystone-endpoint-admin \
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -253,49 +259,60 @@ for x in cinder glance neutron nova; do
 done
 
 helm install kolla/glance-create-db-job --version $VERSION \
-    --namespace kolla --name glance-create-db --set "$common_vars"
+    --namespace kolla --name glance-create-db \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-manage-db-job --version $VERSION \
-    --namespace kolla --name glance-manage-db --set "$common_vars,ceph_backend=true"
+    --namespace kolla --name glance-manage-db \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-db-job --version $VERSION \
-    --set $common_vars,element_name=cinder \
     --namespace kolla \
-    --name cinder-create-db
+    --name cinder-create-db \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-manage-db-job --version $VERSION \
-    --set $common_vars,element_name=cinder \
     --namespace kolla \
-    --name cinder-manage-db
+    --name cinder-manage-db \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-internal \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-internalv2-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-internalv2 --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-internalv2 \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-admin \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-create-keystone-endpoint-adminv2-job --version $VERSION \
-    --namespace kolla --name cinder-create-keystone-endpoint-adminv2 --set "$common_vars"
+    --namespace kolla --name cinder-create-keystone-endpoint-adminv2 \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-endpoint-internal \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name glance-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name glance-create-keystone-endpoint-admin \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-create-keystone-endpoint-internal-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-internal --set "$common_vars"
+    --namespace kolla --name nova-create-keystone-endpoint-internal \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-create-keystone-endpoint-admin-job --version $VERSION \
-    --namespace kolla --name nova-create-keystone-endpoint-admin --set "$common_vars"
+    --namespace kolla --name nova-create-keystone-endpoint-admin \
+    --values <(general_config) --values <(ceph_config)
 
 for x in nova nova-api neutron; do
     helm install kolla/$x-create-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-create-db
+        --namespace kolla \
+        --name $x-create-db \
+        --values <(general_config) --values <(ceph_config)
 done
 
 $DIR/tools/pull_containers.sh kolla
@@ -303,8 +320,9 @@ $DIR/tools/wait_for_pods.sh kolla
 
 for x in nova-api neutron; do
     helm install kolla/$x-manage-db-job --version $VERSION \
-        --set $common_vars,element_name=$x --namespace kolla \
-        --name $x-manage-db
+        --namespace kolla \
+        --name $x-manage-db \
+        --values <(general_config) --values <(ceph_config)
 done
 
 $DIR/tools/pull_containers.sh kolla
@@ -340,84 +358,90 @@ helm delete --purge cinder-create-keystone-endpoint-internalv2
 helm delete --purge cinder-create-keystone-endpoint-adminv2
 
 helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
-    --set "$common_vars,element_name=cinder" --namespace kolla \
-    --name cinder-volume-ceph-statefulset
+    --namespace kolla --name cinder-volume-ceph-statefulset \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-api-deployment --version $VERSION \
-    --set "$common_vars" --namespace kolla \
-    --name cinder-api
+    --namespace kolla --name cinder-api \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/cinder-scheduler-statefulset --version $VERSION \
-    --set "$common_vars,element_name=cinder-scheduler" \
-    --namespace kolla --name cinder-scheduler
+    --namespace kolla --name cinder-scheduler \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-api-deployment --version $VERSION \
-    --set "$common_vars,ceph_backend=true" \
-    --namespace kolla --name glance-api-deployment
+    --namespace kolla --name glance-api-deployment \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/glance-registry-deployment --version $VERSION \
-    --set "$common_vars" --namespace kolla \
-    --name glance-registry
+    --namespace kolla --name glance-registry \
+    --values <(general_config) --values <(ceph_config)
 
 helm ls
 
 for x in nova-api nova-novncproxy; do
     helm install kolla/$x-deployment --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
+      --namespace kolla --name $x \
+      --values <(general_config) --values <(ceph_config)
 done
 
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
-      --set "$common_vars,element_name=$x" \
-      --namespace kolla --name $x
+      --namespace kolla --name $x \
+      --values <(general_config) --values <(ceph_config)
 done
 
 helm install kolla/horizon-deployment --version $VERSION \
-    --set "$common_vars,element_name=horizon" \
-    --namespace kolla --name horizon-deployment
+    --namespace kolla --name horizon-deployment \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-server-deployment --version $VERSION \
-    --set "$common_vars" \
-    --namespace kolla --name neutron-server
+    --namespace kolla --name neutron-server \
+    --values <(general_config) --values <(ceph_config)
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/neutron-dhcp-agent-daemonset --version $VERSION \
-    --set "$common_vars,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-dhcp-agent-daemonset
+    --namespace kolla --name neutron-dhcp-agent-daemonset \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-metadata-agent-daemonset --version $VERSION \
     --set "$common_vars,type=network" \
-    --namespace kolla --name neutron-metadata-agent-network
+    --namespace kolla --name neutron-metadata-agent-network \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-l3-agent-daemonset --version $VERSION \
     --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-l3-agent-network
+    --namespace kolla --name neutron-l3-agent-network \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/neutron-openvswitch-agent-daemonset --version $VERSION \
     --set "$common_vars,type=network,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-openvswitch-agent-network
+    --namespace kolla --name neutron-openvswitch-agent-network \
+    --values <(general_config) --values <(ceph_config)
 
 [ "x$1" == "xceph-multi" ] &&
     helm install kolla/openvswitch-ovsdb-daemonset --version $VERSION \
     --set "$common_vars,type=compute,selector_key=kolla_compute" \
-    --namespace kolla --name openvswitch-ovsdb-compute &&
+    --namespace kolla --name openvswitch-ovsdb-compute \
+    --values <(general_config) --values <(ceph_config) &&
     helm install kolla/neutron-openvswitch-agent-daemonset --version $VERSION \
     --set "$common_vars,type=compute,selector_key=kolla_compute,tunnel_interface=$tunnel_interface" \
-    --namespace kolla --name neutron-openvswitch-agent-compute &&
+    --namespace kolla --name neutron-openvswitch-agent-compute \
+    --values <(general_config) --values <(ceph_config) &&
     helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
     --set $common_vars,type=compute,selector_key=kolla_compute \
-    --namespace kolla --name openvswitch-vswitchd-compute
+    --namespace kolla --name openvswitch-vswitchd-compute \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-libvirt-daemonset --version $VERSION \
-    --set "$common_vars,ceph_backend=true,element_name=nova-libvirt" \
-    --namespace kolla --name nova-libvirt-daemonset
+    --namespace kolla --name nova-libvirt-daemonset \
+    --values <(general_config) --values <(ceph_config)
 
 helm install kolla/nova-compute-daemonset --version $VERSION \
-    --set "$common_vars,ceph_backend=true,tunnel_interface=$tunnel_interface,element_name=nova-compute" \
-    --namespace kolla --name nova-compute-daemonset
+    --namespace kolla --name nova-compute-daemonset \
+    --values <(general_config) --values <(ceph_config)
 
 #kollakube res create pod keepalived
 
