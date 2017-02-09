@@ -1,0 +1,13 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        mariadb:
+            all:
+                element_name: mariadb
+        memcached:
+            all:
+                element_name: memcached
+        rabbitmq:
+            all:
+                element_name: rabbitmq
