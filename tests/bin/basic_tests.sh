@@ -162,7 +162,6 @@ wait_for_cinder test detaching
 openstack server add volume test2 test
 wait_for_cinder test available
 wait_for_cinder test attaching
-
 cat > /tmp/$$ <<EOF
 #!/bin/sh -xe
 mkdir /tmp/mnt
@@ -172,7 +171,7 @@ sudo cp /tmp/mnt/test.txt /tmp
 sudo chown cirros /tmp/test.txt
 EOF
 chmod +x /tmp/$$
-
+openstack volume list
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
