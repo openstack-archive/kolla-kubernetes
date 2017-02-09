@@ -25,6 +25,9 @@ $DIR/helm_build_services.py "$REPODIR"
 helm repo index "$REPODIR"
 helm repo update
 
+$DIR/helm_prebuild_compute_kits.py
+$DIR/helm_build_compute_kits.py "$REPODIR"
+
 kill $PID
 
 helm search | grep '^kollabuild/'
