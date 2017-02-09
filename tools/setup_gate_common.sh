@@ -10,7 +10,7 @@ DISTRO=$1
 CONFIG=$2
 if [ "x$DISTRO" == "xubuntu" ]; then
     sudo apt-get update
-    if [ "x$CONFIG" == "xiscsi" ]; then
+    if [ "x$CONFIG" == "xiscsi" -o "x$CONFIG" == "xhelm-compute-kit" ]; then
        sudo apt-get install lvm2
     fi
     sudo apt-get remove -y open-iscsi
@@ -19,7 +19,7 @@ if [ "x$DISTRO" == "xubuntu" ]; then
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
 else
     sudo yum clean all
-    if [ "x$CONFIG" == "xiscsi" ]; then
+    if [ "x$CONFIG" == "xiscsi" -o "x$CONFIG" == "xhelm-compute-kit" ]; then
        sudo yum remove -y iscsi-initiator-utils
     fi
     sudo yum install -y bridge-utils
