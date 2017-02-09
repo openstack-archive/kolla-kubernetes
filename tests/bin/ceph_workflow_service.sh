@@ -13,12 +13,7 @@ function general_config {
 }
 
 function ceph_config {
-    common_ceph_config $1
-}
-
-function entry_point_config {
-    general_config
-    ceph_config
+    common_ceph_config $gate_job 
 }
 
 tunnel_interface=docker0
@@ -30,34 +25,38 @@ if [ "x$1" == "xceph-multi" ]; then
 fi
 
 base_distro="$2"
+gate_job="$1"
+
+general_config > /tmp/general_config.yaml
+ceph_config > /tmp/ceph_config.yaml
 
 common_vars="kube_logger=false,base_distro=$base_distro"
 
 helm install kolla/mariadb --version $VERSION \
-    --namespace kolla --name mariadb --set "$common_vars,element_name=mariadb" \
-    --values <(entry_point_config $1)
+    --namespace kolla --name mariadb \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/memcached --version $VERSION \
     --namespace kolla --name memcached \
-    --set "$common_vars,element_name=memcached" \
-    --values <(entry_point_config $1)
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/rabbitmq --version $VERSION \
-    --namespace kolla --name rabbitmq --set "$common_vars" \
-    --values <(entry_point_config $1)
+    --namespace kolla --name rabbitmq \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/keystone --version $VERSION \
-    --namespace kolla --name keystone --set "$common_vars,element_name=keystone" \
-    --values <(entry_point_config $1)
+    --namespace kolla --name keystone \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 helm install kolla/openvswitch --version $VERSION \
-  --namespace kolla --name openvswitch --values  <(entry_point_config $1)
+  --namespace kolla --name openvswitch \
+  --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -81,19 +80,20 @@ $DIR/tests/bin/endpoint_test.sh
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
 helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
-    --set "$common_vars,element_name=cinder" --namespace kolla \
-    --name cinder-volume-ceph-statefulset
+    --namespace kolla --name cinder-volume-ceph-statefulset \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/cinder-control --version $VERSION \
-    --namespace kolla --name cinder --set "$common_vars,element_name=cinder" \
-    --values <(entry_point_config $1)
+    --namespace kolla --name cinder \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/glance --version $VERSION \
-    --namespace kolla --name glance --set "$common_vars,element_name=glance" \
-    --values <(entry_point_config $1)
+    --namespace kolla --name glance \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/neutron --version $VERSION \
-    --namespace kolla --name neutron --values  <(entry_point_config $1)
+    --namespace kolla --name neutron \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
@@ -101,17 +101,16 @@ $DIR/tools/wait_for_pods.sh kolla
 helm ls
 
 helm install kolla/nova-control --version $VERSION  --namespace kolla \
-    --name nova-control --set "$common_vars,element_name=nova" \
-    --values <(entry_point_config $1)
+    --name nova-control \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/nova-compute --version $VERSION  --namespace kolla \
-    --name nova-compute --set "$common_vars,element_name=nova" \
-    --values <(entry_point_config $1)
+    --name nova-compute \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/horizon --version $VERSION \
     --namespace kolla --name horizon \
-    --set "$common_vars,element_name=horizon" \
-    --values <(entry_point_config $1)
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 #kollakube res create pod keepalived
 
