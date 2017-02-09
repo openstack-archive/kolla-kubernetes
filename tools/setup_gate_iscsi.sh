@@ -63,6 +63,8 @@ fi
 
 . ~/keystonerc_admin
 
+openstack network agent list
+
 sudo pvs >> $WORKSPACE/logs/pvs.txt
 
 sudo vgs >> $WORKSPACE/logs/vgs.txt
