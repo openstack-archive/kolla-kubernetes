@@ -15,13 +15,13 @@ Install steps
 
 This list of instructions is currently incomplete.
 
-completely remove the following option from /etc/kolla-kubernetes/kolla-kubernetes.yaml
+completely remove the following option from /etc/kolla-kubernetes/kolla-kubernetes.yml
 
 ::
 
     keyring: /etc/ceph/ceph.client.admin.keyring
 
-set the user option in the storage_ceph to 'kolla' in /etc/kolla-kubernetes/kolla-kubernetes.yaml and
+set the user option in the storage_ceph to 'kolla' in /etc/kolla-kubernetes/kolla-kubernetes.yml and
 pool = kollavolumes
 
 Upload ceph.conf and admin key generated from the external ceph while
