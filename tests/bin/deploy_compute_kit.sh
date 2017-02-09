@@ -19,6 +19,10 @@ function entrypoint_config {
 tunnel_interface=docker0
 base_distro="$2"
 
-echo "Not yet implemented. Exiting ..."
+helm install kolla/compute-kit-0.5.0 --version $VERSION \
+    --namespace kolla --name compute-kit-0.5.0 \
+    --values <(entrypoint_config)
 
-exit 1
+$DIR/tools/wait_for_pods.sh kolla 900
+
+$DIR/tools/build_local_admin_keystonerc.sh
