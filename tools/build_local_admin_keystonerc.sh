@@ -1,7 +1,18 @@
 #!/bin/bash -e
 
+# In some cases we need to use external keystone ip address. By default
+# with no parameter passed, the script will behave as before.
+# If 'ext' parameter passed, the script will use external keystone
+# address.
+
+if [ "x$1" == "xext" ]; then
+KEYSTONE_CLUSTER_IP=`kubectl get svc keystone-public --namespace=kolla -o \
+    jsonpath='{.spec.externalIPs[0]}'`
+else
 KEYSTONE_CLUSTER_IP=`kubectl get svc keystone-public --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'`
+fi
+
 KEYSTONE_ADMIN_PASSWD=`grep keystone_admin_password /etc/kolla/passwords.yml \
     | cut -d':' -f2 | sed -e 's/ //'`
 
