@@ -55,6 +55,10 @@ EOF
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
 
+pushd kolla-ansible;
+git checkout 72be1e1d447acbbf555e79f79ed96fc50f4493bf 
+popd
+
 sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
