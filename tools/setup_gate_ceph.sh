@@ -134,9 +134,9 @@ kollakube res create configmap \
 kollakube res create secret nova-libvirt
 
 if [ "x$CONFIG" == "xhelm-entrypoint" ]; then
-   tests/bin/ceph_workflow_service.sh "$4" "$2" "$BRANCH"
+   tests/bin/ceph_workflow_service.sh "$4" "$2"
 else
-   tests/bin/ceph_workflow.sh "$4" "$2" "$BRANCH"
+   tests/bin/ceph_workflow.sh "$4" "$2"
 fi
 
 . ~/keystonerc_admin
