@@ -1,0 +1,47 @@
+From baef948913c8f08c6d1d6b2af2690981cb28b41d Mon Sep 17 00:00:00 2001
+From: Steven Dake <stdake@cisco.com>
+Date: Sat, 11 Feb 2017 21:04:04 -0700
+Subject: [PATCH] Comment out placement in kolla-kubernetes gate
+
+GROAN
+---
+ ansible/roles/nova/templates/nova.conf.j2 | 26 +++++++++++++-------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/ansible/roles/nova/templates/nova.conf.j2 b/ansible/roles/nova/templates/nova.conf.j2
+index 448d1e0..b09cfec 100644
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -218,16 +218,16 @@ api_paste_config = /etc/nova/api-paste.ini
+ [scheduler]
+ max_attempts = 10
+ 
+-[placement]
+-auth_type = password
+-{% if orchestration_engine == 'KUBERNETES' %}
+-auth_url = {{ keystone_admin_url }}
+-{% else %}
+-auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
+-{% endif %}
+-username = {{ placement_keystone_user }}
+-password = {{ placement_keystone_password }}
+-user_domain_name = default
+-project_name = service
+-project_domain_name = default
+-os_region_name = {{ openstack_region_name }}
++#[placement]
++#auth_type = password
++#{% if orchestration_engine == 'KUBERNETES' %}
++#auth_url = {{ keystone_admin_url }}
++#{% else %}
++#auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
++#{% endif %}
++#username = {{ placement_keystone_user }}
++#password = {{ placement_keystone_password }}
++#user_domain_name = default
++#project_name = service
++#project_domain_name = default
++#os_region_name = {{ openstack_region_name }}
+-- 
+2.10.1 (Apple Git-78)
+
