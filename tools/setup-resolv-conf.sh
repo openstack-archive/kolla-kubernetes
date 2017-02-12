@@ -1,11 +1,25 @@
 #!/bin/bash -e
-NAMESPACE=$(kolla-kubernetes resource-template create bootstrap neutron-create-db -o json | jq -r '.metadata.namespace')
-TOOLBOX=$(kolla-kubernetes resource-template create bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
+
+NAMESPACE=$1
 
 function finish {
-    kubectl run -i --rm fetchresolv --restart=Never --namespace=$NAMESPACE --image=$TOOLBOX -- /bin/bash -c 'cat /etc/resolv.conf' | egrep '^search|^nameserver|^options' > /tmp/$$
-    kubectl create configmap resolv-conf --from-file=resolv.conf=/tmp/$$ --namespace $NAMESPACE
-    rm -f /tmp/$$
+DNS_IP=`kubectl get svc --namespace=kube-system -l k8s-app=kube-dns -o \
+        jsonpath='{.items[*].spec.clusterIP}'`
+cat > /tmp/$$ <<EOF
+- apiVersion: v1
+  data:
+    resolv.conf: |
+      search kolla.svc.cluster.local svc.cluster.local cluster.local
+      nameserver $DNS_IP
+      options ndots:5
+  kind: ConfigMap
+  metadata:
+    name: resolv-conf
+    namespace: $NAMESPACE 
+EOF
+
+kubectl create configmap resolv-conf --from-file=resolv.conf=/tmp/$$ --namespace $NAMESPACE
+rm -f /tmp/$$
 }
 
 if [ "x$1" == "x--partial-async" ]; then
