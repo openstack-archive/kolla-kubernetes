@@ -1,0 +1,43 @@
+From ce0aa1dc4aa1d2004c5d9fa71849568dca822b77 Mon Sep 17 00:00:00 2001
+From: Steven Dake <stdake@cisco.com>
+Date: Sat, 11 Feb 2017 23:28:35 -0700
+Subject: [PATCH] Fixes problem with kolla-kubernetes 3.0.2 images
+
+The kolla-kubernetes deliverable uses Newton images, however,
+the kolla-ansible 4.0.0 deliverable is targeted at Ocata.  In
+Ocata, nova requires the placement API implementation.  This
+change is transitory until genconfig is no longer required
+for kolla-kubernetes to operate.
+
+Change-Id: I1c192a01d91b4f507bafadb53b6abb1efdcdb46c
+Closes-Bug: #1663961
+---
+ ansible/roles/nova/templates/nova.conf.j2 | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/ansible/roles/nova/templates/nova.conf.j2 b/ansible/roles/nova/templates/nova.conf.j2
+index 448d1e0..9e58b4c 100644
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -218,16 +218,14 @@ api_paste_config = /etc/nova/api-paste.ini
+ [scheduler]
+ max_attempts = 10
+ 
++{% if orchestration_engine != 'KUBERNETES' %}
+ [placement]
+ auth_type = password
+-{% if orchestration_engine == 'KUBERNETES' %}
+-auth_url = {{ keystone_admin_url }}
+-{% else %}
+ auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
+-{% endif %}
+ username = {{ placement_keystone_user }}
+ password = {{ placement_keystone_password }}
+ user_domain_name = default
+ project_name = service
+ project_domain_name = default
+ os_region_name = {{ openstack_region_name }}
++{% endif %}
+-- 
+2.10.1 (Apple Git-78)
+
