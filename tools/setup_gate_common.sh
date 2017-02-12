@@ -95,7 +95,5 @@ tools/secret-generator.py create
 }
 
 function setup_resolv_conf_common {
-TOOLBOX=$(kollakube tmpl bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
-sudo docker pull $TOOLBOX > /dev/null
-timeout 240s tools/setup-resolv-conf.sh
+tools/setup-resolv-conf.sh kolla
 }
