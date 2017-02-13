@@ -1,0 +1,13 @@
+{{- $searchPath := ":global.kolla.ironic.dnsmasq.deployment:global.kolla.ironic.dnsmasq.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-dnsmasq" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $resourceName := "ironic-dnsmasq" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "ironic" }}
+{{- $serviceType := "dnsmasq" }}
+{{- $portName := "ironic-dnsmasq" }}
+{{- $privileged := true }}

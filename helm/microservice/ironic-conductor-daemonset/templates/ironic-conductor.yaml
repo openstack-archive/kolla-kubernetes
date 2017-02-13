@@ -1,0 +1,152 @@
+{{- $searchPath := ":global.kolla.ironic.conductor.daemonset:global.kolla.ironic.conductor.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $resourceName := "ironic-conductor" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "ironic" }}
+{{- $serviceType := "conductor" }}
+{{- $privileged := true }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-conductor" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-pxe" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFullPXE := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $ironicInterface := include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $url1 :=  include "kolla_val_get_str" (dict "key" "initramf_url" "searchPath" $searchPath "Values" .Values )}}
+{{- $url2 :=  include "kolla_val_get_str" (dict "key" "kernel_url" "searchPath" $searchPath "Values" .Values )}}
+{{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $elementName }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ $elementName }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ $elementName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-ironic-conductor",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/ironic/..data/* /ironic/;
+                  cp -a /config/pxe/..data/* /pxe/;
+                  curl -L {{ $url1 }} -o /tftpboot/ironic-agent.initramfs;
+                  curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
+                  IP=$(ip addr show dev {{ $ironicInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  cmd1=\"/usr/sbin/in.tftpd --verbose --foreground --user root --address \";
+                  cmd2=\":69 --map-file /map-file /tftpboot\";
+                  jq ''.command = \"''$cmd1$IP$cmd2''\"'' /config/pxe/..data/config.json > /pxe/config.json;
+                  sed  -i ''s/\(http:\/\/\).*\(:5050\)/\1ironic-inspector\2/g'' /pxe/default; 
+             "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "conductor-config",
+                   "mountPath": "/config/conductor"
+                },
+                {
+                   "name": "pxe-config",
+                   "mountPath": "/config/pxe"
+                },
+                {
+                   "name": "ironic-conductor-config",
+                   "mountPath": "/ironic/"
+                },
+                {
+                   "name": "ironic-pxe-config",
+                   "mountPath": "/pxe/"
+                },
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - name: pxe 
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFullPXE }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-pxe-config
+            - mountPath: /tftpboot
+              name: tftpboot
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+        - name: main
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-conductor--config
+            - mountPath: /var/lib/ironic
+              name: ironic-persistent-storage
+            - mountPath: /var/run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys
+              name: sys
+            - mountPath: /tftpboot
+              name: tftpboot
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: conductor-config
+          configMap:
+            name: {{ $elementName }}
+        - name: pxe-config
+          configMap:
+            name: ironic-pxe 
+        - name: ironic-pxe-config
+          emptyDir: {}
+        - name: ironic-conductor-config
+          emptyDir: {}
+        - name: ironic-persistent-storage
+          hostPath:
+            path: /var/lib/ironic
+        - name: run
+          hostPath:
+            path: /var/run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: tftpboot
+          emptyDir: {}
+{{- end }}
