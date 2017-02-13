@@ -53,7 +53,8 @@ common_mariadb = [
     'keystone-delete-db-job',
     'neutron-delete-db-job',
     'nova-delete-db-job',
-    'nova-api-delete-db-job'
+    'nova-api-delete-db-job',
+    'ironic-delete-db-job'
 ]
 
 common_create_keystone_admin = [
@@ -89,7 +90,9 @@ common_create_keystone_admin = [
     'neutron-delete-keystone-service-job',
     'neutron-delete-keystone-user-job',
     'nova-delete-keystone-service-job',
-    'nova-delete-keystone-user-job'
+    'nova-delete-keystone-user-job',
+    'ironic-delete-keystone-service-job',
+    'ironic-delete-keystone-user-job'
 ]
 
 

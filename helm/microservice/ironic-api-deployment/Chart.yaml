@@ -1,9 +1,9 @@
-name: nova-api-deployment
-version: 0.5.0-1 #FIXME make this changable
-description: FIXME
-keywords: nova api deployment microservice package
+name: ironic-api-deployment
+version: 0.5.0-1
+description: ironic api deployment microservice package
+keywords:
   - openstack
-  - nova
+  - ironic
   - api
 sources:
   - http://github.com/openstack
