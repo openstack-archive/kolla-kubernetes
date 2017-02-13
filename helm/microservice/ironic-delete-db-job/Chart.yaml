@@ -1,10 +1,11 @@
-name: nova-api-deployment
-version: 0.5.0-1 #FIXME make this changable
-description: FIXME
-keywords: nova api deployment microservice package
+name: ironic-delete-db-job
+version: 0.5.0-1
+description: Helm chart to delete the ironic database
+keywords:
   - openstack
-  - nova
-  - api
+  - ironic
+  - delete
+  - database
 sources:
   - http://github.com/openstack
 engine: gotpl
