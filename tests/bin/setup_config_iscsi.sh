@@ -17,6 +17,16 @@ sed -i "s/^\(kolla_kubernetes_external_vip:\).*/\1 '$IP'/" \
 cat tests/conf/iscsi-all-in-one/kolla_kubernetes_config \
     >> etc/kolla-kubernetes/kolla-kubernetes.yml
 
+#
+# Ironic needs 2 files pulled fron OpenStack
+#
+ironic_url="http://tarballs.openstack.org/ironic-python-agent/tinyipa/files"
+sudo mkdir -p /etc/kolla/config/ironic/
+sudo curl -L $ironic_url/tinyipa-stable-newton.gz \
+          -o /etc/kolla/config/ironic/ironic-agent.initramfs
+sudo curl -L $ironic_url/tinyipa-stable-newton.vmlinuz \
+          -o /etc/kolla/config/ironic/ironic-agent.kernel
+
 kolla-ansible/tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
