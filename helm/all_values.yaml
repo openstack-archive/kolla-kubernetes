@@ -870,3 +870,150 @@ helm-repo-deployment:
                         persistent: true
                         method: "git"
                         url: "https://github.com/openstack/kolla-kubernetes"
+
+ironic-api-svc:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                            port_external: true
+                            node_port_enabled: false
+
+ironic-inspector-svc:
+        global:
+            kolla:
+                ironic:
+                    inspector:
+                        all:
+                            port: 5050 
+                            port_external: true
+                            node_port_enabled: false
+ironic-api-create-db-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            database_name: "ironic"
+                            database_user: "ironic"
+                            image_tag: 3.0.2
+
+ironic-api-delete-db-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            database_name: "ironic"
+                            database_user: "ironic"
+                            image_tag: 3.0.2
+
+ironic-api-deployment:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                            ironic_interface: none
+                            image_tag: 3.0.2
+
+
+ironic-conductor-daemonset:
+        global:
+            kolla:
+                ironic:
+                    conductor:
+                        all:
+                            selector_key: kolla_ironic_conductor
+                            ironic_interface: none
+                            initramf_url: "http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.gz"
+                            kernel_url: "http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.vmlinuz"
+                            image_tag: 3.0.2
+
+ironic-inspector-daemonset:
+        global:
+            kolla:
+                all:
+                ironic:
+                    inspector:
+                        all:
+                            selector_key: kolla_ironic_inspector
+                            image_tag: 3.0.2
+
+ironic-dnsmasq-deployment:
+        global:
+            kolla:
+                ironic:
+                    dnsmasq:
+                        all:
+                            ironic_interface: none
+                            image_tag: 3.0.2
+
+ironic-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    api:
+                        all:
+                            keystone_user_name: ironic
+                            image_tag: 3.0.2
+
+ironic-delete-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    api:
+                        all:
+                            keystone_user_name: ironic
+                            image_tag: 3.0.2
+
+ironic-api-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                        create_keystone_endpoint:
+                           all:
+                                service: ironic-api
+                                image_tag: 3.0.2
+
+ironic-api-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                        create_keystone_endpoint:
+                            all:
+                                service: ironic-api
+                                image_tag: 3.0.2
+
+ironic-api-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                        create_keystone_endpoint:
+                            all:
+                                service: ironic-api
+                                image_tag: 3.0.2
