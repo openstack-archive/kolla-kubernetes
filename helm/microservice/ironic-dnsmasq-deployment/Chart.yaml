@@ -1,10 +1,10 @@
-name: nova-api-deployment
-version: 0.5.0-1 #FIXME make this changable
-description: FIXME
-keywords: nova api deployment microservice package
+name: ironic-dnsmasq-deployment
+version: 0.5.0-1
+description: ironic dnsmask deployment microservice package
+keywords:
   - openstack
-  - nova
-  - api
+  - ironic
+  - dnsmask
 sources:
   - http://github.com/openstack
 engine: gotpl
