@@ -429,7 +429,7 @@ Test everything works by starting a container with an interactive terminal:
 .. end
 
 Once that pod has started and your terminal has connected to it, you can then
-test the Kubenetes DNS service (and by extension the CNI SDN layer) by running:
+test the Kubernetes DNS service (and by extension the CNI SDN layer) by running:
 
 .. path .
 .. code-block:: console
