@@ -30,6 +30,7 @@ enable_cinder_backend_rbd: "no"
 enable_ceph: "no"
 enable_elasticsearch: "yes"
 enable_kibana: "yes"
+enable_ironic: "yes"
 
 #Once this is tested and working, enable
 glance_backend_ceph: "no"
