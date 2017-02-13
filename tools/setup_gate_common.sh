@@ -68,7 +68,7 @@ fi
 
 pushd kolla-ansible;
 pip install pip --upgrade
-pip install "ansible<2.1"
+pip install "ansible"
 pip install "python-openstackclient"
 pip install "python-neutronclient"
 pip install "python-cinderclient"
@@ -77,6 +77,7 @@ pip install pyyaml
 popd
 pip install -r requirements.txt
 pip install .
+pip show jinja2
 }
 
 function setup_helm_common {
