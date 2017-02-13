@@ -31,7 +31,8 @@ tools/setup_kubernetes.sh master
 kubectl taint nodes --all dedicated-
 
 NODE=$(hostname -s)
-kubectl label node $NODE kolla_controller=true kolla_compute=true kolla_storage=true
+kubectl label node $NODE kolla_controller=true kolla_compute=true \
+                         kolla_storage=true kolla_ironic_conductor=true
 
 tests/bin/setup_canal.sh
 
@@ -44,6 +45,8 @@ setup_namespace_secrets
 # Setting up resolv.conf workaround 
 setup_resolv_conf_common
 
+ls -al /etc/kolla/ironic-pxe
+
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
     nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
@@ -52,7 +55,9 @@ kollakube res create configmap \
     openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
     nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived;
+    cinder-scheduler cinder-volume iscsid tgtd keepalived \
+    ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
+    ironic-inspector ironic-inspector-haproxy ironic-pxe;
 kollakube res create secret nova-libvirt
 
 if [ "x$4" == "xhelm-compute-kit" ]; then
@@ -62,6 +67,19 @@ else
 fi
 
 . ~/keystonerc_admin
+
+#
+# Ironic related commands
+#
+pip install -U python-ironicclient 
+kubectl get pods -n kolla | grep ironic
+kubectl get svc -n kolla | grep ironic
+kubectl get configmaps -n kolla | grep ironic
+kubectl describe svc ironic-api -n kolla
+ironic node-list 
+#
+# End of Ironic commands
+#
 
 sudo pvs >> $WORKSPACE/logs/pvs.txt
 
