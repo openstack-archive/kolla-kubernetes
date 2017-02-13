@@ -1,10 +1,11 @@
-name: nova-api-deployment
-version: 0.5.0-1 #FIXME make this changable
-description: FIXME
-keywords: nova api deployment microservice package
+name: ironic-create-db-job
+version: 0.5.0-1
+description: ironic create db microservice package
+keywords:
   - openstack
-  - nova
-  - api
+  - ironic
+  - db
+  - create
 sources:
   - http://github.com/openstack
 engine: gotpl
