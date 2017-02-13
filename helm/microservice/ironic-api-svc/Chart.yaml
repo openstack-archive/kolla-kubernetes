@@ -1,10 +1,11 @@
-name: nova-api-deployment
+name: ironic-api-svc
 version: 0.5.0-1
-description:  
-keywords: nova api deployment microservice package
+description: ironic api svc microservice package 
+keywords:
   - openstack
-  - nova
+  - ironic
   - api
+  - svc
 sources:
   - http://github.com/openstack
 engine: gotpl

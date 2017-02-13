@@ -1,10 +1,10 @@
-name: nova-api-deployment
+name: ironic-create-keystone-endpoint-admin-job
 version: 0.5.0-1
-description:  
-keywords: nova api deployment microservice package
+description: Helm chart for creating ironic keystone admin endpoint
+keywords:
   - openstack
-  - nova
-  - api
+  - ironic
+  - keystone-endpoint-admin
 sources:
   - http://github.com/openstack
 engine: gotpl

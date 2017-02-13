@@ -870,3 +870,122 @@ helm-repo-deployment:
                         persistent: true
                         method: "git"
                         url: "https://github.com/openstack/kolla-kubernetes"
+
+ironic-api-svc:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                            node_port: 6385
+                            port_external: true
+                            node_port_enabled: false
+
+ironic-create-db-job:
+        global:
+            kolla:
+                ironic:
+                    all:
+                        database_name: "ironic"
+                        database_user: "ironic"
+
+ironic-delete-db-job:
+        global:
+            kolla:
+                ironic:
+                    all:
+                        database_name: "ironic"
+                        database_user: "ironic"
+
+ironic-api-deployment:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+
+
+ironic-conductor-daemonset:
+        global:
+            kolla:
+                all:
+                ironic:
+                    compute:
+                        all:
+                            selector_key: kolla_ironic_conductor
+
+ironic-inspector-daemonset:
+        global:
+            kolla:
+                all:
+                ironic:
+                    compute:
+                        all:
+                            selector_key: kolla_ironic_inspector
+
+ironic-pxe-daemonset:
+        global:
+            kolla:
+                all:
+                ironic:
+                    compute:
+                        all:
+                            selector_key: kolla_ironic_pxe
+
+ironic-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    all:
+                        keystone_user_name: ironic
+
+ironic-delete-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    all:
+                        keystone_user_name: ironic
+
+ironic-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                    create_keystone_endpoint:
+                        all:
+                            service: ironic-api
+
+ironic-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+                    create_keystone_endpoint:
+                        all:
+                            service: ironic-api
+
+ironic-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                ironic:
+                    api:
+                        all:
+                            port: 6385

@@ -1,9 +1,9 @@
 name: nova-api-deployment
 version: 0.5.0-1
-description:  
-keywords: nova api deployment microservice package
+description: ironic api deployment microservice package
+keywords:
   - openstack
-  - nova
+  - ironic
   - api
 sources:
   - http://github.com/openstack

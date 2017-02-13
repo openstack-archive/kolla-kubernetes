@@ -1,10 +1,11 @@
-name: nova-api-deployment
+name: ironic-delete-keystone-service-job
 version: 0.5.0-1
-description:  
-keywords: nova api deployment microservice package
+description: Helm chart to delete the ironic keystone service
+keywords:
   - openstack
-  - nova
-  - api
+  - ironic
+  - delete
+  - service
 sources:
   - http://github.com/openstack
 engine: gotpl
