@@ -409,6 +409,54 @@ helm install kolla/tgtd-daemonset --version $VERSION \
     --namespace kolla --name tgtd-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
+#
+# Ironic related activities
+#
+helm install kolla/ironic-api-svc --debug --version $VERSION \
+    --namespace kolla --name ironic-api-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/ironic-create-keystone-service-job --debug --version $VERSION \
+    --namespace kolla --name ironic-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/ironic-create-keystone-user-job --debug --version $VERSION \
+    --namespace kolla --name ironic-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm delete --purge ironic-create-keystone-user
+helm delete --purge ironic-create-keystone-service
+
+helm install kolla/ironic-api-create-db-job --debug --version $VERSION \
+    --namespace kolla --name ironic-api-create-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/ironic-api-manage-db-job --debug --version $VERSION \
+    --namespace kolla --name ironic-api-manage-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/ironic-api-create-keystone-endpoint-internal-job --debug --version $VERSION \
+    --namespace kolla --name ironic-api-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/ironic-api-create-keystone-endpoint-admin-job --debug --version $VERSION \
+    --namespace kolla --name ironic-api-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/ironic-api-create-keystone-endpoint-public-job --debug --version $VERSION \
+    --namespace kolla --name ironic-api-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/ironic-api-deployment --debug --version $VERSION \
+    --namespace kolla --name ironic-api-deployment \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
