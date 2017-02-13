@@ -1,0 +1,154 @@
+{{- $searchPath := ":global.kolla.ironic.conductor.daemonset:global.kolla.ironic.conductor.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $novncSearchPath := "global.kolla.ironic.novncproxy.all" }}
+{{- $resourceName := "ironic-conductor" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "ironic" }}
+{{- $serviceType := "conductor" }}
+{{- $privileged := true }}
+{{- $novncProxyHost := include "kolla_val_get_str" (dict "key" "host" "searchPath" $novncSearchPath "Values" .Values) }}
+{{- $novncProxyPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $novncSearchPath "Values" .Values) }}
+{{- $novncProxyBaseUrl := printf "http://%s:%s/vnc_auto.html" $novncProxyHost $novncProxyPort }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-conductor" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "libvirt_tcp" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "libvirt_tcp" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "key" "ceph_backend" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "ceph_backend" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $tunnelInterface := include "kolla_val_get_str" (dict "key" "tunnel_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- end }}
+{{- $extraDepVolumeMounts := "ironic_conductor_extra_dep_volume_mounts" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $elementName }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ $elementName }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ $elementName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-ironic-conductor",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/..data/* /ironic/;
+                  IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  mkdir -p /var/log/kolla/ironic-init;
+                  echo Using $IP | tee /var/log/kolla/ironic-init/ip.log;
+                  crudini --set /ironic/ironic.conf DEFAULT my_ip $IP;
+                  crudini --set /ironic/ironic.conf vnc novncproxy_host $IP;
+                  crudini --set /ironic/ironic.conf vnc vncserver_listen $IP;
+                  crudini --set /ironic/ironic.conf vnc vncserver_proxyclient_address $IP;
+                  crudini --set /ironic/ironic.conf vnc novncproxy_base_url {{ $novncProxyBaseUrl }};
+             "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "ironic-conductor-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "ironic-config",
+                   "mountPath": "/ironic/"
+                }
+             ]
+          },
+          {
+             "name": "initialize-ironic",
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-ce",
+                 "[ ! -d /var/lib/ironic/instances ] && mkdir -p /var/lib/ironic/instances;
+                  chown ironic: /var/lib/ironic;
+                  chown ironic: /var/lib/ironic/instances;
+             "],
+             "securityContext": {
+                 "runAsUser": 0
+             },
+             "volumeMounts": [
+                {
+                   "name": "ironic-conductor-persistent-storage",
+                   "mountPath": "/var/lib/ironic"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - name: main
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFull }}"
+          securityContext:
+            privileged: true
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-config
+            - mountPath: /var/lib/ironic
+              name: ironic-conductor-persistent-storage
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: ironic-conductor-config
+          configMap:
+            name: {{ $elementName }}
+        - name: ironic-conductor-persistent-storage
+          hostPath:
+            path: /var/lib/ironic
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /var/run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: ironic-config
+          emptyDir: {}
+{{- end }}

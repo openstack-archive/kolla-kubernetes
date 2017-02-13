@@ -1075,3 +1075,34 @@ kolla-kubernetes:
       pod:
       - name: keepalived
         template: services/keepalived/keepalived-daemonset.yml.j2
+  - name: ironic
+    resources:
+      configmap:
+      - name: ironic-api
+      - name: ironic-api-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: ironic-api-haproxy
+          port_name: ironic_api_port
+      - name: ironic-api-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: ironic-api-logging
+          log_format: 'openstack'
+      - name: ironic-conductor
+      - name: ironic-conductor-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: ironic-conductor-logging
+          log_format: 'openstack'
+      - name: ironic-inspector
+      - name: ironic-inspector-logging
+        template: services/common/logging-configmap.yml.j2
+        vars:
+          configmap_name: ironic-inspector-logging
+          log_format: 'openstack'
+      - name: ironic-inspector-haproxy
+        template: services/common/api-haproxy-configmap.yml.j2
+        vars:
+          configmap_name: ironic-inspector-haproxy
+          port_name: ironic_inspector_port
