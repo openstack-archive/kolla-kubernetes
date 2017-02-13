@@ -1,0 +1,87 @@
+{{- $searchPath := ":global.kolla.ironic.conductor.daemonset:global.kolla.ironic.conductor.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $resourceName := "ironic-conductor" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "ironic" }}
+{{- $serviceType := "conductor" }}
+{{- $privileged := true }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "nova-compute" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $tunnelInterface := include "kolla_val_get_str" (dict "key" "tunnel_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $elementName }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ $elementName }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ $elementName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-ironic-conductor",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/..data/* /ironic/;
+                  IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  mkdir -p /var/log/kolla/ironic-init;
+                  echo Using $IP | tee /var/log/kolla/ironic-init/ip.log;
+                  crudini --set /ironic/ironic.conf DEFAULT my_ip $IP;
+             "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "ironic-conductor-config",
+                   "mountPath": "/config/"
+                },
+                {
+                   "name": "ironic-config",
+                   "mountPath": "/ironic/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - name: main
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-config
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: ironic-conductor-config
+          configMap:
+            name: {{ $elementName }}
+        - name: ironic-config
+          emptyDir: {}
+{{- end }}
