@@ -9,7 +9,7 @@ while true; do
         break || true
     sleep 1
     now=$(date +%s)
-    echo 'Waitng for pod to terminate: ' $now
+    echo 'Waiting for pod to terminate: ' $now
     [ $now -gt $end ] && echo containers failed to terminate. && \
         kubectl get pods --namespace $1 && exit -1
 done
