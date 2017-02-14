@@ -1,0 +1,11 @@
+Code-Review+1: Borne Mace <borne.mace@oracle.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+1: Mark Giles <mark.giles@oracle.com>
+Code-Review+2: Steve Wilkerson <sw5822@att.com>
+Workflow+1: Steve Wilkerson <sw5822@att.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 14 Feb 2017 17:49:27 +0000
+Reviewed-on: https://review.openstack.org/431156
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
