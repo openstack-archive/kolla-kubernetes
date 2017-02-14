@@ -67,6 +67,7 @@ else
 fi
 
 pushd kolla-ansible;
+git checkout 6cb4507267e0a368a69c0ba1d02a6e16301ddf43
 pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
