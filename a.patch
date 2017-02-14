@@ -1,0 +1,85 @@
+diff --git a/ansible/roles/neutron/defaults/main.yml b/ansible/roles/neutron/defaults/main.yml
+index 3a849ae9..3e086f3b 100644
+--- a/ansible/roles/neutron/defaults/main.yml
++++ b/ansible/roles/neutron/defaults/main.yml
+@@ -7,7 +7,7 @@ neutron_services:
+     image: "{{ openvswitch_db_image_full }}"
+     enabled: "{{ neutron_plugin_agent == 'openvswitch' }}"
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         inventory_hostname in groups['compute']
+         or (enable_manila | bool and inventory_hostname in groups['manila-share'])
+         or inventory_hostname in groups['neutron-dhcp-agent']
+@@ -26,7 +26,7 @@ neutron_services:
+     image: "{{ openvswitch_vswitchd_image_full }}"
+     enabled: "{{ neutron_plugin_agent == 'openvswitch' }}"
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         inventory_hostname in groups['compute']
+         or (enable_manila | bool and inventory_hostname in groups['manila-share'])
+         or inventory_hostname in groups['neutron-dhcp-agent']
+@@ -57,7 +57,7 @@ neutron_services:
+     enabled: "{{ neutron_plugin_agent == 'openvswitch' }}"
+     privileged: True
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         ( inventory_hostname in groups['compute']
+           or (enable_manila | bool and inventory_hostname in groups['manila-share'])
+           or inventory_hostname in groups['neutron-dhcp-agent']
+@@ -85,7 +85,7 @@ neutron_services:
+     enabled: "{{ neutron_plugin_agent == 'sfc' }}"
+     privileged: True
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         ( inventory_hostname in groups['compute']
+           or (enable_manila | bool and inventory_hostname in groups['manila-share'])
+           or inventory_hostname in groups['neutron-dhcp-agent']
+@@ -115,7 +115,7 @@ neutron_services:
+       NEUTRON_BRIDGE: "br-ex"
+       NEUTRON_INTERFACE: "{{ neutron_external_interface }}"
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         inventory_hostname in groups['compute']
+         or (enable_manila | bool and inventory_hostname in groups['manila-share'])
+         or inventory_hostname in groups['neutron-dhcp-agent']
+@@ -149,7 +149,7 @@ neutron_services:
+     privileged: True
+     enabled: "{{ not enable_neutron_vpnaas | bool }}"
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         inventory_hostname in groups['neutron-l3-agent']
+         or (inventory_hostname in groups['compute'] and enable_neutron_dvr | bool)
+       }}
+@@ -166,7 +166,7 @@ neutron_services:
+     privileged: True
+     enabled: "{{ enable_neutron_lbaas | bool }}"
+     group: "neutron-lbaas-agent"
+-    host_in_groups: "{{ inventory_hostname in groups['neutron-lbaas-agent'] }}"
++    host_in_groups: "{{ True if orchestration_engine == 'KUBERNETES' else inventory_hostname in groups['neutron-lbaas-agent'] }}"
+     volumes:
+       - "{{ node_config_directory }}/neutron-lbaas-agent/:{{ container_config_directory }}/:ro"
+       - "/etc/localtime:/etc/localtime:ro"
+@@ -180,7 +180,7 @@ neutron_services:
+     privileged: True
+     enabled: true
+     host_in_groups: >-
+-      {{
++      {{ True if orchestration_engine == 'KUBERNETES' else
+         inventory_hostname in groups['neutron-metadata-agent']
+         or (inventory_hostname in groups['compute'] and enable_neutron_dvr | bool)
+       }}
+@@ -196,7 +196,7 @@ neutron_services:
+     privileged: True
+     enabled: "{{ enable_neutron_vpnaas | bool }}"
+     group: "neutron-vpnaas-agent"
+-    host_in_groups: "{{ inventory_hostname in groups['neutron-vpnaas-agent'] }}"
++    host_in_groups: "{{ True if orchestration_engine == 'KUBERNETES' else inventory_hostname in groups['neutron-vpnaas-agent'] }}"
+     volumes:
+       - "{{ node_config_directory }}/neutron-vpnaas-agent/:{{ container_config_directory }}/:ro"
+       - "/etc/localtime:/etc/localtime:ro"
