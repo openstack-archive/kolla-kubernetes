@@ -15,3 +15,5 @@ import pbr.version
 
 __version__ = pbr.version.VersionInfo(
     'kolla-kubernetes').version_string()
+
+# LALALALALALA this change does nothing
