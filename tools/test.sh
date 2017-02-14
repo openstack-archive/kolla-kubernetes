@@ -1,5 +1,10 @@
-#!/bin/bash
+#!/bin/bash -x
 [ ! -d ../kolla ] && pushd .. && git clone https://github.com/openstack/kolla-ansible && mv kolla-ansible kolla && popd
+pushd ../kolla;
+git checkout ba023042b29ff2f9b4486d8c3276c62523b95b8a
+git diff 6cb4507267e0a368a69c0ba1d02a6e16301ddf43..96185846c30ab6848a7e9aa0e31219f80e70d26b > foo.patch
+patch -p1 -R < foo.patch
+popd
 grep api_interface_address ../kolla/etc/kolla/globals.yml || echo api_interface_address: "0.0.0.0" >> ../kolla/etc/kolla/globals.yml
 grep tunnel_interface_address ../kolla/etc/kolla/globals.yml || echo tunnel_interface_address: "0.0.0.0" >> ../kolla/etc/kolla/globals.yml
 grep orchestration_engine ../kolla/etc/kolla/globals.yml || echo orchestration_engine: KUBERNETES >> ../kolla/etc/kolla/globals.yml
