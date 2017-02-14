@@ -67,6 +67,8 @@ else
 fi
 
 pushd kolla-ansible;
+git fetch https://git.openstack.org/openstack/kolla-ansible refs/changes/04/424504/4 && git format-patch -1 --stdout FETCH_HEAD > foo.patch
+patch -p1 -R foo.patch
 pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-openstackclient"
