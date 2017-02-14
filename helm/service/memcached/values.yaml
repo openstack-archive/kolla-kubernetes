@@ -2,9 +2,3 @@ global:
     kolla:
         all:
             kubernetes_entrypoint: true
-        memcached:
-            deployment:
-                dependencies:
-                    service:
-                    - memcached
-

@@ -3,14 +3,7 @@ global:
         all:
             kubernetes_entrypoint: true
         mariadb:
-            init-element:
-                job:
-                    dependencies:
-                        service:
-                        - mariadb
             statefulset:
                     dependencies:
                         jobs:
                         - mariadb-init-element
-                        service:
-                        - mariadb
