@@ -6,6 +6,11 @@ grep orchestration_engine ../kolla/etc/kolla/globals.yml || echo orchestration_e
 #sudo yum install -y golang-bin || sudo apt-get install -y golang
 #tools/build_helm_templates.sh
 set -x
+
+cp a.patch ../kolla/
+pushd ../kolla
+patch -p1 < a.patch
+popd
 mkdir -p ~/.helm/plugins/template
 curl -L -o /tmp/helm-template.tar.gz https://github.com/technosophos/helm-template/releases/download/2.1.3%2B1/helm-template-linux.tgz
 curl -L -o /tmp/helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-linux-amd64.tar.gz
