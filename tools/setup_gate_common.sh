@@ -77,6 +77,8 @@ pip install pyyaml
 popd
 pip install -r requirements.txt
 pip install .
+#FIXME Temporary to get the gate to work again while committing fixes.
+pip install jinja2==2.8.0
 }
 
 function setup_helm_common {
