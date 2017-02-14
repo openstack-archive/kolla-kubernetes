@@ -21,4 +21,5 @@ export REPODIR=/tmp/repo.$$
 helm init -c
 helm template || true
 tools/helm_build_all.sh /tmp/repo.$$
+pip install jinja2==2.8.0
 python setup.py test --slowest --testr-args="$1"
