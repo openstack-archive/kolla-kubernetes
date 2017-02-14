@@ -131,7 +131,7 @@ class JinjaUtils(object):
 
         def loader(n):
             if n == name:
-                return template_str
+                return template_str.replace('\\n', ' ')
             else:
                 kkdir = pathfinder.PathFinder.find_kolla_kubernetes_dir()
                 path = os.path.join(kkdir, n)
