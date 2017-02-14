@@ -56,7 +56,7 @@ EOF
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
 
 pushd kolla-ansible;
-git am $WORKSPACE/tools/0001-Fixes-problem-with-kolla-kubernetes-3.0.2-images.patch
+patch -p1 -R < $WORKSPACE/tools/0001-Fixes-problem-with-kolla-kubernetes-3.0.2-images.patch
 popd
 
 sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
