@@ -6,12 +6,7 @@ global:
             init_element:
                 job:
                     cookie: 67
-                    dependencies:
-                        service:
-                        - rabbitmq
             statefulset:
                     dependencies:
                         jobs:
                         - rabbitmq-init-element
-                        service:
-                        - rabbitmq

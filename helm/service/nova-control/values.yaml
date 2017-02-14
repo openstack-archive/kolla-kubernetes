@@ -27,7 +27,6 @@ global:
                         service:
                         - mariadb
                         - keystone-admin
-                        - nova-api
             create_db:
                 job:
                     dependencies:
@@ -92,5 +91,4 @@ global:
                 deployment:
                     dependencies:
                         service:
-                        - nova-novncproxy
                         - nova-api
