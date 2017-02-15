@@ -21,8 +21,8 @@ function iscsi_config {
 general_config > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
-helm install kolla/compute-kit-0.5.0 --version $VERSION \
-    --namespace kolla --name compute-kit-0.5.0 \
+helm install kolla/compute-kit --version $VERSION \
+    --namespace kolla --name compute-kit \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla 900
