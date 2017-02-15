@@ -31,8 +31,8 @@ kollakube res create bootstrap openvswitch-set-external-ip
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-# It looks like after containers are up OpenStack services needs extra time to 
-# come up, givving extra 10 minutes to settle.
+# It looks like after containers are up OpenStack services needs extra time to
+# come up, giving extra 10 minutes to settle.
 sleep 600
 
 $DIR/tools/build_local_admin_keystonerc.sh
