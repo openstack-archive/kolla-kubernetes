@@ -1,6 +1,6 @@
 name: ironic-conductor-daemonset
-version: 0.5.0-1
-description: Ironic conductor microservice package 
+version: 0.6.0-1
+description: Ironic conductor microservice package
 keywords:
   - openstack
   - ironic
