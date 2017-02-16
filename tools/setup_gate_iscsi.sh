@@ -32,7 +32,8 @@ kubectl taint nodes --all dedicated-
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true kolla_compute=true \
-                         kolla_storage=true kolla_ironic_conductor=true
+                         kolla_storage=true kolla_ironic_conductor=true \
+                         kolla_ironic_compute=true
 
 tests/bin/setup_canal.sh
 
@@ -58,7 +59,8 @@ kollakube res create configmap \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
     cinder-scheduler cinder-volume iscsid tgtd keepalived \
     ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
-    ironic-inspector ironic-inspector-haproxy ironic-pxe;
+    ironic-inspector ironic-inspector-haproxy ironic-pxe \
+    nova-compute-ironic;
 kollakube res create secret nova-libvirt
 
 if [ "x$4" == "xhelm-compute-kit" ]; then
@@ -81,6 +83,14 @@ ironic node-list
 #
 # End of Ironic commands
 #
+
+neutron agent-list
+nova service-list
+cinder service-list
+
+user='root'
+password=$(python -c 'import yaml; print yaml.safe_load(open("/etc/kolla/passwords.yml"))["database_password"]')
+kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$password -e 'use nova;  select * from compute_nodes;'
 
 sudo pvs >> $WORKSPACE/logs/pvs.txt
 
