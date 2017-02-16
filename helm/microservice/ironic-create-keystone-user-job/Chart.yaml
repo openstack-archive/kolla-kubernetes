@@ -1,6 +1,6 @@
 name: ironic-create-keystone-user-job
-version: 0.5.0-1
-description: Helm chart for the ironic keystone user 
+version: 0.6.0-1
+description: Helm chart for the ironic keystone user
 keywords:
   - openstack
   - ironic

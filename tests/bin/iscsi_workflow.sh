@@ -453,14 +453,18 @@ helm install kolla/ironic-api-create-keystone-endpoint-public-job --version $VER
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-api-deployment --debug --version $VERSION \
+helm install kolla/ironic-api-deployment --version $VERSION \
     --namespace kolla --name ironic-api-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-conductor-daemonset --debug --version $VERSION \
+helm install kolla/ironic-conductor-daemonset --version $VERSION \
     --namespace kolla --name ironic-conductor-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/nova-compute-ironic-daemonset --version $VERSION \
+    --namespace kolla --name nova-compute-ironic-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
