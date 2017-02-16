@@ -13,4 +13,10 @@ function common_iscsi_config {
     echo "      volume_lvm:"
     echo "        all:"
     echo "          element_name: cinder-volume"
+    echo "    nova:"
+    echo "      all:"
+    echo "        image_tag: 3.0.3"
+    echo "    ironic:"
+    echo "      all:"
+    echo "        image_tag: 3.0.3"
 }
