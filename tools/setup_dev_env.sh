@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-DEV_BASE=/opt
+DEV_BASE=${DEV_BASE:-/opt}
 KOLLA_K8S=${DEV_BASE}/kolla-kubernetes
 
 pushd ${DEV_BASE}
