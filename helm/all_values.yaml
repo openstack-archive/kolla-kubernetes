@@ -463,6 +463,20 @@ nova-compute-daemonset:
                             selector_key: kolla_compute
                             libvirt_tcp: false
 
+nova-compute-ironic-daemonset:
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                nova:
+                    novncproxy:
+                        all:
+                            host: nova-novncproxy
+                            port: 6080
+                    compute-ironic:
+                        all:
+                            selector_key: kolla_ironic_compute
+
 nova-libvirt-daemonset:
         global:
             kolla:
