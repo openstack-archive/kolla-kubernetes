@@ -59,11 +59,13 @@ helm install kolla/memcached --version $VERSION \
     --namespace kolla --name memcached \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+wait_for_pods kolla mariadb,memcached running,succeeded
+
 helm install kolla/rabbitmq --version $VERSION \
     --namespace kolla --name rabbitmq \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-wait_for_pods kolla mariadb,memcached,rabbitmq running,succeeded
+wait_for_pods kolla rabbitmq running,succeeded
 
 helm install kolla/keystone --version $VERSION \
     --namespace kolla --name keystone \
