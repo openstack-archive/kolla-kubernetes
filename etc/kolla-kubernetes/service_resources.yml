@@ -356,6 +356,7 @@ kolla-kubernetes:
       containers:
       - name: nova-compute
       - name: nova-libvirt
+      - name: nova-compute-ironic
     - name: nova-control
       containers:
       - name: nova-api
@@ -376,6 +377,7 @@ kolla-kubernetes:
         vars:
           configmap_name: nova-api-logging
           log_format: 'openstack'
+      - name: nova-compute-ironic
       - name: nova-compute
       - name: nova-compute-logging
         template: services/common/logging-configmap.yml.j2
