@@ -1,0 +1,10 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Code-Review+2: Steve Wilkerson <sw5822@att.com>
+Workflow+1: Steve Wilkerson <sw5822@att.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 17 Feb 2017 13:45:44 +0000
+Reviewed-on: https://review.openstack.org/410641
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
