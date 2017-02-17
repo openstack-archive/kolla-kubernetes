@@ -6,6 +6,7 @@ TYPE="$3"
 CONFIG="$4"
 BRANCH="$6"
 PIPELINE="$x7"
+IP=172.18.0.1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 . "$DIR/setup_gate_common.sh"
@@ -97,7 +98,15 @@ setup_namespace_secrets
 # Setting up resolv.conf workaround
 setup_resolv_conf_common
 
-tests/bin/build_test_ceph.sh
+tunnel_interface=docker0
+if [ "x$CONFIG" == "xceph-multi" ]; then
+    interface=$(netstat -ie | grep -B1 \
+        $(cat /etc/nodepool/primary_node_private) \
+        | head -n 1 | awk -F: '{print $1}')
+    tunnel_interface=$interface
+fi
+
+tests/bin/build_test_ceph.sh $CONFIG $DISTRO $IP $tunnel_interface
 
 helm install kolla/ceph-admin-pod --version $PACKAGE_VERSION \
     --namespace kolla --name ceph-admin-pod --set kube_logger=false
