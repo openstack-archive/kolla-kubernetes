@@ -1,40 +1,40 @@
 dependencies:
   - name: glance-pv
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-pvc
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-api-svc
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-registry-svc
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-db-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-manage-db-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-keystone-service-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-keystone-user-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-keystone-endpoint-public-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-keystone-endpoint-internal-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-create-keystone-endpoint-admin-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-registry-deployment
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: glance-api-deployment
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1

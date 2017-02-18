@@ -1,10 +1,10 @@
 dependencies:
   - name: neutron-delete-db-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-delete-keystone-service-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-delete-keystone-user-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
