@@ -144,7 +144,7 @@ data:
     memcache_servers = memcached
 
   wsgi-keystone.conf: |
-    Listen 0.0.0.0:5000
+    Listen 0.0.0.0.6.00
     Listen 0.0.0.0:35357
 
     <VirtualHost *:5000>

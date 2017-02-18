@@ -1,40 +1,40 @@
 dependencies:
   - name: neutron-create-db-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-server-svc
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-create-keystone-service-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-create-keystone-endpoint-admin-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-create-keystone-endpoint-internal-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-create-keystone-endpoint-public-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-create-keystone-user-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-manage-db-job
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-server-deployment
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-dhcp-agent-daemonset
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-l3-agent-daemonset
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-metadata-agent-daemonset
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
   - name: neutron-openvswitch-agent-daemonset
     repository: http://localhost:10191
-    version: 0.5.0-1
+    version: 0.6.0-1
