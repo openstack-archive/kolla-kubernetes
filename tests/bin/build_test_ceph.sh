@@ -38,7 +38,7 @@ function wait_for_ceph_bootstrap {
 
 kollakube res create configmap ceph-mon ceph-osd
 
-helm install kolla/test-ceph-init-mon-job --version 0.5.0-1 \
+helm install kolla/test-ceph-init-mon-job --version 0.6.0-1 \
     --namespace kolla \
     --name test-ceph-init-mon-job \
     --values /tmp/general_config.yaml \
