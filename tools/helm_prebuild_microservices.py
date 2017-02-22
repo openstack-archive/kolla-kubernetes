@@ -93,8 +93,8 @@ common_create_keystone_admin = [
 ]
 
 
-def helm_build_package(repodir, srcdir):
-    command_line = "cd %s; helm package %s" % (repodir, srcdir)
+def helm_dep_up(srcdir):
+    command_line = "cd %s; helm dep up" % (srcdir)
     try:
         res = subprocess.check_output(
             command_line, shell=True,
@@ -138,12 +138,7 @@ def main():
             sys.stdout.flush()
             count += 1
         pkgchartdir = os.path.join(microdir, package, "charts")
-        try:
-            os.makedirs(pkgchartdir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-        helm_build_package(pkgchartdir, os.path.join(srcdir, "kolla-common"))
+        helm_dep_up(pkgchartdir)
         pkg_values = copy.deepcopy(values['common'])
         if package in common_create_keystone_admin:
             key = 'common-create-keystone-admin'

@@ -1,16 +1,16 @@
 dependencies:
   - name: rabbitmq-pv
-    repository: http://localhost:10191
+    repository: file://../../service/rabbitmq-pv
     version: 0.6.0-1
   - name: rabbitmq-pvc
-    repository: http://localhost:10191
+    repository: file://../../service/rabbitmq-pvc
     version: 0.6.0-1
   - name: rabbitmq-svc
-    repository: http://localhost:10191
+    repository: file://../../service/rabbitmq-svc
     version: 0.6.0-1
   - name: rabbitmq-init-element-job
-    repository: http://localhost:10191
+    repository: file://../../service/rabbitmq-init-element-job
     version: 0.6.0-1
   - name: rabbitmq-statefulset
-    repository: http://localhost:10191
+    repository: file://../../service/rabbitmq-statefulset
     version: 0.6.0-1
