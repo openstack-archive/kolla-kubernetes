@@ -1,10 +1,10 @@
 dependencies:
   - name: cinder-volume-lvm-daemonset
-    repository: http://localhost:10191
+    repository: file://../../service/cinder-volume-lvm-daemonset
     version: 0.6.0-1
   - name: iscsid-daemonset
-    repository: http://localhost:10191
+    repository: file://../../service/iscsid-daemonset
     version: 0.6.0-1
   - name: tgtd-daemonset
-    repository: http://localhost:10191
+    repository: file://../../service/tgtd-daemonset
     version: 0.6.0-1
