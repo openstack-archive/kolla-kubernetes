@@ -8,7 +8,7 @@ grep orchestration_engine ../kolla/etc/kolla/globals.yml || echo orchestration_e
 set -x
 mkdir -p ~/.helm/plugins/template
 curl -L -o /tmp/helm-template.tar.gz https://github.com/technosophos/helm-template/releases/download/2.1.3%2B1/helm-template-linux.tgz
-curl -L -o /tmp/helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.1.3-linux-amd64.tar.gz
+curl -L -o /tmp/helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.2.0-linux-amd64.tar.gz
 mkdir -p ~/bin
 tar --strip-components 1 -C ~/bin linux-amd64/helm -zxf /tmp/helm.tar.gz
 tar -C ~/.helm/plugins/template/ -zxf /tmp/helm-template.tar.gz

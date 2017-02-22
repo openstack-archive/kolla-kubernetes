@@ -91,7 +91,6 @@ function setup_helm_common {
 tools/setup_helm.sh
 
 tools/helm_build_all.sh ~/.helm/repository/kolla
-helm repo remove kollabuild
 tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
 helm update
 helm search
