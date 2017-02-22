@@ -1,37 +1,37 @@
 dependencies:
   - name: mariadb
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: rabbitmq
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: memcached
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: keystone
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: glance
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: openvswitch
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: neutron
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: cinder-control
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: cinder-volume-lvm
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: nova-compute
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: nova-control
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
   - name: horizon
-    repository: http://localhost:10191
+    repository: file://../../service/
     version: 0.6.0-1
