@@ -77,6 +77,10 @@ pip install pyyaml
 popd
 pip install -r requirements.txt
 pip install .
+sudo cat > /etc/kolla/config/nova.conf <<"EOF"
+[DEFAULT]
+use_neutron = True
+EOF
 }
 
 function setup_helm_common {
