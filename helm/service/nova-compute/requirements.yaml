@@ -1,7 +1,7 @@
 dependencies:
   - name: nova-compute-daemonset
-    repository: http://localhost:10191
+    repository: file://../../microservice/nova-compute-daemonset
     version: 0.6.0-1
   - name: nova-libvirt-daemonset
-    repository: http://localhost:10191
+    repository: file://../../microservice/nova-libvirt-daemonset
     version: 0.6.0-1
