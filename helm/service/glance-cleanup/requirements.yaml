@@ -1,10 +1,10 @@
 dependencies:
   - name: glance-delete-db-job
-    repository: http://localhost:10191
+    repository: file://../../service/glance-delete-db-job
     version: 0.6.0-1
   - name: glance-delete-keystone-service-job
-    repository: http://localhost:10191
+    repository: file://../../service/glance-delete-keystone-service-job
     version: 0.6.0-1
   - name: glance-delete-keystone-user-job
-    repository: http://localhost:10191
+    repository: glance-delete-keystone-user-job
     version: 0.6.0-1

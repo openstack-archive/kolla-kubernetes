@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
-HELM_VERSION=2.1.3
+HELM_VERSION=2.2.0
 
 curl http://storage.googleapis.com/kubernetes-helm/helm-v$HELM_VERSION-linux-amd64.tar.gz | sudo tar --strip-components 1 -C /usr/bin linux-amd64/helm -zxf -
 mkdir -p ~/.kube
