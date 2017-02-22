@@ -9,25 +9,16 @@ if [ "x$REPODIR" == "x" ]; then
     exit 1
 fi
 
-$DIR/helm_buildrepo.sh "$REPODIR" &
-export PID=$!
-trap "kill $PID" TERM
+mkdir -p "$REPODIR"
 
 $DIR/helm_prebuild_microservices.py
 $DIR/helm_build_microservices.py "$REPODIR"
 
-helm repo index "$REPODIR"
-helm repo update
-
 $DIR/helm_prebuild_services.py
 $DIR/helm_build_services.py "$REPODIR"
-
-helm repo index "$REPODIR"
-helm repo update
 
 $DIR/helm_prebuild_compute_kits.py
 $DIR/helm_build_compute_kits.py "$REPODIR"
 
-kill $PID
-
-helm search | grep '^kollabuild/'
+helm repo index "$REPODIR"
+helm repo update
