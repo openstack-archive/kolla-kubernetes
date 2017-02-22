@@ -1,0 +1,9 @@
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 22 Feb 2017 13:39:44 +0000
+Reviewed-on: https://review.openstack.org/436734
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
