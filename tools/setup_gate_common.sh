@@ -77,6 +77,14 @@ pip install pyyaml
 popd
 pip install -r requirements.txt
 pip install .
+sudo mkdir -p /etc/kolla/config
+# NOTE (sbezverk) Added as a workaround since kolla-ansible master had
+# use_neutron config option removed. Next 4 lines can be removed after
+# kolla_kubernetes stop using mitake 2.0.X images.
+sudo bash -c 'cat << EOF > /etc/kolla/config/nova.conf
+[DEFAULT]
+use_neutron = True
+EOF'
 }
 
 function setup_helm_common {
