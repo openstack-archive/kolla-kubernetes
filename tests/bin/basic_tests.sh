@@ -178,4 +178,18 @@ scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
 
+# TODO: implement it
+# openstack role add --project service --user admin heat_stack_owner
+# export OS_PROJECT_NAME=service
+cat > /tmp/$$ <<EOF
+heat_template_version: 2015-04-30
+resources:
+  the_resource:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: TestServerGroup
+EOF
+# openstack stack create -t /tmp/$$ TestServerGroup
+# openstack stack list | grep CREATE_COMPLETE
+
 diff -u <(echo $TESTSTR) /tmp/$$.2
