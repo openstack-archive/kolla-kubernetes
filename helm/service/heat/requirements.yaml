@@ -1,0 +1,49 @@
+dependencies:
+  - name: heat-api-svc
+    repository: file://../../microservice/heat-api-svc
+    version: 0.6.0-1
+  - name: heat-cfn-api-svc
+    repository: file://../../microservice/heat-cfn-api-svc
+    version: 0.6.0-1
+  - name: heat-create-db-job
+    repository: file://../../microservice/heat-create-db-job
+    version: 0.6.0-1
+  - name: heat-manage-db-job
+    repository: file://../../microservice/heat-manage-db-job
+    version: 0.6.0-1
+  - name: heat-create-keystone-user-job
+    repository: file://../../microservice/heat-create-keystone-user-job
+    version: 0.6.0-1
+  - name: heat-create-keystone-service-job
+    repository: file://../../microservice/heat-create-keystone-service-job
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-service-job
+    repository: file://../../microservice/heat-cfn-create-keystone-service-job
+    version: 0.6.0-1
+  - name: heat-create-keystone-endpoint-admin-job
+    repository: file://../../microservice/heat-create-keystone-endpoint-admin-job
+    version: 0.6.0-1
+  - name: heat-create-keystone-endpoint-public-job
+    repository: file://../../microservice/heat-create-keystone-endpoint-public-job
+    version: 0.6.0-1
+  - name: heat-create-keystone-endpoint-internal-job
+    repository: file://../../microservice/heat-create-keystone-endpoint-internal-job
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-admin-job
+    repository: file://../../microservice/heat-cfn-create-keystone-endpoint-admin-job
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-public-job
+    repository: file://../../microservice/heat-cfn-create-keystone-endpoint-public-job
+    version: 0.6.0-1
+  - name: heat-cfn-create-keystone-endpoint-internal-job
+    repository: file://../../microservice/heat-cfn-create-keystone-endpoint-internal-job
+    version: 0.6.0-1
+  - name: heat-api-deployment
+    repository: file://../../microservice/heat-api-deployment
+    version: 0.6.0-1
+  - name: heat-api-cfn-deployment
+    repository: file://../../microservice/heat-api-cfn-deployment
+    version: 0.6.0-1
+  - name: heat-engine-statefulset
+    repository: file://../../microservice/heat-engine-statefulset
+    version: 0.6.0-1
