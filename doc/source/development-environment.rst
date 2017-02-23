@@ -476,8 +476,9 @@ container will not be able to connect to the vagrant kubernetes cluster.
 
 The kolla-kubernetes and kolla-ansible project should be checked out into
 the same base directory as halcyon-vagrant-kubernetes.  The default assumed
-in kolla-kubernetes/tools/Dockerfile is ~/devel.  If that is not the case
-in your environment then change that value in Dockerfile.
+in kolla-kubernetes/tools/build_dev_image.sh is ~/devel.  If that is not the
+case in your environment then set the environment variable dev_path to the
+path appropriate for you.
 
 .. path .
 .. code-block:: console
@@ -485,7 +486,7 @@ in your environment then change that value in Dockerfile.
     git clone https://github.com/openstack/kolla-kubernetes.git
     git clone https://github.com/openstack/kolla-ansible.git
 
-    # Edit kolla-kubernetes/tools/Dockerfile to match development base dir
+    # Set dev_path environment variable to match your development base dir
 
     kolla-kubernetes/tools/build_dev_image.sh
     kolla-kubernetes/tools/run_dev_image.sh
