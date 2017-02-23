@@ -1,0 +1,87 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        heat:
+            create_db:
+                job:
+                    dependencies:
+                        service:
+                        - mariadb
+            manage_db:
+                job:
+                    dependencies:
+                        service:
+                        - mariadb
+                        jobs:
+                        - heat-create-db
+            create_keystone_user:
+                job:
+                    dependencies:
+                        jobs:
+                        - heat-create-keystone-service
+                        - heat-cfn-create-keystone-service
+                        service:
+                        - keystone-admin
+            create_keystone_service:
+                job:
+                    dependencies:
+                        service:
+                        - keystone-admin
+            create_keystone_endpoint:
+                public:
+                    job:
+                        dependencies:
+                            jobs:
+                            - heat-create-keystone-service
+                            - heat-cfn-create-keystone-service
+                            - heat-create-keystone-user
+                            - heat-create-keystone-endpoint-internal
+                            - heat-create-keystone-endpoint-admin
+                            - heat-cfn-create-keystone-endpoint-internal
+                            - heat-cfn-create-keystone-endpoint-admin
+                            service:
+                            - keystone-admin
+                internal:
+                    job:
+                        dependencies:
+                            jobs:
+                            - heat-create-keystone-service
+                            - heat-cfn-create-keystone-service
+                            - heat-create-keystone-user
+                            - heat-create-keystone-endpoint-admin
+                            - heat-cfn-create-keystone-endpoint-admin
+                            service:
+                            - keystone-admin
+                admin:
+                    job:
+                        dependencies:
+                            jobs:
+                            - heat-create-keystone-service
+                            - heat-cfn-create-keystone-service
+                            - heat-create-keystone-user
+                            service:
+                            - keystone-admin
+            api:
+                deployment:
+                    dependencies:
+                        jobs:
+                        - heat-create-keystone-endpoint-public
+                        - heat-create-keystone-endpoint-internal
+                        - heat-create-keystone-endpoint-admin
+                        - heat-cfn-create-keystone-endpoint-public
+                        - heat-cfn-create-keystone-endpoint-internal
+                        - heat-cfn-create-keystone-endpoint-admin
+                        - heat-create-db
+                        - heat-manage-db
+                        service:
+                        - mariadb
+                        - keystone-admin
+                svc:
+                    port_external: true
+            engine:
+                statefulset:
+                    dependencies:
+                        service:
+                        - heat-api
+                        - heat-cfn-api
