@@ -71,9 +71,9 @@ function wait_for_cinder {
 
 HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'):80/
-wait_for_http $HORIZON_URL
-curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
-    jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
+#wait_for_http $HORIZON_URL
+#curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
+#    jsonpath='{.spec.clusterIP}'`:80/ | grep 'OpenStack Dashboard'
 
 # Test that endpoint list works correctly
 timeout 120s openstack endpoint list

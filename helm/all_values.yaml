@@ -347,10 +347,6 @@ memcached-deployment:
 mariadb-init-element-job:
         global:
             element_name: mariadb
-            kolla:
-                mariadb:
-                    all:
-                        image_tag: 3.0.2
 
 mariadb-statefulset:
         global:
@@ -360,7 +356,6 @@ mariadb-statefulset:
                     all:
                         database_user: root
                         port: 3306
-                        image_tag: 3.0.2
 
 mariadb-svc:
         global:
@@ -841,25 +836,12 @@ tgtd-daemonset:
             kolla:
                 all:
                     storage_interface: eth0
-            kolla:
-                tgtd:
-                    all:
-                        image_tag: 3.0.2
-
-iscsid-daemonset:
-        global:
-            kolla:
-                iscsid:
-                    all:
-                        image_tag: 3.0.2
 
 cinder-volume-lvm-daemonset:
         global:
             kolla:
                 cinder:
                     volume_lvm:
-                        all:
-                            image_tag: 3.0.2
                         daemonset:
                             lvm_backends: []
 
@@ -875,7 +857,6 @@ helm-repo-deployment:
             kolla:
                 helm-repo:
                     all:
-                        image_tag: 3.0.2
                         port: 8879
                         address: 0.0.0.0
                         pvc_name: "helm-repo"
