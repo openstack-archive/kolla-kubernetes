@@ -55,12 +55,21 @@ kollakube res create configmap \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
     cinder-scheduler cinder-volume iscsid tgtd keepalived;
 
+if [ "x$4" == "xironic" ]; then
+kollakube res create configmap \
+    ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
+    ironic-inspector ironic-inspector-haproxy ironic-pxe \
+    nova-compute-ironic;
+fi
+
 kollakube res create secret nova-libvirt
 
 if [ "x$4" == "xhelm-compute-kit" ]; then
     tests/bin/deploy_compute_kit.sh "$4" "$2" "$BRANCH"
+elif [ "x$4" == "xironic" ]; then
+    tests/bin/iscsi_ironic_workflow.sh "$4" "$2" "$BRANCH"
 else
-    tests/bin/iscsi_workflow.sh "$4" "$2" "$BRANCH"
+    tests/bin/iscsi_generic_workflow.sh "$4" "$2" "$BRANCH"
 fi
 
 . ~/keystonerc_admin

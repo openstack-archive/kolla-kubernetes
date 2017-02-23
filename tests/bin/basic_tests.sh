@@ -32,6 +32,7 @@ function wait_for_http {
     set +ex
     count=0
     while true; do
+        curl -Lsf "$1"
         curl -Lsf "$1" > /dev/null
         [ $? -eq 0 ] && break
         sleep 1
