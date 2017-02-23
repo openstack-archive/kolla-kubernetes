@@ -3,14 +3,13 @@
 VERSION=0.6.0-1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-IP=172.18.0.1
 
 . "$DIR/tests/bin/common_workflow_config.sh"
+if [ "x$branch" == "x3" ]; then
+. "$DIR/tests/bin/common_iscsi_config_v3.sh"
+else
 . "$DIR/tests/bin/common_iscsi_config.sh"
-
-tunnel_interface=docker0
-
-base_distro="$2"
+fi
 
 function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
