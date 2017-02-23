@@ -912,7 +912,6 @@ ironic-api-create-db-job:
                         all:
                             database_name: "ironic"
                             database_user: "ironic"
-                            image_tag: 3.0.2
 
 ironic-api-delete-db-job:
         global:
@@ -922,7 +921,6 @@ ironic-api-delete-db-job:
                         all:
                             database_name: "ironic"
                             database_user: "ironic"
-                            image_tag: 3.0.2
 
 ironic-api-manage-db-job:
         global:
@@ -932,7 +930,6 @@ ironic-api-manage-db-job:
                         all:
                             database_name: "ironic"
                             database_user: "ironic"
-                            image_tag: 3.0.2
 
 ironic-api-deployment:
         global:
@@ -941,7 +938,6 @@ ironic-api-deployment:
                     api:
                         all:
                             port: 6385
-                            image_tag: 3.0.2
 
 
 ironic-conductor-daemonset:
@@ -952,7 +948,6 @@ ironic-conductor-daemonset:
                         all:
                             initramf_url: "http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.gz"
                             kernel_url: "http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.vmlinuz"
-                            image_tag: 3.0.2
                             ironic_interface: docker0
 
 ironic-inspector-daemonset:
@@ -962,7 +957,7 @@ ironic-inspector-daemonset:
                 ironic:
                     inspector:
                         all:
-                            image_tag: 3.0.2
+                            ironic_interface: docker0
 
 ironic-dnsmasq-deployment:
         global:
@@ -970,7 +965,6 @@ ironic-dnsmasq-deployment:
                 ironic:
                     dnsmasq:
                         all:
-                            image_tag: 3.0.2
 
 ironic-create-keystone-user-job:
         global:
@@ -983,7 +977,6 @@ ironic-create-keystone-user-job:
                 ironic:
                     all:
                         keystone_user_name: ironic
-                        image_tag: 3.0.2
 
 ironic-delete-keystone-user-job:
         global:
@@ -996,7 +989,6 @@ ironic-delete-keystone-user-job:
                 ironic:
                     all:
                         keystone_user_name: ironic
-                        image_tag: 3.0.2
 
 ironic-api-create-keystone-endpoint-admin-job:
         global:
@@ -1008,7 +1000,6 @@ ironic-api-create-keystone-endpoint-admin-job:
                         create_keystone_endpoint:
                            all:
                                 service: ironic-api
-                                image_tag: 3.0.2
 
 ironic-api-create-keystone-endpoint-internal-job:
         global:
@@ -1020,7 +1011,6 @@ ironic-api-create-keystone-endpoint-internal-job:
                         create_keystone_endpoint:
                             all:
                                 service: ironic-api
-                                image_tag: 3.0.2
 
 ironic-api-create-keystone-endpoint-public-job:
         global:
@@ -1034,4 +1024,3 @@ ironic-api-create-keystone-endpoint-public-job:
                         create_keystone_endpoint:
                             all:
                                 service: ironic-api
-                                image_tag: 3.0.2
