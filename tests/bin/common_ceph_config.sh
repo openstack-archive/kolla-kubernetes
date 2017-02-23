@@ -21,4 +21,7 @@ function common_ceph_config {
     echo "    nova:"
     echo "      all:"
     echo "        ceph_backend: true"
+    echo "    help-repo:"
+    echo "      all:"
+    echo "        image_tag: 3.0.2"
 }

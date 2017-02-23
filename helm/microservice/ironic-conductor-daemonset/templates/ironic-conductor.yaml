@@ -86,6 +86,16 @@ spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
+        - name: debugger 
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFullPXE }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          command: ["sh", "-xec"]
+          args:
+            - tail -f /var/log/kolla/ironic/ironic-conductor.log || true;
         - name: pxe
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           image: "{{ $imageFullPXE }}"
