@@ -1,0 +1,16 @@
+dependencies:
+  - name: heat-api-cfn-deployment
+    repository: http://localhost:10191
+    version: 0.5.0-1
+  - name: heat-api-deployment
+    repository: http://localhost:10191
+    version: 0.5.0-1
+  - name: heat-api-svc
+    repository: http://localhost:10191
+    version: 0.5.0-1
+  - name: heat-api-cfn-api-svc
+    repository: http://localhost:10191
+    version: 0.5.0-1
+  - name: heat-engine-statefulset
+    repository: http://localhost:10191
+    version: 0.5.0-1
