@@ -1,15 +1,20 @@
 #!/bin/bash -xe
 TMP_BUILD_DIR=/tmp/kolla-kubernetes-build
 DEV_BASE=~/devel
-# Set the below values if you ad running behind a proxy
 BUILD_ARGS="--tag kolla/k8s-devenv:latest"
 
+# Set the below environment variables if you are running behind a proxy
 if [ ! "x$http_proxy" == "x" ]; then
     BUILD_ARGS="$BUILD_ARGS --build-arg http_proxy=$http_proxy"
 fi
 
 if [ ! "x$https_proxy" == "x" ]; then
     BUILD_ARGS="$BUILD_ARGS --build-arg https_proxy=$https_proxy"
+fi
+
+# Set the below environment variable if your dev base is not ~/devel
+if [ ! "x$dev_path" == "x" ]; then
+    DEV_BASE = $dev_path
 fi
 
 # delete old build environment if it is still there
