@@ -1,33 +1,42 @@
-#!/bin/bash -xe
-
-VERSION=0.6.0-1
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-IP=172.18.0.1
-
-. "$DIR/tests/bin/common_workflow_config.sh"
-. "$DIR/tests/bin/common_iscsi_config.sh"
-
-tunnel_interface=docker0
-
-base_distro="$2"
-
 function general_config {
-    common_workflow_config $IP $base_distro $tunnel_interface
+#
+#  Passed parameters: $1 - IP, $2 - base_distro,
+#                     $3 - tunnel_interface
+#
+    common_workflow_config $1 $2 $3
 }
 
 function iscsi_config {
     common_iscsi_config
 }
 
-common_vars="ceph_backend=false,kube_logger=false,base_distro=$base_distro,global.kolla.keystone.all.admin_port_external=true"
+function deploy_iscsi_common {
+#
+#  Passed parameters: $1 - IP, $2 - base_distro,
+#                     $3 - tunnel_interface, $4 - branch,
+#                     $5 - config
+#
+VERSION=0.6.0-1
+IP="$1"
+tunnel_interface="$3"
+base_distro="$2"
+branch="$4"
 
-general_config > /tmp/general_config.yaml
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+
+. "$DIR/tests/bin/common_workflow_config.sh"
+if [ "x$branch" == "x3" ]; then
+. "$DIR/tests/bin/common_iscsi_config_v3.sh"
+else
+. "$DIR/tests/bin/common_iscsi_config.sh"
+fi
+
+general_config $IP $base_distro $tunnel_interface > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
-        --name $x-pv --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml 
+        --name $x-pv --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
     helm install kolla/$x-pvc --version $VERSION --namespace kolla \
         --name $x-pvc --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
@@ -415,3 +424,4 @@ $DIR/tools/wait_for_pods.sh kolla
 #kollakube res create pod keepalived
 
 kollakube res delete bootstrap openvswitch-set-external-ip
+}
