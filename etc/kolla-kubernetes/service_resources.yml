@@ -1177,3 +1177,65 @@ kolla-kubernetes:
         vars:
           configmap_name: heat-engine-logging
           log_format: 'openstack'
+      bootstrap:
+      - name: heat-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: public
+          service_auth: openstack_heat_auth
+          description: Openstack orchestration
+          endpoint: heat_public_endpoint
+      - name: heat-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: internal
+          service_auth: openstack_heat_auth
+          description: Openstack orchestration
+          endpoint: heat_internal_endpoint
+      - name: heat-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: admin
+          service_auth: openstack_heat_auth
+          description: Openstack orchestration
+          endpoint: heat_admin_endpoint
+      - name: heat-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: heat
+          role: admin
+          service_auth: openstack_heat_auth
+          secret: heat-keystone-password
+      - name: heat-cfn-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: public
+          service_auth: openstack_heat_auth
+          description: Openstack cloudformation
+          endpoint: heat_cfn_public_endpoint
+      - name: heat-cfn-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: internal
+          service_auth: openstack_heat_auth
+          description: Openstack cloudformation
+          endpoint: heat_cfn_internal_endpoint
+      - name: heat-cfn-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: heat
+          service_type: orchestration
+          interface: admin
+          service_auth: openstack_heat_auth
+          description:  Openstack cloudformation
+          endpoint: heat_cfn_admin_endpoint
