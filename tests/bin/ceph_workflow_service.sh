@@ -158,3 +158,9 @@ helm install kolla/horizon --version $VERSION \
 #kollakube res create pod keepalived
 
 wait_for_pods kolla nova,horizon running,succeeded
+
+helm install kolla/heat --version $VERSION \
+    --namespace kolla --name heat \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+wait_for_pods kolla heat running,succeeded

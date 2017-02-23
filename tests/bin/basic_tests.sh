@@ -69,6 +69,27 @@ function wait_for_cinder {
     set -ex
 }
 
+function wait_for_heat_stack {
+    set +x
+    count=0
+    while true; do
+        stack_status=$(openstack stack show $1 -f value -c stack_status)
+        if [[ $stack_status == "CREATE_COMPLETE" ]]; then
+            break
+        elif [[ $stack_status == "ERROR" ]]; then
+            echo Heat stack create failed.
+            exit -1
+        fi
+        sleep 1
+        count=$((count+1))
+        if [[ $count -gt 15 ]]; then
+            echo Heat stack create timeout.
+            exit -1
+        fi
+    done
+    set -x
+}
+
 HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'):80/
 wait_for_http $HORIZON_URL
@@ -177,5 +198,21 @@ chmod +x /tmp/$$
 scp_to_vm $FIP2 /tmp/$$ /tmp/script
 ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
-
 diff -u <(echo $TESTSTR) /tmp/$$.2
+
+# TODO: implement it
+# Heat basic functional test
+openstack --version
+openstack help
+openstack role create heat_stack_owner
+openstack role add --project admin --user admin heat_stack_owner
+cat > /tmp/$$ <<EOF
+heat_template_version: 2015-04-30
+resources:
+  the_resource:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: TestServerGroup
+EOF
+openstack stack create -t /tmp/$$ TestServerGroup
+wait_for_heat_stack TestServerGroup
