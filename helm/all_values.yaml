@@ -655,7 +655,7 @@ heat-api-svc:
                         all:
                             port: 8004
                             node_port: 8004
-                            port_external: false
+                            port_external: true
                             node_port_enabled: false
 
 heat-cfn-api-svc:
@@ -665,8 +665,8 @@ heat-cfn-api-svc:
                     api_cfn:
                         all:
                             port: 8000
-                            node_port: 8004
-                            port_external: false
+                            node_port: 8000
+                            port_external: true
                             node_port_enabled: false
 
 heat-api-deployment:
