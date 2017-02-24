@@ -96,8 +96,8 @@ Generating Kubernetes Secrets
 =============================
 
 Before using this script, you MUST generate passwords by using
-``generate_passwords.py`` (comes with kolla distribution), if there is no
-``password.yml`` at ``/etc/kolla``, the script will generate an error.
+``generate_passwords.py`` (comes with kolla-ansible distribution), if there is
+no ``password.yml`` at ``/etc/kolla``, the script will generate an error.
 Script accepts 1 parameter: ``create`` or ``delete``.
 
 ::
