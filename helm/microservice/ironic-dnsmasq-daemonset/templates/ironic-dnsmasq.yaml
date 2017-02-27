@@ -1,0 +1,98 @@
+{{- $searchPath := ":global.kolla.ironic.dnsmasq.daemonset:global.kolla.ironic.dnsmasq.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $resourceName := "ironic-dnsmasq" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $serviceName := "ironic" }}
+{{- $serviceType := "dnsmasq" }}
+{{- $privileged := true }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-dnsmasq" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $ironicInterface := include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $url1 :=  include "kolla_val_get_str" (dict "key" "initramf_url" "searchPath" $searchPath "Values" .Values )}}
+{{- $url2 :=  include "kolla_val_get_str" (dict "key" "kernel_url" "searchPath" $searchPath "Values" .Values )}}
+{{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $elementName }}
+  labels:
+    component: {{ $serviceName }}
+    system: {{ $elementName }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: {{ $serviceName }}
+        system: {{ $elementName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-ironic-dnsmasq",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /config/ironic/..data/* /ironic/;
+                  curl -L {{ $url1 }} -o /tftpboot/ironic-agent.initramfs;
+                  curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
+                  IP=$(ip addr show dev {{ $ironicInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+                  jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/dnsmasq/..data/config.json > /ironic/config.json;
+                  sed  -i ''s|\\(http://\\).*\\(:5050\\)|\\1ironic-inspector\\2|g'' /ironic/default; 
+             "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla/"
+                },
+                {
+                   "name": "dnsmasq-config",
+                   "mountPath": "/config/ironic"
+                },
+                {
+                   "name": "ironic-dnsmasq-config",
+                   "mountPath": "/ironic/"
+                },
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - name: main
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFull }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-dnsmasq-config
+            - mountPath: /tftpboot
+              name: tftpboot
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: dnsmasq-config
+          configMap:
+            name: {{ $elementName }}
+        - name: ironic-dnsmasq-config
+          emptyDir: {}
+        - name: tftpboot
+          emptyDir: {}
+{{- end }}
