@@ -39,7 +39,8 @@ pod_http_termination = [
     'glance-registry-deployment',
     'heat-api-cfn-deployment',
     'heat-api-deployment',
-    'ironic-api-deployment'
+    'ironic-api-deployment',
+    'ironic-inspector-deployment'
 ]
 
 common_mariadb = [
@@ -51,13 +52,16 @@ common_mariadb = [
     'glance-create-db-job',
     'ironic-api-create-db-job',
     'ironic-api-manage-db-job',
+    'ironic-inspector-create-db-job',
+    'ironic-inspector-manage-db-job',
     'cinder-delete-db-job',
     'glance-delete-db-job',
     'keystone-delete-db-job',
     'neutron-delete-db-job',
     'nova-delete-db-job',
     'nova-api-delete-db-job',
-    'ironic-api-delete-db-job'
+    'ironic-api-delete-db-job',
+    'ironic-inspector-delete-db-job'
 ]
 
 common_create_keystone_admin = [
@@ -66,6 +70,11 @@ common_create_keystone_admin = [
     'ironic-api-create-keystone-endpoint-public-job',
     'ironic-api-create-keystone-endpoint-internal-job',
     'ironic-api-create-keystone-endpoint-admin-job',
+    'ironic-inspector-create-keystone-service-job',
+    'ironic-inspector-create-keystone-user-job',
+    'ironic-inspector-create-keystone-endpoint-public-job',
+    'ironic-inspector-create-keystone-endpoint-internal-job',
+    'ironic-inspector-create-keystone-endpoint-admin-job',
     'neutron-create-keystone-service-job',
     'neutron-create-keystone-endpoint-public-job',
     'neutron-create-keystone-endpoint-internal-job',
@@ -99,6 +108,8 @@ common_create_keystone_admin = [
     'neutron-delete-keystone-user-job',
     'nova-delete-keystone-service-job',
     'nova-delete-keystone-user-job',
+    'ironic-inspector-delete-keystone-service-job',
+    'ironic-inspector-delete-keystone-user-job',
     'ironic-delete-keystone-service-job',
     'ironic-delete-keystone-user-job'
 ]
