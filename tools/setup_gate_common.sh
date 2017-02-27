@@ -28,6 +28,10 @@ fi
 function setup_bridge {
 sudo brctl addbr dns0
 sudo ifconfig dns0 172.19.0.1 netmask 255.255.255.0
+sudo brctl addbr net1
+sudo ifconfig net1 172.21.0.1 netmask 255.255.255.0
+sudo brctl addbr net2
+sudo ifconfig net2 172.22.0.1 netmask 255.255.255.0
 sudo systemctl restart unbound
 sudo systemctl status unbound
 sudo netstat -pnl
