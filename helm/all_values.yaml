@@ -885,6 +885,9 @@ ironic-inspector-svc:
                             port: 5050
                             port_external: true
                             node_port_enabled: false
+                            ironic_provision: true
+                            ironic_inspector_provision_vip: 10.1.0.1
+
 ironic-api-create-db-job:
         global:
             kolla:
