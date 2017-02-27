@@ -1,0 +1,11 @@
+name: ironic-inspector-deployment
+version: 0.6.0-1
+description: ironic inspector deployment microservice package
+keywords:
+  - openstack
+  - ironic
+  - inspector
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
