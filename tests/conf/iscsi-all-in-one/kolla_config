@@ -18,6 +18,7 @@ nova_api_database_address: "mariadb"
 neutron_database_address: "mariadb"
 cinder_database_address: "mariadb"
 ironic_database_address: "mariadb"
+ironic_inspector_database_address: "mariadb"
 rabbitmq_servers: "rabbitmq"
 
 openstack_logging_debug: "True"
