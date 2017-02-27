@@ -53,6 +53,7 @@ ironic
 # Ironic related commands
 #
 pip install -U python-ironicclient
+pip install -U python-ironic-inspector-client
 kubectl get pods -n kolla | grep ironic
 kubectl get svc -n kolla | grep ironic
 kubectl get configmaps -n kolla | grep ironic
@@ -66,3 +67,5 @@ wait_for_ironic_node
 openstack baremetal node list
 node_id=$(openstack baremetal node list -c "UUID" -f value)
 openstack baremetal node show $node_id
+
+openstack baremetal introspection rule list
