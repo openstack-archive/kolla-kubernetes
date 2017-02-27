@@ -885,6 +885,9 @@ ironic-inspector-svc:
                             port: 5050
                             port_external: true
                             node_port_enabled: false
+                            ironic_provision: true
+                            ironic_inspector_provision_vip: 10.1.0.1
+
 ironic-api-create-db-job:
         global:
             kolla:
@@ -970,6 +973,32 @@ ironic-delete-keystone-user-job:
                 ironic:
                     all:
                         keystone_user_name: ironic
+
+ironic-inspector-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    inspector:
+                        all:
+                            keystone_user_name: ironic-inspector
+
+ironic-inspector-delete-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                ironic:
+                    inspector:
+                        all:
+                            keystone_user_name: ironic-inspector
 
 ironic-api-create-keystone-endpoint-admin-job:
         global:
