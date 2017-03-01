@@ -46,8 +46,8 @@ virtualenv .venv
 
 cat > /tmp/clonemap <<"EOF"
 clonemap:
- - name: openstack/kolla
-   dest: kolla
+ - name: openstack/kolla-ansiblw
+   dest: kolla-ansible
 EOF
 
 [ -x /usr/zuul-env/bin/zuul-cloner ] && \
@@ -56,9 +56,11 @@ EOF
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
 
-sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
-sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
-sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
+echo SDAKE PATH IS `pwd`
+echo SDAKE DIR contains `ls -l`
+
+#sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla-ansible
+#sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 
 if [ -f /etc/redhat-release ]; then
     sudo yum install -y crudini jq sshpass bzip2
@@ -67,19 +69,18 @@ else
     sudo apt-get install -y crudini jq sshpass bzip2
 fi
 
-pushd kolla-ansible;
-pip install pip --upgrade
-pip install "ansible<2.1"
-pip install "python-cinderclient==1.11.0"
-pip install "python-openstackclient"
-pip install "python-neutronclient"
-pip install "selenium"
-pip install -r requirements.txt
+sudo pip install pip --upgrade
+sudo pip install ansible
+sudo pip instlal `pwd`/kolla-ansible/ `pwd`/kolla-kubernetes/
 pip install pyyaml
-popd
-pip install -r requirements.txt
-pip install .
+pip install selenium
+pip install python-neutronclient
+pip install python-openstackclient
+
+sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+sudo cp -aR `pwd`/kolla-kubernetes/etc/kolla-kubernetes /etc
 sudo mkdir -p /etc/kolla/config
+
 # NOTE (sbezverk) Added as a workaround since kolla-ansible master had
 # use_neutron config option removed. Next 4 lines can be removed after
 # kolla_kubernetes stop using mitake 2.0.X images.
