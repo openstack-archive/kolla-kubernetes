@@ -99,7 +99,7 @@ CONFIG_SEARCH_PATHS = [
     '/etc/kolla-kubernetes',
     # Then development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 '../kolla/etc/kolla')),
+                                 '../kolla-ansible/etc/kolla')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  './etc/kolla-kubernetes')),
 ]
@@ -108,13 +108,13 @@ CONFIG_SEARCH_PATHS = [
 KOLLA_SEARCH_PATHS = [
     # Search installation paths first
     os.path.abspath(os.path.join(PathFinder.find_installed_root(),
-                                 './share/kolla')),
-    '/usr/share/kolla',
+                                 './share/kolla-ansible')),
+    '/usr/share/kolla-ansible',
     # Then search development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 '../kolla')),
+                                 '../kolla-ansible')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 'kolla')),
+                                 'kolla-ansible')),
 ]
 
 # prioritize directories to search for kolla-kubernetes sources
