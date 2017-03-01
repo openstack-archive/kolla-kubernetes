@@ -1,8 +1,8 @@
 #!/bin/bash
-[ ! -d ../kolla ] && pushd .. && git clone https://github.com/openstack/kolla-ansible && mv kolla-ansible kolla && popd
-grep api_interface_address ../kolla/etc/kolla/globals.yml || echo api_interface_address: "0.0.0.0" >> ../kolla/etc/kolla/globals.yml
-grep tunnel_interface_address ../kolla/etc/kolla/globals.yml || echo tunnel_interface_address: "0.0.0.0" >> ../kolla/etc/kolla/globals.yml
-grep orchestration_engine ../kolla/etc/kolla/globals.yml || echo orchestration_engine: KUBERNETES >> ../kolla/etc/kolla/globals.yml
+[ ! -d ../kolla-ansible ] && pushd .. && git clone https://github.com/openstack/kolla-ansible && cp -r kolla-ansible/etc/kolla/ /etc/kolla && popd
+grep api_interface_address ../kolla-ansible/etc/kolla/globals.yml || echo api_interface_address: "0.0.0.0" >> /etc/kolla/globals.yml
+grep tunnel_interface_address ../kolla-ansible/etc/kolla/globals.yml || echo tunnel_interface_address: "0.0.0.0" >> /etc/kolla/globals.yml
+grep orchestration_engine ../kolla-ansible/etc/kolla/globals.yml || echo orchestration_engine: KUBERNETES >> /etc/kolla/globals.yml
 #sudo yum install -y golang-bin || sudo apt-get install -y golang
 #tools/build_helm_templates.sh
 set -x
@@ -21,4 +21,4 @@ export REPODIR=/tmp/repo.$$
 helm init -c
 helm template || true
 tools/helm_build_all.sh /tmp/repo.$$
-python setup.py test --slowest --testr-args="$1"
+python setup.py test  --testr-args="$1"
