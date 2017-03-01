@@ -57,7 +57,6 @@ EOF
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
 
 sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
-sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 
 if [ -f /etc/redhat-release ]; then
@@ -67,18 +66,15 @@ else
     sudo apt-get install -y crudini jq sshpass bzip2
 fi
 
-pushd kolla-ansible;
 pip install pip --upgrade
-pip install "ansible<2.1"
-pip install "python-cinderclient==1.11.0"
-pip install "python-openstackclient"
-pip install "python-neutronclient"
-pip install "selenium"
-pip install -r requirements.txt
+pip install ansible
+pip install -r kolla-ansible/requirements.txt
+pip install kolla-ansible/
 pip install pyyaml
-popd
-pip install -r requirements.txt
-pip install .
+pip install selenium
+pip install python-neutronclient
+pip install python-openstackclient
+
 sudo mkdir -p /etc/kolla/config
 # NOTE (sbezverk) Added as a workaround since kolla-ansible master had
 # use_neutron config option removed. Next 4 lines can be removed after
