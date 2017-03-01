@@ -1,0 +1,31 @@
+dependencies:
+  - name: ironic-api-svc
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-create-db-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-manage-db-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-create-keystone-service-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-create-keystone-user-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-create-keystone-endpoint-admin-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-create-keystone-endpoint-internal-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-create-keystone-endpoint-public-job
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-api-deployment
+    repository: http://localhost:10191
+    version: 0.6.0-1
+  - name: ironic-conductor-daemonset
+    repository: http://localhost:10191
+    version: 0.6.0-1
