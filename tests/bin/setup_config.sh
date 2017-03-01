@@ -1,3 +1,4 @@
+| sudo tee -a /etc/kolla/globals.yml
 #!/bin/bash -xe
 
 NODE=$(hostname -s)
@@ -5,37 +6,32 @@ NODE=$(hostname -s)
 TYPE="$2"
 BRANCH="$3"
 
-echo "kolla_base_distro: $1" >> kolla-ansible/etc/kolla/globals.yml
-cat tests/conf/ceph-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
+echo "kolla_base_distro: $1" | sudo tee -a /etc/kolla/globals.yml
+
 IP=172.18.0.1
-sed -i "s/^\(kolla_external_vip_address:\).*/\1 '$IP'/" \
-    kolla-ansible/etc/kolla/globals.yml
-sed -i "s/^\(kolla_kubernetes_external_vip:\).*/\1 '$IP'/" \
-    etc/kolla-kubernetes/kolla-kubernetes.yml
 
-cat tests/conf/ceph-all-in-one/kolla_kubernetes_config \
-    >> etc/kolla-kubernetes/kolla-kubernetes.yml
+sudo -E sed -i "s/^\(kolla_external_vip_address:\).*/\1 '$IP'/" /etc/kolla/globals.yml
+sudo -E sed -i "s/^\(kolla_kubernetes_external_vip:\).*/\1 '$IP'/" /etc/kolla-kubernetes/kolla-kubernetes.yml
+sudo -E sed -i "s/initial_mon:.*/initial_mon: $NODE/" /etc/kolla-kubernetes/kolla-kubernetes.yml
 
-sed -i "s/initial_mon:.*/initial_mon: $NODE/" \
-    etc/kolla-kubernetes/kolla-kubernetes.yml
+cat tests/conf/ceph-all-in-one/kolla_config | sudo tee -a  /etc/kolla/globals.yml
+cat tests/conf/ceph-all-in-one/kolla_kubernetes_config | sudo tee -a /etc/kolla-kubernetes/kolla-kubernetes.yml
 
 if [ "x$TYPE" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
         $(cat /etc/nodepool/primary_node_private) \
         | head -n 1 | awk -F: '{print $1}')
-    echo "tunnel_interface: $interface" >> kolla-ansible/etc/kolla/globals.yml
-    echo "storage_interface: $interface" >> \
-        etc/kolla-kubernetes/kolla-kubernetes.yml
-    sed -i "s/172.17.0.1/$(cat /etc/nodepool/primary_node_private)/" \
-        etc/kolla-kubernetes/kolla-kubernetes.yml
+    echo "tunnel_interface: $interface" | sudo tee -a /etc/kolla/globals.yml
+    echo "storage_interface: $interface" | sudo tee -a /etc/kolla-kubernetes/kolla-kubernetes.yml
+    sudo sed -i "s/172.17.0.1/$(cat /etc/nodepool/primary_node_private)/" /etc/kolla-kubernetes/kolla-kubernetes.yml
 fi
 
 if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
     echo 'enable_placement: "no"' >> kolla-ansible/etc/kolla/globals.yml
 fi
 
-kolla-ansible/tools/generate_passwords.py
-kolla-ansible/tools/kolla-ansible genconfig
+kolla-genpwd
+kolla-ansible genconfig
 
 # Testing ansible-in-k8s approach
 rm -rf /etc/kolla/neutron*
@@ -49,6 +45,7 @@ rm -rf /etc/kolla/cinder*
 ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
 
+#TODO (this is wrong)
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_user nova
