@@ -116,7 +116,11 @@ helm install kolla/neutron --version $VERSION \
     --namespace kolla --name neutron \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-wait_for_pods kolla cinder,glance,neutron running,succeeded
+helm install kolla/ironic --version $VERSION  --namespace kolla \
+    --name ironic \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+wait_for_pods kolla cinder,glance,neutron,ironic running,succeeded
 
 helm ls
 
