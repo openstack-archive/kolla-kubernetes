@@ -132,6 +132,10 @@ helm install kolla/nova-compute --version $VERSION  --namespace kolla \
     --name nova-compute \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/nova-compute-ironic --version $VERSION  --namespace kolla \
+    --name nova-compute-ironic \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
 helm install kolla/horizon --version $VERSION \
     --namespace kolla --name horizon \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
