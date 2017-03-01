@@ -1,0 +1,11 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        nova:
+            compute-ironic:
+                daemonset:
+                    dependencies:
+                        service:
+                        - nova-metadata
+                        - nova-api
