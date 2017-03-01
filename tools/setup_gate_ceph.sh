@@ -139,7 +139,9 @@ kollakube res create configmap \
     openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
     nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume keepalived;
+    cinder-scheduler cinder-volume keepalived \
+    ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
+    ironic-inspector ironic-inspector-haproxy ironic-pxe;
 kollakube res create secret nova-libvirt
 
 if [ "x$CONFIG" == "xhelm-entrypoint" ]; then

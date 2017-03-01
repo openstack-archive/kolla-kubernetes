@@ -1,0 +1,86 @@
+global:
+    kolla:
+        all:
+            kubernetes_entrypoint: true
+        ironic:
+            create_db:
+                job:
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+            manage_db:
+                job:
+                    dependencies:
+                        SERVICE:
+                        - mariadb
+                        JOBS:
+                        - ironic-create-db
+                        - ironic-create-keystone-endpoint-public
+                        - ironic-create-keystone-endpoint-internal
+                        - ironic-create-keystone-endpoint-admin
+            create_keystone_user:
+                job:
+                    dependencies:
+                        JOBS:
+                        - ironic-create-keystone-service
+                        SERVICE:
+                        - keystone-admin
+            create_keystone_service:
+                job:
+                    dependencies:
+                        SERVICE:
+                        - keystone-admin
+            create_keystone_endpoint:
+                public:
+                    job:
+                        dependencies:
+                            JOBS:
+                            - ironic-create-keystone-service
+                            - ironic-create-keystone-user
+                            - ironic-create-keystone-endpoint-internal
+                            - ironic-create-keystone-endpoint-admin
+                            SERVICE:
+                            - keystone-admin
+                internal:
+                    job:
+                        dependencies:
+                            JOBS:
+                            - ironic-create-keystone-service
+                            - ironic-create-keystone-user
+                            - ironic-create-keystone-endpoint-admin
+                            SERVICE:
+                            - keystone-admin
+                admin:
+                    job:
+                        dependencies:
+                            JOBS:
+                            - ironic-create-keystone-service
+                            - ironic-create-keystone-user
+                            SERVICE:
+                            - keystone-admin
+            api:
+                deployment:
+                    dependencies:
+                        JOBS:
+                        - ironic-create-keystone-endpoint-public
+                        - ironic-create-keystone-endpoint-internal
+                        - ironic-create-keystone-endpoint-admin
+                        - ironic-create-db
+                        - ironic-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin
+                svc:
+                    port_external: true
+            conductor:
+                deployment:
+                    dependencies:
+                        JOBS:
+                        - ironic-create-keystone-endpoint-public
+                        - ironic-create-keystone-endpoint-internal
+                        - ironic-create-keystone-endpoint-admin
+                        - ironic-create-db
+                        - ironic-manage-db
+                        SERVICE:
+                        - mariadb
+                        - keystone-admin

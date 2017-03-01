@@ -16,6 +16,7 @@ nova_database_address: "mariadb"
 nova_api_database_address: "mariadb"
 neutron_database_address: "mariadb"
 cinder_database_address: "mariadb"
+ironic_database_address: "mariadb"
 rabbitmq_servers: "rabbitmq"
 
 openstack_logging_debug: "True"
@@ -28,6 +29,7 @@ enable_cinder_backend_rbd: "yes"
 enable_ceph: "yes"
 enable_elasticsearch: "yes"
 enable_kibana: "yes"
+enable_ironic: "yes"
 
 #Once this is tested and working, enable
 glance_backend_ceph: "yes"
