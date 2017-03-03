@@ -269,11 +269,13 @@ class KubeUtils(object):
             return ('', code)
 
         configuration = YamlUtils.yaml_dict_from_string(res)
+        for context in configuration['contexts']:
+            if context['name'] != current_context:
+                continue
 
-        for cluster in configuration['clusters']:
-            server = cluster['cluster']['server']
-            context = cluster['name']
-            if context == current_context:
-                return server
+            context_cluster = context['context']['cluster']
+            for cluster in configuration['clusters']:
+                if cluster['name'] == context_cluster:
+                    return cluster['cluster']['server']
 
         return None
