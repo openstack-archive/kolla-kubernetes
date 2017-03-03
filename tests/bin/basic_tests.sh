@@ -139,7 +139,7 @@ sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
     StrictHostKeyChecking=no cirros@$FIP curl 169.254.169.254
 
 sshpass -p 'cubswin:)' ssh -o UserKnownHostsFile=/dev/null -o \
-    StrictHostKeyChecking=no cirros@$FIP ping -c 4 $FIP2
+    StrictHostKeyChecking=no cirros@$FIP ping -W 20 -c 10 $FIP2
 
 openstack volume show test -f value -c status
 TESTSTR=$(uuidgen)
