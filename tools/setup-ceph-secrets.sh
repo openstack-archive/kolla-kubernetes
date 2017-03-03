@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 NAMESPACE=$(kolla-kubernetes resource-template create bootstrap ceph-bootstrap-initial-mon -o json | jq -r '.metadata.namespace')
-pods=$(kubectl get pods -a --selector=job-name=test-ceph-init-mon --namespace=$NAMESPACE --output=jsonpath={.items..metadata.name})
+jobname=$1
+pods=$(kubectl get pods -a --selector=job-name=$1 --namespace=$NAMESPACE --output=jsonpath={.items..metadata.name})
 kubectl logs $pods --namespace=$NAMESPACE | grep FETCH_CEPH_KEYS | sed 's/^FETCH_CEPH_KEYS: //' > /tmp/$$
 [ "x$(jq .failed /tmp/$$)" != "xfalse" ] && echo failed to read keys. && exit -1
 

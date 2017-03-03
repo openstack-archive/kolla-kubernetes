@@ -50,7 +50,7 @@ helm install kolla/test-ceph-init-mon-job --version 0.6.0-1 \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-$DIR/tools/setup-ceph-secrets.sh
+$DIR/tools/setup-ceph-secrets.sh test-ceph-init-mon
 
 helm install kolla/test-ceph-mon-daemonset --version 0.6.0-1 \
     --namespace kolla \

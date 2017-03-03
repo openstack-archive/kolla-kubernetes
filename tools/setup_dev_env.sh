@@ -64,7 +64,7 @@ ceph_startup () {
     kubectl create -f /tmp/kube.yaml
     kolla-kubernetes/tools/wait_for_pods.py kolla ceph-bootstrap-initial-mon succeeded
 
-    kolla-kubernetes/tools/setup-ceph-secrets.sh
+    kolla-kubernetes/tools/setup-ceph-secrets.sh ceph-bootstrap-initial-mon
 
     # ceph mon-bootstrap
     kollakube res delete bootstrap ceph-bootstrap-initial-mon
