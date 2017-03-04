@@ -33,7 +33,7 @@ function common_iscsi {
    deploy_iscsi_common  $IP $base_distro $tunnel_interface $branch $config
 }
 
-function ironic {
+function ironic_base {
    deploy_ironic  $IP $base_distro $tunnel_interface $branch $config
 }
 
@@ -45,27 +45,6 @@ common_iscsi
 #
 # Deploying ironic
 #
-ironic
+ironic_base
 
-. ~/keystonerc_admin
-
-#
-# Ironic related commands
-#
-pip install -U python-ironicclient
-pip install -U python-ironic-inspector-client
-kubectl get pods -n kolla | grep ironic
-kubectl get svc -n kolla | grep ironic
-kubectl get configmaps -n kolla | grep ironic
-kubectl describe svc ironic-api -n kolla
-nova service-list
-
-openstack baremetal node create --driver pxe_ipmitool
-
-wait_for_ironic_node
-
-openstack baremetal node list
-node_id=$(openstack baremetal node list -c "UUID" -f value)
-openstack baremetal node show $node_id
-
-openstack baremetal introspection rule list
+exit 0
