@@ -48,6 +48,7 @@ common_mariadb = [
     'neutron-create-db-job',
     'nova-create-db-job',
     'nova-api-create-db-job',
+    'nova-cell0-create-db-job',
     'cinder-create-db-job',
     'glance-create-db-job',
     'ironic-api-create-db-job',
