@@ -32,6 +32,7 @@ sudo brctl addbr net1
 sudo ifconfig net1 172.21.0.1 netmask 255.255.255.0
 sudo brctl addbr net2
 sudo ifconfig net2 172.22.0.1 netmask 255.255.255.0
+sudo brctl addbr tenants
 sudo systemctl restart unbound
 sudo systemctl status unbound
 sudo netstat -pnl
