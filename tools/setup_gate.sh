@@ -31,8 +31,8 @@ if [ "x$4" == "xiscsi" ]; then
 fi
 
 if [ "x$4" == "xhelm-operator" ]; then
-    echo "helm operator job is not yet implemented..."
-    exit -1
+    tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    exit 0
 fi
 
 if [ "x$4" == "xhelm-compute-kit" ]; then
