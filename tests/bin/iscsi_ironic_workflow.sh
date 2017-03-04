@@ -3,21 +3,6 @@
 # Passed parameters $1 - Config, $2 - Distro, $3 - Branch
 #
 
-function wait_for_ironic_node {
-    set +x
-    count=0
-    while true; do
-        val=$(openstack baremetal node list -c "Provisioning State" -f value)
-        node_id=$(openstack baremetal node list -c "UUID" -f value)
-        [ $val == "available" ] && break
-        [ $val == "error" ] && openstack baremetal node show $node_id && exit -1
-        sleep 1;
-        count=$((count+1))
-        [ $count -gt 30 ] && openstack baremetal node show $node_id && exit -1
-    done
-    set -x
-}
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 VERSION=0.6.0-1
 IP=172.18.0.1
@@ -33,7 +18,7 @@ function common_iscsi {
    deploy_iscsi_common  $IP $base_distro $tunnel_interface $branch $config
 }
 
-function ironic {
+function ironic_base {
    deploy_ironic  $IP $base_distro $tunnel_interface $branch $config
 }
 
@@ -45,38 +30,24 @@ common_iscsi
 #
 # Deploying ironic
 #
-ironic
+ironic_base
 
-. ~/keystonerc_admin
 
 #
-# Ironic related commands
+# Placement is not working, debugging it
 #
-pip install python-ironicclient
-pip install python-ironic-inspector-client
-kubectl get pods -n kolla | grep ironic
-kubectl get svc -n kolla | grep ironic
-kubectl get configmaps -n kolla | grep ironic
-kubectl describe svc ironic-api -n kolla
-nova service-list
+kubectl get svc nova-placement-api -n kolla -o yaml
+kubectl describe svc nova-placement-api -n kolla
+kubectl get pods -n kolla | grep placement | \
+        awk '{print "kubectl get pod -n kolla "$1" -o yaml"}' | sh -l
 
-openstack baremetal node create --driver pxe_ipmitool
+kubectl get pods -n kolla | grep placement | \
+        awk '{print "kubectl describe pod -n kolla "$1}' | sh -l
 
-wait_for_ironic_node
+OS_TOKEN=$(openstack token issue -f value -c id)
 
-openstack baremetal node list
-node_id=$(openstack baremetal node list -c "UUID" -f value)
-openstack baremetal node show $node_id
+curl -s -H "X-Auth-Token: $OS_TOKEN" http://`kubectl get svc nova-placement-api \
+    --namespace=kolla -o \
+    jsonpath='{.spec.externalIPs[0]}'`:8780/
 
-openstack baremetal introspection rule list
-
-tftp_srv=$(sudo netstat -tunlp | grep tftpd | awk '{print $4}')
-tftp_addr=${tftp_srv%:*}
-tftp $tftp_addr <<'EOF'
-get /pxelinux.0 ./pxelinux.0
-quit
-EOF
-downloaded=$(ls -l ./pxelinux.0 | wc -l)
-if [ $downloaded -eq 0 ]; then
-  exit 1
-fi
+exit 0
