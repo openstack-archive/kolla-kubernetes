@@ -21,6 +21,7 @@ IP="$1"
 tunnel_interface="$3"
 base_distro="$2"
 branch="$4"
+config="$5"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
@@ -183,6 +184,19 @@ if [ "x$branch" != "x2" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
+
+#
+# NOTE: Workaround for ironic to add additional interface
+#
+if [ "x$config" == "xironic" ]; then
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-br br-tenants
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-port br-tenants tenants
+    sudo ifconfig br-tenants up
+    sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
+                                    | awk '{print $2}')/24
 fi
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
@@ -408,6 +422,9 @@ helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --namespace kolla --name nova-placement-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
 
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
