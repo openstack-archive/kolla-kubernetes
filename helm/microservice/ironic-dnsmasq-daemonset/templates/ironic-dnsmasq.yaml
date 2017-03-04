@@ -16,7 +16,7 @@
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $ironicInterface := include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
-{{- $url1 :=  include "kolla_val_get_str" (dict "key" "initramf_url" "searchPath" $searchPath "Values" .Values )}}
+{{- $url1 :=  include "kolla_val_get_str" (dict "key" "initramfs_url" "searchPath" $searchPath "Values" .Values )}}
 {{- $url2 :=  include "kolla_val_get_str" (dict "key" "kernel_url" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicDHCPrange :=  include "kolla_val_get_str" (dict "key" "ironic_dhcp_range" "searchPath" $searchPath "Values" .Values )}}
