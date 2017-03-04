@@ -28,10 +28,16 @@ fi
 function setup_bridge {
 sudo brctl addbr dns0
 sudo ifconfig dns0 172.19.0.1 netmask 255.255.255.0
-sudo brctl addbr net1
-sudo ifconfig net1 172.21.0.1 netmask 255.255.255.0
 sudo brctl addbr net2
 sudo ifconfig net2 172.22.0.1 netmask 255.255.255.0
+sudo brctl addbr tenants
+sudo ls -al /proc/sys || true
+sudo ls -al /proc/sys/net || true
+sudo ls -al /proc/sys/net/bridge || true
+sudo ls -al /proc || true
+sudo ls -al /proc/sys/net/bridge/bridge-nf-call-iptables || true
+
+sudo sh -c 'echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
 sudo systemctl restart unbound
 sudo systemctl status unbound
 sudo netstat -pnl
@@ -97,6 +103,21 @@ sudo bash -c 'cat << EOF > /etc/kolla/config/nova.conf
 [DEFAULT]
 use_neutron = True
 EOF'
+if [ "x$2" == "xironic" ]; then
+sudo bash -c 'cat << EOF >> /etc/kolla/config/nova.conf
+scheduler_default_filters = AggregateInstanceExtraSpecsFilter,RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
+ram_allocation_ratio = 1.0
+reserved_host_memory_mb = 0
+EOF'
+sudo bash -c 'cat << EOF >> /etc/kolla/config/ironic.conf
+[neutron]
+cleaning_network = ironic-cleaning-net
+EOF'
+sudo bash -c 'cat << EOF >> /etc/kolla/config/ironic.conf
+[pxe]
+tftp_server = undefined
+EOF'
+fi
 }
 
 function setup_helm_common {
