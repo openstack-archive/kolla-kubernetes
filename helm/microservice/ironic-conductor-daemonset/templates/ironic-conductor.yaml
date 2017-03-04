@@ -50,6 +50,7 @@ spec:
                   cp -a /config/pxe/..data/* /pxe/;
                   IP=$(ip addr show dev {{ $ironicInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
+                  crudini --set /ironic/nova.conf conductor api_url http://$IP:6385;
              "],
              "volumeMounts": [
                 {
@@ -72,6 +73,22 @@ spec:
                    "name": "ironic-pxe-config",
                    "mountPath": "/pxe/"
                 },
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
+          },
+          {
+             "name": "pxelinux",
+             "image": {{ $imageFullPXE | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+             "],
+             "volumeMounts": [
                 {
                    "name": "tftpboot",
                    "mountPath": "/tftpboot/"
