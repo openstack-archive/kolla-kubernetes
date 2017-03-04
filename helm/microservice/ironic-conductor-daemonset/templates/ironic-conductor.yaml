@@ -41,7 +41,7 @@ spec:
 {{- include "common_dependency_container_multi" $env | indent 10 }}
           {
              "name": "initialize-ironic-conductor",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "image": {{ $imageFullPXE | quote }},
              "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
                  "sh",
@@ -50,6 +50,8 @@ spec:
                   cp -a /config/pxe/..data/* /pxe/;
                   IP=$(ip addr show dev {{ $ironicInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
+                  cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+                  crudini --set /ironic/nova.conf conductor api_url http://$IP:6385;
              "],
              "volumeMounts": [
                 {
