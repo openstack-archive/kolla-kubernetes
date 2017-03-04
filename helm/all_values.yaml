@@ -1036,7 +1036,7 @@ ironic-conductor-daemonset:
                         ironic_api_vip: 172.21.0.1
                     conductor:
                         all:
-                            ironic_interface: net1
+                            ironic_interface: tenants
 
 ironic-inspector-deployment:
         global:
@@ -1044,7 +1044,7 @@ ironic-inspector-deployment:
                 ironic:
                     inspector:
                         all:
-                            port: 5050 
+                            port: 5050
                             ironic_interface: net2
 
 ironic-dnsmasq-daemonset:
