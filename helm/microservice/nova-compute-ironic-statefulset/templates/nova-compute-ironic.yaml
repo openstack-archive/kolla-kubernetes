@@ -43,6 +43,7 @@ spec:
                  "cp -a /config/..data/* /ironic/;
                   IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   crudini --set /ironic/nova.conf DEFAULT my_ip $IP;
+                  crudini --set /ironic/nova.conf DEFAULT vif_pluggin_is_fatal false;
              "],
              "volumeMounts": [
                 {
