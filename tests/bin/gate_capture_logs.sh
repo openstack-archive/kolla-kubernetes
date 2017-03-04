@@ -106,4 +106,8 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 arp -a > $WORKSPACE/logs/arp.txt
+sudo systemctl status libvirtd.service > $WORKSPACE/logs/libvirtd.log
+sudo journalctl -xe > $WORKSPACE/logs/journalctl.log
+sudo ls -al /var/run > $WORKSPACE/logs/var_run.log
+sudo cat /proc/cpuinfo > $WORKSPACE/logs/cpu_info.log 
 exit -1
