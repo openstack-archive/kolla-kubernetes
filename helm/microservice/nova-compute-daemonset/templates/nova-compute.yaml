@@ -132,6 +132,18 @@ spec:
       hostIPC: True
 {{- end }}
       containers:
+        - name: debug
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFull }}"
+          command: [
+              "bash",
+              "-ce",
+              "tail -f /var/log/kolla/nova/nova-compute.log;
+              "]
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
         - name: main
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           image: "{{ $imageFull }}"
