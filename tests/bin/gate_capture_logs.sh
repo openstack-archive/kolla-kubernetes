@@ -106,4 +106,9 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 arp -a > $WORKSPACE/logs/arp.txt
+sudo docker exec -tu root \
+     $(sudo docker ps | grep nova-libvirt: | awk '{print $1}') \
+     cat /tmp/vm-1.log > $WORKSPACE/logs/vm-1.log
+sudo cp /tmp/packets $WORKSPACE/logs/packets
+
 exit -1
