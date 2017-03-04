@@ -20,13 +20,9 @@ setup_packages $DISTRO $CONFIG
 setup_bridge
 
 # Setting up virt env, kolla-ansible and kolla-kubernetes
-setup_kolla $BRANCH
+setup_kolla $CONFIG
 
-if [ "x$4" == "xironic" ]; then
-   tests/bin/setup_config_iscsi.sh "$2" "source" "$BRANCH"
-else
-   tests/bin/setup_config_iscsi.sh "$2" "$4" "$BRANCH"
-fi
+tests/bin/setup_config_iscsi.sh "$2" "$4" "$BRANCH" "$TYPE"
 
 tests/bin/setup_gate_loopback_lvm.sh
 
@@ -73,6 +69,8 @@ if [ "x$4" == "xhelm-compute-kit" ]; then
     tests/bin/deploy_compute_kit.sh "$4" "$2" "$BRANCH"
 elif [ "x$4" == "xironic" ]; then
     tests/bin/iscsi_ironic_workflow.sh "$4" "$2" "$BRANCH"
+elif [ "x$4" == "xhelm-operator" ]; then
+    echo "Not yet implemented..." "$4" "$2" "$BRANCH"
 else
     tests/bin/iscsi_generic_workflow.sh "$4" "$2" "$BRANCH"
 fi
@@ -90,3 +88,11 @@ cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
 tests/bin/basic_tests.sh
 tests/bin/horizon_test.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+#
+# Workflow specific tests
+#
+if [ "x$4" == "xironic" ]; then
+   tests/bin/ironic_deploy_tests.sh "$4" "$2" "$BRANCH"
+fi
+
+exit 0
