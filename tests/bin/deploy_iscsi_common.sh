@@ -21,6 +21,7 @@ IP="$1"
 tunnel_interface="$3"
 base_distro="$2"
 branch="$4"
+config="$5"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
@@ -185,6 +186,22 @@ helm install kolla/nova-placement-create-keystone-service-job --debug --version 
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
 
+if [ "x$config" == "xironic" ]; then
+#
+# NOTE: Workaround for ironic to add additional interface
+#
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl show
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-br br-tenants
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-port br-tenants tenants
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl show
+#
+#
+#
+fi
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -409,6 +426,9 @@ helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
 
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
       --namespace kolla --name $x \
@@ -461,6 +481,11 @@ helm install kolla/tgtd-daemonset --version $VERSION \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-create-simple-cell-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
 #kollakube res create pod keepalived
 
 kollakube res delete bootstrap openvswitch-set-external-ip
