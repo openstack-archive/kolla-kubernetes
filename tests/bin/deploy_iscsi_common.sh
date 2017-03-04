@@ -10,6 +10,38 @@ function iscsi_config {
     common_iscsi_config
 }
 
+function check_for_nova {
+    for service in nova-scheduler nova-conductor nova-compute;
+        do
+           str=$(nova service-list | grep $service | awk '{print $12}')
+           status=${str%%[[:space:]]*}
+           if [ "x$status" != "xup" ]; then
+              return 1
+           fi
+        done
+    return 0
+}
+
+function wait_for_openstack {
+    set +e
+    count=0
+    while true; do
+        [ $count -gt 60 ] && echo Wait for openstack services failed... \
+                           && return -1
+        echo "Check for nova"
+        check_for_nova
+        retcode=$?
+        if [ $retcode -eq 1 ]; then
+           sleep 1
+           count=$((count+1))
+           continue
+        else
+           break
+        fi
+    done
+    set -e
+}
+
 function deploy_iscsi_common {
 #
 #  Passed parameters: $1 - IP, $2 - base_distro,
@@ -21,6 +53,7 @@ IP="$1"
 tunnel_interface="$3"
 base_distro="$2"
 branch="$4"
+config="$5"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
@@ -183,6 +216,17 @@ if [ "x$branch" != "x2" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
+
+#
+# NOTE: Workaround for ironic to add additional interface
+#
+if [ "x$config" == "xironic" ]; then
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-br br-tenants
+    sudo ifconfig br-tenants up
+    sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
+                                    | awk '{print $2}')/24
 fi
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
@@ -409,6 +453,9 @@ helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
 
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
       --namespace kolla --name $x \
@@ -459,6 +506,24 @@ helm install kolla/tgtd-daemonset --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+$DIR/tools/build_local_admin_keystonerc.sh
+. ~/keystonerc_admin
+
+wait_for_openstack
+
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
+    --namespace kolla --name nova-cell0-create-db-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-create-simple-cell-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
+
 $DIR/tools/wait_for_pods.sh kolla
 
 #kollakube res create pod keepalived
