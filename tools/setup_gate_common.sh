@@ -28,10 +28,12 @@ fi
 function setup_bridge {
 sudo brctl addbr dns0
 sudo ifconfig dns0 172.19.0.1 netmask 255.255.255.0
-sudo brctl addbr net1
-sudo ifconfig net1 172.21.0.1 netmask 255.255.255.0
+#sudo brctl addbr net1
+#sudo ifconfig net1 172.21.0.1 netmask 255.255.255.0
 sudo brctl addbr net2
 sudo ifconfig net2 172.22.0.1 netmask 255.255.255.0
+sudo brctl addbr tenants
+sudo ifconfig tenants 172.21.0.10 netmask 255.255.255.0
 sudo systemctl restart unbound
 sudo systemctl status unbound
 sudo netstat -pnl
@@ -85,6 +87,11 @@ sudo bash -c 'cat << EOF > /etc/kolla/config/nova.conf
 [DEFAULT]
 use_neutron = True
 EOF'
+if [ "x$1" == "xironic" ]; then
+sudo bash -c 'cat << EOF >> /etc/kolla/config/nova.conf
+scheduler_default_filters = AggregateInstanceExtraSpecsFilter,RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
+EOF'
+fi
 }
 
 function setup_helm_common {
