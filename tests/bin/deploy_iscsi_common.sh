@@ -21,6 +21,7 @@ IP="$1"
 tunnel_interface="$3"
 base_distro="$2"
 branch="$4"
+config="$5"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
@@ -172,7 +173,22 @@ helm install kolla/openvswitch-vswitchd-daemonset --version $VERSION \
 kollakube res create bootstrap openvswitch-set-external-ip
 
 $DIR/tools/wait_for_pods.sh kolla
-
+if [ "x$config" == "xironic" ]; then
+#
+# NOTE: Workaround for ironic to add additional interface
+#
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl show
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-br br-tenants
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl add-port br-tenants tenants
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+         | awk '{print $1}') ovs-vsctl show
+#
+#
+#
+fi
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
