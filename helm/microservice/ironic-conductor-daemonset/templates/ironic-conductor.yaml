@@ -21,7 +21,6 @@
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $ironicInterface := include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
-{{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicAPI :=  include "kolla_val_get_str" (dict "key" "ironic_api_vip" "searchPath" $searchPath "Values" .Values )}}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
