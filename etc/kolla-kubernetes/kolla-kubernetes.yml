@@ -53,6 +53,7 @@ neutron_server_replicas: "1"  # may be > 1
 nova_api_replicas: "1"
 nova_conductor_replicas: "1"
 nova_scheduler_replicas: "1"
+placement_api_replicas: "1"
 cinder_api_replicas: "1"
 cinder_scheduler_replicas: "1"
 # !!!ALERT!!! Changing the number of replica's for the cinder
@@ -183,6 +184,14 @@ cinder_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v1/%(tenant_i
 cinder_admin_endpointv2: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_public_endpointv2: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_internal_endpointv2: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+
+########################
+# Placement-API variables
+########################
+placement_database_name: "placement"
+placement_admin_endpoint: "http://placement-api:{{ placement_api_port }}"
+placement_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ placement_api_port }}"
+placement_internal_endpoint: "http://placement-api:{{ placement_api_port }}"
 
 #######################
 # Configuration below, allows to configure multiple backends for Cinder.
