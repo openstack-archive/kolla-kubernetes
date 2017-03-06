@@ -363,6 +363,9 @@ kolla-kubernetes:
       - name: nova-conductor
       - name: nova-consoleauth
       - name: nova-novncproxy
+    - name: nova-placement
+      containers:
+      - name: nova-placement-api
     resources:
       configmap:
       - name: nova-api
@@ -412,6 +415,7 @@ kolla-kubernetes:
         vars:
           configmap_name: nova-novncproxy-logging
           log_format: 'openstack'
+      - name: nova-placement-api
       secret:
       - name: nova-libvirt
         template: services/nova/nova-libvirt-secret.yml.j2
@@ -440,6 +444,13 @@ kolla-kubernetes:
           service: nova
           type: api
           name: nova-metadata
+      - name: nova-placement-api
+        template: services/common/generic-service.yml.j2
+        vars:
+          port_name: placement_api_port
+          service: placement-api
+          type: api
+          name: placement-api
       bootstrap:
       - name: nova-create-api-db
         template: services/nova/nova-control-bootstrap-job-create-nova-api-db.yml.j2
@@ -479,6 +490,40 @@ kolla-kubernetes:
           secret: nova-keystone-password
       - name: nova-create-db
         template: services/nova/nova-control-bootstrap-job-create-nova-db.yml.j2
+      - name: nova-placement-api-create-keystone-endpoint-public
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: placement
+          service_type: placement
+          interface: public
+          service_auth: openstack_nova_auth
+          description: Placement API Service
+          endpoint: placement_public_endpoint
+      - name: nova-placement-api-create-keystone-endpoint-internal
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: placement
+          service_type: placement
+          interface: internal
+          service_auth: openstack_nova_auth
+          description: Placement API Service
+          endpoint: placement_internal_endpoint
+      - name: nova-placement-api-create-keystone-endpoint-admin
+        template: services/common/common-create-keystone-endpoint.yml.j2
+        vars:
+          service_name: placement
+          service_type: placement
+          interface: admin
+          service_auth: openstack_nova_auth
+          description: Placement API Service
+          endpoint: placement_admin_endpoint
+      - name: nova-placement-api-create-keystone-user
+        template: services/common/common-create-keystone-user.yml.j2
+        vars:
+          user: placement
+          role: admin
+          service_auth: openstack_nova_auth
+          secret: placement-keystone-password
       pod:
       - name: nova-compute
         template: services/nova/nova-compute-pod.yml.j2
@@ -528,6 +573,8 @@ kolla-kubernetes:
           port_name: nova-novncproxy
           image: nova_novncproxy_image_full
           check_path: /vnc_auto.html
+      - name: nova-placement-api
+        template: services/nova/nova-placement-api-pod.yml.j2
   - name: openvswitch
     pods:
     - name: openvswitch-ovsdb

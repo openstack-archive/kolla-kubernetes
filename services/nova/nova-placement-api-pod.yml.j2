@@ -1,0 +1,64 @@
+{%- set resourceName = kolla_kubernetes.cli.args.resource_name %}
+{%- import "services/common/common-lib.yml.j2" as lib with context %}
+apiVersion: v1
+kind: ReplicationController
+spec:
+  replicas: {{ placement_api_replicas }}
+  selector:
+      service: placement-api
+  template:
+    metadata:
+      labels:
+        service: placement-api
+        type: api
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+             "name": "initialize-placement-logs",
+             "image": "{{ placement_api_image_full }}",
+             "imagePullPolicy": "IfNotPresent",
+             "command": [
+                 "sh",
+                 "-ce",
+                 "[ -d /var/log/kolla/placement-api ] || mkdir /var/log/kolla/placement-api ;
+                  chown -R nova: /var/log/kolla/placement-api;
+                  chmod 755 /var/log/kolla/placement-api; "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          }
+        ]'
+
+    spec:
+      nodeSelector:
+{%- set selector = kolla_kubernetes_hostlabel_placement |
+                       default(kolla_kubernetes_hostlabel_controller)
+%}
+          {{ selector.key }}: {{ selector.value }}
+      containers:
+        - image: "{{ placement_api_image_full }}"
+          name: main
+          volumeMounts:
+{{ lib.common_volume_mounts(indent=12) }}
+            - mountPath: {{ container_config_directory }}
+              name: placement-api-config
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "{{ config_strategy }}"
+          ports:
+            - containerPort: {{ placement_api_port }}
+              name: placement-api
+{{ lib.common_containers(indent=8) }}
+      volumes:
+{{ lib.common_volumes(indent=8) }}
+        - name: placement-api-config
+          configMap:
+            name: nova-placement-api
+metadata:
+   name: placement
+   namespace: {{ kolla_kubernetes_namespace }}
