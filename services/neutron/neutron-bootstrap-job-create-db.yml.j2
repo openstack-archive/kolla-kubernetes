@@ -20,7 +20,7 @@ spec:
           command: ["bash", "-c"]
           args:
             - ansible localhost -m mysql_db -a
-              "login_host='{{ neutron_database_address }}'
+              "login_host=mariadb
                login_port='{{ mariadb_port }}'
                login_user='{{ database_user }}'
                login_password='$DATABASE_PASSWORD'
@@ -42,7 +42,7 @@ spec:
           command: ["sh", "-c"]
           args:
             - ansible localhost -m mysql_user -a
-              "login_host='{{ neutron_database_address }}'
+              "login_host=mariadb
                login_port='{{ mariadb_port }}'
                login_user='{{ database_user }}'
                login_password='$DATABASE_PASSWORD'
