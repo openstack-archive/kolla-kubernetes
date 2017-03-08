@@ -28,7 +28,9 @@ spec:
   type: NodePort
 {{- else if  $localVals.port_external }}
   externalIPs:
-    - {{ $externalVip }}
+    {{ with $externalVip }}
+    - {{ . }}
+    {{ end }}
 {{- end }}
   selector:
     service: {{ .element_service | quote }}
