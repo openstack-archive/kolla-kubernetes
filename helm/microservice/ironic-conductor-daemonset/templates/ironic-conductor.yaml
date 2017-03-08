@@ -22,6 +22,7 @@
 {{- $ironicInterface := include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
+{{- $ironicAPI :=  include "kolla_val_get_str" (dict "key" "ironic_api_vip" "searchPath" $searchPath "Values" .Values )}}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -50,6 +51,7 @@ spec:
                   cp -a /config/pxe/..data/* /pxe/;
                   IP=$(ip addr show dev {{ $ironicInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
                   jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
+                  crudini --set /ironic/nova.conf conductor api_url http://{{ $ironicAPI }}:6385;
              "],
              "volumeMounts": [
                 {
@@ -72,6 +74,27 @@ spec:
                    "name": "ironic-pxe-config",
                    "mountPath": "/pxe/"
                 },
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
+          },
+          {
+             "name": "pxelinux",
+             "image": {{ $imageFullPXE | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
+                     cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+                  fi;
+                  if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
+                     cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
+                  fi;
+             "],
+             "volumeMounts": [
                 {
                    "name": "tftpboot",
                    "mountPath": "/tftpboot/"

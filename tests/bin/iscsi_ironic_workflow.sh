@@ -69,3 +69,14 @@ node_id=$(openstack baremetal node list -c "UUID" -f value)
 openstack baremetal node show $node_id
 
 openstack baremetal introspection rule list
+
+tftp_srv=$(sudo netstat -tunlp | grep tftpd | awk '{print $4}')
+tftp_addr=${tftp_srv%:*}
+tftp $tftp_addr <<'EOF'
+get /pxelinux.0 ./pxelinux.0
+quit
+EOF
+ls -al
+if [ $(ls -l ./pxelinux.0 >/dev/null 2>&1 | wc -l) -eq 0 ]; then
+  exit 1
+fi
