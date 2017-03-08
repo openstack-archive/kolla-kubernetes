@@ -69,3 +69,7 @@ node_id=$(openstack baremetal node list -c "UUID" -f value)
 openstack baremetal node show $node_id
 
 openstack baremetal introspection rule list
+
+tftp_srv=$(sudo netstat -tunlp | grep tftpd | awk '{print $4}')
+tftp_addr=${tftp_srv%:*}
+tftp $tftp_addr -c 'get /pxelinux.0'

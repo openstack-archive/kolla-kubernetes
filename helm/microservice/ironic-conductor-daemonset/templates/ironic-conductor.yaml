@@ -77,6 +77,22 @@ spec:
                    "mountPath": "/tftpboot/"
                 }
              ]
+          },
+          {
+             "name": "pxelinux",
+             "image": {{ $imageFullPXE | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+             "],
+             "volumeMounts": [
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
           }
         ]'
     spec:
