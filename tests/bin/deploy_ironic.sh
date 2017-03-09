@@ -84,8 +84,8 @@ helm install kolla/ironic-conductor-daemonset --version $VERSION \
     --namespace kolla --name ironic-conductor-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/nova-compute-ironic-daemonset --version $VERSION \
-    --namespace kolla --name nova-compute-ironic-daemonset \
+helm install kolla/nova-compute-ironic-statefulset --version $VERSION \
+    --namespace kolla --name nova-compute-ironic-statefulset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
