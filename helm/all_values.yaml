@@ -1032,6 +1032,8 @@ ironic-conductor-daemonset:
         global:
             kolla:
                 ironic:
+                    all:
+                        ironic_api_vip: 172.21.0.1
                     conductor:
                         all:
                             ironic_interface: net1
