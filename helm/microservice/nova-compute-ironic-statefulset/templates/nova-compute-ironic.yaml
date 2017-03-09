@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.nova.compute-ironic.daemonset:global.kolla.nova.compute-ironic.all:global.kolla.nova.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.nova.compute-ironic.statefulset:global.kolla.nova.compute-ironic.all:global.kolla.nova.all:global.kolla.all" }}
 {{- $resourceName := "nova-compute-ironic" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
@@ -15,16 +15,15 @@
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $tunnelInterface := "eth0" }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1beta1 
+kind: StatefulSet 
 metadata:
   name: {{ $elementName }}
-  labels:
-    component: {{ $serviceName }}
-    system: {{ $elementName }}
 spec:
+  replicas: {{ $replicas }}
   template:
     metadata:
       labels:
