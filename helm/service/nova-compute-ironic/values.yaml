@@ -4,7 +4,7 @@ global:
             kubernetes_entrypoint: true
         nova:
             compute-ironic:
-                daemonset:
+                statefulset:
                     dependencies:
                         service:
                         - nova-metadata
