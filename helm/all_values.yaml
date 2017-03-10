@@ -379,6 +379,16 @@ nova-api-svc:
                             port_external: true
                             node_port_enabled: false
 
+placement-api-svc:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
+                            node_port: 8780
+                            port_external: true
+                            node_port_enabled: false
 nova-metadata-svc:
         global:
             kolla:
@@ -446,6 +456,14 @@ nova-api-deployment:
                         all:
                             port: 8775
 
+placement-api-deployment:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
+
 nova-novncproxy-deployment:
         global:
             kolla:
@@ -505,6 +523,32 @@ nova-delete-keystone-user-job:
                     all:
                         keystone_user_name: nova
 
+placement-api-create-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    placement_api:
+                        all:
+                            keystone_user_name: placement
+
+placement-api-delete-keystone-user-job:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+                nova:
+                    placement_api:
+                        all:
+                            keystone_user_name: placement
+
 nova-create-keystone-endpoint-admin-job:
         global:
             kolla:
@@ -536,6 +580,38 @@ nova-create-keystone-endpoint-public-job:
                     api:
                         all:
                             port: 8774
+
+placement-api-create-keystone-endpoint-admin-job:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
+                        create_keystone_endpoint:
+                            all:
+                                service: placement-api
+
+placement-api-create-keystone-endpoint-internal-job:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
+                        create_keystone_endpoint:
+                            all:
+                                service: placement-api
+
+placement-api-create-keystone-endpoint-public-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
 
 heat-api-svc:
         global:
@@ -1036,7 +1112,7 @@ ironic-conductor-daemonset:
                         ironic_api_vip: 172.21.0.1
                     conductor:
                         all:
-                            ironic_interface: net1
+                            ironic_interface: net1 
 
 ironic-inspector-deployment:
         global:
@@ -1044,7 +1120,7 @@ ironic-inspector-deployment:
                 ironic:
                     inspector:
                         all:
-                            port: 5050 
+                            port: 5050
                             ironic_interface: net2
 
 ironic-dnsmasq-daemonset:
