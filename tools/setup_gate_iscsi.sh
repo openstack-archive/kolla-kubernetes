@@ -20,7 +20,7 @@ setup_packages $DISTRO $CONFIG
 setup_bridge
 
 # Setting up virt env, kolla-ansible and kolla-kubernetes
-setup_kolla
+setup_kolla $BRANCH
 
 if [ "x$4" == "xironic" ]; then
    tests/bin/setup_config_iscsi.sh "$2" "source" "$BRANCH"
@@ -57,7 +57,8 @@ kollakube res create configmap \
     openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
     nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived;
+    cinder-scheduler cinder-volume iscsid tgtd keepalived \
+    placement-api placement-api-haproxy;
 
 if [ "x$4" == "xironic" ]; then
 kollakube res create configmap \
