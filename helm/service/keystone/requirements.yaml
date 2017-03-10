@@ -1,4 +1,8 @@
 dependencies:
+  - name: mariadb
+    repository: file://../../service/mariadb
+    version: 0.6.0-1
+    condition: global.kolla.keystone.mariadb.enabled
   - name: keystone-admin-svc
     repository: file://../../microservice/keystone-admin-svc
     version: 0.6.0-1
