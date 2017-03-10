@@ -51,6 +51,16 @@ ceph_config > /tmp/ceph_config.yaml
 
 common_vars="kube_logger=false,base_distro=$base_distro"
 
+# Test standalone service installation with condition/tags in requirements.yaml
+helm install kolla/keystone --version $VERSION \
+    --namespace kolla --name keystone \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml \
+    --set tags.keystone=true
+
+helm delete --purge keystone
+
+# Service installation
+
 helm install kolla/mariadb --version $VERSION \
     --namespace kolla --name mariadb \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
