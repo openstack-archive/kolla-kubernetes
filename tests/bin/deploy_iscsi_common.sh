@@ -93,6 +93,10 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
+helm install kolla/placement-api-svc --debug --version $VERSION \
+    --namespace kolla --name placement-api-svc \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 helm install kolla/horizon-svc --version $VERSION \
     --namespace kolla --name horizon-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -173,6 +177,10 @@ kollakube res create bootstrap openvswitch-set-external-ip
 
 $DIR/tools/wait_for_pods.sh kolla
 
+helm install kolla/placement-api-create-keystone-service-job --debug --version $VERSION \
+    --namespace kolla --name placement-api-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -183,6 +191,10 @@ helm install kolla/glance-create-keystone-service-job --version $VERSION \
 
 helm install kolla/cinder-create-keystone-service-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/placement-api-create-keystone-user-job --debug --version $VERSION \
+    --namespace kolla --name placement-api-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-user-job --version $VERSION \
@@ -225,6 +237,10 @@ helm install kolla/nova-create-keystone-endpoint-public-job --version $VERSION \
     --namespace kolla --name nova-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
+helm install kolla/placement-api-create-keystone-endpoint-public-job --debug --version $VERSION \
+    --namespace kolla --name placement-api-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 helm install kolla/neutron-create-keystone-endpoint-public-job --version $VERSION \
     --namespace kolla --name neutron-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -260,6 +276,14 @@ helm install kolla/cinder-create-db-job --version $VERSION \
 
 helm install kolla/cinder-manage-db-job --version $VERSION \
     --namespace kolla --name cinder-manage-db \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/placement-api-create-keystone-endpoint-internal-job --debug --version $VERSION \
+    --namespace kolla --name placement-api-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/placement-api-create-keystone-endpoint-admin-job --debug --version $VERSION \
+    --namespace kolla --name placement-api-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 helm install kolla/cinder-create-keystone-endpoint-internal-job --version $VERSION \
@@ -368,6 +392,10 @@ for x in nova-api nova-novncproxy; do
       --namespace kolla --name $x \
       --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
+
+helm install kolla/placement-api-deployment --dry-run --debug --version $VERSION \
+    --namespace kolla --name placement-api-deployment \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 for x in nova-conductor nova-scheduler nova-consoleauth; do
     helm install kolla/$x-statefulset --version $VERSION \
