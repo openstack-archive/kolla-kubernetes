@@ -2,6 +2,8 @@ global:
     kolla:
         all:
             kubernetes_entrypoint: true
+        computekit:
+            enabled: false
         keystone:
             create_db:
                 job:
