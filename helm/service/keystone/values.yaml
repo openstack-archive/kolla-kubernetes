@@ -2,6 +2,8 @@ global:
     kolla:
         all:
             kubernetes_entrypoint: true
+        mariadb:
+	    enabled: false
         keystone:
             create_db:
                 job:
