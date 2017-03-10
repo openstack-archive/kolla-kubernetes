@@ -3,6 +3,9 @@ global:
         all:
             kubernetes_entrypoint: true
         keystone:
+            mariadb:
+                enabled: false
+                element_name: mariadb
             create_db:
                 job:
                     dependencies:

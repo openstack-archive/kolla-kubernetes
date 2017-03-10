@@ -23,7 +23,7 @@ function wait_for_pods {
         $DIR/tools/wait_for_pods.py $1 $2 $3
     else
         $DIR/tools/pull_containers.sh $1
-        $DIR/tools/wait_for_pods.sh $1
+        $DIR/tools/wait_for_pods.sh $1 300
     fi
 }
 
@@ -50,6 +50,21 @@ general_config > /tmp/general_config.yaml
 ceph_config > /tmp/ceph_config.yaml
 
 common_vars="kube_logger=false,base_distro=$base_distro"
+
+# Test standalone service installation with condition/tags in requirements.yaml
+helm install kolla/keystone --version $VERSION \
+    --namespace kolla --name keystone \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml \
+    --set global.kolla.keystone.mariadb.enabled=true \
+    --set global.kolla.keystone.mariadb.element_name=keystone-mariadb
+
+wait_for_pods kolla keystone running,succeeded
+
+helm status keystone
+
+helm delete --purge keystone
+
+# Service installation
 
 helm install kolla/mariadb --version $VERSION \
     --namespace kolla --name mariadb \
