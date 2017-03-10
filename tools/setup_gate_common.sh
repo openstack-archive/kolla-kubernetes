@@ -55,6 +55,18 @@ EOF
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
 
+#
+# For images version 3 and higher, placement api needs to be enabled, this
+# workaround can be removed after version 2.X.X images are retired.
+#
+pwd
+ls -al
+pushd kolla-ansible
+if [ "x$1" == "x3" ]; then
+   git am `pwd`/kolla-kubernetes/tools/patches/0001-Revert-Fixes-problem-with-kolla-kubernetes-3.0.2-ima.patch
+fi
+popd
+
 sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
 sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
 sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
