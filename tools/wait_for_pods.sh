@@ -23,6 +23,9 @@ while true; do
     sleep 1
     now=$(date +%s)
     [ $now -gt $end ] && echo containers failed to start. && \
-        kubectl get pods --namespace $1 && exit -1
+#        kubectl get pods --namespace $1 && exit -1
+         for x in `kubectl get pods -n kolla | awk 'NR>1' | awk '{ print $1 }'`; \
+         do kubectl logs $x -n kolla ;\
+         done && exit -1 
 done
 set -x
