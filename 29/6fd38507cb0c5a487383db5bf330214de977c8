@@ -1,0 +1,9 @@
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sat, 11 Mar 2017 17:23:29 +0000
+Reviewed-on: https://review.openstack.org/426025
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
