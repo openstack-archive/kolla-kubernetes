@@ -33,6 +33,15 @@ $DIR/tools/wait_for_pods.sh kolla
 
 # It looks like after containers are up OpenStack services needs extra time to
 # come up, giving extra 10 minutes to settle.
+$DIR/tools/build_local_admin_keystonerc.sh
+. ~/keystonerc_admin
+
+nova service-list
+neutron agent-list
+cinder service-list
+
 sleep 600
 
-$DIR/tools/build_local_admin_keystonerc.sh
+nova service-list
+neutron agent-list
+cinder service-list
