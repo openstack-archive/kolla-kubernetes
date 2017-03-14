@@ -84,7 +84,7 @@ sudo pvs >> $WORKSPACE/logs/pvs.txt
 sudo vgs >> $WORKSPACE/logs/vgs.txt
 
 sudo lvs >> $WORKSPACE/logs/lvs.txt
-
+pip list 
 cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
 
 tests/bin/basic_tests.sh
