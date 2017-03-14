@@ -1,0 +1,7 @@
+dependencies:
+  - name: fluentd-svc
+    repository: file://../../microservice/fluentd-svc
+    version: 0.6.0-1
+  - name: fluentd-deployment
+    repository: file://../../microservice/fluentd-deployment
+    version: 0.6.0-1

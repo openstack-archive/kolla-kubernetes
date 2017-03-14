@@ -323,6 +323,28 @@ rabbitmq-svc:
                         mgmt_port_external: false
                         mgmt_node_port_enabled: false
 
+fluentd-svc:
+       global:
+            element_name: fluentd
+            kolla:
+                fluentd:
+                    all:
+                        enabled: true
+                        fluentd_syslog_port: 5140
+                        fluentd_syslog_node_port: 5140
+                        port_external: false
+                        node_port_enabled: false
+
+fluentd-deployment:
+        global:
+            element_name: fluentd
+            kolla:
+                fluentd:
+                    all:
+                        enabled: true
+                        fluentd_syslog_port: 5140
+
+
 memcached-svc:
         global:
             element_name: memcached
