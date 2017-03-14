@@ -52,8 +52,8 @@ ironic
 #
 # Ironic related commands
 #
-pip install -U python-ironicclient
-pip install -U python-ironic-inspector-client
+pip install python-ironicclient
+pip install python-ironic-inspector-client
 kubectl get pods -n kolla | grep ironic
 kubectl get svc -n kolla | grep ironic
 kubectl get configmaps -n kolla | grep ironic
