@@ -23,8 +23,8 @@ and reconfigure), the community needs a way to handle running a series of tasks
 in a certain order.  Kubernetes does not natively support workflow operations.
 
 OpenStack as a whole is highly customizable and flexible.  A deployment tool
-needs to be equally customizable and flexiable in order for a user to get
-the most benifit from it.
+needs to be equally customizable and flexible in order for a user to get
+the most benefit from it.
 
 Proposed change
 ===============
