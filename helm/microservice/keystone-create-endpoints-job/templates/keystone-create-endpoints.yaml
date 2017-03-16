@@ -62,6 +62,8 @@ spec:
             - mountPath: {{ $containerConfigDirectory }}
               name: service-configmap
               readOnly: true
+            - name: keystone-fernet-keys
+              mountPath: /etc/keystone/fernet-keys
           env:
             - name: KOLLA_KUBERNETES
               value: ""
@@ -77,4 +79,7 @@ spec:
         - name: service-configmap
           configMap:
             name: {{ .resourceName }}
+        - name: keystone-fernet-keys
+          secret:
+            secretName: keystone-fernet-keys
 {{- end }}
