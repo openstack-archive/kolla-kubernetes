@@ -166,6 +166,16 @@ helm install kolla/rabbitmq-statefulset --version $VERSION \
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
+helm install kolla/keystone-fernet-setup-job --version $VERSION \
+    --namespace kolla \
+    --name keystone-fernet-setup-job \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+helm delete --purge keystone-fernet-setup-job
+
 helm install kolla/keystone-create-db-job --version $VERSION \
     --namespace kolla --name keystone-create-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
