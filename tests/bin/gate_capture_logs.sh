@@ -26,6 +26,7 @@ kubectl get deployments --all-namespaces -o yaml > \
 kubectl describe node $(hostname -s) > $WORKSPACE/logs/node.txt
 kubectl get pods -a --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
 kubectl get configmaps -a --all-namespaces -o yaml > $WORKSPACE/logs/configmaps.yaml
+kubectl get secrets -a --all-namespaces -o yaml > $WORKSPACE/logs/secrets.yaml
 sudo docker images > $WORKSPACE/logs/docker_images.txt
 kubectl get pods -a --all-namespaces -o json | jq -r \
     '.items[].metadata | .namespace + " " + .name' | while read line; do
