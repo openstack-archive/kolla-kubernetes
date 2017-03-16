@@ -19,6 +19,8 @@ cinder_database_address: "mariadb"
 ironic_database_address: "mariadb"
 rabbitmq_servers: "rabbitmq"
 
+keystone_token_provider: "fernet"
+
 openstack_logging_debug: "True"
 
 enable_haproxy: "no"
