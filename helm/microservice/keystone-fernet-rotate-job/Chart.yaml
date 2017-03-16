@@ -1,0 +1,12 @@
+name: keystone-fernet-rotate-job
+version: 0.6.0-1 #FIXME make this changable
+description: keystone fernet token rotation job
+keywords:
+  - openstack
+  - keystone
+  - fernet
+  - rotation
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready

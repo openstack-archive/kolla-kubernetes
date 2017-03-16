@@ -54,6 +54,10 @@ EOF
     --branch master --cache-dir /opt/git git://git.openstack.org \
     openstack/kolla-ansible && true
 [ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
+pushd kolla-ansible
+git fetch https://git.openstack.org/openstack/kolla-ansible refs/changes/59/447159/1 && git format-patch -1 --stdout FETCH_HEAD > foo.patch
+git am foo.patch
+popd
 
 #
 # For images version 3 and higher, placement api needs to be enabled, this
