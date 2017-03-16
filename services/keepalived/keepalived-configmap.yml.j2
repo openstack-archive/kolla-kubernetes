@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  nametwo: {{ kolla_kubernetes.cli.args.resource_name }}
   name: {{ kolla_kubernetes.cli.args.resource_name }}
   namespace: {{ kolla_kubernetes_namespace }}
 data:
