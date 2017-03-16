@@ -1,0 +1,81 @@
+{{- $resourceName := "keystone-fernet-setup-job" }}
+{{- $searchPath := ":global.kolla.keystone.fernet.setup.job:global.kolla.fernet.all:global.kolla.keystone.all:global.kolla.all" }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "keystone" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-fernet-setup-job
+spec:
+  template:
+{{- include "init_container_header" . | indent 4 }}
+{{- include "common_dependency_container_single" . | indent 10 }}
+{{- include "init_container_tail" . | indent 4 }}
+    spec:
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: main
+          securityContext:
+            runAsUser: 0
+          command:
+          - /bin/bash
+          - -ec
+          - |
+            KUBE_TOKEN=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
+            KUBE_NAMESPACE=$(</var/run/secrets/kubernetes.io/serviceaccount/namespace)
+     
+            mkdir -p /var/log/kolla/keystone
+            chown keystone.keystone /var/log/kolla/keystone
+            mkdir -p /etc/keystone/fernet-keys
+            cp -a /config/..data/* /etc/keystone
+            chown keystone.keystone /etc/keystone/fernet-keys
+            keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
+            TOKEN=$(cat /etc/keystone/fernet-keys/0 | base64)
+            cat > /tmp/tokens.json <<EOF
+            {
+                "apiVersion": "v1",
+                "kind": "Secret",
+                "type": "Opaque",
+                "metadata": {
+                    "name": "keystone-fernet-keys",
+                    "lastmod": "0000-01-01T12:00:00Z"
+                },
+                "data": {
+                    "0": "$TOKEN"
+                }
+            }
+            EOF
+
+            curl -f --tlsv1.2 -sS  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+                -d '@/tmp/tokens.json' \
+                -H 'Content-type:application/json' \
+                -H "Authorization: Bearer $KUBE_TOKEN" \
+              https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT/api/v1/namespaces/$KUBE_NAMESPACE/secrets/ > /dev/null
+
+          env:
+{{- include "common_bootstrap_env_vars" . | indent 12 }}
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /config
+              name: keystone
+              readOnly: true
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: keystone
+          configMap:
+            name: keystone
+      restartPolicy: OnFailure
+{{- end }}
