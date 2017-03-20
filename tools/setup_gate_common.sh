@@ -20,6 +20,7 @@ else
     sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils tftp
     sudo yum install -y lvm2
+    sudo yum install -y libselinux-python
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
 fi
