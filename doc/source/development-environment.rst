@@ -33,7 +33,7 @@ repositories:
    Currently, the following versions are tested and required:
      * ansible >= 2.2.0
      * helm >= 2.2.0
-     * kubernetes >= 1.5.2
+     * kubernetes >= 1.5.4
      * vagrant <1.9.0
 
 
@@ -273,7 +273,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v1.5.2/kubernetes-client-linux-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v1.5.4/kubernetes-client-linux-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -298,7 +298,7 @@ To install the kubernetes clients:
 
 .. code-block:: console
 
-    curl -L https://dl.k8s.io/v1.5.2/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
+    curl -L https://dl.k8s.io/v1.5.4/kubernetes-client-darwin-amd64.tar.gz | tar -xzv
     sudo cp kubernetes/client/bin/* /usr/local/bin
     sudo chmod 755 /usr/local/bin/kubefed /usr/local/bin/kubectl
     sudo chown root: /usr/local/bin/kubefed /usr/local/bin/kubectl
@@ -349,7 +349,7 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
     ./setup-halcyon.sh \
         --k8s-config kolla \
-        --k8s-version v1.5.2 \
+        --k8s-version v1.5.4 \
         --guest-os centos
 
 .. end
