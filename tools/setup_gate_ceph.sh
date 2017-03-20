@@ -131,17 +131,13 @@ tools/setup_simple_ceph_users.sh
 
 tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it "$BRANCH"
 
+ansible-playbook ./tools/ansible/create_configmaps.yaml
+kubectl create --namespace=kolla -f /tmp/kolla-kubernetes/configmaps
+
 kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume keepalived nova-compute-ironic\
-    ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
-    ironic-inspector ironic-inspector-haproxy ironic-pxe;
+    glance-api-haproxy nova-novncproxy-haproxy neutron-server-haproxy \
+    nova-api-haproxy cinder-api-haproxy \
+    ironic-api-haproxy ironic-inspector-haproxy
 kollakube res create secret nova-libvirt
 
 if [ "x$CONFIG" == "xhelm-entrypoint" ]; then
