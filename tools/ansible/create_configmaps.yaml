@@ -1,0 +1,51 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    node_config_directory: "/etc/kolla/"
+    target_directory: "/tmp/kolla-kubernetes/configmaps"
+  tasks:
+    - name: Ensure configmaps directory exists
+      file:
+        path: "{{ target_directory }}"
+        state: "directory"
+    - name: Create configmaps
+      ignore_errors: yes
+      template:
+        src: "templates/configmap.j2"
+        dest: "{{ target_directory }}/{{ item.configmap_name }}.yaml"
+      with_items:
+        - {'configmap_name': 'nova-api', 'source_dirname': 'nova-api/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'neutron-l3-agent', 'source_dirname': 'neutron-l3-agent/', 'source_filenames': ['l3-agent.ini', 'fwaas-driver.ini', 'config.json', 'ml2-conf.ini', 'neutron.conf']}
+        - {'configmap_name': 'ironic-dnsmasq', 'source_dirname': 'ironic-dnsmasq/', 'source_filenames': ['dnsmasq.conf', 'config.json']}
+        - {'configmap_name': 'nova-novncproxy', 'source_dirname': 'nova-novncproxy/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'nova-consoleauth', 'source_dirname': 'nova-consoleauth/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'keepalived', 'source_dirname': 'keepalived/', 'source_filenames': ['keepalived.conf', 'config.json']}
+        - {'configmap_name': 'openvswitch-vswitchd', 'source_dirname': 'openvswitch-vswitchd/', 'source_filenames': ['config.json']}
+        - {'configmap_name': 'neutron-dhcp-agent', 'source_dirname': 'neutron-dhcp-agent/', 'source_filenames': ['dnsmasq.conf', 'dhcp-agent.ini', 'config.json', 'ml2-conf.ini', 'neutron.conf']}
+        - {'configmap_name': 'keystone', 'source_dirname': 'keystone/', 'source_filenames': ['keystone.conf', 'keystone-paste.ini', 'config.json', 'wsgi-keystone.conf']}
+        - {'configmap_name': 'memcached', 'source_dirname': 'memcached/', 'source_filenames': ['config.json']}
+        - {'configmap_name': 'resolv-conf', 'source_dirname': 'resolv-conf/', 'source_filenames': ['resolv.conf']}
+        - {'configmap_name': 'openvswitch-db-server', 'source_dirname': 'openvswitch-db-server/', 'source_filenames': ['config.json']}
+        - {'configmap_name': 'cinder-backup', 'source_dirname': 'cinder-backup/', 'source_filenames': ['cinder.conf', 'config.json']}
+        - {'configmap_name': 'nova-conductor', 'source_dirname': 'nova-conductor/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'neutron-server', 'source_dirname': 'neutron-server/', 'source_filenames': ['neutron-lbaas.conf', 'neutron-vpnaas.conf', 'config.json', 'ml2-conf.ini', 'neutron.conf']}
+        - {'configmap_name': 'ironic-inspector', 'source_dirname': 'ironic-inspector/', 'source_filenames': ['inspector.conf', 'config.json']}
+        - {'configmap_name': 'neutron-openvswitch-agent', 'source_dirname': 'neutron-openvswitch-agent/', 'source_filenames': ['config.json', 'ml2-conf.ini', 'neutron.conf']}
+        - {'configmap_name': 'ironic-conductor', 'source_dirname': 'ironic-conductor/', 'source_filenames': ['config.json', 'ironic.conf']}
+        - {'configmap_name': 'nova-scheduler', 'source_dirname': 'nova-scheduler/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'ironic-api', 'source_dirname': 'ironic-api/', 'source_filenames': ['config.json', 'ironic.conf']}
+        - {'configmap_name': 'mariadb', 'source_dirname': 'mariadb/', 'source_filenames': ['config.json', 'galera.cnf', 'wsrep-notify.sh']}
+        - {'configmap_name': 'nova-libvirt', 'source_dirname': 'nova-libvirt/', 'source_filenames': ['libvirtd.conf', 'config.json', 'qemu.conf']}
+        - {'configmap_name': 'nova-compute', 'source_dirname': 'nova-compute/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'glance-api', 'source_dirname': 'glance-api/', 'source_filenames': ['glance-api.conf', 'config.json']}
+        - {'configmap_name': 'cinder-api', 'source_dirname': 'cinder-api/', 'source_filenames': ['cinder.conf', 'config.json']}
+        - {'configmap_name': 'cinder-volume', 'source_dirname': 'cinder-volume/', 'source_filenames': ['cinder.conf', 'config.json']}
+        - {'configmap_name': 'canal-config', 'source_dirname': 'canal-config/', 'source_filenames': ['masquerade', 'etcd_endpoints', 'canal_iface', 'cni_network_config']}
+        - {'configmap_name': 'rabbitmq', 'source_dirname': 'rabbitmq/', 'source_filenames': ['rabbitmq.config', 'rabbitmq-clusterer.config', 'config.json', 'definitions.json', 'rabbitmq-env.conf']}
+        - {'configmap_name': 'neutron-metadata-agent', 'source_dirname': 'neutron-metadata-agent/', 'source_filenames': ['metadata-agent.ini', 'config.json', 'ml2-conf.ini', 'neutron.conf']}
+        - {'configmap_name': 'nova-compute-ironic', 'source_dirname': 'nova-compute-ironic/', 'source_filenames': ['nova.conf', 'config.json']}
+        - {'configmap_name': 'horizon', 'source_dirname': 'horizon/', 'source_filenames': ['local-settings', 'config.json', 'horizon.conf']}
+        - {'configmap_name': 'ironic-pxe', 'source_dirname': 'ironic-pxe/', 'source_filenames': ['default', 'config.json']}
+        - {'configmap_name': 'glance-registry', 'source_dirname': 'glance-registry/', 'source_filenames': ['glance-registry.conf', 'config.json']}
+        - {'configmap_name': 'cinder-scheduler', 'source_dirname': 'cinder-scheduler/', 'source_filenames': ['cinder.conf', 'config.json']}
