@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    node_config_directory: "/etc/kolla/"
+    target_directory: "/tmp/kolla-kubernetes/configmaps"
+  tasks:
+    - name: Ensure configmaps directory exists
+      file:
+        path: "{{ target_directory }}"
+        state: "directory"
+    - name: Create configmaps
+      template:
+        src: "templates/configmap.j2"
+        dest: "{{ target_directory }}/{{ item.configmap_name }}.yaml"
+      with_items:
+          - {'configmap_name': 'mariadb', 'source_dirname': 'mariadb/', 'source_filename': 'galera.cnf'}

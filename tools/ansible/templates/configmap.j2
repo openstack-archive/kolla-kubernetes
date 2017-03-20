@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ item['configmap_name']}}
+data:
+  {{ item.source_filename }}: |+
+{{ lookup('file', node_config_directory + item.source_dirname + item.source_filename) | indent(4, indentfirst=true)}}
