@@ -1,0 +1,25 @@
+{
+    "command": "cloudkitty-processor --config-file /etc/cloudkitty/cloudkitty.conf",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/cloudkitty.conf",
+            "dest": "/etc/cloudkitty/cloudkitty.conf",
+            "owner": "cloudkitty",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/policy.json",
+            "dest": "/etc/cloudkitty/policy.json",
+            "owner": "cloudkitty",
+            "perm": "0600",
+            "optional": true
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/cloudkitty",
+            "owner": "cloudkitty:cloudkitty",
+            "recurse": true
+        }
+    ]
+}

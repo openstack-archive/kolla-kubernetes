@@ -1,0 +1,36 @@
+---
+- name: Ensuring config directory exists
+  file:
+    path: "{{ node_config_directory }}/glance-api"
+    state: "directory"
+  when: inventory_hostname in groups['glance-api']
+
+- name: Copying over ceph.conf(s)
+  merge_configs:
+    sources:
+      - "{{ role_path }}/../ceph/templates/ceph.conf.j2"
+      - "{{ node_custom_config }}/ceph.conf"
+      - "{{ node_custom_config }}/ceph/{{ inventory_hostname }}/ceph.conf"
+    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
+  when: inventory_hostname in groups['glance-api']
+
+- include: ../../ceph_pools.yml
+  vars:
+    pool_name: "{{ glance_pool_name }}"
+    pool_type: "{{ glance_pool_type }}"
+    cache_mode: "{{ glance_cache_mode }}"
+
+# TODO(SamYaple): Improve changed_when tests
+- name: Pulling cephx keyring
+  command: docker exec ceph_mon ceph auth get-or-create client.glance mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool={{ ceph_glance_pool_name }}, allow rwx pool={{ ceph_glance_pool_name }}-cache'
+  register: cephx_key
+  delegate_to: "{{ groups['ceph-mon'][0] }}"
+  changed_when: False
+  run_once: True
+
+- name: Pushing cephx keyring
+  copy:
+    content: "{{ cephx_key.stdout }}\n\r"
+    dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
+    mode: "0600"
+  when: inventory_hostname in groups['glance-api']

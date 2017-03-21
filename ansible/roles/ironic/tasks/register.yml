@@ -1,0 +1,72 @@
+---
+- name: Creating the Ironic service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "ironic"
+      service_type: "baremetal"
+      description: "Ironic bare metal provisioning service"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_ironic_auth }}' }}"
+    module_extra_vars:
+      openstack_ironic_auth: "{{ openstack_ironic_auth }}"
+  run_once: True
+  when: inventory_hostname in groups['ironic-api']
+  with_items:
+    - {'interface': 'admin', 'url': '{{ ironic_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ ironic_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ ironic_public_endpoint }}'}
+
+- name: Creating the Ironic project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ ironic_keystone_user }}"
+      password: "{{ ironic_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_ironic_auth }}' }}"
+    module_extra_vars:
+      openstack_ironic_auth: "{{ openstack_ironic_auth }}"
+  run_once: True
+  when: inventory_hostname in groups['ironic-api']
+
+- name: Creating the Ironic Inspector service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "ironic-inspector"
+      service_type: "baremetal-introspection"
+      description: "Ironic Inspector baremetal introspection service"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_ironic_inspector_auth }}' }}"
+    module_extra_vars:
+      openstack_ironic_inspector_auth: "{{ openstack_ironic_inspector_auth }}"
+  run_once: True
+  when: inventory_hostname in groups['ironic-inspector']
+  with_items:
+    - {'interface': 'admin', 'url': '{{ ironic_inspector_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ ironic_inspector_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ ironic_inspector_public_endpoint }}'}
+
+- name: Creating the Ironic Inspector project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ ironic_inspector_keystone_user }}"
+      password: "{{ ironic_inspector_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_ironic_inspector_auth }}' }}"
+    module_extra_vars:
+      openstack_ironic_inspector_auth: "{{ openstack_ironic_inspector_auth }}"
+  run_once: True
+  when: inventory_hostname in groups['ironic-inspector']

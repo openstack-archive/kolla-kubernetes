@@ -1,0 +1,19 @@
+---
+- name: Running Solum bootstrap container
+  vars:
+    solum_api: "{{ solum_services['solum-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ solum_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_solum"
+    restart_policy: "never"
+    volumes: "{{ solum_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[solum_api.group][0] }}"

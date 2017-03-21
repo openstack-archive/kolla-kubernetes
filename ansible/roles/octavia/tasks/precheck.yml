@@ -1,0 +1,37 @@
+---
+- name: Get container facts
+  kolla_container_facts:
+    name:
+      - octavia_api
+      - octavia_health_manager
+  register: container_facts
+
+- name: Checking free port for Octavia API
+  wait_for:
+    host: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+    port: "{{ octavia_api_port }}"
+    connect_timeout: 1
+    state: stopped
+  when:
+    - container_facts['octavia_api'] is not defined
+    - inventory_hostname in groups['octavia-api']
+
+- name: Checking free port for Octavia Health Manager
+  wait_for:
+    host: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+    port: "{{ octavia_health_manager_port }}"
+    connect_timeout: 1
+    state: stopped
+  when:
+    - container_facts['octavia_health_manager'] is not defined
+    - inventory_hostname in groups['octavia-health-manager']
+
+- name: Checking certificate files exist for octavia
+  local_action: stat path="{{ node_custom_config }}/octavia/{{ item }}"
+  register: result
+  failed_when: not result.stat.exists
+  when: inventory_hostname in groups['octavia-worker']
+  with_items:
+    - cakey.pem
+    - ca_01.pem
+    - client.pem

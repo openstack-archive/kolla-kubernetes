@@ -1,0 +1,70 @@
+---
+- name: Creating the Magnum service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "magnum"
+      service_type: "container-infra"
+      description: "Openstack Container Service"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_magnum_auth }}' }}"
+    module_extra_vars:
+      openstack_magnum_auth: "{{ openstack_magnum_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ magnum_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ magnum_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ magnum_public_endpoint }}'}
+
+- name: Creating the Magnum project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ magnum_keystone_user }}"
+      password: "{{ magnum_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_magnum_auth }}' }}"
+    module_extra_vars:
+      openstack_magnum_auth: "{{ openstack_magnum_auth }}"
+  run_once: True
+
+- name: Creating Magnum trustee domain
+  kolla_toolbox:
+    module_name: "os_keystone_domain"
+    module_args:
+      name: "{{ magnum_trustee_domain }}"
+      description: "Owns users and projects created by magnum"
+      auth: "{{ '{{ openstack_magnum_auth }}' }}"
+    module_extra_vars:
+      openstack_magnum_auth: "{{ openstack_magnum_auth }}"
+  register: trustee_domain
+  run_once: True
+
+- name: Creating Magnum trustee user
+  kolla_toolbox:
+    module_name: "os_user"
+    module_args:
+      name: "{{ magnum_trustee_domain_admin }}"
+      domain: "{{ magnum_trustee_domain }}"
+      password: "{{ magnum_keystone_password }}"
+      auth: "{{ '{{ openstack_magnum_auth }}' }}"
+    module_extra_vars:
+      openstack_magnum_auth: "{{ openstack_magnum_auth }}"
+  run_once: True
+
+- name: Creating Magnum trustee user role
+  kolla_toolbox:
+    module_name: "os_user_role"
+    module_args:
+      domain: "{{ trustee_domain.id }}"
+      user: "{{ magnum_trustee_domain_admin }}"
+      role: "admin"
+      auth: "{{ '{{ openstack_magnum_auth }}' }}"
+    module_extra_vars:
+      openstack_magnum_auth: "{{ openstack_magnum_auth }}"
+  run_once: True

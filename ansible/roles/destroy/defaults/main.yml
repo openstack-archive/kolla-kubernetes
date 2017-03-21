@@ -1,0 +1,2 @@
+---
+destroy_include_images: "{{ enable_destroy_images }}"

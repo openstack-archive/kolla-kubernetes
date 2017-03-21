@@ -1,0 +1,19 @@
+---
+- name: Running Glance bootstrap container
+  vars:
+    glance_api: "{{ glance_services['glance-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ glance_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_glance"
+    restart_policy: "never"
+    volumes: "{{ glance_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[glance_api.group][0] }}"

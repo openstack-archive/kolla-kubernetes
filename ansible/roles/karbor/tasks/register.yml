@@ -1,0 +1,34 @@
+---
+- name: Creating the Karbor service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "karbor"
+      service_type: "data-protect"
+      description: "Application Data Protection Service"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_karbor_auth }}' }}"
+    module_extra_vars:
+      openstack_karbor_auth: "{{ openstack_karbor_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ karbor_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ karbor_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ karbor_public_endpoint }}'}
+
+- name: Creating the Karbor project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ karbor_keystone_user }}"
+      password: "{{ karbor_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_karbor_auth }}' }}"
+    module_extra_vars:
+      openstack_karbor_auth: "{{ openstack_karbor_auth }}"
+  run_once: True

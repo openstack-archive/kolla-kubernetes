@@ -1,0 +1,19 @@
+---
+- name: Running Keystone bootstrap container
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ keystone.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_keystone"
+    restart_policy: "never"
+    volumes: "{{ keystone.volumes|reject('equalto', '')|list }}"
+  run_once: True
+  delegate_to: "{{ groups['keystone'][0] }}"

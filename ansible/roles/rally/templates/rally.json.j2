@@ -1,0 +1,25 @@
+{
+    "command": "sleep infinity",
+    "config_files":[
+        {
+            "source": "{{ container_config_directory }}/rally.conf",
+            "dest": "/etc/rally/rally.conf",
+            "owner": "rally",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/policy.json",
+            "dest": "/etc/rally/policy.json",
+            "owner": "rally",
+            "perm": "0600",
+            "optional": true
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/rally",
+            "owner": "rally:rally",
+            "recurse": true
+        }
+    ]
+}

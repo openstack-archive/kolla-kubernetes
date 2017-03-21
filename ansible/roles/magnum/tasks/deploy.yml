@@ -1,0 +1,13 @@
+---
+- include: register.yml
+  when: inventory_hostname in groups['magnum-api']
+
+- include: config.yml
+  when: inventory_hostname in groups['magnum-api'] or
+        inventory_hostname in groups['magnum-conductor']
+
+- include: bootstrap.yml
+  when: inventory_hostname in groups['magnum-api']
+
+- name: Flush handlers
+  meta: flush_handlers

@@ -1,0 +1,11 @@
+---
+- name: Pulling memcached image
+  vars:
+    service: "{{ memcached_services.memcached }}"
+  kolla_docker:
+    action: "pull_image"
+    common_options: "{{ docker_common_options }}"
+    image: "{{ service.image }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool

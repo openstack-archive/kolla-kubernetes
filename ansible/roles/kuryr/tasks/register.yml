@@ -1,0 +1,14 @@
+---
+- name: Creating the Kuryr project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ kuryr_keystone_user }}"
+      password: "{{ kuryr_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_kuryr_auth }}' }}"
+    module_extra_vars:
+      openstack_kuryr_auth: "{{ openstack_kuryr_auth }}"
+  run_once: True

@@ -1,0 +1,57 @@
+---
+- name: Creating the Heat service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "{{ item.service_name }}"
+      service_type: "{{ item.service_type }}"
+      description: "Openstack Orchestration"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_heat_auth }}' }}"
+    module_extra_vars:
+      openstack_heat_auth: "{{ openstack_heat_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ heat_admin_endpoint }}', 'service_name': 'heat', 'service_type': 'orchestration'}
+    - {'interface': 'internal', 'url': '{{ heat_internal_endpoint }}', 'service_name': 'heat', 'service_type': 'orchestration'}
+    - {'interface': 'public', 'url': '{{ heat_public_endpoint }}', 'service_name': 'heat', 'service_type': 'orchestration'}
+    - {'interface': 'admin', 'url': '{{ heat_cfn_admin_endpoint }}', 'service_name': 'heat-cfn', 'service_type': 'cloudformation'}
+    - {'interface': 'internal', 'url': '{{ heat_cfn_internal_endpoint }}', 'service_name': 'heat-cfn', 'service_type': 'cloudformation'}
+    - {'interface': 'public', 'url': '{{ heat_cfn_public_endpoint }}', 'service_name': 'heat-cfn', 'service_type': 'cloudformation'}
+
+- name: Creating the Heat project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ heat_keystone_user }}"
+      password: "{{ heat_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_heat_auth }}' }}"
+    module_extra_vars:
+      openstack_heat_auth: "{{ openstack_heat_auth }}"
+  run_once: True
+
+- name: Creating the heat_stack_user role
+  kolla_toolbox:
+    module_name: os_keystone_role
+    module_args:
+      name: "{{ heat_stack_user_role }}"
+      auth: "{{ '{{ openstack_heat_auth }}' }}"
+    module_extra_vars:
+      openstack_heat_auth: "{{ openstack_heat_auth }}"
+  run_once: True
+
+- name: Creating the heat_stack_owner role
+  kolla_toolbox:
+    module_name: os_keystone_role
+    module_args:
+      name: "{{ heat_stack_owner_role }}"
+      auth: "{{ '{{ openstack_heat_auth }}' }}"
+    module_extra_vars:
+      openstack_heat_auth: "{{ openstack_heat_auth }}"
+  run_once: True

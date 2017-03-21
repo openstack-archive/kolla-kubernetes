@@ -1,0 +1,25 @@
+{
+    "command": "aodh-listener",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/aodh.conf",
+            "dest": "/etc/aodh/aodh.conf",
+            "owner": "aodh",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/policy.json",
+            "dest": "/etc/aodh/policy.json",
+            "owner": "aodh",
+            "perm": "0600",
+            "optional": true
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/aodh",
+            "owner": "aodh:kolla",
+            "recurse": true
+        }
+    ]
+}

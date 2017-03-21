@@ -1,0 +1,24 @@
+---
+- name: Check whether the swift service is enabled
+  local_action: fail msg='Ceph-rgw-keystone is conflicted with swift, you should only enable one of them'
+  when: enable_swift | bool
+
+- name: Creating the Swift service and endpoint
+  kolla_toolbox:
+    module_name: kolla_keystone_service
+    module_args:
+      service_name: "swift"
+      service_type: "object-store"
+      description: "Openstack Object Storage"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_swift_auth }}' }}"
+    module_extra_vars:
+      openstack_swift_auth: "{{ openstack_swift_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ swift_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ swift_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ swift_public_endpoint }}'}

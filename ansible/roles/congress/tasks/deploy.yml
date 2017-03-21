@@ -1,0 +1,14 @@
+---
+- include: register.yml
+  when: inventory_hostname in groups['congress-api']
+
+- include: config.yml
+  when: inventory_hostname in groups['congress-api'] or
+        inventory_hostname in groups['congress-policy-engine'] or
+        inventory_hostname in groups['congress-datasource']
+
+- include: bootstrap.yml
+  when: inventory_hostname in groups['congress-api']
+
+- name: Flush handlers
+  meta: flush_handlers

@@ -1,0 +1,8 @@
+---
+- include: register.yml
+
+- include: config.yml
+
+- include: bootstrap_service.yml
+
+- include: start.yml

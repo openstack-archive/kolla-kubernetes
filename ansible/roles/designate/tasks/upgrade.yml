@@ -1,0 +1,9 @@
+---
+- include: config.yml
+
+- include: bootstrap_service.yml
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- include: update_pools.yml

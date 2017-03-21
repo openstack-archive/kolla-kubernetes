@@ -1,0 +1,69 @@
+---
+project_name: "karbor"
+
+karbor_services:
+  karbor-api:
+    container_name: karbor_api
+    group: karbor-api
+    enabled: true
+    image: "{{ karbor_api_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/karbor-api/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  karbor-protection:
+    container_name: karbor_protection
+    group: karbor-protection
+    enabled: true
+    image: "{{ karbor_protection_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/karbor-protection/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  karbor-operationengine:
+    container_name: karbor_operationengine
+    group: karbor-operationengine
+    enabled: true
+    image: "{{ karbor_operationengine_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/karbor-operationengine/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+
+
+####################
+# Database
+####################
+karbor_database_name: "karbor"
+karbor_database_user: "karbor"
+karbor_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+karbor_protection_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-karbor-protection"
+karbor_protection_tag: "{{ openstack_release }}"
+karbor_protection_image_full: "{{ karbor_protection_image }}:{{ karbor_protection_tag }}"
+
+karbor_operationengine_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-karbor-operationengine"
+karbor_operationengine_tag: "{{ openstack_release }}"
+karbor_operationengine_image_full: "{{ karbor_operationengine_image }}:{{ karbor_operationengine_tag }}"
+
+karbor_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-karbor-api"
+karbor_api_tag: "{{ openstack_release }}"
+karbor_api_image_full: "{{ karbor_api_image }}:{{ karbor_api_tag }}"
+
+
+####################
+# OpenStack
+####################
+karbor_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ karbor_api_port }}/v1/%(tenant_id)s"
+karbor_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ karbor_api_port }}/v1/%(tenant_id)s"
+karbor_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ karbor_api_port }}/v1/%(tenant_id)s"
+
+karbor_logging_debug: "{{ openstack_logging_debug }}"
+
+karbor_keystone_user: "karbor"
+
+openstack_karbor_auth: "{{ openstack_auth }}" 

@@ -1,0 +1,24 @@
+---
+- include: ceph.yml
+  when:
+    - enable_ceph | bool
+    - gnocchi_backend_storage == 'ceph'
+
+- include: external_ceph.yml
+  when:
+    - enable_ceph | bool == False
+    - gnocchi_backend_storage == 'ceph'
+
+- include: register.yml
+  when: inventory_hostname in groups['gnocchi-api']
+
+- include: config.yml
+  when: inventory_hostname in groups['gnocchi-statsd'] or
+        inventory_hostname in groups['gnocchi-api'] or
+        inventory_hostname in groups['gnocchi-metricd']
+
+- include: bootstrap.yml
+  when: inventory_hostname in groups['gnocchi-api']
+
+- name: Flush handlers
+  meta: flush_handlers

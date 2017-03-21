@@ -1,0 +1,84 @@
+---
+project_name: "gnocchi"
+
+gnocchi_services:
+  gnocchi-api:
+    container_name: gnocchi_api
+    group: gnocchi-api
+    enabled: true
+    image: "{{ gnocchi_api_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/gnocchi-api/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "gnocchi:/var/lib/gnocchi/"
+      - "kolla_logs:/var/log/kolla/"
+  gnocchi-metricd:
+    container_name: gnocchi_metricd
+    group: gnocchi-metricd
+    enabled: true
+    image: "{{ gnocchi_metricd_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/gnocchi-metricd/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "gnocchi:/var/lib/gnocchi/"
+      - "kolla_logs:/var/log/kolla/"
+  gnocchi-statsd:
+    container_name: gnocchi_statsd
+    group: gnocchi-statsd
+    enabled: true
+    image: "{{ gnocchi_statsd_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/gnocchi-statsd/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "gnocchi:/var/lib/gnocchi/"
+      - "kolla_logs:/var/log/kolla/"
+
+
+####################
+# Ceph
+####################
+ceph_gnocchi_pool_type: "{{ ceph_pool_type }}"
+ceph_gnocchi_cache_mode: "{{ ceph_cache_mode }}"
+
+# Due to Ansible issues on include, you cannot override these variables. Please
+# override the variables they reference instead.
+gnocchi_pool_name: "{{ ceph_gnocchi_pool_name }}"
+gnocchi_pool_type: "{{ ceph_gnocchi_pool_type }}"
+gnocchi_cache_mode: "{{ ceph_gnocchi_cache_mode }}"
+
+
+####################
+# Database
+####################
+gnocchi_database_name: "gnocchi"
+gnocchi_database_user: "gnocchi"
+gnocchi_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+gnocchi_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-gnocchi-api"
+gnocchi_api_tag: "{{ openstack_release }}"
+gnocchi_api_image_full: "{{ gnocchi_api_image }}:{{ gnocchi_api_tag }}"
+
+gnocchi_statsd_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-gnocchi-statsd"
+gnocchi_statsd_tag: "{{ openstack_release }}"
+gnocchi_statsd_image_full: "{{ gnocchi_statsd_image }}:{{ gnocchi_statsd_tag }}"
+
+gnocchi_metricd_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-gnocchi-metricd"
+gnocchi_metricd_tag: "{{ openstack_release }}"
+gnocchi_metricd_image_full: "{{ gnocchi_metricd_image }}:{{ gnocchi_metricd_tag }}"
+
+####################
+# OpenStack
+####################
+gnocchi_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ gnocchi_api_port }}"
+gnocchi_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ gnocchi_api_port }}"
+gnocchi_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ gnocchi_api_port }}"
+
+gnocchi_logging_debug: "{{ openstack_logging_debug }}"
+
+gnocchi_keystone_user: "gnocchi"
+
+openstack_gnocchi_auth: "{{ openstack_auth }}"

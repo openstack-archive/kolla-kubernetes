@@ -1,0 +1,19 @@
+---
+- name: Running trove bootstrap container
+  vars:
+    trove_api: "{{ trove_services['trove-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ trove_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_trove"
+    restart_policy: "never"
+    volumes: "{{ trove_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[trove_api.group][0] }}"

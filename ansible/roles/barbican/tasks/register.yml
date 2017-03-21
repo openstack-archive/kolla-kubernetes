@@ -1,0 +1,49 @@
+---
+- name: Creating the barbican service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "barbican"
+      service_type: "key-manager"
+      description: "Barbican Key Management Service"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_barbican_auth }}' }}"
+    module_extra_vars:
+      openstack_barbican_auth: "{{ openstack_barbican_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ barbican_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ barbican_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ barbican_public_endpoint }}'}
+
+- name: Creating the barbican project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ barbican_keystone_user }}"
+      password: "{{ barbican_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_barbican_auth }}' }}"
+    module_extra_vars:
+      openstack_barbican_auth: "{{ openstack_barbican_auth }}"
+  run_once: True
+
+- name: Creating default barbican roles
+  kolla_toolbox:
+    module_name: os_keystone_role
+    module_args:
+      name: "{{ item }}"
+      auth: "{{ '{{ openstack_barbican_auth }}' }}"
+    module_extra_vars:
+      openstack_barbican_auth: "{{ openstack_barbican_auth }}"
+  run_once: True
+  with_items:
+    - "{{ barbican_keymanager_role }}"
+    - "{{ barbican_creator_role }}"
+    - "{{ barbican_observer_role }}"
+    - "{{ barbican_audit_role }}"

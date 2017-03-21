@@ -1,0 +1,44 @@
+---
+- name: Creating the Cloudkitty service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "cloudkitty"
+      service_type: "rating"
+      description: "OpenStack Rating"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_cloudkitty_auth }}' }}"
+    module_extra_vars:
+      openstack_cloudkitty_auth: "{{ openstack_cloudkitty_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ cloudkitty_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ cloudkitty_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ cloudkitty_public_endpoint }}'}
+
+- name: Creating the Cloudkitty project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ cloudkitty_keystone_user }}"
+      password: "{{ cloudkitty_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_cloudkitty_auth }}' }}"
+    module_extra_vars:
+      openstack_cloudkitty_auth: "{{ openstack_cloudkitty_auth }}"
+  run_once: True
+
+- name: Creating the rating role
+  kolla_toolbox:
+    module_name: os_keystone_role
+    module_args:
+      name: "{{ cloudkitty_openstack_keystone_default_role }}"
+      auth: "{{ '{{ openstack_cloudkitty_auth }}' }}"
+    module_extra_vars:
+      openstack_cloudkitty_auth: "{{ openstack_cloudkitty_auth }}"
+  run_once: True

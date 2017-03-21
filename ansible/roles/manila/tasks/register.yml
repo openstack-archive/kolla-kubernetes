@@ -1,0 +1,37 @@
+---
+- name: Creating the Manila service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "{{ item.service_name }}"
+      service_type: "{{ item.service_type }}"
+      description: "Openstack Shared Filesystems"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_manila_auth }}' }}"
+    module_extra_vars:
+      openstack_manila_auth: "{{ openstack_manila_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ manila_admin_endpoint }}', 'service_name': 'manila', 'service_type': 'share'}
+    - {'interface': 'internal', 'url': '{{ manila_internal_endpoint }}', 'service_name': 'manila', 'service_type': 'share'}
+    - {'interface': 'public', 'url': '{{ manila_public_endpoint }}', 'service_name': 'manila', 'service_type': 'share'}
+    - {'interface': 'admin', 'url': '{{ manila_v2_admin_endpoint }}', 'service_name': 'manilav2', 'service_type': 'sharev2'}
+    - {'interface': 'internal', 'url': '{{ manila_v2_internal_endpoint }}', 'service_name': 'manilav2', 'service_type': 'sharev2'}
+    - {'interface': 'public', 'url': '{{ manila_v2_public_endpoint }}', 'service_name': 'manilav2', 'service_type': 'sharev2'}
+
+- name: Creating the Manila project, user and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ manila_keystone_user }}"
+      password: "{{ manila_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_manila_auth }}' }}"
+    module_extra_vars:
+      openstack_manila_auth: "{{ openstack_manila_auth }}"
+  run_once: True

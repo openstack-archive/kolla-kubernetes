@@ -1,0 +1,30 @@
+---
+project_name: "Kibana"
+
+kibana_services:
+  kibana:
+    container_name: "kibana"
+    image: "{{ kibana_image_full }}"
+    enabled: true
+    group: "kibana"
+    volumes:
+      - "{{ node_config_directory }}/kibana/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+
+
+####################
+# Kibana
+####################
+kibana_default_app_id: "discover"
+kibana_elasticsearch_request_timeout: 300000
+kibana_elasticsearch_shard_timeout: 0
+kibana_elasticsearch_ssl_verify: false
+
+
+####################
+# Docker
+####################
+kibana_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-kibana"
+kibana_tag: "{{ openstack_release }}"
+kibana_image_full: "{{ kibana_image }}:{{ kibana_tag }}"

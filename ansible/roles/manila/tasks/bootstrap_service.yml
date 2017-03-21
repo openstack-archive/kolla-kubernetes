@@ -1,0 +1,19 @@
+---
+- name: Running Manila bootstrap container
+  vars:
+    manila_api: "{{ manila_services['manila-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ manila_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_manila"
+    restart_policy: "never"
+    volumes: "{{ manila_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[manila_api.group][0] }}"

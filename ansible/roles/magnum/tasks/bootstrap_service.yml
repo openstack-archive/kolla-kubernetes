@@ -1,0 +1,19 @@
+---
+- name: Running Magnum bootstrap container
+  vars:
+    magnum_api: "{{ magnum_services['magnum-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ magnum_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_magnum"
+    restart_policy: "never"
+    volumes: "{{ magnum_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[magnum_api.group][0] }}"

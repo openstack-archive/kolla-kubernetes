@@ -1,0 +1,24 @@
+---
+elasticsearch_services:
+  elasticsearch:
+    container_name: elasticsearch
+    group: elasticsearch
+    enabled: true
+    image: "{{ elasticsearch_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/elasticsearch/:{{ container_config_directory }}/"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "elasticsearch:/var/lib/elasticsearch/data"
+
+
+####################
+# Elasticsearch
+####################
+elasticsearch_cluster_name: "kolla_logging"
+
+####################
+# Docker
+####################
+elasticsearch_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-elasticsearch"
+elasticsearch_tag: "{{ openstack_release }}"
+elasticsearch_image_full: "{{ elasticsearch_image }}:{{ elasticsearch_tag }}"

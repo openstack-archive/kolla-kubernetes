@@ -1,0 +1,99 @@
+---
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/{{ item.key }}"
+    state: "directory"
+    recurse: yes
+  when:
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ gnocchi_services }}"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+  register: gnocchi_config_jsons
+  when:
+    - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ gnocchi_services }}"
+  notify:
+    - Restart gnocchi-api container
+    - Restart gnocchi-metricd container
+    - Restart gnocchi-statsd container
+
+- name: Copying over gnocchi.conf
+  merge_configs:
+    vars:
+      service_name: "{{ item.key }}"
+    sources:
+      - "{{ role_path }}/templates/gnocchi.conf.j2"
+      - "{{ node_custom_config }}/global.conf"
+      - "{{ node_custom_config }}/database.conf"
+      - "{{ node_custom_config }}/messaging.conf"
+      - "{{ node_custom_config }}/gnocchi.conf"
+      - "{{ node_custom_config }}/gnocchi/{{ item.key }}.conf"
+      - "{{ node_custom_config }}/gnocchi/{{ inventory_hostname }}/gnocchi.conf"
+    dest: "{{ node_config_directory }}/{{ item.key }}/gnocchi.conf"
+  register: gnocchi_confs
+  when:
+    - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ gnocchi_services }}"
+  notify:
+    - Restart gnocchi-api container
+    - Restart gnocchi-metricd container
+    - Restart gnocchi-statsd container
+
+- name: Copying over wsgi-gnocchi.conf
+  vars:
+    service: "{{ gnocchi_services['gnocchi-api'] }}"
+  template:
+    src: "wsgi-gnocchi.conf.j2"
+    dest: "{{ node_config_directory }}/{{ item }}/wsgi-gnocchi.conf"
+  register: gnocchi_wsgi_conf
+  when:
+    - inventory_hostname in groups['gnocchi-api']
+    - service.enabled | bool
+  with_items:
+    - "gnocchi-api"
+  notify:
+    - Restart gnocchi-api container
+
+- name: Check if policies shall be overwritten
+  local_action: stat path="{{ node_custom_config }}/gnocchi/policy.json"
+  register: gnocchi_policy
+
+- name: Copying over existing policy.json
+  template:
+    src: "{{ node_custom_config }}/gnocchi/policy.json"
+    dest: "{{ node_config_directory }}/{{ item.key }}/policy.json"
+  register: gnocchi_policy_jsons
+  when:
+    - gnocchi_policy.stat.exists
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ gnocchi_services }}"
+  notify:
+    - Restart gnocchi-api container
+    - Restart gnocchi-metricd container
+    - Restart gnocchi-statsd container
+
+- name: Check gnocchi containers
+  kolla_docker:
+    action: "compare_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ item.value.container_name }}"
+    image: "{{ item.value.image }}"
+    volumes: "{{ item.value.volumes }}"
+  register: check_gnocchi_containers
+  when:
+    - action != "config"
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ gnocchi_services }}"
+  notify:
+    - Restart gnocchi-api container
+    - Restart gnocchi-metricd container
+    - Restart gnocchi-statsd container

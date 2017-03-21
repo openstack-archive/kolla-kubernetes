@@ -1,0 +1,40 @@
+---
+project_name: "tacker"
+
+tacker_services:
+  tacker:
+    container_name: "tacker"
+    group: "tacker"
+    enabled: true
+    image: "{{ tacker_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/tacker/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+
+####################
+# Database
+####################
+tacker_database_name: "tacker"
+tacker_database_user: "tacker"
+tacker_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+########
+# Docker
+########
+tacker_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-tacker"
+tacker_tag: "{{ openstack_release }}"
+tacker_image_full: "{{ tacker_image }}:{{ tacker_tag }}"
+
+####################
+# OpenStack
+####################
+tacker_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ tacker_server_port }}"
+tacker_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ tacker_server_port }}"
+tacker_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ tacker_server_port }}"
+
+tacker_logging_debug: "{{ openstack_logging_debug }}"
+
+tacker_keystone_user: "tacker"
+
+openstack_tacker_auth: "{{ openstack_auth }}"

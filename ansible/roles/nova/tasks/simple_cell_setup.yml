@@ -1,0 +1,34 @@
+---
+- name: Waiting for nova-compute service up
+  command: >
+    docker exec kolla_toolbox openstack
+    --os-interface internal
+    --os-auth-url {{ keystone_admin_url }}
+    --os-identity-api-version 3
+    --os-project-domain-name default
+    --os-tenant-name admin
+    --os-username admin
+    --os-password {{ keystone_admin_password }}
+    --os-user-domain-name default
+    compute service list -f json --service nova-compute
+  register: nova_compute_services
+  changed_when: false
+  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"
+  retries: 20
+  delay: 10
+  until:
+    - nova_compute_services | success
+    - nova_compute_services.stdout | from_json | length != 0
+
+- name: Running nova simple cell setup
+  command: docker exec nova_api nova-manage cell_v2 simple_cell_setup
+  register: cell_setup
+  changed_when:
+    - cell_setup | success
+    - '"Cell0 is already setup" not in cell_setup.stdout'
+  failed_when:
+    - cell_setup.rc != 0
+    - '"No hosts found to map to cell, exiting." not in cell_setup.stdout'
+  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"

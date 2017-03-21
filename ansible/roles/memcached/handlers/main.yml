@@ -1,0 +1,15 @@
+- name: Restart memcached container
+  vars:
+    service: "{{ memcached_services.memcached }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    image: "{{ service.image }}"
+    name: "{{ service.container_name }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - action != "config"
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - memcached_config_json.changed | bool
+      or check_memcached_container.changed | bool

@@ -1,0 +1,91 @@
+---
+- name: Ensuring config directory exists
+  file:
+    path: "{{ node_config_directory }}/{{ item }}"
+    state: "directory"
+  with_items:
+    - "nova-compute"
+    - "nova-libvirt/secrets"
+  when: inventory_hostname in groups['compute']
+
+- name: Copying over ceph.conf(s)
+  merge_configs:
+    vars:
+      service_name: "{{ item }}"
+    sources:
+      - "{{ role_path }}/../ceph/templates/ceph.conf.j2"
+      - "{{ node_custom_config }}/ceph.conf"
+      - "{{ node_custom_config }}/ceph/{{ inventory_hostname }}/ceph.conf"
+    dest: "{{ node_config_directory }}/{{ item }}/ceph.conf"
+  with_items:
+    - "nova-compute"
+    - "nova-libvirt"
+  when: inventory_hostname in groups['compute']
+
+- include: ../../ceph_pools.yml
+  vars:
+    pool_name: "{{ nova_pool_name }}"
+    pool_type: "{{ nova_pool_type }}"
+    cache_mode: "{{ nova_cache_mode }}"
+
+# TODO(SamYaple): Improve changed_when tests
+- name: Pulling cephx keyring for nova
+  command: docker exec ceph_mon ceph auth get-or-create client.nova mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool={{ ceph_cinder_pool_name }}, allow rwx pool={{ ceph_cinder_pool_name }}-cache, allow rwx pool={{ ceph_nova_pool_name }}, allow rwx pool={{ ceph_nova_pool_name }}-cache, allow rwx pool={{ ceph_glance_pool_name }}, allow rwx pool={{ ceph_glance_pool_name }}-cache'
+  register: cephx_key
+  delegate_to: "{{ groups['ceph-mon'][0] }}"
+  changed_when: False
+  run_once: True
+
+# TODO(SamYaple): Improve failed_when and changed_when tests
+- name: Pulling nova cephx keyring for libvirt
+  command: docker exec ceph_mon ceph auth get-key client.nova
+  register: nova_cephx_raw_key
+  delegate_to: "{{ groups['ceph-mon'][0] }}"
+  changed_when: False
+  run_once: True
+
+- name: Pulling cinder cephx keyring for libvirt
+  command: docker exec ceph_mon ceph auth get-key client.cinder
+  register: cinder_cephx_raw_key
+  delegate_to: "{{ groups['ceph-mon'][0] }}"
+  changed_when: False
+  run_once: True
+
+- name: Pushing cephx keyring for nova
+  copy:
+    content: "{{ cephx_key.stdout }}\n\r"
+    dest: "{{ node_config_directory }}/nova-compute/ceph.client.nova.keyring"
+    mode: "0600"
+  when: inventory_hostname in groups['compute']
+
+- name: Pushing secrets xml for libvirt
+  template:
+    src: "secret.xml.j2"
+    dest: "{{ node_config_directory }}/nova-libvirt/secrets/{{ item.uuid }}.xml"
+    mode: "0600"
+  when:
+    - inventory_hostname in groups['compute']
+    - item.enabled | bool
+  with_items:
+    - uuid: "{{ rbd_secret_uuid }}"
+      name: client.nova secret
+      enabled: true
+    - uuid: "{{ cinder_rbd_secret_uuid }}"
+      name: client.cinder secret
+      enabled: "{{ cinder_backend_ceph }}"
+
+- name: Pushing secrets key for libvirt
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ node_config_directory }}/nova-libvirt/secrets/{{ item.uuid }}.base64"
+    mode: "0600"
+  when:
+    - inventory_hostname in groups['compute']
+    - item.enabled | bool
+  with_items:
+    - uuid: "{{ rbd_secret_uuid }}"
+      content: "{{ nova_cephx_raw_key.stdout }}"
+      enabled: true
+    - uuid: "{{ cinder_rbd_secret_uuid }}"
+      content: "{{ cinder_cephx_raw_key.stdout }}"
+      enabled: "{{ cinder_backend_ceph }}"

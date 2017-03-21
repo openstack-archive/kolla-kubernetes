@@ -1,0 +1,70 @@
+[DEFAULT]
+debug = {{ barbican_logging_debug }}
+log_dir = /var/log/kolla/barbican
+
+
+bind_port = {{ barbican_api_port }}
+bind_host = {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}
+host_href = {{ public_protocol }}://{{ kolla_external_fqdn }}:{{ barbican_api_port }}
+backlog = 4096
+max_allowed_secret_in_bytes = 10000
+max_allowed_request_size_in_bytes = 1000000
+
+db_auto_create = False
+sql_connection = mysql+pymysql://{{ barbican_database_user }}:{{ barbican_database_password }}@{{ barbican_database_address }}/{{ barbican_database_name }}
+
+transport_url = rabbit://{% for host in groups['rabbitmq'] %}{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ rabbitmq_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+# ================= Secret Store Plugin ===================
+[secretstore]
+namespace = barbican.secretstore.plugin
+enabled_secretstore_plugins = store_crypto
+
+# ================= Crypto plugin ===================
+[crypto]
+namespace = barbican.crypto.plugin
+enabled_crypto_plugins = p11_crypto
+
+[p11_crypto_plugin]
+# Path to vendor PKCS11 library
+library_path = '/usr/lib/libCryptoki2_64.so'
+# Password to login to PKCS11 session
+login = '{{ barbican_p11_password }}'
+# Label to identify master KEK in the HSM (must not be the same as HMAC label)
+mkek_label = 'kolla_master_kek'
+# Length in bytes of master KEK
+mkek_length = 32
+# Label to identify HMAC key in the HSM (must not be the same as MKEK label)
+hmac_label = 'kolla_hmac'
+
+
+[keystone_notifications]
+enable = True
+
+[keystone_authtoken]
+auth_uri = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}
+project_domain_id = default
+project_name = service
+user_domain_id = default
+username = {{ barbican_keystone_user }}
+password = {{ barbican_keystone_password }}
+auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
+auth_type = password
+
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = {{ memcache_secret_key }}
+{% if orchestration_engine == 'KUBERNETES' %}
+memcache_servers = {{ memcached_servers }}
+{% else %}
+memcached_servers = {% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+{% endif %}
+
+[service_credentials]
+auth_url = {{ internal_protocol  }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}
+region_name = {{ openstack_region_name }}
+password = {{ barbican_keystone_password }}
+username = {{ barbican_keystone_user }}
+project_name = service
+project_domain_id = default
+user_domain_id = default
+auth_type = password

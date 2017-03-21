@@ -1,0 +1,18 @@
+{
+    "command": "/opt/kibana/bin/kibana",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/kibana.yml",
+            "dest": "/opt/kibana/config/kibana.yml",
+            "owner": "kibana",
+            "perm": "0640"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/kibana",
+            "owner": "kibana:kibana",
+            "recurse": true
+        }
+    ]
+}

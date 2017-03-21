@@ -1,0 +1,18 @@
+---
+- name: Creating haproxy mysql user
+  kolla_toolbox:
+    module_name: mysql_user
+    module_args:
+      login_host: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+      login_port: "{{ mariadb_port }}"
+      login_user: "{{ database_user }}"
+      login_password: "{{ database_password }}"
+      name: "haproxy"
+      password: ""
+      host: "%"
+      priv: "*.*:USAGE"
+  run_once: True
+
+- name: Cleaning up facts
+  set_fact:
+    delegate_host: "bootstraped"

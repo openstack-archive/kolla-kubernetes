@@ -1,0 +1,47 @@
+---
+- name: Creating Nova databases
+  kolla_toolbox:
+    module_name: mysql_db
+    module_args:
+      login_host: "{{ database_address }}"
+      login_port: "{{ database_port }}"
+      login_user: "{{ database_user }}"
+      login_password: "{{ database_password }}"
+      name: "{{ item }}"
+  register: database
+  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"
+  with_items:
+    - "{{ nova_database_name }}"
+    - "{{ nova_database_name }}_cell0"
+    - "{{ nova_api_database_name }}"
+
+- name: Creating Nova databases user and setting permissions
+  kolla_toolbox:
+    module_name: mysql_user
+    module_args:
+      login_host: "{{ database_address }}"
+      login_port: "{{ database_port }}"
+      login_user: "{{ database_user }}"
+      login_password: "{{ database_password }}"
+      name: "{{ item.database_username }}"
+      password: "{{ item.database_password }}"
+      host: "%"
+      priv: "{{ item.database_name }}.*:ALL"
+      append_privs: "yes"
+  register: database_user_create
+  with_items:
+    - database_name: "{{ nova_database_name }}"
+      database_username: "{{ nova_database_name }}"
+      database_password: "{{ nova_database_password }}"
+    - database_name: "{{ nova_database_name }}_cell0"
+      database_username: "{{ nova_database_name }}"
+      database_password: "{{ nova_database_password }}"
+    - database_name: "{{ nova_api_database_name }}"
+      database_username: "{{ nova_api_database_name }}"
+      database_password: "{{ nova_api_database_password }}"
+  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"
+
+- include: bootstrap_service.yml
+  when: database.changed

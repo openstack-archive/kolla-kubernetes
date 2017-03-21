@@ -1,0 +1,8 @@
+---
+- include: config.yml
+
+- include: bootstrap.yml
+  when: horizon_backend_database | bool
+
+- name: Flush handlers
+  meta: flush_handlers

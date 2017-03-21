@@ -1,0 +1,58 @@
+---
+project_name: "magnum"
+
+magnum_services:
+  magnum-api:
+    container_name: magnum_api
+    group: magnum-api
+    enabled: true
+    image: "{{ magnum_api_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/magnum-api/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  magnum-conductor:
+    container_name: magnum_conductor
+    group: magnum-conductor
+    enabled: true
+    image: "{{ magnum_conductor_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/magnum-conductor/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "magnum:/var/lib/magnum/"
+      - "kolla_logs:/var/log/kolla/"
+
+
+####################
+# Database
+####################
+magnum_database_name: "magnum"
+magnum_database_user: "magnum"
+magnum_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+magnum_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-magnum-api"
+magnum_api_tag: "{{ openstack_release }}"
+magnum_api_image_full: "{{ magnum_api_image }}:{{ magnum_api_tag }}"
+magnum_conductor_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-magnum-conductor"
+magnum_conductor_tag: "{{ openstack_release }}"
+magnum_conductor_image_full: "{{ magnum_conductor_image }}:{{ magnum_conductor_tag }}"
+
+
+####################
+# OpenStack
+####################
+magnum_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ magnum_api_port }}/v1"
+magnum_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ magnum_api_port }}/v1"
+magnum_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ magnum_api_port }}/v1"
+
+magnum_logging_debug: "{{ openstack_logging_debug }}"
+
+magnum_keystone_user: "magnum"
+magnum_trustee_domain_admin: "magnum_trustee_domain_admin"
+magnum_trustee_domain: "magnum"
+
+openstack_magnum_auth: "{{ openstack_auth }}"

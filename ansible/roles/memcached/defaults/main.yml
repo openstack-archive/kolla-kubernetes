@@ -1,0 +1,25 @@
+---
+project_name: "memcached"
+
+memcached_services:
+  memcached:
+    container_name: "memcached"
+    image: "{{ memcached_image_full }}"
+    enabled: true
+    group: "memcached"
+    volumes:
+      - "{{ node_config_directory }}/memcached/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+
+####################
+# Docker
+####################
+memcached_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-memcached"
+memcached_tag: "{{ openstack_release }}"
+memcached_image_full: "{{ memcached_image }}:{{ memcached_tag }}"
+
+####################
+# Memcached options
+####################
+memcached_connection_limit: "5000"

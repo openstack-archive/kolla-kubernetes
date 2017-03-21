@@ -1,0 +1,112 @@
+---
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/{{ item }}"
+    state: "directory"
+    recurse: yes
+  with_items:
+    - "fluentd"
+    - "fluentd/input"
+    - "fluentd/output"
+    - "fluentd/format"
+    - "fluentd/filter"
+    - "kolla-toolbox"
+    - "cron"
+    - "cron/logrotate"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item }}/config.json"
+  with_items:
+    - "fluentd"
+    - "kolla-toolbox"
+    - "cron"
+
+- name: Copying over fluentd input config files
+  template:
+    src: "conf/input/{{ item }}.conf.j2"
+    dest: "{{ node_config_directory }}/fluentd/input/{{ item }}.conf"
+  with_items:
+    - "00-global"
+    - "01-syslog"
+    - "02-mariadb"
+    - "03-rabbitmq"
+
+- name: Copying over fluentd output config files
+  template:
+    src: "conf/output/{{ item.name }}.conf.j2"
+    dest: "{{ node_config_directory }}/fluentd/output/{{ item.name }}.conf"
+  when: item.enabled | bool
+  with_items:
+    - name: "00-local"
+      enabled: true
+    - name: "01-es"
+      enabled: "{{ enable_elasticsearch }}"
+
+- name: Copying over fluentd format config files
+  template:
+    src: "conf/format/{{ item }}.conf.j2"
+    dest: "{{ node_config_directory }}/fluentd/format/{{ item }}.conf"
+  with_items:
+    - "apache_access"
+    - "wsgi_access"
+    - "wsgi_python"
+
+- name: Copying over fluentd filter config files
+  template:
+    src: "conf/filter/{{ item }}.conf.j2"
+    dest: "{{ node_config_directory }}/fluentd/filter/{{ item }}.conf"
+  with_items:
+    - "00-record_transformer"
+    - "01-rewrite"
+
+- name: Copying over td-agent.conf
+  template:
+    src: "td-agent.conf.j2"
+    dest: "{{ node_config_directory }}/{{ item }}/td-agent.conf"
+  with_items:
+    - "fluentd"
+
+- name: Copying over cron logrotate config files
+  template:
+    src: "cron-logrotate-{{ item.name }}.conf.j2"
+    dest: "{{ node_config_directory }}/cron/logrotate/{{ item.name }}.conf"
+  when: item.enabled | bool
+  with_items:
+    - { name: "ansible", enabled: "yes" }
+    - { name: "aodh", enabled: "{{ enable_aodh }}" }
+    - { name: "barbican", enabled: "{{ enable_barbican }}" }
+    - { name: "ceilometer", enabled: "{{ enable_ceilometer }}" }
+    - { name: "cinder", enabled: "{{ enable_cinder }}" }
+    - { name: "cloudkitty", enabled: "{{ enable_cloudkitty }}" }
+    - { name: "designate", enabled: "{{ enable_designate }}" }
+    - { name: "elasticsearch", enabled: "{{ enable_elasticsearch }}" }
+    - { name: "freezer", enabled: "{{ enable_freezer }}" }
+    - { name: "glance", enabled: "{{ enable_glance }}" }
+    - { name: "global", enabled: "yes" }
+    - { name: "gnocchi", enabled: "{{ enable_gnocchi }}" }
+    - { name: "grafana", enabled: "{{ enable_grafana }}" }
+    - { name: "haproxy", enabled: "{{ enable_haproxy }}" }
+    - { name: "heat", enabled: "{{ enable_heat }}" }
+    - { name: "iscsid", enabled: "{{ enable_iscsid }}" }
+    - { name: "karbor", enabled: "{{ enable_karbor }}" }
+    - { name: "keepalived", enabled: "{{ enable_haproxy }}" }
+    - { name: "keystone", enabled: "{{ enable_keystone }}" }
+    - { name: "magnum", enabled: "{{ enable_magnum }}" }
+    - { name: "manila", enabled: "{{ enable_manila }}" }
+    - { name: "mariadb", enabled: "{{ enable_mariadb }}" }
+    - { name: "mistral", enabled: "{{ enable_mistral }}" }
+    - { name: "murano", enabled: "{{ enable_murano }}" }
+    - { name: "neutron", enabled: "{{ enable_neutron }}" }
+    - { name: "nova", enabled: "{{ enable_nova }}" }
+    - { name: "octavia", enabled: "{{ enable_octavia }}" }
+    - { name: "panko", enabled: "{{ enable_panko }}" }
+    - { name: "rabbitmq", enabled: "{{ enable_rabbitmq }}" }
+    - { name: "sahara", enabled: "{{ enable_sahara }}" }
+    - { name: "searchlight", enabled: "{{ enable_searchlight }}" }
+    - { name: "senlin", enabled: "{{ enable_senlin }}" }
+    - { name: "solum", enabled: "{{ enable_solum }}" }
+    - { name: "swift", enabled: "{{ enable_swift }}" }
+    - { name: "tacker", enabled: "{{ enable_tacker }}" }
+    - { name: "watcher", enabled: "{{ enable_watcher }}" }

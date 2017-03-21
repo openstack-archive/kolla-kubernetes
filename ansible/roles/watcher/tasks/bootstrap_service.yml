@@ -1,0 +1,19 @@
+---
+- name: Running Watcher bootstrap container
+  vars:
+    watcher_api: "{{ watcher_services['watcher-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ watcher_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_watcher"
+    restart_policy: "never"
+    volumes: "{{ watcher_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[watcher_api.group][0] }}"

@@ -1,0 +1,63 @@
+---
+- name: Creating Ironic database
+  kolla_toolbox:
+    module_name: mysql_db
+    module_args:
+      login_host: "{{ database_address }}"
+      login_port: "{{ database_port }}"
+      login_user: "{{ database_user }}"
+      login_password: "{{ database_password }}"
+      name: "{{ item.database_name }}"
+  register: database
+  run_once: True
+  delegate_to: "{{ item.delegate_to }}"
+  with_items:
+    - database_name: "{{ ironic_database_name }}"
+      delegate_to: "{{ groups['ironic-api'][0] }}"
+    - database_name: "{{ ironic_inspector_database_name }}"
+      delegate_to: "{{ groups['ironic-inspector'][0] }}"
+
+- name: Creating Ironic database user and setting permissions
+  kolla_toolbox:
+    module_name: mysql_user
+    module_args:
+      login_host: "{{ database_address }}"
+      login_port: "{{ database_port }}"
+      login_user: "{{ database_user }}"
+      login_password: "{{ database_password }}"
+      name: "{{ item.database_name }}"
+      password: "{{ item.database_password }}"
+      host: "%"
+      priv: "{{ item.database_name }}.*:ALL"
+      append_privs: "yes"
+  run_once: True
+  delegate_to: "{{ item.delegate_to }}"
+  with_items:
+    - database_name: "{{ ironic_database_name }}"
+      database_password: "{{ ironic_database_password }}"
+      delegate_to: "{{ groups['ironic-api'][0] }}"
+    - database_name: "{{ ironic_inspector_database_name }}"
+      database_password: "{{ ironic_inspector_database_password }}"
+      delegate_to: "{{ groups['ironic-inspector'][0] }}"
+
+- include: bootstrap_service.yml
+  when: database.changed
+
+- name: Running Ironic-PXE bootstrap container
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ ironic_pxe_image_full }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_ironic_pxe"
+    restart_policy: "never"
+    volumes:
+      - "{{ node_config_directory }}/ironic-pxe/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "ironic_pxe:/tftpboot/"
+  when: "{{ inventory_hostname in groups['ironic-pxe'] }}"

@@ -1,0 +1,19 @@
+---
+- name: Running Octavia bootstrap container
+  vars:
+    octavia_api: "{{ octavia_services['octavia-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ octavia_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_octavia"
+    restart_policy: "never"
+    volumes: "{{ octavia_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[octavia_api.group][0] }}"

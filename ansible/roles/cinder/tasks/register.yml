@@ -1,0 +1,40 @@
+---
+- name: Creating the Cinder service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "{{ item.service_name }}"
+      service_type: "{{ item.service_type }}"
+      description: "Openstack Block Storage"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_cinder_auth }}' }}"
+    module_extra_vars:
+      openstack_cinder_auth: "{{ openstack_cinder_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ cinder_admin_endpoint }}', 'service_name': 'cinder', 'service_type': 'volume'}
+    - {'interface': 'internal', 'url': '{{ cinder_internal_endpoint }}', 'service_name': 'cinder', 'service_type': 'volume'}
+    - {'interface': 'public', 'url': '{{ cinder_public_endpoint }}', 'service_name': 'cinder', 'service_type': 'volume'}
+    - {'interface': 'admin', 'url': '{{ cinder_v2_admin_endpoint }}', 'service_name': 'cinderv2', 'service_type': 'volumev2'}
+    - {'interface': 'internal', 'url': '{{ cinder_v2_internal_endpoint }}', 'service_name': 'cinderv2', 'service_type': 'volumev2'}
+    - {'interface': 'public', 'url': '{{ cinder_v2_public_endpoint }}', 'service_name': 'cinderv2', 'service_type': 'volumev2'}
+    - {'interface': 'admin', 'url': '{{ cinder_v3_admin_endpoint }}', 'service_name': 'cinderv3', 'service_type': 'volumev3'}
+    - {'interface': 'internal', 'url': '{{ cinder_v3_internal_endpoint }}', 'service_name': 'cinderv3', 'service_type': 'volumev3'}
+    - {'interface': 'public', 'url': '{{ cinder_v3_public_endpoint }}', 'service_name': 'cinderv3', 'service_type': 'volumev3'}
+
+- name: Creating the Cinder project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ cinder_keystone_user }}"
+      password: "{{ cinder_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_cinder_auth }}' }}"
+    module_extra_vars:
+      openstack_cinder_auth: "{{ openstack_cinder_auth }}"
+  run_once: True

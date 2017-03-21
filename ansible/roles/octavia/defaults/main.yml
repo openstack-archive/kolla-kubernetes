@@ -1,0 +1,82 @@
+---
+project_name: "octavia"
+
+octavia_services:
+  octavia-api:
+    container_name: octavia_api
+    group: octavia-api
+    enabled: true
+    image: "{{ octavia_api_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/octavia-api/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  octavia-health-manager:
+    container_name: octavia_health_manager
+    group: octavia-health-manager
+    enabled: true
+    image: "{{ octavia_health_manager_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/octavia-health-manager/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  octavia-housekeeping:
+    container_name: octavia_housekeeping
+    group: octavia-housekeeping
+    enabled: true
+    image: "{{ octavia_housekeeping_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/octavia-housekeeping/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  octavia-worker:
+    container_name: octavia_worker
+    group: octavia-worker
+    enabled: true
+    image: "{{ octavia_worker_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/octavia-worker/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+
+
+####################
+# Database
+####################
+octavia_database_name: "octavia"
+octavia_database_user: "octavia"
+octavia_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+octavia_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-octavia-api"
+octavia_api_tag: "{{ openstack_release }}"
+octavia_api_image_full: "{{ octavia_api_image }}:{{ octavia_api_tag }}"
+
+octavia_health_manager_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-octavia-health-manager"
+octavia_health_manager_tag: "{{ openstack_release }}"
+octavia_health_manager_image_full: "{{ octavia_health_manager_image }}:{{ octavia_health_manager_tag }}"
+
+octavia_housekeeping_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-octavia-housekeeping"
+octavia_housekeeping_tag: "{{ openstack_release }}"
+octavia_housekeeping_image_full: "{{ octavia_housekeeping_image }}:{{ octavia_housekeeping_tag }}"
+
+octavia_worker_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-octavia-worker"
+octavia_worker_tag: "{{ openstack_release }}"
+octavia_worker_image_full: "{{ octavia_worker_image }}:{{ octavia_worker_tag }}"
+
+
+####################
+# OpenStack
+####################
+octavia_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ octavia_api_port }}"
+octavia_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ octavia_api_port }}"
+octavia_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ octavia_api_port }}"
+
+octavia_logging_debug: "{{ openstack_logging_debug }}"
+
+octavia_keystone_user: "octavia"
+
+openstack_octavia_auth: "{{ openstack_auth }}"

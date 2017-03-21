@@ -1,0 +1,25 @@
+{
+    "command": "murano-engine --config-file /etc/murano/murano.conf",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/murano.conf",
+            "dest": "/etc/murano/murano.conf",
+            "owner": "murano",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/policy.json",
+            "dest": "/etc/murano/policy.json",
+            "owner": "murano",
+            "perm": "0600",
+            "optional": true
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/murano",
+            "owner": "murano:murano",
+            "recurse": true
+        }
+    ]
+}

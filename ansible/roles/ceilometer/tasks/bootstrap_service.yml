@@ -1,0 +1,20 @@
+---
+- name: Running Ceilometer bootstrap container
+  vars:
+    ceilometer_api: "{{ ceilometer_services['ceilometer-api'] }}"
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      CEILOMETER_DATABASE_TYPE: "{{ ceilometer_database_type }}"
+    image: "{{ ceilometer_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_ceilometer"
+    restart_policy: "never"
+    volumes: "{{ ceilometer_api.volumes }}"
+  run_once: True
+  delegate_to: "{{ groups[ceilometer_api.group][0] }}"
