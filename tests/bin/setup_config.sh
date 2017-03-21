@@ -34,6 +34,10 @@ fi
 kolla-ansible/tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
+# Testing ansible-in-k8s approach
+rm -rf /etc/kolla/neutron*
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
+
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_user nova

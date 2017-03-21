@@ -1,0 +1,17 @@
+{% if enable_neutron_lbaas | bool %}
+[service_providers]
+{% if enable_octavia | bool %}
+service_provider = LOADBALANCERV2:Octavia:neutron_lbaas.drivers.octavia.driver.OctaviaDriver:default
+{% else %}
+service_provider = LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+{% endif %}
+
+[service_auth]
+auth_url = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = {{ neutron_keystone_password }}
+auth_version = 2
+region = {{ openstack_region_name }}
+endpoint_type = internal
+{% endif %}
