@@ -1,0 +1,16 @@
+#jinja2: trim_blocks: False
+[DEFAULT]
+{% if enable_neutron_dvr | bool %}
+{% if inventory_hostname in groups['network'] %}
+agent_mode = dvr_snat
+{% elif inventory_hostname in groups['compute'] %}
+agent_mode = dvr
+{% endif %}
+{% else %}
+agent_mode = legacy
+{% endif %}
+{% if enable_neutron_fwaas | bool %}
+[fwaas]
+driver = neutron_fwaas.services.firewall.drivers.linux.iptables_fwaas.IptablesFwaasDriver
+enabled = True
+{% endif %}
