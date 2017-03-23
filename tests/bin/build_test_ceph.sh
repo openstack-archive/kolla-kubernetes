@@ -39,7 +39,8 @@ function wait_for_ceph_bootstrap {
     done
 }
 
-kollakube res create configmap ceph-mon ceph-osd
+kubectl create configmap ceph-mon --from-file=/etc/kolla/ceph-mon --namespace kolla;
+kubectl create configmap ceph-osd --from-file=/etc/kolla/ceph-osd --namespace kolla;
 
 helm install kolla/test-ceph-init-mon-job --version 0.6.0-1 \
     --namespace kolla \
