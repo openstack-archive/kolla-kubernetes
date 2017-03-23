@@ -135,17 +135,6 @@ spec:
         - name: neutron-l3-agent-configmap
           configMap:
             name: neutron-l3-agent
-            items:
-            - key: neutron.conf
-              path: neutron.conf
-            - key: config.json
-              path: config.json
-            - key: ml2-conf.ini
-              path: ml2_conf.ini
-            - key: fwaas-driver.ini
-              path: fwaas_driver.ini
-            - key: l3-agent.ini
-              path: l3_agent.ini
         - name: host-run-netns
           hostPath:
             path: /run/netns

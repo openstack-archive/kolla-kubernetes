@@ -15,19 +15,7 @@
 {{- $configListenPortParameter := "bind_port" }}
 {{- $portName := "heat-api" }}
 {{- $checkPath := "/" }}
-{{- $extraConfigmapConfig := "heat_api_cfn_extra_configmap_config" }}
 {{- $privileged := false }}
-{{- define "heat_api_cfn_extra_configmap_config" }}
-items:
-- key: heat.conf
-  path: heat.conf
-- key: policy.json
-  path: policy.json
-- key: api-paste.ini
-  path: api-paste.ini
-- key: templates
-  path: templates
-{{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_python_deployment" $env }}
 {{- end }}
