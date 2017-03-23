@@ -43,6 +43,7 @@ pod.beta.kubernetes.io/init-containers: '[
   }
 ]'
 {{- end }}
+<<<<<<< HEAD
 {{- define "keystone_extra_volumes" }}
 - name: keystone-fernet-keys
   secret:
@@ -64,5 +65,8 @@ items:
   path: config.json
 {{- end }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraVolume" $extraVolumes "extraVolumeMounts" $extraVolumeMounts "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
+=======
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
+>>>>>>> 6ab0755... Simple configmap to raw kubectl
 {{- include "common_api_apache_deployment" $env }}
 {{- end }}
