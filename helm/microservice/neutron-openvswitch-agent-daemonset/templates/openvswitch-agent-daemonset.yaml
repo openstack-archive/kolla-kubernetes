@@ -174,13 +174,6 @@ spec:
         - name: neutron-openvswitch-agent-configmap
           configMap:
             name: neutron-openvswitch-agent
-            items:
-            - key: neutron.conf
-              path: neutron.conf
-            - key: config.json
-              path: config.json
-            - key: ml2-conf.ini
-              path: ml2_conf.ini
         - name: pod-main-config
           emptyDir: {}
 # NOTE: (sbezverk) Linux bridge will be moved to its own file at the time of development

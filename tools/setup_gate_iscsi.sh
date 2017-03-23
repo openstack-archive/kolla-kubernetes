@@ -49,16 +49,27 @@ setup_namespace_secrets
 # Setting up resolv.conf workaround
 setup_resolv_conf_common
 
-kollakube res create configmap \
+for cm in \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
+    nova-scheduler glance-api \
     glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
     neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
     openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived \
-    placement-api placement-api-haproxy;
+    nova-novncproxy \
+    cinder-api cinder-backup \
+    cinder-scheduler cinder-volume nova-compute-ironic\
+    ironic-api ironic-conductor ironic-dnsmasq \
+    ironic-inspector ironic-pxe placement-api iscsid tgtd; do
+
+    kubectl create configmap $cm --from-file=/etc/kolla/$cm --namespace kolla;
+done
+
+kollakube res create configmap \
+    glance-api-haproxy glance-registry-haproxy \
+    nova-novncproxy-haproxy neutron-server-haproxy \
+    nova-api-haproxy cinder-api-haproxy \
+    keepalived \
+    placement-api-haproxy;
 
 if [ "x$4" == "xironic" ]; then
 kollakube res create configmap \
