@@ -50,12 +50,5 @@ spec:
         - name: horizon-config
           configMap:
             name: horizon
-            items:
-            - key: horizon.conf
-              path: horizon.conf
-            - key: config.json
-              path: config.json
-            - key: local-settings
-              path: local_settings
 {{- end }}
 

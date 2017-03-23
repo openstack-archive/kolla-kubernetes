@@ -43,26 +43,6 @@ pod.beta.kubernetes.io/init-containers: '[
   }
 ]'
 {{- end }}
-{{- define "keystone_extra_volumes" }}
-- name: keystone-fernet-keys
-  secret:
-    secretName: keystone-fernet-keys
-{{- end }}
-{{- define "keystone_extra_volume_mounts" }}
-- name: keystone-fernet-keys
-  mountPath: /etc/keystone/fernet-keys
-{{- end }}
-{{- define "keystone_extra_configmap_config" }}
-items:
-- key: keystone.conf
-  path: keystone.conf
-- key: keystone-paste.ini
-  path: keystone-paste.ini
-- key: wsgi-keystone.conf
-  path: wsgi-keystone.conf
-- key: config.json
-  path: config.json
-{{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraVolume" $extraVolumes "extraVolumeMounts" $extraVolumeMounts "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_apache_deployment" $env }}
 {{- end }}
