@@ -106,4 +106,35 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 arp -a > $WORKSPACE/logs/arp.txt
+sudo docker exec -tu root \
+     $(sudo docker ps | grep nova-libvirt: | awk '{print $1}') \
+     cat /tmp/vm-1.log > $WORKSPACE/logs/vm-1.log
+sudo cp /tmp/packets $WORKSPACE/logs/packets
+
+#
+# Check power status and status of vbmc
+#
+sudo ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power status \
+                 > $WORKSPACE/logs/ipmitool_status.txt
+sudo vbmc list > $WORKSPACE/logs/vbmc_list.txt
+sudo vbmc show vm-1 > $WORKSPACE/logs/vbmc_show.txt
+
+#
+# Ironic realted logs
+#
+$DIR/tools/build_local_admin_keystonerc.sh
+. ~/keystonerc_admin
+openstack baremetal node list > $WORKSPACE/logs/baremetal_node_list.txt
+node_id=$(openstack baremetal node list -c "UUID" -f value)
+openstack baremetal node show $node_id > $WORKSPACE/logs/baremetal_node_show.txt
+openstack baremetal introspection rule list > $WORKSPACE/logs/baremetal_inspection_rule.txt
+openstack server list > $WORKSPACE/logs/openstack_server_list.txt
+openstack port list > $WORKSPACE/logs/openstack_port_list.txt
+ironic node-validate $node_id > $WORKSPACE/logs/ironic_node_validate.txt
+ironic port-list > $WORKSPACE/logs/ironic_port_list.txt
+ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) \
+                 > $WORKSPACE/logs/ironic_port_show.txt
+sudo virsh list > $WORKSPACE/logs/virsh_list.txt
+sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
+
 exit -1
