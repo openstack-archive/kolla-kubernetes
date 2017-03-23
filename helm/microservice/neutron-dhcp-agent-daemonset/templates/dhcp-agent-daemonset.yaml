@@ -117,17 +117,6 @@ spec:
         - name: neutron-dhcp-agent-configmap
           configMap:
             name: neutron-dhcp-agent
-            items:
-            - key: neutron.conf
-              path: neutron.conf
-            - key: config.json
-              path: config.json
-            - key: ml2-conf.ini
-              path: ml2_conf.ini
-            - key: dhcp-agent.ini
-              path: dhcp_agent.ini
-            - key: dnsmasq.conf
-              path: dnsmasq.conf
         - name: host-run-netns
           hostPath:
             path: /run/netns
