@@ -15,21 +15,7 @@
 {{- $configListenPortParameter := "bind_port" }}
 {{- $portName := "neutron-server" }}
 {{- $checkPath := "/" }}
-{{- $extraConfigmapConfig := "neutron_server_extra_configmap_config" }}
 {{- $privileged := false }}
-{{- define "neutron_server_extra_configmap_config" }}
-items:
-- key: neutron.conf
-  path: neutron.conf
-- key: config.json
-  path: config.json
-- key: ml2-conf.ini
-  path: ml2_conf.ini
-- key: neutron-lbaas.conf
-  path: neutron_lbaas.conf
-- key: neutron-vpnaas.conf
-  path: neutron_vpnaas.conf
-{{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_python_deployment" $env }}
 {{- end }}
