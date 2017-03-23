@@ -1,0 +1,111 @@
+---
+- name: Check if policies shall be overwritten
+  local_action: stat path="{{ node_custom_config }}/keystone/policy.json"
+  register: keystone_policy
+
+- name: Check if Keystone Domain specific settings enabled
+  local_action: stat path="{{ node_custom_config }}/keystone/domains"
+  register: keystone_domain_directory
+
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/{{ item.key }}"
+    state: "directory"
+    recurse: yes
+  when:
+    - item.value.enabled | bool
+  with_dict: "{{ keystone_services }}"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+  register: keystone_config_jsons
+  with_dict: "{{ keystone_services }}"
+  when:
+    - item.value.enabled | bool
+
+- name: Copying over keystone.conf
+  merge_configs:
+    vars:
+      service_name: "{{ item.key }}"
+    sources:
+      - "{{ role_path }}/templates/keystone.conf.j2"
+      - "{{ node_custom_config }}/global.conf"
+      - "{{ node_custom_config }}/database.conf"
+      - "{{ node_custom_config }}/messaging.conf"
+      - "{{ node_custom_config }}/keystone.conf"
+      - "{{ node_custom_config }}/keystone/{{ item.key }}.conf"
+      - "{{ node_custom_config }}/keystone/{{ inventory_hostname }}/keystone.conf"
+    dest: "{{ node_config_directory }}/{{ item.key }}/keystone.conf"
+  register: keystone_confs
+  with_dict: "{{ keystone_services }}"
+  when:
+    - item.key == "keystone"
+    - item.value.enabled | bool
+
+- name: Creating Keystone Domain directory
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
+  file:
+    dest: "{{ node_config_directory }}/keystone/domains/"
+    state: "directory"
+  when:
+    - keystone.enabled | bool
+    - keystone_domain_directory.stat.exists
+
+- name: Get file list in custom domains folder
+  local_action: find path="{{ node_custom_config }}/keystone/domains" recurse=no file_type=file
+  register: keystone_domains
+  when: keystone_domain_directory.stat.exists
+
+- name: Copying Keystone Domain specific settings
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ node_config_directory }}/keystone/domains/"
+  register: keystone_domains
+  when:
+    - keystone.enabled | bool
+    - keystone_domain_directory.stat.exists
+  with_items: "{{ keystone_domains.files|default([]) }}"
+
+- name: Copying over existing policy.json
+  template:
+    src: "{{ node_custom_config }}/keystone/policy.json"
+    dest: "{{ node_config_directory }}/{{ item.key }}/policy.json"
+  register: keystone_policy_jsons
+  when:
+    - item.key == "keystone"
+    - item.value.enabled | bool
+    - keystone_policy.stat.exists
+  with_dict: "{{ keystone_services }}"
+
+- name: Copying over wsgi-keystone.conf
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/keystone/wsgi-keystone.conf"
+  register: keystone_wsgi
+  when:
+    - keystone.enabled | bool
+  with_first_found:
+    - "{{ node_custom_config }}/keystone/{{ inventory_hostname }}/wsgi-keystone.conf"
+    - "{{ node_custom_config }}/keystone/wsgi-keystone.conf"
+    - "wsgi-keystone.conf.j2"
+
+- name: Copying over keystone-paste.ini
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/keystone-paste.ini.j2"
+      - "{{ node_custom_config }}/keystone/keystone-paste.ini"
+      - "{{ node_custom_config }}/keystone/{{ inventory_hostname }}/keystone-paste.ini"
+    dest: "{{ node_config_directory }}/keystone/keystone-paste.ini"
+  register: keystone_paste_ini
+  when:
+    - keystone.enabled | bool
+

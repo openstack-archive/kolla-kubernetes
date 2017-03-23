@@ -1,0 +1,38 @@
+---
+project_name: "keystone"
+
+keystone_services:
+  keystone:
+    container_name: "keystone"
+    group: "keystone"
+    enabled: true
+    image: "{{ keystone_image_full }}"
+
+####################
+# Database
+####################
+keystone_database_name: "keystone"
+keystone_database_user: "keystone"
+keystone_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Fernet
+####################
+keystone_username: "keystone"
+keystone_groupname: "keystone"
+
+
+####################
+# Docker
+####################
+keystone_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-keystone"
+keystone_tag: "{{ openstack_release }}"
+keystone_image_full: "{{ keystone_image }}:{{ keystone_tag }}"
+
+####################
+# OpenStack
+####################
+keystone_logging_debug: "{{ openstack_logging_debug }}"
+
+openstack_keystone_auth: "{{ openstack_auth }}"

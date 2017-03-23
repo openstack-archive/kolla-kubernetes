@@ -4,3 +4,4 @@
   connection: local
   roles:
     - neutron
+    - keystone
