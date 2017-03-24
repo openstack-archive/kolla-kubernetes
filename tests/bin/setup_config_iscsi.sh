@@ -32,6 +32,13 @@ crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
 # Keystone does not seem to invalidate its cache on entry point addition.
 crudini --set /etc/kolla/keystone/keystone.conf cache enabled False
 
+if [ "x$CONFIG" == "xironic" ]; then
+   if [ "x$DISTRO" == "xubuntu" ]; then
+      /bin/cp tests/conf/ironic/libvirtd.conf /etc/kolla/nova-libvirt
+      /bin/cp tests/conf/ironic/qemu.conf /etc/kolla/nova-libvirt
+   fi
+fi
+
 sed -i 's/log_outputs = "3:/log_outputs = "1:/' /etc/kolla/nova-libvirt/libvirtd.conf
 sed -i 's/log_level = 3/log_level = 1/' /etc/kolla/nova-libvirt/libvirtd.conf
 
