@@ -142,5 +142,7 @@ ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) \
                  > $WORKSPACE/logs/ironic_port_show.txt
 sudo virsh list > $WORKSPACE/logs/virsh_list.txt
 sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
+sudo docker exec  $(sudo docker ps | grep libvirt: | awk '{print$1}') \
+     cat /var/log/kolla/libvirt/libvirtd.log > $WORKSPACE/logs/complete_libvirtd.log
 
 exit -1

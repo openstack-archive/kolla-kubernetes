@@ -33,7 +33,7 @@ function wait_for_ironic_node {
 }
 
 function wait_for_vm {
-    set -x
+    set +x
     count=0
     while true; do
         val=$(openstack server show $1 -f value -c OS-EXT-STS:vm_state)
@@ -110,11 +110,22 @@ wait_for_ironic_node
 if [ "x$base_distro" == "xubuntu" ]; then
   echo 'exit 101' | sudo tee /usr/sbin/policy-rc.d
   sudo chmod +x /usr/sbin/policy-rc.d
+  sudo add-apt-repository -y cloud-archive:ocata
   sudo apt-get update
   sudo apt-get install -y libvirt-bin libvirt-dev \
                           qemu-kvm qemu-utils ipmitool \
                           pkg-config strace tcpdump
   sudo sed -i 's|/usr/libexec/qemu-kvm|/usr/bin/qemu-system-x86_64|g' $DIR/../conf/ironic/vm-1.xml
+  sudo sed -i "s|machine='pc'|machine='pc-i440fx-xenial'|g" $DIR/../conf/ironic/vm-1.xml
+
+  sudo dpkg -l | grep libvirt
+  sudo apt-cache policy libvirt-bin
+
+  sudo docker exec  $(sudo docker ps | grep libvirt: | awk '{print$1}') \
+                      sudo dpkg -l | grep libvirt
+  sudo docker exec  $(sudo docker ps | grep libvirt: | awk '{print$1}') \
+                      sudo apt-cache policy libvirt-bin
+  sudo chown :root -R /var/lib/libvirt/qemu
 else
   sudo yum install -y libvirt qemu-kvm-ev qemu-img-ev ipmitool libvirt-client libvirt-devel \
                       tcpdump strace
@@ -149,15 +160,7 @@ DISK_GB=1
 ARCH="x86_64"
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/vm-1.qcow2 5G
 
-#
-# Debugging Ubuntu permission denied error
-#
-if [ "x$base_distro" == "xubuntu" ]; then
- sudo strace sudo virsh list --all
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-else
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-fi
+sudo virsh define $DIR/../conf/ironic/vm-1.xml
 sudo virsh list --all
 
 #
