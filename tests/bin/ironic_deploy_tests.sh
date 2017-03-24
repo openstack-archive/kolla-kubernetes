@@ -65,7 +65,7 @@ function wait_for_virsh_vm {
     set +x
     count=0
     while true; do
-        val=$(sudo virsh list | grep $1 | awk '{print $3}')
+        val=$(virsh_m list | grep $1 | awk '{print $3}')
         [ "x$val" == "xrunning" ] && break
         sleep 1;
         count=$((count+1))
@@ -115,9 +115,17 @@ if [ "x$base_distro" == "xubuntu" ]; then
                           qemu-kvm qemu-utils ipmitool \
                           pkg-config strace tcpdump
   sudo sed -i 's|/usr/libexec/qemu-kvm|/usr/bin/qemu-system-x86_64|g' $DIR/../conf/ironic/vm-1.xml
+
+#
+# NOTE(sbezverk) Workaround for Ubuntu using user nova for libvirtd. Possibly can be removed
+# in Pike.
+  sudo addgroup --gid 42436 nova
+  sudo useradd -M --shell /usr/sbin/nologin --uid 42436 --gid 42436 nova
+  alias virsh_m='sudo -u nova bash -c virsh'
 else
   sudo yum install -y libvirt qemu-kvm-ev qemu-img-ev ipmitool libvirt-client libvirt-devel \
                       tcpdump strace
+  alias virsh_m='sudo virsh'
 fi
 
 #
@@ -149,16 +157,8 @@ DISK_GB=1
 ARCH="x86_64"
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/vm-1.qcow2 5G
 
-#
-# Debugging Ubuntu permission denied error
-#
-if [ "x$base_distro" == "xubuntu" ]; then
- sudo strace sudo virsh list --all
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-else
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-fi
-sudo virsh list --all
+virsh_m define $DIR/../conf/ironic/vm-1.xml
+virsh_m list --all
 
 #
 # Add virtual bmc to VM
