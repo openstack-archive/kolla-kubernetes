@@ -1,0 +1,9 @@
+global:
+    kolla:
+        nova:
+            api:
+                all:
+                    port: 8774
+            metadata:
+                all:
+                    port: 8775
