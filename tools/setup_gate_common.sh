@@ -30,8 +30,8 @@ sudo brctl addbr dns0
 sudo ifconfig dns0 172.19.0.1 netmask 255.255.255.0
 sudo brctl addbr net2
 sudo ifconfig net2 172.22.0.1 netmask 255.255.255.0
-sudo modprobe br_netfilter || true
-sudo sh -c 'echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
+#sudo modprobe br_netfilter || true
+#sudo sh -c 'echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables'
 sudo systemctl restart unbound
 sudo systemctl status unbound
 sudo netstat -pnl
