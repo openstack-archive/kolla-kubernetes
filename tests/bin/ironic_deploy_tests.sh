@@ -65,12 +65,23 @@ function wait_for_virsh_vm {
     set +x
     count=0
     while true; do
-        val=$(sudo virsh list | grep $1 | awk '{print $3}')
+        val=$(virsh_modified $2 "list" | grep $1 | awk '{print $3}')
         [ "x$val" == "xrunning" ] && break
         sleep 1;
         count=$((count+1))
         [ $count -gt 300 ] && exit -1
     done
+    set -x
+}
+
+function virsh_modified {
+    set +x
+
+    if [ "x$1" == "xubuntu" ]; then
+        sudo -u nova bash -c virsh $2
+    else
+        sudo virsh $2
+    fi
     set -x
 }
 
@@ -115,6 +126,12 @@ if [ "x$base_distro" == "xubuntu" ]; then
                           qemu-kvm qemu-utils ipmitool \
                           pkg-config strace tcpdump
   sudo sed -i 's|/usr/libexec/qemu-kvm|/usr/bin/qemu-system-x86_64|g' $DIR/../conf/ironic/vm-1.xml
+
+#
+# NOTE(sbezverk) Workaround for Ubuntu using user nova for libvirtd. Possibly can be removed
+# in Pike.
+  sudo addgroup --gid 42436 nova
+  sudo useradd -M --shell /usr/sbin/nologin --uid 42436 --gid 42436 nova
 else
   sudo yum install -y libvirt qemu-kvm-ev qemu-img-ev ipmitool libvirt-client libvirt-devel \
                       tcpdump strace
@@ -149,16 +166,8 @@ DISK_GB=1
 ARCH="x86_64"
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/vm-1.qcow2 5G
 
-#
-# Debugging Ubuntu permission denied error
-#
-if [ "x$base_distro" == "xubuntu" ]; then
- sudo strace sudo virsh list --all
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-else
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-fi
-sudo virsh list --all
+virsh_modified $base_distro "define $DIR/../conf/ironic/vm-1.xml"
+virsh_modified $base_distro "list --all"
 
 #
 # Add virtual bmc to VM
@@ -256,7 +265,7 @@ openstack server create \
 #
 # Wait for virsh vm to run
 #
-wait_for_virsh_vm vm-1
+wait_for_virsh_vm vm-1 $base_distro
 
 #
 # Wait for nova instance to become active
