@@ -33,7 +33,7 @@ function wait_for_ironic_node {
 }
 
 function wait_for_vm {
-    set -x
+    set +x
     count=0
     while true; do
         val=$(openstack server show $1 -f value -c OS-EXT-STS:vm_state)
@@ -115,6 +115,18 @@ if [ "x$base_distro" == "xubuntu" ]; then
                           qemu-kvm qemu-utils ipmitool \
                           pkg-config strace tcpdump
   sudo sed -i 's|/usr/libexec/qemu-kvm|/usr/bin/qemu-system-x86_64|g' $DIR/../conf/ironic/vm-1.xml
+
+#
+# NOTE(sbezverk) Workaround for Ubuntu using user nova for libvirtd. Possibly can be removed
+# in Pike.
+#  sudo addgroup --gid 42436 nova
+#  sudo useradd -M --shell /usr/sbin/nologin --uid 42436 --gid 42436 nova
+#  sudo adduser nova root
+#  sudo mkdir -p /home/nova
+#  sudo chown -R nova /home/nova
+  sudo systemctl stop apparmor.service || true
+  sudo update-rc.d -f apparmor remove || true
+
 else
   sudo yum install -y libvirt qemu-kvm-ev qemu-img-ev ipmitool libvirt-client libvirt-devel \
                       tcpdump strace
@@ -149,15 +161,10 @@ DISK_GB=1
 ARCH="x86_64"
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/vm-1.qcow2 5G
 
-#
-# Debugging Ubuntu permission denied error
-#
-if [ "x$base_distro" == "xubuntu" ]; then
- sudo strace sudo virsh list --all
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-else
- sudo virsh define $DIR/../conf/ironic/vm-1.xml
-fi
+sudo docker exec  $(sudo docker ps | grep libvirt: | awk '{print$1}') \
+                  sudo usermod -a -G nova root 
+
+sudo virsh define $DIR/../conf/ironic/vm-1.xml
 sudo virsh list --all
 
 #
