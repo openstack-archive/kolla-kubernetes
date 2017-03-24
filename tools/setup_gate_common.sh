@@ -112,6 +112,16 @@ sudo bash -c 'cat << EOF >> /etc/kolla/config/ironic.conf
 tftp_server = undefined
 pxe_append_params = nofb nomodeset vga=normal console=tty0 console=ttyS0,115200n8
 EOF'
+sudo mkdir -p /etc/kolla/config/nova-libvirt/
+sudo bash -c 'cat << EOF >> /etc/kolla/config/nova-libvirt/libvirtd.conf
+unix_sock_ro_perms = "0777"
+unix_sock_rw_perms = "0777"
+auth_unix_ro = "none"
+auth_unix_rw = "none"
+EOF'
+sudo bash -c 'cat << EOF >> /etc/kolla/config/nova-libvirt/qemu.conf
+group = "root"
+EOF'
 fi
 }
 
