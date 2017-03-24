@@ -35,4 +35,8 @@ function common_iscsi_config {
     echo "    horizon:"
     echo "      all:"
     echo "        image_tag: 4.0.0"
+    echo "    nova:"
+    echo "      libvirt:"
+    echo "        all:"
+    echo "          image_tag: 4.0.0-beta.1"
 }
