@@ -19,6 +19,5 @@ export HELMBIN=$HOME/bin/helm
 export HELM_HOME=$HOME/.helm/
 export REPODIR=/tmp/repo.$$
 helm init -c
-helm template || true
 tools/helm_build_all.sh /tmp/repo.$$
 python setup.py test --slowest --testr-args="$1"
