@@ -5,6 +5,7 @@ grep tunnel_interface_address ../kolla/etc/kolla/globals.yml || echo tunnel_inte
 grep orchestration_engine ../kolla/etc/kolla/globals.yml || echo orchestration_engine: KUBERNETES >> ../kolla/etc/kolla/globals.yml
 #sudo yum install -y golang-bin || sudo apt-get install -y golang
 #tools/build_helm_templates.sh
+#echi 
 set -x
 mkdir -p ~/.helm/plugins/template
 curl -L -o /tmp/helm-template.tar.gz https://github.com/technosophos/helm-template/releases/download/2.2.2%2B1/helm-template-linux-2.2.2.1.tgz
