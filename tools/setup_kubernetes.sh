@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+Kubernetes_verison=v1.5.4
 if [ -f /etc/redhat-release ]; then
     cat > /tmp/setup.$$ <<"EOF"
 setenforce 0
@@ -31,7 +32,7 @@ EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+kubeadm init --skip-preflight-checks --use-kubernetes-version $Kubernetes_verison --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
