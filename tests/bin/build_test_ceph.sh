@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+VERSION=0.6.0-1
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 IP="$3"
 base_distro="$2"
@@ -16,6 +18,7 @@ function ceph_config {
   echo "node: $(hostname -s)"
   echo "storage_interface: $tunnel_interface"
   echo "initial_member: $(hostname -s)"
+  echo "initial_mon: $(hostname -s)"
   echo "ceph:"
   echo "  monitors:"
   echo "  - $IP"
@@ -41,7 +44,7 @@ function wait_for_ceph_bootstrap {
 
 kollakube res create configmap ceph-mon ceph-osd
 
-helm install kolla/test-ceph-init-mon-job --version 0.6.0-1 \
+helm install kolla/test-ceph-init-mon-job --version $VERSION \
     --namespace kolla \
     --name test-ceph-init-mon-job \
     --values /tmp/general_config.yaml \
@@ -52,7 +55,7 @@ $DIR/tools/wait_for_pods.sh kolla
 
 $DIR/tools/setup-ceph-secrets.sh
 
-helm install kolla/test-ceph-mon-daemonset --version 0.6.0-1 \
+helm install kolla/test-ceph-mon-daemonset --version $VERSION \
     --namespace kolla \
     --name test-ceph-mon-daemonset \
     --values /tmp/general_config.yaml \
@@ -60,19 +63,30 @@ helm install kolla/test-ceph-mon-daemonset --version 0.6.0-1 \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res create pod ceph-bootstrap-osd0
+helm install kolla/test-ceph-init-osd --version $VERSION \
+    --namespace kolla \
+    --name test-ceph-init-osd0-job \
+    --values /tmp/general_config.yaml \
+    --values /tmp/ceph_config.yaml \
+    --set index=0
+
 $DIR/tools/pull_containers.sh kolla
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
-kollakube res create pod ceph-bootstrap-osd1
+helm install kolla/test-ceph-init-osd --version $VERSION \
+    --namespace kolla \
+    --name test-ceph-init-osd1-job \
+    --values /tmp/general_config.yaml \
+    --values /tmp/ceph_config.yaml \
+    --set index=1
 
 $DIR/tools/wait_for_pods.sh kolla
 wait_for_ceph_bootstrap kolla
 
-kollakube res delete pod ceph-bootstrap-osd0
-kollakube res delete pod ceph-bootstrap-osd1
+helm delete --purge test-ceph-init-osd0-job
+helm delete --purge test-ceph-init-osd1-job
 kollakube res create pod ceph-osd0
 kollakube res create pod ceph-osd1
 
