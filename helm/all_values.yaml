@@ -463,17 +463,6 @@ nova-cell0-delete-db-job:
                             database_name: "nova_cell0"
                             database_user: "nova"
 
-nova-api-deployment:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            port: 8774
-                    metadata:
-                        all:
-                            port: 8775
-
 nova-placement-deployment:
         global:
             kolla:
