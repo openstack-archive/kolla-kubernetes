@@ -226,7 +226,7 @@ storage_interface: "eth0"
 ########################
 kolla_kubernetes_ovs_setup_bridge: "yes"
 kolla_kubernetes_ovs_add_port: "yes"
-enable_resolve_conf_net_host_workaround: "yes"
+resolve_conf_net_host_workaround: "yes"
 
 ########################
 # Ceph variables

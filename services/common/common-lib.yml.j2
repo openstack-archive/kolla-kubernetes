@@ -9,7 +9,7 @@
 - mountPath: /etc/localtime
   name: host-etc-localtime
   readOnly: true
-{%- if netHostTrue == "yes" and enable_resolve_conf_net_host_workaround == "yes" %}
+{%- if netHostTrue == "yes" and resolve_conf_net_host_workaround == "yes" %}
 - mountPath: /etc/resolv.conf
   name: resolv-conf
   subPath: resolv.conf
@@ -53,7 +53,7 @@
 {% if enable_kube_logger == "yes" and not podTypeBootstrap == "yes" and not noLoggingPod == True %}
 {{ kube_logger_volume() }}
 {% endif %}
-{%- if netHostTrue == "yes" and enable_resolve_conf_net_host_workaround == "yes" %}
+{%- if netHostTrue == "yes" and resolve_conf_net_host_workaround == "yes" %}
 - name: resolv-conf
   configMap:
     name: resolv-conf
