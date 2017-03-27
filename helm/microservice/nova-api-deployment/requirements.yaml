@@ -2,3 +2,6 @@ dependencies:
   - name: kolla-common
     repository: file://../../kolla-common
     version: 0.6.0-1
+    include-values:
+      - common
+      - pod-http-termination

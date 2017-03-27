@@ -17,6 +17,9 @@ import subprocess
 import sys
 import yaml
 
+native = [
+    'nova-api-deployment'
+]
 
 stateful_services = [
     'rabbitmq-pv',
@@ -31,7 +34,6 @@ stateful_services = [
 
 pod_http_termination = [
     'neutron-server-deployment',
-    'nova-api-deployment',
     'nova-novncproxy-deployment',
     'nova-placement-deployment',
     'cinder-api-deployment',
@@ -182,6 +184,8 @@ def main():
             count += 1
         pkgdir = os.path.join(microdir, package)
         helm_dep_up(pkgdir)
+        if package in native:
+            continue
         pkg_values = copy.deepcopy(values['common'])
         if package in common_create_keystone_admin:
             key = 'common-create-keystone-admin'

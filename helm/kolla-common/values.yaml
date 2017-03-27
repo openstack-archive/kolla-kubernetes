@@ -1,0 +1,44 @@
+exports:
+    common:
+        global:
+            kolla:
+                all:
+                    docker_registry: docker.io
+                    docker_namespace: kolla
+                    base_distro: centos
+                    install_type: binary
+                    container_config_directory: /var/lib/kolla/config_files
+                    image_tag: 2.0.2
+                    fluentd_image_tag: 3.0.2
+                    kolla_toolbox_image_tag: 3.0.2
+                    kubernetes_entrypoint_image_tag: 4.0.0
+                    selector_key: kolla_controller
+                    selector_value: "true"
+                    image_pull_policy: IfNotPresent
+                    kubernetes_entrypoint: false
+                    kube_logger: true
+                    openvswitch_tcp: false
+                    resolve_conf_net_host_workaround: true
+
+    pod-http-termination:
+        global:
+            kolla:
+                all:
+                    replicas: 1
+                    haproxy_python_termination: true
+                    haproxy_image_tag: 3.0.2
+                    grace_period_seconds: 172800
+
+    stateful-service:
+        global:
+            kolla:
+                all:
+                    storage_provider: host
+                    storage_provider_fstype: xfs
+                    size_gb: 10
+                    ceph:
+                        monitors: []
+                        pool: kollavolumes
+                        secret_name: ceph-kolla
+                        user: kolla
+
