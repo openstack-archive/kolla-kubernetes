@@ -73,6 +73,12 @@ test-ceph-mon-daemonset:
                 all:
                     storage_interface: eth0
 
+test-ceph-initial-osd-job:
+        global:
+            kolla:
+                all:
+                    storage_interface: eth0
+
 keystone-admin-svc:
         global:
             kolla:
