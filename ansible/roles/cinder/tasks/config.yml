@@ -1,0 +1,105 @@
+---
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/{{ item.key }}"
+    state: "directory"
+    recurse: yes
+  when:
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ cinder_services }}"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+  register: cinder_config_jsons
+  when:
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ cinder_services }}"
+  notify:
+    - Restart cinder-api container
+    - Restart cinder-scheduler container
+    - Restart cinder-volume container
+    - Restart cinder-backup container
+
+- name: Copying over cinder.conf
+  merge_configs:
+    vars:
+      service_name: "{{ item.key }}"
+    sources:
+      - "{{ role_path }}/templates/cinder.conf.j2"
+      - "{{ node_custom_config }}/global.conf"
+      - "{{ node_custom_config }}/database.conf"
+      - "{{ node_custom_config }}/messaging.conf"
+      - "{{ node_custom_config }}/cinder.conf"
+      - "{{ node_custom_config }}/cinder/{{ item.key }}.conf"
+      - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/cinder.conf"
+    dest: "{{ node_config_directory }}/{{ item.key }}/cinder.conf"
+  register: cinder_confs
+  when:
+    - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ cinder_services }}"
+  notify:
+    - Restart cinder-api container
+    - Restart cinder-scheduler container
+    - Restart cinder-volume container
+    - Restart cinder-backup container
+
+- name: Check if policies shall be overwritten
+  local_action: stat path="{{ node_custom_config }}/cinder/policy.json"
+  register: cinder_policy
+
+- name: Copying over existing policy.json
+  template:
+    src: "{{ node_custom_config }}/cinder/policy.json"
+    dest: "{{ node_config_directory }}/{{ item.key }}/policy.json"
+  register: cinder_policy_jsons
+  when:
+    - cinder_policy.stat.exists
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ cinder_services }}"
+  notify:
+    - Restart cinder-api container
+    - Restart cinder-scheduler container
+    - Restart cinder-volume container
+    - Restart cinder-backup container
+
+- name: Copying over nfs_shares files for cinder_volume
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/cinder-volume/nfs_shares"
+  with_first_found:
+    - files:
+        - "{{ node_custom_config }}/nfs_shares.j2"
+        - "{{ node_custom_config }}/cinder/nfs_shares.j2"
+        - "{{ node_custom_config }}/cinder/cinder-volume/nfs_shares.j2"
+        - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/nfs_shares.j2"
+        - "{{ node_custom_config }}/nfs_shares"
+        - "{{ node_custom_config }}/cinder/nfs_shares"
+        - "{{ node_custom_config }}/cinder/cinder-volume/nfs_shares"
+        - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/nfs_shares"
+      skip: "{{ not enable_cinder_backend_nfs | bool and not enable_cinder_backend_hnas_nfs | bool }}"
+
+- name: Check cinder containers
+  kolla_docker:
+    action: "compare_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ item.value.container_name }}"
+    image: "{{ item.value.image }}"
+    volumes: "{{ item.value.volumes | reject('equalto', '') | list }}"
+    privileged: "{{ item.value.privileged | default(False) }}"
+    ipc_mode: "{{ item.value.ipc_mode | default('') }}"
+  register: check_cinder_containers
+  when:
+    - action != "config"
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ cinder_services }}"
+  notify:
+    - Restart cinder-api container
+    - Restart cinder-scheduler container
+    - Restart cinder-volume container
+    - Restart cinder-backup container
