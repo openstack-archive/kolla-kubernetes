@@ -38,8 +38,9 @@ kolla-ansible/tools/kolla-ansible genconfig
 rm -rf /etc/kolla/neutron*
 rm -rf /etc/kolla/keystone*
 rm -rf /etc/kolla/glance*
+rm -rf /etc/kolla/rabbitmq*
 
-ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
+ansible-playbook  -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
