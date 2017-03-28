@@ -9,3 +9,4 @@
     - glance
     - horizon
     - memcached
+    - cinder
