@@ -10,3 +10,4 @@
     - horizon
     - memcached
     - cinder
+    - rabbitmq
