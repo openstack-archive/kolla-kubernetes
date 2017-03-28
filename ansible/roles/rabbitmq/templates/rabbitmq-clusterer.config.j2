@@ -1,0 +1,8 @@
+[
+  {version, 1},
+  {nodes, [
+    {'rabbit@{{ hostvars[host]['ansible_hostname'] }}', disc}
+  ]},
+  {gospel,
+    {node, 'rabbit@{{ hostvars[groups['rabbitmq'][0]]['ansible_hostname'] }}'}}
+].
