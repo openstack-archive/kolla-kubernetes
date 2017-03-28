@@ -1,0 +1,35 @@
+[DEFAULT]
+debug = {{ ironic_logging_debug }}
+log_dir = /var/log/kolla/ironic
+
+listen_address = 0.0.0.0
+listen_port = {{ ironic_inspector_port }}
+
+[ironic]
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ ironic_inspector_keystone_user }}
+password = {{ ironic_inspector_keystone_password }}
+
+[keystone_authtoken]
+auth_uri = {{ keystone_internal_url }}
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ ironic_inspector_keystone_user }}
+password = {{ ironic_inspector_keystone_password }}
+
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = {{ memcache_secret_key }}
+memcache_servers = {{ memcached_servers }}
+
+[firewall]
+dnsmasq_interface = undefined
+
+[database]
+connection = mysql+pymysql://{{ ironic_inspector_database_user }}:{{ ironic_inspector_database_password }}@{{ ironic_inspector_database_address }}/{{ ironic_inspector_database_name }}

@@ -1,0 +1,57 @@
+[DEFAULT]
+debug = {{ ironic_logging_debug }}
+
+log_dir = /var/log/kolla/ironic
+
+admin_user = {{ openstack_auth.username }}
+admin_password = {{ keystone_admin_password }}
+
+enabled_drivers = pxe_ipmitool
+
+transport_url = rabbit://{{ rabbitmq_user }}:{{ rabbitmq_password }}@rabbitmq:{{ rabbitmq_port }}
+
+{% if service_name == 'ironic-api' %}
+[api]
+
+host_ip = 0.0.0.0
+api_workers = {{ openstack_service_workers }}
+
+{% if service_name == 'ironic-conductor' %}
+[conductor]
+api_url = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ ironic_api_port }}
+automated_clean=false
+{% endif %}
+
+[database]
+connection = mysql+pymysql://{{ ironic_database_user }}:{{ ironic_database_password }}@{{ ironic_database_address }}/{{ ironic_database_name }}
+max_retries = -1
+
+[keystone_authtoken]
+auth_uri = {{ keystone_internal_url }}
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ ironic_keystone_user }}
+password = {{ ironic_keystone_password }}
+
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = {{ memcache_secret_key }}
+memcache_servers = {{ memcached_servers }}
+
+
+[glance]
+glance_host = {{ internal_protocol }}://glance-api:{{ glance_api_port }}
+
+[neutron]
+url = {{ internal_protocol }}://neutron-server:{{ neutron_server_port }}
+cleaning_network = {{ ironic_cleaning_network }}
+
+[inspector]
+enabled = true
+
+[agent]
+deploy_logs_local_path = /var/log/kolla/ironic
+deploy_logs_storage_backend = local
+deploy_logs_collect = always
