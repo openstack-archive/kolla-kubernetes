@@ -1,0 +1,12 @@
+WARNING
+
+This directory contains very old versions of prehelmized services. There are
+currently a few things left to port:
+
+ * swift
+ * ceph-osd
+ * keepalived
+ * openvswitch-set-external-ip
+ * elasticsearch
+
+Please ignore the rest.
