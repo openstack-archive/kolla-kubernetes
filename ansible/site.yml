@@ -12,3 +12,4 @@
     - memcached
     - cinder
     - heat
+    - ironic
