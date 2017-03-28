@@ -1,0 +1,72 @@
+---
+project_name: "heat"
+
+heat_services:
+  heat-api:
+    container_name: heat_api
+    group: heat-api
+    enabled: true
+    image: "{{ heat_api_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/heat-api/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  heat-api-cfn:
+    container_name: heat_api_cfn
+    group: heat-api-cfn
+    enabled: true
+    image: "{{ heat_api_cfn_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/heat-api-cfn/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+  heat-engine:
+    container_name: heat_engine
+    group: heat-engine
+    enabled: true
+    image: "{{ heat_engine_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/heat-engine/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla/"
+
+####################
+# Database
+####################
+heat_database_name: "heat"
+heat_database_user: "heat"
+heat_database_address: "{{ kolla_internal_fqdn }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+heat_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-heat-api"
+heat_api_tag: "{{ openstack_release }}"
+heat_api_image_full: "{{ heat_api_image }}:{{ heat_api_tag }}"
+
+heat_api_cfn_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-heat-api-cfn"
+heat_api_cfn_tag: "{{ openstack_release }}"
+heat_api_cfn_image_full: "{{ heat_api_cfn_image }}:{{ heat_api_cfn_tag }}"
+
+heat_engine_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-heat-engine"
+heat_engine_tag: "{{ openstack_release }}"
+heat_engine_image_full: "{{ heat_engine_image }}:{{ heat_engine_tag }}"
+
+####################
+# OpenStack
+####################
+heat_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ heat_api_port }}/v1/%(tenant_id)s"
+heat_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ heat_api_port }}/v1/%(tenant_id)s"
+heat_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ heat_api_port }}/v1/%(tenant_id)s"
+heat_cfn_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ heat_api_cfn_port }}/v1"
+heat_cfn_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ heat_api_cfn_port }}/v1"
+heat_cfn_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ heat_api_cfn_port }}/v1"
+
+heat_logging_debug: "{{ openstack_logging_debug }}"
+
+heat_keystone_user: "heat"
+heat_stack_user_role: "heat_stack_user"
+heat_stack_owner_role: "heat_stack_owner"
+
+openstack_heat_auth: "{{ openstack_auth }}"
