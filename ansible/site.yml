@@ -8,3 +8,4 @@
     - keystone
     - glance
     - horizon
+    - memcached
