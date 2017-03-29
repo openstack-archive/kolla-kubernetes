@@ -43,6 +43,8 @@ EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' i\
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 systemctl daemon-reload
 systemctl stop kubelet
 systemctl restart docker
