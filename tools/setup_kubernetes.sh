@@ -13,7 +13,12 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
+yum install -y docker kubeadm-1.6.0-0.x86_64 kubelet kubectl kubernetes-cni ebtables
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_NETWORK_ARGS=.*|KUBELET_KUBECONFIG_ARGS="" |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+systemctl start docker
 systemctl start kubelet
 EOF
 else
@@ -22,7 +27,12 @@ apt-get install -y apt-transport-https
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
+apt-get install -y docker.io kubeadm kubelet kubectl kubernetes-cni
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_NETWORK_ARGS=.*|KUBELET_KUBECONFIG_ARGS="" |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sudo service kubelet restart
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
@@ -31,7 +41,9 @@ EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 \
+             --kubernetes-version "v1.5.6"
+             --apiserver-advertise-address $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
