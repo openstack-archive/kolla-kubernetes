@@ -36,7 +36,9 @@ tests/bin/setup_gate_loopback.sh
 
 tools/setup_kubernetes.sh master
 
-kubectl taint nodes --all dedicated-
+kubectl describe nodes
+
+kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 # Turn up kube-proxy logging
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
