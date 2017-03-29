@@ -18,6 +18,7 @@ fi
 
 base_distro="$2"
 gate_job="$1"
+branch="$3"
 function general_config {
     common_workflow_config $IP $base_distro $tunnel_interface
 }
@@ -83,6 +84,12 @@ kollakube res create bootstrap openvswitch-set-external-ip
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
+    --namespace kolla --name nova-placement-create-keystone-service \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
+
 helm install kolla/glance-api-svc --version $VERSION \
     --namespace kolla --name glance-api-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -110,6 +117,12 @@ helm install kolla/nova-metadata-svc --version $VERSION \
 helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-placement-svc --debug --version $VERSION \
+    --namespace kolla --name nova-placement-svc \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
 
 helm install kolla/horizon-svc --version $VERSION \
     --namespace kolla --name horizon-svc \
@@ -207,6 +220,12 @@ helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-servicev2 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-placement-create-keystone-user-job --debug --version $VERSION \
+    --namespace kolla --name nova-placement-create-keystone-user \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
+
 helm install kolla/cinder-create-keystone-user-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -257,6 +276,18 @@ helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION
 
 helm install kolla/heat-create-keystone-user-job --version $VERSION \
     --namespace kolla --name heat-create-keystone-user
+
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-placement-create-keystone-endpoint-public-job --debug --version $VERSION \
+    --namespace kolla --name nova-placement-create-keystone-endpoint-public \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+helm install kolla/nova-placement-create-keystone-endpoint-internal-job --debug --version $VERSION \
+    --namespace kolla --name nova-placement-create-keystone-endpoint-internal \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+helm install kolla/nova-placement-create-keystone-endpoint-admin-job --debug --version $VERSION \
+    --namespace kolla --name nova-placement-create-keystone-endpoint-admin \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
 
 for x in heat heat-cfn; do
     helm install kolla/$x-create-keystone-service-job --version $VERSION \
@@ -402,6 +433,12 @@ helm install kolla/glance-registry-deployment --version $VERSION \
 
 helm ls
 
+if [ "x$branch" != "x2" ]; then
+helm install kolla/nova-placement-deployment --debug --version $VERSION \
+    --namespace kolla --name nova-placement-deployment \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
+
 for x in nova-api nova-novncproxy; do
     helm install kolla/$x-deployment --version $VERSION \
       --namespace kolla --name $x \
@@ -474,3 +511,4 @@ $DIR/tools/wait_for_pods.sh kolla
 kollakube res delete bootstrap openvswitch-set-external-ip
 
 $DIR/tools/wait_for_pods.sh kolla
+

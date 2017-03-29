@@ -26,6 +26,9 @@ spec:
           command: ["sh", "-xc"]
           args:
             - |
+                curl -s http://172.16.128.100:6666/version
+                cat /etc/resolv.conf
+                ping -c 20 8.8.8.8
                 cat > /tmp/dns-test.py << "EOEF"
                 import socket
                 import sys
@@ -46,6 +49,8 @@ EOF
 done
 
 $DIR/wait_for_pods.sh default
+
+sudo ifconfig
 
 kubectl get pods -l test=dns -o json | jq -r '.items[].metadata.name' | while read pod; do
     echo Pod: $pod
