@@ -11,6 +11,11 @@ global:
                         dependencies:
                             service:
                             - mariadb
+                create_cell:
+                    job:
+                        dependencies:
+                            job:
+                            - nova-cell0-create-db-job
                 manage_db:
                     job:
                         dependencies:
@@ -79,6 +84,58 @@ global:
                     dependencies:
                         service:
                         - nova-api
+            placement_api:
+                create_keystone_service:
+                    job:
+                        dependencies:
+                            service:
+                            - keystone-admin
+                create_keystone_user:
+                    job:
+                        dependencies:
+                            jobs:
+                            - placement-create-keystone-service
+                            service:
+                            - keystone-admin
+                create_keystone_endpoint:
+                    admin:
+                        job:
+                            dependencies:
+                                jobs:
+                                - placement-create-keystone-service
+                                - placement-create-keystone-user
+                                service:
+                                - keystone-admin
+                    internal:
+                        job:
+                            dependencies:
+                                jobs:
+                                - placement-create-keystone-service
+                                - placement-create-keystone-user
+                                - placement-api-create-keystone-endpoint-admin
+                                service:
+                                - keystone-admin
+                    public:
+                        job:
+                            dependencies:
+                                jobs:
+                                - placement-create-keystone-service
+                                - placement-create-keystone-user
+                                - placement-api-create-keystone-endpoint-admin
+                                - placement-api-create-keystone-endpoint-internal
+                                service:
+                                - keystone-admin
+                deployment:
+                    dependencies:
+                        jobs:
+                        - nova-api-create-db
+                        - nova-api-manage-db
+                        - placement-api-create-keystone-endpoint-public
+                        - placement-api-create-keystone-endpoint-internal
+                        - placement-api-create-keystone-endpoint-admin
+                        service:
+                        - mariadb
+                        - keystone-admin
             scheduler:
                 statefulset:
                     dependencies:
