@@ -13,7 +13,11 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
+
+# TODO(sdake) unpin kubernetes from a known working RPM packaged version
+# NOTE(sdake) These pins are known good working pins for the RPM packaging for
+#             Kubernetes. Kubernetes 1.6.0 is incompatible with kubeadm 1.6.0.
+yum install -y docker kubelet-1.5.4-0.x86_64 kubeadm-1.6.0-0.x86_64 kubectl-1.5.4-0.x86_64 kubernetes-cni-0.3.0.1-0.07a8a2.x86_64 ebtables
 systemctl start kubelet
 EOF
 else
@@ -22,7 +26,11 @@ apt-get install -y apt-transport-https
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
+
+# TODO(sdake) unpin kubernetes from a known working RPM packaged version
+# NOTE(sdake) These pins are known good working pins for the DEB packaging for
+#             Kubernetes. Kubernetes 1.6.0 is incompatible with kubeadm 1.6.0.
+apt-get install -y docker.io kubelet=1.5.6-00 kubeadm=1.5.6-00 kubectl=1.5.6-00 kubernetes-cni=1.5.6-00
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
