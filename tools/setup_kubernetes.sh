@@ -31,7 +31,7 @@ EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --apiserver-advertise-address $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
@@ -43,6 +43,8 @@ EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' i\
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 systemctl daemon-reload
 systemctl stop kubelet
 systemctl restart docker
