@@ -9,6 +9,7 @@ global:
                         service:
                         - nova-metadata
                         - nova-api
+                        - nova-placement-api
                         socket:
                         - /var/run/libvirt/libvirt-sock
             libvirt:
@@ -17,3 +18,4 @@ global:
                         service:
                         - nova-metadata
                         - nova-api
+                        - nova-placement-api
