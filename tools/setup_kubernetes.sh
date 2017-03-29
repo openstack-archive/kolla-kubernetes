@@ -13,7 +13,12 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubelet kubeadm kubectl kubernetes-cni ebtables
+yum install -y docker kubeadm-1.6.0-0.x86_64 kubelet kubectl kubernetes-cni ebtables
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_NETWORK_ARGS=.*|KUBELET_NETWORK_ARGS=" |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+systemctl start docker
 systemctl start kubelet
 EOF
 else
@@ -22,7 +27,12 @@ apt-get install -y apt-transport-https
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
+apt-get install -y docker.io kubeadm kubelet kubectl kubernetes-cni
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i 's|KUBELET_NETWORK_ARGS=.*|KUBELET_NETWORK_ARGS=" |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sudo service kubelet restart
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
@@ -31,9 +41,10 @@ EOF
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --api-advertise-addresses $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
-grep 'kubeadm join --token' /tmp/kubeout | awk '{print $3}' | sed 's/[^=]*=//' > /etc/kubernetes/token.txt
-grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/ip.txt
+kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 \
+             --apiserver-advertise-address $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
+grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
+grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
 EOF
 else
@@ -43,6 +54,9 @@ EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#sed -i 's|RBAC|AlwaysAllow|g' /etc/kubernetes/manifests/kube-apiserver.yaml
+#sed -i 's|insecure-port=0|insecure-port=8080|g' \
+#        /etc/kubernetes/manifests/kube-apiserver.yaml 
 systemctl daemon-reload
 systemctl stop kubelet
 systemctl restart docker
@@ -50,13 +64,40 @@ systemctl start kubelet
 EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config 
+sudo chown $(id -u):$(id -g) ~/.kube/config
+sudo netstat -tunlp
+kubectl config view
 
 if [ "$1" == "master" ]; then
     count=0
     while true; do
-        kubectl get pods > /dev/null 2>&1 && break || true
+        kubectl get pods -n kube-system > /dev/null 2>&1 && break || true
         sleep 1
         count=$((count + 1))
         [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
     done
 fi
+
+#FIXME This is a horible hack to get k8s 1.6 working. This should be removed in favor
+#      of more fine grained rules.
+
+kubectl update -f <(cat <<EOF
+apiVersion: rbac.authorization.k8s.io/v1alpha1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: Group
+  name: system:masters
+- kind: Group
+  name: system:authenticated
+- kind: Group
+  name: system:unauthenticated
+EOF
+)
