@@ -36,7 +36,9 @@ tests/bin/setup_gate_loopback.sh
 
 tools/setup_kubernetes.sh master
 
-kubectl taint nodes --all dedicated-
+kubectl describe nodes
+
+kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 # Turn up kube-proxy logging
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
@@ -141,7 +143,9 @@ kollakube res create configmap \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
     cinder-scheduler cinder-volume keepalived nova-compute-ironic\
     ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
-    ironic-inspector ironic-inspector-haproxy ironic-pxe;
+    ironic-inspector ironic-inspector-haproxy ironic-pxe \
+    placement-api placement-api-haproxy;
+
 kollakube res create secret nova-libvirt
 
 if [ "x$CONFIG" == "xhelm-entrypoint" ]; then
