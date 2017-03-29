@@ -110,6 +110,11 @@ sudo docker exec -tu root \
      $(sudo docker ps | grep nova-libvirt: | awk '{print $1}') \
      cat /tmp/vm-1.log > $WORKSPACE/logs/vm-1.log
 sudo cp /tmp/packets $WORKSPACE/logs/packets
+mkdir -p $WORKSPACE/logs/rbac
+kubectl get clusterroles -o yaml > $WORKSPACE/logs/rbac/clusterroles.yaml
+kubectl get roles -o yaml > $WORKSPACE/logs/rbac/roles.yaml
+kubectl get clusterrolebindings -o yaml > $WORKSPACE/logs/rbac/clusterroles.yaml
+kubectl get rolebindings -o yaml > $WORKSPACE/logs/rbac/rolebindings.yaml
 
 #
 # Check power status and status of vbmc
