@@ -47,6 +47,8 @@ done
 
 $DIR/wait_for_pods.sh default
 
+sudo ifconfig
+
 kubectl get pods -l test=dns -o json | jq -r '.items[].metadata.name' | while read pod; do
     echo Pod: $pod
     kubectl logs $pod
