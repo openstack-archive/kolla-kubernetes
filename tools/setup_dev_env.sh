@@ -170,4 +170,4 @@ config_setup
 k8s_setup
 ceph_startup
 helm_setup
-kolla-kubernetes/tests/bin/ceph_workflow_service.sh devenv centos 172.16.35.11 eth1
+kolla-kubernetes/tests/bin/ceph_workflow_service.sh devenv centos 2 172.16.35.11 eth1
