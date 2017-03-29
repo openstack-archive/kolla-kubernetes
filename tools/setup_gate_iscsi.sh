@@ -28,7 +28,9 @@ tests/bin/setup_gate_loopback_lvm.sh
 
 tools/setup_kubernetes.sh master
 
-kubectl taint nodes --all dedicated-
+kubectl describe nodes
+
+kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true kolla_compute=true \

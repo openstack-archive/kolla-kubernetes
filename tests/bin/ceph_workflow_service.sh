@@ -116,6 +116,7 @@ helm install kolla/neutron --version $VERSION \
     --namespace kolla --name neutron \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+sudo docker ps -a | grep openvswitch
 sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
                           | awk '{print $1}') ovs-vsctl add-br br-tenants
 sudo ifconfig br-tenants up
