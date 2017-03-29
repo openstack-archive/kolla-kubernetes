@@ -1,0 +1,32 @@
+#!/bin/bash
+
+function find_base_dir {
+    local real_path=$(python -c "import os;print(os.path.realpath('$0'))")
+    local dir_name="$(dirname "$real_path")"
+    if [[ ${dir_name} == "/usr/bin" ]]; then
+        BASEDIR=/usr/share/kolla-kubernetes
+    elif [[ ${dir_name} == "/usr/local/bin" ]]; then
+        BASEDIR=/usr/local/share/kolla-kubernetes
+    else
+        BASEDIR="$(dirname ${dir_name})"
+    fi
+}
+
+function process_cmd {
+    echo "Generate configuration files for enabled OpenStack services : $CMD"
+    $CMD
+    if [[ $? -ne 0 ]]; then
+        echo "Command failed $CMD"
+        exit 1
+    fi
+}
+
+find_base_dir
+
+CONFIG_DIR="/etc/kolla"
+PASSWORDS_FILE="${CONFIG_DIR}/passwords.yml"
+CONFIG_OPTS="-e @${CONFIG_DIR}/globals.yml -e @${PASSWORDS_FILE} -e CONFIG_DIR=${CONFIG_DIR}"
+PLAYBOOK="${BASEDIR}/ansible/site.yml"
+
+CMD="ansible-playbook $CONFIG_OPTS $PLAYBOOK --verbose"
+process_cmd
