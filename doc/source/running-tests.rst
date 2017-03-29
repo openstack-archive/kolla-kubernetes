@@ -82,7 +82,7 @@ the ``kolla_kubernetes/tests/test_utils.py`` file:
 
 .. code-block:: console
 
-    $ tox -e py27 test_kolla_docker.ModuleArgsTest.test_module_args
+    $ tox -e py27 test_utils.TestJinjaUtils.test_merge_configs_and_self_render
 
 Debugging unit tests
 ------------------------
