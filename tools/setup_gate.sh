@@ -11,6 +11,16 @@ trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
 
+#
+# Capturing messages from the host
+# 1.6.0 upgrade troubleshooting
+if [ "x$DISTRO" == "xcentos" ]; then
+    tail -f /var/log/messages > $WORKSPACE/logs/host_messages & || true
+fi
+if [ "x$DISTRO" == "xubuntu" ]; then
+    tail -f /var/log/syslog > $WORKSPACE/logs/host_messages & || true
+fi
+
 if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi
