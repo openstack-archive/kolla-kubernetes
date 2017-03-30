@@ -2,7 +2,7 @@
 Specfications are Advisory
 ==========================
 
-This project is under heavy active development.  Specifications in this repository
+This project is under heavy active development. Specifications in this repository
 refelcts general consensus of ideas at the time the specification was conceived rather
 then set of actions to take or a commitment to precisely implement the specification.
 As an example, kolla-ansible looks much different today than then ansible-multi spec.

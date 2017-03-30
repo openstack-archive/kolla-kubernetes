@@ -49,7 +49,7 @@ The kolla deliverable maintains container images and container build tools.
 The kolla-ansible deliverable maintains an Ansible deployment for Kolla
 containers on bare metal.
 
-THe kolla-kubernetes deliverable maintains a cloud-native implementation
+The kolla-kubernetes deliverable maintains a cloud-native implementation
 of deployment of OpenStack on Kubernetes.
 
 Getting Involved
