@@ -3,6 +3,7 @@
   hosts: localhost
   connection: local
   roles:
-    - neutron
-    - keystone
     - glance
+    - heat
+    - keystone
+    - neutron
