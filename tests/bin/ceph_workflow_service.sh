@@ -4,8 +4,9 @@ VERSION=0.6.0-1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 gate_job="$1"
 base_distro="$2"
-IP=${3:-172.18.0.1}
-tunnel_interface=${4:-docker0}
+branch="$3"
+IP=${4:-172.18.0.1}
+tunnel_interface=${5:-docker0}
 
 # Break out devenv behavior since we will use different polling logic
 # and we also assume ceph-multi use in the devenv
@@ -116,7 +117,8 @@ helm install kolla/neutron --version $VERSION \
     --namespace kolla --name neutron \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+sudo docker ps | grep openvswitch
+sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd@ \
                           | awk '{print $1}') ovs-vsctl add-br br-tenants
 sudo ifconfig br-tenants up
 sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
