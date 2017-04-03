@@ -123,10 +123,6 @@ kolla-kubernetes:
       - name: memcached
         template: services/memcached/memcached-pod.yml.j2
   - name: keystone
-    pods:
-    - name: keystone
-      containers:
-      - name: keystone
     resources:
       configmap:
       - name: keystone
@@ -136,29 +132,6 @@ kolla-kubernetes:
           configmap_name: keystone-logging
           log_format: 'openstack'
       secret:
-      disk:
-      pv:
-      pvc:
-      svc:
-      - name: keystone-admin
-        template: services/keystone/keystone-service-admin.yml.j2
-      - name: keystone-public
-        template: services/common/generic-service.yml.j2
-        vars:
-          port_name: keystone_public_port
-          service: keystone
-          type: api
-          name: keystone-public
-      bootstrap:
-      - name: keystone-create-db
-        template: services/keystone/keystone-bootstrap-job-create-db.yml.j2
-      - name: keystone-manage-db
-        template: services/keystone/keystone-bootstrap-job-manage-db.yml.j2
-      - name: keystone-endpoints
-        template: services/keystone/keystone-bootstrap-job-endpoints.yml.j2
-      pod:
-      - name: keystone
-        template: services/keystone/keystone-pod.yml.j2
   - name: horizon
     resources:
       configmap:
