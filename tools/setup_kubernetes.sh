@@ -13,7 +13,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubeadm-1.6.0-0.x86_64 kubelet kubectl kubernetes-cni ebtables
+yum install -y docker kubeadm kubelet kubectl kubernetes-cni ebtables
 sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd --enable-cri=false |g' \
         /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
@@ -31,12 +31,12 @@ sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver='$cgr
 EOF
 fi
 
-if [ "$1" == "master" ]; then
-    cat >> /tmp/setup.$$ <<"EOF"
-sed -i 's|^\(Environment.*KUBELET_NETWORK_ARGS.*\)|#\1|g' \
-        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-EOF
-fi
+#if [ "$1" == "master" ]; then
+#    cat >> /tmp/setup.$$ <<"EOF"
+#sed -i 's|^\(Environment.*KUBELET_NETWORK_ARGS.*\)|#\1|g' \
+#        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#EOF
+#fi
 
 cat >> /tmp/setup.$$ <<"EOF"
 systemctl daemon-reload
@@ -52,8 +52,8 @@ kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 \
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt
 rm -f /tmp/kubeout
-sed -i 's|^#\(Environment.*KUBELET_NETWORK_ARGS.*\)|\1|g' \
-        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#sed -i 's|^#\(Environment.*KUBELET_NETWORK_ARGS.*\)|\1|g' \
+#        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
 else
     cat >> /tmp/setup.$$ <<EOF
