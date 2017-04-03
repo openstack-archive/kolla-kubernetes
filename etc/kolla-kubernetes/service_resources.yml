@@ -462,26 +462,6 @@ kolla-kubernetes:
         template: services/swift/swift-object-pod.yml.j2
       - name: swift-proxy
         template: services/swift/swift-proxy-pod.yml.j2
-  - name: kube-dns
-    pods:
-    - name: skydns
-      containers:
-      - name: etcd
-      - name: kube2sky
-      - name: skydns
-      - name: healthz
-    resources:
-      secret:
-      disk:
-      pv:
-      pvc:
-      svc:
-      - name: kube-dns
-        template: services/skydns/skydns-service.yml.j2
-      bootstrap:
-      pod:
-      - name: kube-dns-v11
-        template: services/skydns/skydns-pod.yml.j2
   - name: iscsi
     resources:
       configmap:
