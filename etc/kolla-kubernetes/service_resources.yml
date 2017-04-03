@@ -87,10 +87,6 @@ kolla-kubernetes:
           log_format: 'horizon'
       secret:
   - name: rabbitmq
-    pods:
-    - name: rabbitmq
-      containers:
-      - name: rabbitmq
     resources:
       configmap:
       - name: rabbitmq
@@ -100,36 +96,6 @@ kolla-kubernetes:
           configmap_name: rabbitmq-logging
           log_format: 'rabbitmq'
       secret:
-      disk:
-      - name: rabbitmq
-        template: services/common/common-disk.sh.j2
-        vars:
-          size_in_gb: 10
-      pv:
-      - name: rabbitmq
-        template: services/common/common-pv.yml.j2
-        vars:
-          name: rabbitmq
-          size_in_gb: 10
-      pvc:
-      - name: rabbitmq
-        template: services/common/common-pvc.yml.j2
-        vars:
-          name: rabbitmq
-          size_in_gb: 10
-      svc:
-      - name: rabbitmq-management
-        template: services/rabbitmq/rabbitmq-service-management.yml.j2
-      - name: rabbitmq
-        template: services/rabbitmq/rabbitmq-service.yml.j2
-      bootstrap:
-      - name: rabbitmq-bootstrap
-        template: services/rabbitmq/rabbitmq-bootstrap-job.yml.j2
-        vars:
-          pvc_name: rabbitmq
-      pod:
-      - name: rabbitmq
-        template: services/rabbitmq/rabbitmq-pod.yml.j2
   - name: glance
     resources:
       configmap:
