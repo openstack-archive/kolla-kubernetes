@@ -39,6 +39,7 @@ rm -rf /etc/kolla/neutron*
 rm -rf /etc/kolla/keystone*
 rm -rf /etc/kolla/glance*
 rm -rf /etc/kolla/horizon*
+rm -rf /etc/kolla/nova*
 
 ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
