@@ -169,8 +169,9 @@ class Service(object):
     def __init__(self, y):
         self.y = y
         self.pods = collections.OrderedDict()
-        for i in self.y['pods']:
-            self.pods[i['name']] = Pod(i)
+        if 'pods' in self.y:
+            for i in self.y['pods']:
+                self.pods[i['name']] = Pod(i)
         self.resourceTemplates = {}
         for rt in self.VALID_RESOURCE_TYPES:
             # Initialize instance resourceTemplates hash
