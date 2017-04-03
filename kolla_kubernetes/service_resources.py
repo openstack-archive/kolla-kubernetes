@@ -35,6 +35,12 @@ class KollaKubernetesResources(object):
                 PathFinder.find_config_file('service_resources.yml'))
         return KollaKubernetesResources._singleton
 
+    def GetForTests():
+        if KollaKubernetesResources._singleton is None:
+            KollaKubernetesResources._singleton = KollaKubernetesResources(
+                PathFinder.find_config_file('service_resources_tests.yml'))
+        return KollaKubernetesResources._singleton
+
     @staticmethod
     def GetJinjaDict(service_name=None, cli_args={}, debug_regex=None):
         # check the cache first

@@ -17,7 +17,7 @@ from kolla_kubernetes.commands.cmd_resource import ResourceTemplate
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.tests import base
 
-KKR = KollaKubernetesResources.Get()
+KKR = KollaKubernetesResources.GetForTests()
 # FIXME configmap should be here, but requires config to be done in tox.
 # as it seems to change home.
 RESOURCE_TYPES = ('secret pv pvc svc bootstrap pod').split(" ")
