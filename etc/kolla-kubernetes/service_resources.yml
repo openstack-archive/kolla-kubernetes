@@ -160,10 +160,6 @@ kolla-kubernetes:
       - name: keystone
         template: services/keystone/keystone-pod.yml.j2
   - name: horizon
-    pods:
-    - name: horizon
-      containers:
-      - name: horizon
     resources:
       configmap:
       - name: horizon
@@ -173,16 +169,6 @@ kolla-kubernetes:
           configmap_name: horizon-logging
           log_format: 'horizon'
       secret:
-      disk:
-      pv:
-      pvc:
-      svc:
-      - name: horizon
-        template: services/horizon/horizon-service.yml.j2
-      bootstrap:
-      pod:
-      - name: horizon
-        template: services/horizon/horizon-pod.yml.j2
   - name: rabbitmq
     pods:
     - name: rabbitmq
