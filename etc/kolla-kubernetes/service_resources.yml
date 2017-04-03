@@ -679,22 +679,11 @@ kolla-kubernetes:
       - name: kube-dns-v11
         template: services/skydns/skydns-pod.yml.j2
   - name: iscsi
-    pods:
     resources:
       configmap:
       - name: iscsid
       - name: tgtd
       secret:
-      disk:
-      pv:
-      pvc:
-      svc:
-      bootstrap:
-      pod:
-      - name: iscsi-iscsid
-        template: services/iscsi/iscsi-iscsid-daemonset.yml.j2
-      - name: iscsi-tgtd
-        template: services/iscsi/iscsi-tgtd-daemonset.yml.j2
   - name: cinder
     resources:
       configmap:
