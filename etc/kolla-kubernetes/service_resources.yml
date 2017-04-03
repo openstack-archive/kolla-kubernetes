@@ -62,24 +62,10 @@ kolla-kubernetes:
       - name: ceph-rbd
         template: services/ceph/ceph-rbd-pod.yml.j2
   - name: memcached
-    pods:
-    - name: memcached
-      containers:
-      - name: memcached
     resources:
       configmap:
       - name: memcached
       secret:
-      disk:
-      pv:
-      pvc:
-      svc:
-      - name: memcached
-        template: services/memcached/memcached-service.yml.j2
-      bootstrap:
-      pod:
-      - name: memcached
-        template: services/memcached/memcached-pod.yml.j2
   - name: keystone
     resources:
       configmap:
