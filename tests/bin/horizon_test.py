@@ -97,13 +97,14 @@ if __name__ == "__main__":
     try:
         i.setUp()
         i.testInstances()
-    except Exception:
-        print("Tearing down due to error.")
-        i.screenshot()
+    except Exception as e:
+        print("Tearing down due to error. %s" % e)
         try:
+            i.screenshot()
             i.tearDown()
-        except Exception:
+        except Exception as e:
+            print("Got another exception. %s" % e)
             pass
-        raise
+        pass
     else:
         i.tearDown()
