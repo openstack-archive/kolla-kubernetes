@@ -197,6 +197,7 @@ api_paste_config = /etc/nova/api-paste.ini
 max_attempts = 10
 discover_hosts_in_cells_interval = 60
 
+{% if enable_placement | bool %}
 [placement]
 auth_type = password
 auth_url = {{ keystone_admin_url }}
@@ -207,3 +208,10 @@ project_name = service
 project_domain_name = default
 os_region_name = {{ openstack_region_name }}
 os_interface = internal
+{% endif %}
+
+osapi_compute_listen = {{ api_interface_address }}
+osapi_compute_listen_port = {{ nova_api_port }}
+osapi_compute_workers = {{ openstack_service_workers }}
+metadata_workers = {{ openstack_service_workers }}
+

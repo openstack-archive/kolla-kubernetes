@@ -3,8 +3,7 @@
 NODE=$(hostname -s)
 
 TYPE="$2"
-
-BRANCH="$6"
+BRANCH="$3"
 
 echo "kolla_base_distro: $1" >> kolla-ansible/etc/kolla/globals.yml
 cat tests/conf/ceph-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
@@ -29,6 +28,10 @@ if [ "x$TYPE" == "xceph-multi" ]; then
         etc/kolla-kubernetes/kolla-kubernetes.yml
     sed -i "s/172.17.0.1/$(cat /etc/nodepool/primary_node_private)/" \
         etc/kolla-kubernetes/kolla-kubernetes.yml
+fi
+
+if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
+    echo 'enable_placement: "no"' >> kolla-ansible/etc/kolla/globals.yml
 fi
 
 kolla-ansible/tools/generate_passwords.py
