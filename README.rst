@@ -40,9 +40,9 @@ project are:
 ===============   =====================================================
 Deliverable       Repository
 ===============   =====================================================
-kolla             https://git.openstack.org/openstack/kolla
-kolla-ansible     https://git.openstack.org/openstack/kolla-ansible
-kolla-kubernetes  https://git.openstack.org/openstack/kolla-kubernetes
+kolla             https://github.com/openstack/kolla
+kolla-ansible     https://github.com/openstack/kolla-ansible
+kolla-kubernetes  https://github.com/openstack/kolla-kubernetes
 
 The kolla deliverable maintains container images and container build tools.
 
