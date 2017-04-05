@@ -34,6 +34,8 @@ EOF
 fi
 
 cat >> /tmp/setup.$$ <<"EOF"
+modprobe br_netfilter || true
+echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
 systemctl daemon-reload
 systemctl start docker
 systemctl restart kubelet

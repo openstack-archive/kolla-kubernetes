@@ -365,6 +365,7 @@ enable_tempest: "no"
 enable_trove: "no"
 enable_vmtp: "no"
 enable_watcher: "no"
+enable_placement: "yes"
 
 ironic_keystone_user: "ironic"
 neutron_keystone_user: "neutron"
