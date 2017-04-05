@@ -132,9 +132,15 @@ wait_for_pods kolla cinder,glance,neutron,ironic running,succeeded
 
 helm ls
 
+PEN=true
+if [ "x$branch" == "x2" -o "x$branch" == "x3" ]; then
+  PEN=false
+fi
+
 helm install kolla/nova-control --version $VERSION  --namespace kolla \
     --name nova-control \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+    --set global.kolla.nova.all.placement_enabled=$PEN
 
 helm install kolla/nova-compute --version $VERSION  --namespace kolla \
     --name nova-compute \
