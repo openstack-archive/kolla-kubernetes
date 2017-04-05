@@ -36,11 +36,14 @@ tests/bin/setup_gate_loopback.sh
 
 tools/setup_kubernetes.sh master
 
-kubectl describe nodes
-
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
-# Turn up kube-proxy logging
+#
+# Setting up networking on master, before slave nodes in multinode
+# scenario will attempt to join the cluster
+tests/bin/setup_canal.sh
+
+# Turn up kube-proxy logging enable only for debug 
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
@@ -86,8 +89,6 @@ kubectl label node $NODE kolla_controller=true
 if [ "x$CONFIG" != "xceph-multi" ]; then
     kubectl label node $NODE kolla_compute=true
 fi
-
-tests/bin/setup_canal.sh
 
 # Setting up Helm
 setup_helm_common
