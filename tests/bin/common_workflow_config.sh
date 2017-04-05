@@ -1,7 +1,12 @@
 function common_workflow_config {
+#  Passed parameters: $1 - IP, $2 - base_distro,
+#                     $3 - tunnel_interface, $4 - branch
+#
     IP="$1"
     base_distro="$2"
     tunnel_interface="$3"
+    branch="$4"
+
     echo "global:"
     echo "  kolla:"
     echo "    keystone:"
@@ -44,4 +49,11 @@ function common_workflow_config {
     echo "      external_vip: $IP"
     echo "      base_distro: $base_distro"
     echo "      tunnel_interface: $tunnel_interface"
+
+# Disable nova placement API on 2.0.0 and 3.0.0 images as that doesn't exist
+    if [ "x$branch" == "x2" -o "x$branch" == "x3" ]; then
+        echo "    nova"
+        echo "      all:"
+        echo "        enable_placement_api: false"
+    fi
 }
