@@ -91,9 +91,16 @@ function iscsi_config {
 general_config > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
+NOVA_PLACEMENT_ENABLE=true
+if [ "x$branch" == "x2" -o "x$branch" == "x3" ]; then
+  NOVA_PLACEMENT_ENABLE=false
+fi
+
 helm install kolla/compute-kit --version $VERSION \
     --namespace kolla --name compute-kit \
-    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml \
+    --set global.kolla.nova.all.placement_enabled=$NOVA_PLACEMENT_ENABLE
+
 
 $DIR/tools/wait_for_pods.sh kolla 900
 
