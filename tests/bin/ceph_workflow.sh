@@ -20,7 +20,7 @@ base_distro="$2"
 gate_job="$1"
 branch="$3"
 function general_config {
-    common_workflow_config $IP $base_distro $tunnel_interface
+    common_workflow_config $IP $base_distro $tunnel_interface $branch
 }
 
 function ceph_config {
