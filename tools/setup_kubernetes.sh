@@ -64,6 +64,8 @@ if [ "$1" == "master" ]; then
     set +e
     count=0
     while true; do
+        echo "Cheking status of just created pods""
+        kubectl get pods -n kube-system
         kubectl get pods -n kube-system > /dev/null 2>&1 && break || true
         sleep 1
         count=$((count + 1))
