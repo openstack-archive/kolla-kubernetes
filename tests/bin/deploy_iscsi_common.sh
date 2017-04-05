@@ -1,9 +1,9 @@
 function general_config {
 #
 #  Passed parameters: $1 - IP, $2 - base_distro,
-#                     $3 - tunnel_interface
+#                     $3 - tunnel_interface, $4 - branch
 #
-    common_workflow_config $1 $2 $3
+    common_workflow_config $1 $2 $3 $4
 }
 
 function iscsi_config {
@@ -126,7 +126,7 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-svc --debug --version $VERSION \
     --namespace kolla --name nova-placement-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -222,7 +222,7 @@ kollakube res create bootstrap openvswitch-set-external-ip
 
 $DIR/tools/wait_for_pods.sh kolla
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -251,7 +251,7 @@ helm install kolla/cinder-create-keystone-service-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-user-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -297,7 +297,7 @@ helm install kolla/nova-create-keystone-endpoint-public-job --version $VERSION \
     --namespace kolla --name nova-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-endpoint-public-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -337,7 +337,7 @@ helm install kolla/cinder-manage-db-job --version $VERSION \
     --namespace kolla --name cinder-manage-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-endpoint-internal-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-internal \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -454,7 +454,7 @@ for x in nova-api nova-novncproxy; do
       --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 done
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --namespace kolla --name nova-placement-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
@@ -519,7 +519,7 @@ $DIR/tools/build_local_admin_keystonerc.sh
 
 wait_for_openstack
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" && "x$branch" != "x3" ]; then
 helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
     --namespace kolla --name nova-cell0-create-db-job \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
