@@ -114,7 +114,7 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
     tunnel_interface=$interface
 fi
 
-tests/bin/build_test_ceph.sh $CONFIG $DISTRO $IP $tunnel_interface
+tests/bin/build_test_ceph.sh $CONFIG $DISTRO $IP $tunnel_interface $BRANCH
 
 helm install kolla/ceph-admin-pod --version $PACKAGE_VERSION \
     --namespace kolla --name ceph-admin-pod --set kube_logger=false

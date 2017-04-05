@@ -10,6 +10,7 @@ kubectl get pods --namespace $1 -o json | \
 jq -r '.items[].spec.containers[].image' | sort -u | while read line; do
     grep "$line" /tmp/imags.$$ > /dev/null 2>&1 && continue || true
     echo Pulling container $line
-    sudo docker pull $line > /dev/null
+# TODO(sdake) not sure what this does - but its busted with placement conditional
+#    sudo docker pull $line > /dev/null
 done
 set -x
