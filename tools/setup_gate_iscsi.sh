@@ -28,6 +28,11 @@ tests/bin/setup_gate_loopback_lvm.sh
 
 tools/setup_kubernetes.sh master
 
+tools/wait_for_kube_control_plane.sh
+kubectl get nodes
+kubectl get pods --all-namespaces
+tests/bin/setup_canal.sh
+
 kubectl describe nodes
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
@@ -35,8 +40,6 @@ kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true kolla_compute=true \
                          kolla_storage=true
-
-tests/bin/setup_canal.sh
 
 # Setting up Helm
 setup_helm_common
