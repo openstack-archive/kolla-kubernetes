@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.nova.placement_api.create_keystone_service.job:global.kolla.nova.placement_api.create_keystone_service.all:global.kolla.nova.placement_api.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $resourceName := "placement-api-create-keystone-service" }}
+{{- $resourceName := "nova-placement-create-keystone-service" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 {{- $serviceName := "placement" }}

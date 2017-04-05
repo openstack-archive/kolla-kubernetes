@@ -7,11 +7,12 @@ IP="$3"
 base_distro="$2"
 gate_job="$1"
 tunnel_interface="$4"
+branch="$5"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
 
 function general_config {
-    common_workflow_config $IP $base_distro $tunnel_interface
+    common_workflow_config $IP $base_distro $tunnel_interface $branch
 }
 
 function ceph_config {

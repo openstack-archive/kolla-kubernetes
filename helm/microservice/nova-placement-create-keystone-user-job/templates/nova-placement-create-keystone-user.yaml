@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.nova.placement_api.create_keystone_user.job:global.kolla.nova.placement_api.create_keystone_user.all:global.kolla.nova.placement_api.all:global.nova.kolla.all:global.kolla.all" }}
-{{- $resourceName := "placement-api-create-keystone-user" }}
+{{- $resourceName := "nova-placement-api-create-keystone-user" }}
 {{- $serviceName := "placement" }}
 {{- $serviceType := "create-keystone-user" }}
 {{- $elementName := .Values.element_name | default $serviceName }}

@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.nova.placement_api.create_keystone_endpoint.admin.job:global.kolla.nova.placement_api.create_keystone_endpoint.all:global.kolla.nova.placement_api.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $resourceName := "placement-api-create-keystone-endpoint-admin" }}
+{{- $resourceName := "placement-create-keystone-endpoint-admin" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 {{- $serviceName := "placement-api" }}
