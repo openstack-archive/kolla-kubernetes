@@ -21,4 +21,8 @@ function common_ceph_config {
     echo "    nova:"
     echo "      all:"
     echo "        ceph_backend: true"
+# Disable nova placement API on 2.y.z and 3.y.z images as that doesn't exist
+#    if [ "x$2" == "x2" -o "x$2" == "x3" ]; then
+#        echo "        placement_api_enabled: false"
+#    fi
 }
