@@ -40,6 +40,11 @@ kubectl describe nodes
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
+#
+# Setting up networking on master, before slave nodes in multinode
+# scenario will attempt to join the cluster
+tests/bin/setup_canal.sh
+
 # Turn up kube-proxy logging
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
@@ -86,8 +91,6 @@ kubectl label node $NODE kolla_controller=true
 if [ "x$CONFIG" != "xceph-multi" ]; then
     kubectl label node $NODE kolla_compute=true
 fi
-
-tests/bin/setup_canal.sh
 
 # Setting up Helm
 setup_helm_common
