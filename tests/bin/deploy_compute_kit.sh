@@ -9,6 +9,7 @@ VERSION=0.6.0-1
 IP=172.18.0.1
 tunnel_interface=docker0
 base_distro="$2"
+branch="$3"
 
 function check_for_nova {
     for service in nova-scheduler nova-conductor nova-compute;
@@ -81,7 +82,7 @@ function wait_for_openstack {
 }
 
 function general_config {
-    common_workflow_config $IP $base_distro $tunnel_interface
+    common_workflow_config $IP $base_distro $tunnel_interface $branch
 }
 
 function iscsi_config {

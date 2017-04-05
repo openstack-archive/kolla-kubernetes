@@ -20,7 +20,7 @@ base_distro="$2"
 gate_job="$1"
 branch="$3"
 function general_config {
-    common_workflow_config $IP $base_distro $tunnel_interface
+    common_workflow_config $IP $base_distro $tunnel_interface $branch
 }
 
 function ceph_config {
@@ -112,7 +112,7 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-svc --debug --version $VERSION \
     --namespace kolla --name nova-placement-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -229,7 +229,7 @@ helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-servicev2 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -289,7 +289,7 @@ helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION
 helm install kolla/heat-create-keystone-user-job --version $VERSION \
     --namespace kolla --name heat-create-keystone-user
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-endpoint-public-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -447,7 +447,7 @@ helm install kolla/glance-registry-deployment --version $VERSION \
 
 helm ls
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --namespace kolla --name nova-placement-deployment \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
