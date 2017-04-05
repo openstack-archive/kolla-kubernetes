@@ -63,14 +63,7 @@ if [ "$1" == "master" ]; then
     mkdir -p ~/.kube
     sudo cp /etc/kubernetes/admin.conf ~/.kube/config
     sudo chown $(id -u):$(id -g) ~/.kube/config
-    set +e
-    count=0
-    while true; do
-        kubectl get pods -n kube-system > /dev/null 2>&1 && break || true
-        sleep 1
-        count=$((count + 1))
-        [ $count -gt 30 ] && echo kube-apiserver failed to come back up. && exit -1
-    done
+    tools/wait_for_kube_control_plane.sh
 
 # NOTE(sbezverk/kfox111) This is a horible hack to get k8s 1.6 working. This should be
 # removed in favor of more fine grained rules.
