@@ -1,9 +1,9 @@
 function general_config {
 #
 #  Passed parameters: $1 - IP, $2 - base_distro,
-#                     $3 - tunnel_interface
+#                     $3 - tunnel_interface, $4 - $branch
 #
-    common_workflow_config $1 $2 $3
+    common_workflow_config $1 $2 $3 $4
 }
 
 function iscsi_config {
