@@ -3,6 +3,8 @@ global:
         all:
             kubernetes_entrypoint: true
         nova:
+            all:
+                enable_placement_api: true
             api:
                 create_db:
                     job:
