@@ -1,9 +1,9 @@
 function general_config {
 #
 #  Passed parameters: $1 - IP, $2 - base_distro,
-#                     $3 - tunnel_interface
+#                     $3 - tunnel_interface, $4 - $branch
 #
-    common_workflow_config $1 $2 $3
+    common_workflow_config $1 $2 $3 $4
 }
 
 function iscsi_config {
@@ -30,7 +30,7 @@ else
 . "$DIR/tests/bin/common_iscsi_config.sh"
 fi
 
-general_config $IP $base_distro $tunnel_interface > /tmp/general_config.yaml
+general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
 helm install kolla/ironic-api-svc --debug --version $VERSION \
