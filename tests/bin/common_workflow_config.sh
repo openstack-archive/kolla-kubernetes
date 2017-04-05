@@ -1,7 +1,11 @@
 function common_workflow_config {
+#  Passed parameters: $1 - IP, $2 - base_distro,
+#                     $3 - tunnel_interface, $4 - branch
     IP="$1"
     base_distro="$2"
     tunnel_interface="$3"
+    branch="$4"
+
     echo "global:"
     echo "  kolla:"
     echo "    keystone:"
@@ -39,6 +43,14 @@ function common_workflow_config {
     echo "    helm-repo:"
     echo "      all:"
     echo "        image_tag: 3.0.3-beta.1"
+
+# Disable nova placement API on 2.y.z and 3.y.z images as they don't exist
+    if [ "x$branch" == "x2" -o "x$branch" == "x3" ]; then
+        echo "    nova:"
+        echo "      all:"
+        echo "        placement_api_enabled: false"
+    fi
+
     echo "    all:"
     echo "      kube_logger: false"
     echo "      external_vip: $IP"
