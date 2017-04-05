@@ -79,7 +79,7 @@ curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
 timeout 120s openstack endpoint list
 
 curl -o cirros.qcow2 \
-    http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img
 echo testing cluster glance-api
 curl http://`kubectl get svc glance-api --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'`:9292/
