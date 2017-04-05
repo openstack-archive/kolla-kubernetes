@@ -13,6 +13,4 @@ sed -i "s@10.96.232.136@172.16.128.100@" /tmp/canal.yaml
 kubectl create -f /tmp/canal.yaml
 
 $DIR/tools/pull_containers.sh kube-system
-$DIR/tools/wait_for_pods.sh kube-system
-
-$DIR/tools/test_kube_dns.sh
+$DIR/tools/wait_for_pods.sh kube-system 240
