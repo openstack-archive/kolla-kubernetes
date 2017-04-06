@@ -32,7 +32,6 @@ Kolla-Kubernetes Services
    mariadb-guide
    memcached-guide
    keystone-guide
-   dns-guide
 
 Indices and tables
 ==================
