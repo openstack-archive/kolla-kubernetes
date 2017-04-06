@@ -58,8 +58,8 @@ config="$5"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-if [ "x$branch" == "x3" ]; then
-. "$DIR/tests/bin/common_iscsi_config_v3.sh"
+if [ "x$branch" == "x4" ]; then
+. "$DIR/tests/bin/common_iscsi_config_v4.sh"
 else
 . "$DIR/tests/bin/common_iscsi_config.sh"
 fi
@@ -222,7 +222,7 @@ fi
 # NOTE: Workaround for ironic to add additional interface
 #
 if [ "x$config" == "xironic" ]; then
-    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd: \
+    sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd@ \
          | awk '{print $1}') ovs-vsctl add-br br-tenants
     sudo ifconfig br-tenants up
     sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
