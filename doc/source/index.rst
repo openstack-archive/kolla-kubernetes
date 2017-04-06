@@ -13,7 +13,6 @@ Contents:
 
    contributing
    development-environment
-   installation
    general-quickstart
    multi-node
    private-registry
