@@ -16,7 +16,6 @@ Contents:
    multi-node
    private-registry
    usage
-   labels
    running-tests
 
 Kolla-Kubernetes Services
