@@ -1,0 +1,10 @@
+name: elasticsearch-deployment
+version: 0.6.0-1 #FIXME make this changable
+description: Memcached service for kolla-kubernetes
+keywords:
+  - openstack
+  - elasticsearch
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready

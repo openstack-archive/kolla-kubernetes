@@ -1306,3 +1306,24 @@ ironic-inspector-manage-db-job:
                         all:
                             database_name: "ironic_inspector"
                             database_user: "ironic_inspector"
+elasticsearch-svc:
+        global:
+            element_name: elasticsearch
+            kolla:
+                memcached:
+                    all:
+                        enabled: true
+                        port: 9200
+                        node_port: 9200
+                        port_external: false
+                        node_port_enabled: false
+
+elasticsearch-deployment:
+        global:
+            element_name: elasticsearch
+            kolla:
+                memcached:
+                    all:
+                        enabled: true
+                        port: 9200
+

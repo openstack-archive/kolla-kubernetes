@@ -1,0 +1,7 @@
+dependencies:
+  - name: elasticsearch-svc
+    repository: file://../../microservice/elasticsearch-svc
+    version: 0.6.0-1
+  - name: elasticsearch-deployment
+    repository: file://../../microservice/elasticsearch-deployment
+    version: 0.6.0-1

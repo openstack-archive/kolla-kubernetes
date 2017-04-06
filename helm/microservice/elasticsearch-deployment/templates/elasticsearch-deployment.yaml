@@ -1,0 +1,64 @@
+{{- $localVals := dict }}
+{{- $resourceName := "elasticsearch" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := false }}
+{{- $name :=  .Release.Name }}
+{{- $elementSearchPath := ":global.kolla.elasticsearch.deployment:global.kolla.elasticsearch.all:global.kolla.all:global" }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $elementSearchPath "Values" .Values ) }}
+{{- $searchPath := printf ":global.kolla.%s.deployment:global.kolla.%s.all:global.kolla.elasticsearch.deployment:global.kolla.elasticsearch.all:global.kolla.all" $elementName $elementName }}
+{{- $serviceName := $elementName }}
+{{- $serviceType := "deployment" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "elementName" $elementName "searchPath" $searchPath "Values" .Values "Release" .Release }}
+{{- $c := dict "searchPath" $searchPath "key" "enabled" "retDict" $localVals "retKey" "enabled" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
+{{- $ci := dict "searchPath" $searchPath "Values" .Values "contName" "elasticsearch" }}
+{{- $_ := set $ci "imageName" "image_full" }}
+{{- $_ := set $ci "tagName" "image_tag" }}
+{{- $elasticsearchImageFull := include "kolla_build_image_full" $ci }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- if $localVals.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: {{ $elementName }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: {{ $elementName }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" $env | indent 10 }}
+        ]'
+    spec:
+      nodeSelector:
+        {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - image: "{{ $elasticsearchImageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: main
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: elasticsearch-config
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          ports:
+            - containerPort: {{ $port }}
+              name: {{ $elementName | trunc 15 | quote }}
+{{- include "common_containers" $env | indent 8 }}
+      volumes:
+{{- include "common_volumes" $env | indent 8 }}
+        - name: elasticsearch-config
+          configMap:
+            name: {{ $elementName }}
+{{- else }}
+{{- include "common_disabled" (dict "elementName" $elementName "serviceKind" "deployment") }}
+{{- end }}
+{{- end }}
