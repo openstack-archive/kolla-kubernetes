@@ -20,7 +20,6 @@ Kolla-Kubernetes Services
 .. toctree::
    :maxdepth: 1
 
-   mariadb-guide
    memcached-guide
 
 Indices and tables
