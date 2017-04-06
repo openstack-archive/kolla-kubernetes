@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Added support for Keystone Fernet Tokens.

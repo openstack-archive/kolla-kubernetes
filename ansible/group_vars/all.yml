@@ -422,7 +422,7 @@ keystone_internal_url: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ k
 keystone_public_url: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ keystone_public_port }}/v3"
 
 # Valid options are [ uuid, fernet ]
-keystone_token_provider: "uuid"
+keystone_token_provider: "fernet"
 fernet_token_expiry: 86400
 
 keystone_default_user_role: "_member_"

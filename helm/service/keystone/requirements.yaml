@@ -8,6 +8,9 @@ dependencies:
   - name: keystone-public-svc
     repository: file://../../microservice/keystone-public-svc
     version: 0.6.0-1
+  - name: keystone-fernet-setup-job
+    repository: file://../../microservice/keystone-fernet-setup-job
+    version: 0.6.0-1
   - name: keystone-create-db-job
     repository: file://../../microservice/keystone-create-db-job
     version: 0.6.0-1
