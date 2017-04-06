@@ -9,7 +9,7 @@ Welcome to kolla-kubernetes's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    contributing
    development-environment
