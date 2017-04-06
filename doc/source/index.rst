@@ -9,7 +9,6 @@ Contents:
    contributing
    deployment-guide
    development-environment
-   general-quickstart
    multi-node
    private-registry
    usage
