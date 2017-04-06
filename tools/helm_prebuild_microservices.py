@@ -137,7 +137,7 @@ common_create_keystone_admin = [
 
 
 def helm_dep_up(srcdir):
-    command_line = "cd %s; helm dep up" % (srcdir)
+    command_line = "cd %s; helm dep up --skip-refresh" % (srcdir)
     try:
         res = subprocess.check_output(
             command_line, shell=True,
