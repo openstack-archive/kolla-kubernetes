@@ -14,7 +14,6 @@ Contents:
    contributing
    development-environment
    installation
-   kubernetes-setup
    general-quickstart
    multi-node
    private-registry
