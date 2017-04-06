@@ -24,8 +24,8 @@ branch="$4"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-if [ "x$branch" == "x3" ]; then
-. "$DIR/tests/bin/common_iscsi_config_v3.sh"
+if [ "x$branch" == "x4" ]; then
+. "$DIR/tests/bin/common_iscsi_config_v4.sh"
 else
 . "$DIR/tests/bin/common_iscsi_config.sh"
 fi
