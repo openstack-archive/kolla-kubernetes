@@ -56,7 +56,7 @@ Step 1: Deploy Kubernetes
 
    This document recommends Kubernetes 1.6.1 or later.
 
- ..warning::
+.. warning::
 
    This documentation assumes a POD CIDR of 10.1.0.0/16 and a service CIDR of
    10.3.3.0/24.  Two rules must be followed when reading this guide.
