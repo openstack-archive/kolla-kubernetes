@@ -46,7 +46,7 @@ Dependencies::
    processes.  This operation will show changes as they occur within
    Kubernetes and also shows the PODs IP addresses::
 
-       watch -d -n 5 -c kubectl get pods --all-namespaces
+       watch -n 5 -c kubectl get pods --all-namespaces
 
 -------------------------
 Step 1: Deploy Kubernetes
@@ -56,7 +56,7 @@ Step 1: Deploy Kubernetes
 
    This document recommends Kubernetes 1.6.1 or later.
 
- ..warning::
+.. warning::
 
    This documentation assumes a POD CIDR of 10.1.0.0/16 and a service CIDR of
    10.3.3.0/24.  Two rules must be followed when reading this guide.
@@ -111,10 +111,12 @@ Install Kubernetes 1.6.1 or later::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni
 
-To enable the proper cgroup driver and disable CRI::
+To enable the proper cgroup driver, start Docker and disable CRI::
 
+    sudo systemctl enable docker
+    sudo systemctl start docker
     CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
-    sudo sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER --enable-cri=false |g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER --enable-cri=false |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 Setup the DNS server with the service CIDR::
 
@@ -137,8 +139,6 @@ Then stop kubelet if it is running::
 
 Then enable and start docker and kubelet::
 
-    sudo systemctl enable docker
-    sudo systemctl start docker
     sudo systemctl enable kubelet
     sudo systemctl start kubelet
 
@@ -158,8 +158,8 @@ Deploy Kubernetes with kubeadm::
 Load the kubedm credentials into the system::
 
     mkdir -p $HOME/.kube
-    sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME/.kube/config.conf
+    sudo -H cp /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo -H chown $(id -u):$(id -g) $HOME/.kube/config
 
 The CNI driver is the networking driver that Kubernetes uses.  Kolla uses canal
 currently in the gate and tests with it hundreds of times per day via
@@ -309,6 +309,7 @@ Modify kolla configuration::
 Add required configuration to the end of /etc/kolla/globals.yml::
 
     cat <<EOF > add-to-globals.yml
+    install_type: "source"
     tempest_image_alt_id: "{{ tempest_image_id }}"
     tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
 
@@ -372,7 +373,7 @@ Generate the default configuration::
 
 Generate the Kubernetes secrets and register them with Kubernetes::
 
-    sudo kolla-kubernetes/tools/secret-generator.py create
+    kolla-kubernetes/tools/secret-generator.py create
 
 Create and register the Kolla config maps::
 
@@ -389,7 +390,7 @@ Create and register the Kolla config maps::
 
 Enable resolv.conf workaround::
 
-    sudo kolla-kubernetes/tools/setup-resolv-conf.sh kolla
+    kolla-kubernetes/tools/setup-resolv-conf.sh kolla
 
 Build all helm microcharts, service charts, and metacharts::
 
@@ -575,7 +576,6 @@ To delete all helm charts::
     helm delete keystone --purge
     helm delete glance --purge
     helm delete cinder-control --purge
-    helm delete cinder-volume-lvm-daemonset --purge
     helm delete horizon --purge
     helm delete openvswitch --purge
     helm delete neutron --purge
