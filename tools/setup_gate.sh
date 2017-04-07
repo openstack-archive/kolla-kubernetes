@@ -21,8 +21,13 @@ if [ "x$BRANCH" == "xt" ]; then
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
-    sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
-    sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
+    sed -i 's/2\.0\.2/3.0.3/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/3.0.3/g' tests/conf/ceph-all-in-one/kolla_config
+fi
+
+if [ "x$BRANCH" == "x4" ]; then
+    sed -i 's/2\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
 fi
 
 if [ "x$4" == "xiscsi" ]; then
@@ -51,4 +56,9 @@ fi
 
 echo "1 "$1 "2 "$2 "3 "$3 "4 "$4 "5 "$5 "BRANCH "$BRANCH "PIPELINE "$PIPELINE
 tools/setup_gate_ceph.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+
+#FIXME fail to get good logs.
+if [ "x$BRANCH" == "x3" ]; then
+  exit -1
+fi
 exit 0
