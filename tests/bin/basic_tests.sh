@@ -69,6 +69,8 @@ function wait_for_cinder {
     set -ex
 }
 
+nova-manage cell_v2 discover_hosts
+
 HORIZON_URL=http://$(kubectl get svc horizon --namespace=kolla -o \
     jsonpath='{.spec.clusterIP}'):80/
 wait_for_http $HORIZON_URL
