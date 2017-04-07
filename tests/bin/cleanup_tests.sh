@@ -22,6 +22,8 @@ fi
 user='root'
 password=$(python -c 'import yaml; print yaml.safe_load(open("/etc/kolla/passwords.yml"))["database_password"]')
 if [ $(kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$password -e 'show databases;' | grep $1 | wc -l) -ne 0 ]; then
+   echo found:
+   kubectl exec mariadb-0 -n kolla -- mysql --user=$user --password=$password -e 'show databases;' | grep $1
    exit -1
 fi
 }
