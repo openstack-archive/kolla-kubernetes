@@ -29,8 +29,8 @@ spec:
 {%- endif %}
 {%- if enable_ceph == "yes" %}
                   mkdir -p /nova/secrets/;
-                  cp -a /secret/a/..data/data /nova/secrets/{{ rbd_secret_uuid }}.xml;
-                  cp -a /secret/b/..data/data /nova/secrets/{{ rbd_secret_uuid }}.base64;
+                  cp -a /secret/a/..data/data /nova/secrets/{{ cinder_rbd_secret_uuid }}.xml;
+                  cp -a /secret/b/..data/data /nova/secrets/{{ cinder_rbd_secret_uuid }}.base64;
                   cp -a /config2/..data/ceph.conf /nova;
 {%- endif %}
              "],
