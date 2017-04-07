@@ -435,7 +435,7 @@ Create a cloud.yaml file for the deployment of the charts::
                element_name: cinder-volume
              daemonset:
                lvm_backends:
-                 - 192.168.7.105: cinder-volumes
+               - '192.168.7.105': 'cinder-volumes'
          ironic:
            conductor:
              daemonset:
@@ -457,7 +457,6 @@ Create a cloud.yaml file for the deployment of the charts::
          horizon:
            all:
              port_external: true
-
 
 .. note::
 
@@ -498,7 +497,6 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/keystone --namespace kolla --name keystone --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/glance --namespace kolla --name glance --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/cinder-control --namespace kolla --name cinder-control --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/cinder-volume-lvm-daemonset --namespace kolla --name cinder-volume --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/horizon --namespace kolla --name horizon --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/openvswitch --namespace kolla --name openvswitch --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/neutron --namespace kolla --name neutron --values ./cloud.yaml
@@ -521,6 +519,45 @@ database::
 
     helm install --debug kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/microservice/nova-api-create-simple-cell-job --namespace kolla --name nova-api-create-simple-cell --values ./cloud.yaml
+
+Deploy iSCSI support with Cinder LVM (Optional)
+
+The Cinder LVM implementation requires a volume group to be set up. This can
+either be a real physical volume or a loopback mounted file for development.
+Use ``pvcreate`` and ``vgcreate`` to create the volume group.  For example
+with the devices ``/dev/sdb`` and ``/dev/sdc``:
+
+::
+
+    <WARNING ALL DATA ON /dev/sdb and /dev/sdc will be LOST!>
+
+    pvcreate /dev/sdb /dev/sdc
+    vgcreate cinder-volumes /dev/sdb /dev/sdc
+
+During development, it may be desirable to use file backed block storage. It
+is possible to use a file and mount it as a block device via the loopback
+system. ::
+
+    mknod /dev/loop2 b 7 2
+    dd if=/dev/zero of=/var/lib/cinder_data.img bs=1G count=20
+    losetup /dev/loop2 /var/lib/cinder_data.img
+    pvcreate /dev/loop2
+    vgcreate cinder-volumes /dev/loop2
+
+Note that in the event where iSCSI daemon is active on the host, there is a 
+need to perform the following steps before executing the cinder-volume-lvm helm
+chart to avoid the iscsd container from going into crash loops:
+
+::
+
+    sudo systemctl stop iscsid
+    sudo systemctl stop iscsid.socket
+
+Execute the cinder-volume-lvm helm chart:
+
+::
+
+    helm install --debug kolla-kubernetes/helm/service/cinder-volume-lvm --namespace kolla --name cinder-volume-lvm --values ./cloud.yaml
 
 Observe the previously running watch command in a different terminal. Wait
 for all pods to to enter the running state.  If you didn't run watch in a
@@ -583,7 +620,7 @@ To delete all helm charts::
     helm delete nova-compute --purge
     helm delete nova-cell0-create-db-job --purge
     helm delete nova-placement-deployment --purge
-    helm delete cinder-volume --purge
+    helm delete cinder-volume-lvm --purge
 
 To clean up the host volumes between runs::
 
