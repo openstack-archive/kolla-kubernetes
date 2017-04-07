@@ -1,4 +1,4 @@
-================================================
+g===============================================
 Bare Metal Deployment Guide for kolla-kubernetes
 ================================================
 
@@ -515,6 +515,11 @@ yet in service charts::
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-internal-job --namespace kolla --name nova-placement-create-keystone-endpoint-internal --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-admin-job --namespace kolla --name nova-placement-create-keystone-endpoint-admin --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-public-job --namespace kolla --name nova-placement-create-keystone-endpoint-public --values ./cloud.yaml
+
+Include iscsid and tgtd for Cinder LVM::
+
+    helm install --debug kolla-kubernetes/helm/microservice/iscsid-daemonset --namespace kolla --name iscsid-daemonset --values ./cloud.yaml
+    helm install --debug kolla-kubernetes/helm/microservice/tgtd-daemonset --namespace kolla --name tgtd-daemonset --values ./cloud.yaml
 
 Wait for nova-compute the enter the running state before creating the cell0
 database::
