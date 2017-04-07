@@ -513,7 +513,24 @@ helm install kolla/nova-libvirt-daemonset --version $VERSION \
 
 helm install kolla/nova-compute-daemonset --version $VERSION \
     --namespace kolla --name nova-compute-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml \
+    --set image_tag=3.0.3
+#FIXME for testing...
+
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
+helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
+    --namespace kolla --name nova-cell0-create-db-job \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-create-simple-cell-job \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
