@@ -517,9 +517,23 @@ helm install kolla/nova-compute-daemonset --version $VERSION \
     --namespace kolla --name nova-compute-daemonset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
+helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
+    --namespace kolla --name nova-cell0-create-db-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-create-simple-cell-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
+
 #kollakube res create pod keepalived
 
-$DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap openvswitch-set-external-ip
