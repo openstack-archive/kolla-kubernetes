@@ -112,7 +112,7 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
     --namespace kolla --name nova-novncproxy-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-svc --debug --version $VERSION \
     --namespace kolla --name nova-placement-svc \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -229,7 +229,7 @@ helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-servicev2 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -289,7 +289,7 @@ helm install kolla/neutron-create-keystone-endpoint-admin-job --version $VERSION
 helm install kolla/heat-create-keystone-user-job --version $VERSION \
     --namespace kolla --name heat-create-keystone-user
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-endpoint-public-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -447,7 +447,7 @@ helm install kolla/glance-registry-deployment --version $VERSION \
 
 helm ls
 
-if [ "x$branch" != "x2" ]; then
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-deployment --debug --version $VERSION \
     --namespace kolla --name nova-placement-deployment \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
@@ -512,14 +512,30 @@ helm install kolla/neutron-openvswitch-agent-daemonset --version $VERSION \
 helm install kolla/nova-libvirt-daemonset --version $VERSION \
     --namespace kolla --name nova-libvirt-daemonset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+    --set image_tag=3.0.3
+#FIXME for testing...
 
 helm install kolla/nova-compute-daemonset --version $VERSION \
     --namespace kolla --name nova-compute-daemonset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+$DIR/tools/pull_containers.sh kolla
+$DIR/tools/wait_for_pods.sh kolla
+
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
+helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
+    --namespace kolla --name nova-cell0-create-db-job \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
+
+helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-create-simple-cell-job \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+fi
+
 #kollakube res create pod keepalived
 
-$DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
 kollakube res delete bootstrap openvswitch-set-external-ip
