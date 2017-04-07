@@ -458,7 +458,20 @@ Create a cloud.yaml file for the deployment of the charts::
            all:
              port_external: true
 
+.. note::
 
+   There is a need to create separate Volume Group for Cinder in order to 
+   deploy iSCSI and LVM.  Please refer to the following reference:
+   https://docs.openstack.org/developer/kolla-ansible/cinder-guide.html
+
+   Note that in the event where iSCSI daemon is active on the host, there is
+   a need to perform the following steps before running the cinder-volume-lvm
+   helm charts to avoid the iscsd container from going into crash loops:
+
+   # systemctl stop iscsid
+   # systemctl stop iscsid.socket
+
+  
 .. note::
 
    The next operation is not a simple copy and paste as the rest of this
@@ -498,7 +511,6 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/keystone --namespace kolla --name keystone --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/glance --namespace kolla --name glance --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/cinder-control --namespace kolla --name cinder-control --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/cinder-volume-lvm-daemonset --namespace kolla --name cinder-volume --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/horizon --namespace kolla --name horizon --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/openvswitch --namespace kolla --name openvswitch --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/neutron --namespace kolla --name neutron --values ./cloud.yaml
@@ -515,6 +527,10 @@ yet in service charts::
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-internal-job --namespace kolla --name nova-placement-create-keystone-endpoint-internal --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-admin-job --namespace kolla --name nova-placement-create-keystone-endpoint-admin --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-public-job --namespace kolla --name nova-placement-create-keystone-endpoint-public --values ./cloud.yaml
+
+Deploy iSCSI support with Cinder LVM (Optional)::
+
+    helm install --debug kolla-kubernetes/helm/service/cinder-volume-lvm --namespace kolla --name cinder-volume-lvm --values ./cloud.yaml
 
 Wait for nova-compute the enter the running state before creating the cell0
 database::
