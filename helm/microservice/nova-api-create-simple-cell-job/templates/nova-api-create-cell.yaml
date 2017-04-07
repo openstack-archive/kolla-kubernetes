@@ -61,6 +61,10 @@ spec:
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ONCE"
+          # This is needed as centos images nova user doesn't have permissions to
+          # change nova.conf.
+          securityContext:
+              runAsUser: 0
           command: [
               "bash",
               "-ce",
