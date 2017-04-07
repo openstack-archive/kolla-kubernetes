@@ -117,6 +117,11 @@ kubectl get roles -o yaml > $WORKSPACE/logs/rbac/roles.yaml
 kubectl get clusterrolebindings -o yaml > $WORKSPACE/logs/rbac/clusterrolebindings.yaml
 kubectl get rolebindings -o yaml > $WORKSPACE/logs/rbac/rolebindings.yaml
 
+cat /etc/nodepool/sub_nodes_private | while read line; do
+    ssh $line sudo iptables-save > $WORKSPACE/logs/iptables-$line-end.txt
+    ssh $line sudo route -n > $WORKSPACE/logs/routes-$line-end.txt
+done
+
 #
 # Check power status and status of vbmc
 #
