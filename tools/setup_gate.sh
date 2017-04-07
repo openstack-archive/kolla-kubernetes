@@ -25,6 +25,11 @@ if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
 fi
 
+if [ "x$BRANCH" == "x4" ]; then
+    sed -i 's/2\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+fi
+
 if [ "x$4" == "xiscsi" ]; then
     tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
     exit 0
