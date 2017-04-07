@@ -63,7 +63,7 @@ cinder_volume_ceph_replicas: "1"
 nova_consoleauth_replicas: "1"
 nova_novncproxy_replicas: "1"
 # !!!ALERT!!! Changing number of replicas for elasticsearch
-# might cause issues and possible data corruption as currenly
+# might cause issues and possible data corruption as currently
 # Kubernetes does no support mutli-write access. It might
 # change in future.
 elasticsearch_replicas: "1"

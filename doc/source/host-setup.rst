@@ -43,7 +43,7 @@ Setup Docker
 
 Docker needs to run with the root filesystem as shared in order for
 Neutron to function in 'thin' containers. The reason for that is mount
-propogation.  Mounts need to be shared so the network namespaces are
+propagation.  Mounts need to be shared so the network namespaces are
 shared among the host and the Neutron containers.
 
 For CentOS and other systemd distros, change MountFlags from "slave"

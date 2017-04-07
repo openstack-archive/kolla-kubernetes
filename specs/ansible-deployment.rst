@@ -14,7 +14,7 @@ work could be split by two tools that both specialize in their fields.
 Problem description
 ===================
 
-In order to do dependancy management in Kubernetes, it requires logic to be
+In order to do dependency management in Kubernetes, it requires logic to be
 added into containers, pods, and/or etcd, so that services will be cluster aware
 during orchestration.  In doing so it requires the developers to account for all
 scenarios and corner cases when architecting the containers.
@@ -22,7 +22,7 @@ scenarios and corner cases when architecting the containers.
 Use Cases
 =========
 
-Ansible is capable of handling dependancy management and will be able to
+Ansible is capable of handling dependency management and will be able to
 orchestrate a cluster and hand it off to Kubernetes to be managed.
 
 Ansible will be orchestrating the cluster by making CLI calls instead of using
@@ -33,7 +33,7 @@ Arguments
 =========
 
 Ansible is an additional tool to add to the project.  So there is an additional
-dependancy here.
+dependency here.
 - Ansible wouldn't be adding any additional complexity. There would actually be
 a net reduction in complexion because of the logic required to be built into
 the containers in order to count for all use cases.
