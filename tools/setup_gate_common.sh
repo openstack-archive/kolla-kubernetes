@@ -71,6 +71,7 @@ pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-cinderclient==1.11.0"
 pip install "python-openstackclient"
+pip install "python-novaclient"
 pip install "python-neutronclient"
 pip install "selenium"
 pip install -r requirements.txt
