@@ -159,7 +159,7 @@ connection_uri = "qemu+tcp://{{ api_interface_address }}/system"
 images_type = rbd
 images_rbd_pool = {{ ceph_nova_pool_name }}
 images_rbd_ceph_conf = /etc/ceph/ceph.conf
-rbd_user = nova
+rbd_user = cinder
 disk_cachemodes="network=writeback"
 {% if nova_hw_disk_discard != '' %}
 hw_disk_discard = {{ nova_hw_disk_discard }}
