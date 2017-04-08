@@ -17,6 +17,7 @@ if [ "x$DISTRO" == "xubuntu" ]; then
         sudo /bin/bash -c "cat > /etc/unbound/unbound.conf.d/kubernetes.conf"
 else
     sudo yum clean all
+    sudo yum-config-manager --enable epel
     sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils tftp
     sudo yum install -y lvm2
