@@ -33,15 +33,15 @@ fi
 general_config $IP $base_distro $tunnel_interface > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-api-svc --version $VERSION \
+helm install kolla/ironic-api-svc --debug --version $VERSION \
     --namespace kolla --name ironic-api-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-create-keystone-service-job --version $VERSION \
+helm install kolla/ironic-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name ironic-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-create-keystone-user-job --version $VERSION \
+helm install kolla/ironic-create-keystone-user-job --debug --version $VERSION \
     --namespace kolla --name ironic-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -50,41 +50,41 @@ $DIR/tools/wait_for_pods.sh kolla
 helm delete --purge ironic-create-keystone-user
 helm delete --purge ironic-create-keystone-service
 
-helm install kolla/ironic-api-create-db-job --version $VERSION \
+helm install kolla/ironic-api-create-db-job --debug --version $VERSION \
     --namespace kolla --name ironic-api-create-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-api-manage-db-job --version $VERSION \
+helm install kolla/ironic-api-manage-db-job --debug --version $VERSION \
     --namespace kolla --name ironic-api-manage-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-api-create-keystone-endpoint-internal-job --version $VERSION \
+helm install kolla/ironic-api-create-keystone-endpoint-internal-job --debug --version $VERSION \
     --namespace kolla --name ironic-api-create-keystone-endpoint-internal \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-api-create-keystone-endpoint-admin-job --version $VERSION \
+helm install kolla/ironic-api-create-keystone-endpoint-admin-job --debug --version $VERSION \
     --namespace kolla --name ironic-api-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-api-create-keystone-endpoint-public-job --version $VERSION \
+helm install kolla/ironic-api-create-keystone-endpoint-public-job --debug --version $VERSION \
     --namespace kolla --name ironic-api-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-api-deployment --version $VERSION \
+helm install kolla/ironic-api-deployment --debug --version $VERSION \
     --namespace kolla --name ironic-api-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-conductor-daemonset --version $VERSION \
+helm install kolla/ironic-conductor-daemonset --debug --version $VERSION \
     --namespace kolla --name ironic-conductor-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/nova-compute-ironic-statefulset --version $VERSION \
+helm install kolla/nova-compute-ironic-statefulset --debug --version $VERSION \
     --namespace kolla --name nova-compute-ironic-statefulset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -93,15 +93,15 @@ $DIR/tools/wait_for_pods.sh kolla
 #
 # Deploying Ironic's Inspector
 #
-helm install kolla/ironic-inspector-svc --version $VERSION \
+helm install kolla/ironic-inspector-svc --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-inspector-create-keystone-service-job --version $VERSION \
+helm install kolla/ironic-inspector-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-inspector-create-keystone-user-job --version $VERSION \
+helm install kolla/ironic-inspector-create-keystone-user-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -110,35 +110,35 @@ $DIR/tools/wait_for_pods.sh kolla
 helm delete --purge ironic-inspector-create-keystone-user
 helm delete --purge ironic-inspector-create-keystone-service
 
-helm install kolla/ironic-inspector-create-db-job --version $VERSION \
+helm install kolla/ironic-inspector-create-db-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-inspector-manage-db-job --version $VERSION \
+helm install kolla/ironic-inspector-manage-db-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-manage-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-inspector-create-keystone-endpoint-internal-job --version $VERSION \
+helm install kolla/ironic-inspector-create-keystone-endpoint-internal-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-keystone-endpoint-internal \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-inspector-create-keystone-endpoint-admin-job --version $VERSION \
+helm install kolla/ironic-inspector-create-keystone-endpoint-admin-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-inspector-create-keystone-endpoint-public-job --version $VERSION \
+helm install kolla/ironic-inspector-create-keystone-endpoint-public-job --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/ironic-inspector-deployment --version $VERSION \
+helm install kolla/ironic-inspector-deployment --debug --version $VERSION \
     --namespace kolla --name ironic-inspector-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-dnsmasq-daemonset --version $VERSION \
+helm install kolla/ironic-dnsmasq-daemonset --debug --version $VERSION \
     --namespace kolla --name ironic-dnsmasq-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
