@@ -52,29 +52,29 @@ ceph_config > /tmp/ceph_config.yaml
 
 common_vars="kube_logger=false,base_distro=$base_distro"
 
-helm install kolla/mariadb --version $VERSION \
+helm install kolla/mariadb --debug --version $VERSION \
     --namespace kolla --name mariadb \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/memcached --version $VERSION \
+helm install kolla/memcached  --debug --version $VERSION \
     --namespace kolla --name memcached \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 wait_for_pods kolla mariadb,memcached running,succeeded
 
-helm install kolla/rabbitmq --version $VERSION \
+helm install kolla/rabbitmq --debug --version $VERSION \
     --namespace kolla --name rabbitmq \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 wait_for_pods kolla rabbitmq running,succeeded
 
-helm install kolla/keystone --version $VERSION \
+helm install kolla/keystone --debug --version $VERSION \
     --namespace kolla --name keystone \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 wait_for_pods kolla keystone running,succeeded
 
-helm install kolla/openvswitch --version $VERSION \
+helm install kolla/openvswitch --debug --version $VERSION \
     --namespace kolla --name openvswitch \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
@@ -101,19 +101,19 @@ $DIR/tests/bin/endpoint_test.sh
 [ -d "$WORKSPACE/logs" ] && openstack catalog list > \
     $WORKSPACE/logs/openstack-catalog-after-bootstrap.json || true
 
-helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
+helm install kolla/cinder-volume-ceph-statefulset --debug --version $VERSION \
     --namespace kolla --name cinder-volume-ceph-statefulset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/cinder-control --version $VERSION \
+helm install kolla/cinder-control --debug --version $VERSION \
     --namespace kolla --name cinder \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/glance --version $VERSION \
+helm install kolla/glance --debug --version $VERSION \
     --namespace kolla --name glance \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/neutron --version $VERSION \
+helm install kolla/neutron --debug --version $VERSION \
     --namespace kolla --name neutron \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
@@ -124,7 +124,7 @@ sudo ifconfig br-tenants up
 sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
                          | awk '{print $2}')/24
 
-helm install kolla/ironic --version $VERSION  --namespace kolla \
+helm install kolla/ironic --debug --version $VERSION  --namespace kolla \
     --name ironic \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
@@ -132,19 +132,19 @@ wait_for_pods kolla cinder,glance,neutron,ironic running,succeeded
 
 helm ls
 
-helm install kolla/nova-control --version $VERSION  --namespace kolla \
+helm install kolla/nova-control --debug --version $VERSION  --namespace kolla \
     --name nova-control \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/nova-compute --version $VERSION  --namespace kolla \
+helm install kolla/nova-compute --debug --version $VERSION  --namespace kolla \
     --name nova-compute \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/nova-compute-ironic --version $VERSION  --namespace kolla \
+helm install kolla/nova-compute-ironic --debug --version $VERSION  --namespace kolla \
     --name nova-compute-ironic \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/horizon --version $VERSION \
+helm install kolla/horizon --debug --version $VERSION \
     --namespace kolla --name horizon \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
