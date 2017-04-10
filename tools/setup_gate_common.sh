@@ -108,10 +108,6 @@ fi
 function setup_helm_common {
 tools/setup_helm.sh
 
-# FIXME removing stable repo as dep up gets refreshed way too frequently
-# before helm 2.3.x. https://github.com/kubernetes/helm/pull/2021
-helm repo remove stable
-
 tools/helm_build_all.sh ~/.helm/repository/kolla
 tools/helm_buildrepo.sh ~/.helm/repository/kolla 10192 kolla &
 helm update
