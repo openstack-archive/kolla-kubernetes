@@ -63,15 +63,15 @@ dependencies:
     repository: file://../../microservice/nova-placement-svc
     version: 0.6.0-1
     condition: global.kolla.nova.all.placement_api_enabled
-  - name: nova-placement-create-keystone-endpoint-internal
+  - name: nova-placement-create-keystone-endpoint-internal-job
     repository: file://../../microservice/nova-placement-create-keystone-endpoint-internal-job
     version: 0.6.0-1
     condition: global.kolla.nova.all.placement_api_enabled
-  - name: nova-placement-create-keystone-endpoint-admin
+  - name: nova-placement-create-keystone-endpoint-admin-job
     repository: file://../../microservice/nova-placement-create-keystone-endpoint-admin-job
     version: 0.6.0-1
     condition: global.kolla.nova.all.placement_api_enabled
-  - name: nova-placement-create-keystone-endpoint-public
+  - name: nova-placement-create-keystone-endpoint-public-job
     repository: file://../../microservice/nova-placement-create-keystone-endpoint-public-job
     version: 0.6.0-1
     condition: global.kolla.nova.all.placement_api_enabled

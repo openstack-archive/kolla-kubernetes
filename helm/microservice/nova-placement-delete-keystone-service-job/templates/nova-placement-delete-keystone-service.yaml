@@ -1,5 +1,5 @@
 {{- $searchPath := ":global.kolla.nova.placement_api.delete_keystone_service.job:global.kolla.nova.placement_api.delete_keystone_service.all:global.kolla.nova.placement_api.all:global.nova.kolla.all:global.kolla.all" }}
-{{- $resourceName := "placement-api-delete-keystone-service" }}
+{{- $resourceName := "nova-placement-api-delete-keystone-service" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}
 {{- $serviceName := "placement-api" }}
