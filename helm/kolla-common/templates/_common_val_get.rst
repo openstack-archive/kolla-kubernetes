@@ -30,7 +30,7 @@ Definition Description:
 
 Inputs:
   Values     - a dictionary tree to search.
-  searchPath - a dictionary or a string with ':' seperated doted paths to
+  searchPath - a dictionary or a string with ':' separated doted paths to
                crawl through Values
   key        - an optional string that is appended to each searchPath item.
 Outputs:
@@ -52,7 +52,7 @@ Definition Description:
 
 Inputs:
   Values     - a dictionary tree to search.
-  searchPath - a dictionary or a string with ':' seperated doted paths to
+  searchPath - a dictionary or a string with ':' separated doted paths to
                crawl through Values
   key        - an optional string that is appended to each searchPath item.
   retDict    - Dictionary to store returned value in.
