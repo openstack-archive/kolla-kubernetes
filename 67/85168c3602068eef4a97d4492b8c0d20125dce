@@ -1,0 +1,9 @@
+Code-Review+2: Steve Wilkerson <wilkers.steve@gmail.com>
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Workflow+1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 11 Apr 2017 02:43:15 +0000
+Reviewed-on: https://review.openstack.org/454375
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
