@@ -10,7 +10,6 @@ Contents:
    deployment-guide
    development-environment
    installation
-   host-setup
    kubernetes-setup
    general-quickstart
    multi-node
