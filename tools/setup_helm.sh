@@ -10,6 +10,13 @@ if [ ! -e ~/.kube/config ]; then
     sudo cat /etc/kubernetes/kubelet.conf > ~/.kube/config
 fi
 
+#
+# Overriding current helm binary with debug version
+# debug version will create a stack trace by using panic
+sudo curl -L https://raw.githubusercontent.com/jascott1/bins/master/helm/history_panic/_dist/linux-amd64/helm \
+          -o /usr/bin/helm
+sudo chmod +x /usr/bin/helm
+
 $DIR/pull_containers.sh kube-system
 $DIR/wait_for_pods.sh kube-system
 
