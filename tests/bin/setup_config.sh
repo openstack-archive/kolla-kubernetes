@@ -35,23 +35,6 @@ if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
 fi
 
 kolla-ansible/tools/generate_passwords.py
-kolla-ansible/tools/kolla-ansible genconfig
-
-# Testing ansible-in-k8s approach
-rm -rf /etc/kolla/neutron*
-rm -rf /etc/kolla/ceph*
-rm -rf /etc/kolla/keystone*
-rm -rf /etc/kolla/glance*
-rm -rf /etc/kolla/horizon*
-rm -rf /etc/kolla/nova*
-rm -rf /etc/kolla/memcached*
-rm -rf /etc/kolla/cinder*
-rm -rf /etc/kolla/rabbitmq*
-rm -rf /etc/kolla/heat*
-rm -rf /etc/kolla/mariadb*
-rm -rf /etc/kolla/ironic*
-rm -rf /etc/kolla/iscisi*
-rm -rf /etc/kolla/tgtd*
 
 ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
