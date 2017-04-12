@@ -1,0 +1,10 @@
+Code-Review+1: Sharath Rao <sharath.rao@ericsson.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Workflow+1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 12 Apr 2017 21:46:20 +0000
+Reviewed-on: https://review.openstack.org/456191
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
