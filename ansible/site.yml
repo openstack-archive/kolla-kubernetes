@@ -4,6 +4,7 @@
   connection: local
   roles:
     - rabbitmq
+    - mariadb
     - nova
     - neutron
     - keystone
