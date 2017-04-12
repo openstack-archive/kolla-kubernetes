@@ -47,6 +47,7 @@ rm -rf /etc/kolla/memcached*
 rm -rf /etc/kolla/cinder*
 rm -rf /etc/kolla/rabbitmq*
 rm -rf /etc/kolla/heat*
+rm -rf /etc/kolla/mariadb*
 
 ansible-playbook  -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
