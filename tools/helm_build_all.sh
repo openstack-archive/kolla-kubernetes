@@ -20,5 +20,13 @@ $DIR/helm_build_services.py "$REPODIR"
 $DIR/helm_prebuild_compute_kits.py
 $DIR/helm_build_compute_kits.py "$REPODIR"
 
+#FIXME this belongs elsewhere. Its just a test for now.
+D=/tmp/computekit-$$/
+mkdir -p $D
+tar -C $D --exclude "charts/*/kolla-common/templates/*" -xf "$REPODIR/compute-kit-0.6.0-1.tgz"
+pushd "$REPODIR"
+helm package "$D/compute-kit"
+popd
+
 helm repo index "$REPODIR"
 helm repo update
