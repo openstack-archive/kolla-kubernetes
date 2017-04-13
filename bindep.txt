@@ -19,8 +19,8 @@ dev-lang/python [platform:gentoo]
 # both here for documentary purpose.
 python3-all [platform:dpkg !platform:ubuntu-precise]
 python3-all-dev [platform:dpkg !platform:ubuntu-precise]
-python3-devel [platform:fedora]
-python34-devel [platform:centos]
+python34-devel [platform:rpm]
+python34-devel [platform:rpm]
 crudini
 jq
 openssl-devel [platform:rpm]
