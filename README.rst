@@ -64,7 +64,7 @@ workflow <http://docs.openstack.org/infra/manual/developers.html>`__.
    `Launchpad <https://launchpad.net/kolla-kubernetes>`__.
 -  Attend weekly
    `meetings <https://wiki.openstack.org/wiki/Meetings/Kolla>`__.
--  Contribute `code <https://git.openstack.org/openstack/kolla-kubernetes>`__.
+-  Contribute `code <https://git.openstack.org/cgit/openstack/kolla-kubernetes>`__.
 
 General Information
 ===================
