@@ -1,4 +1,7 @@
 dependencies:
+  - name: kolla-common
+    repository: file://../../kolla-common
+    version: 0.6.0-1
   - name: mariadb
     repository: file://../../service/mariadb
     version: 0.6.0-1
