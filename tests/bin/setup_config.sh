@@ -39,6 +39,7 @@ kolla-ansible/tools/kolla-ansible genconfig
 
 # Testing ansible-in-k8s approach
 rm -rf /etc/kolla/neutron*
+rm -rf /etc/kolla/ceph*
 rm -rf /etc/kolla/keystone*
 rm -rf /etc/kolla/glance*
 rm -rf /etc/kolla/horizon*
