@@ -271,7 +271,7 @@ Clone kolla-kubernetes::
 
     # apply a cherrypick that fixes kollakube tool
     cd kolla-kubernetes
-    git review -x 439740
+    git fetch git://git.openstack.org/openstack/kolla-kubernetes refs/changes/90/456890/1 && git cherry-pick FETCH_HEAD
     cd ..
 
 Install kolla-kubernetes::
