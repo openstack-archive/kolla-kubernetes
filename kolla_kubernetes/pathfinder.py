@@ -93,36 +93,47 @@ class PathFinder(object):
 
 
 # prioritize directories to search for /etc files
+# Search installation paths first
+# Then development paths
 CONFIG_SEARCH_PATHS = [
-    # Search installation paths first
     '/etc/kolla',
     '/etc/kolla-kubernetes',
-    # Then development paths
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla/etc/kolla')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 './etc/kolla-kubernetes')),
+                                 './etc/kolla-kubernetes'))
 ]
 
 # prioritize directories to search for kolla sources
+# Search installation paths first
+# Then search development paths
+# This has a terrible hack to work with the gate.  Sadly this is not
+# trivial to fix without said hack.  As this code is going bye-bye it
+# doesn't matter.
 KOLLA_SEARCH_PATHS = [
-    # Search installation paths first
-    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
-                                 './share/kolla')),
-    '/usr/share/kolla', '/usr/local/share/kolla',
-    # Then search development paths
+    '/usr/share/kolla',
+    '/usr/local/share/kolla',
+    '/usr/share/kolla-ansible',
+    '/usr/local/share/kolla-ansible',
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  'kolla')),
+    os.path.abspath(os.path.join(PathFinder.find_development_root(),
+                                 '../kolla-ansible')),
+    os.path.abspath(os.path.join(PathFinder.find_development_root(),
+                                 'kolla-ansible')),
+    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
+                                 './share/kolla'))
 ]
 
 # prioritize directories to search for kolla-kubernetes sources
+# Search installation paths first
+# Then search development paths
 KOLLA_KUBERNETES_SEARCH_PATHS = [
-    # Search installation paths first
+    '/usr/share/kolla-kubernetes',
+    '/usr/local/share/kolla-kubernetes',
     os.path.abspath(os.path.join(PathFinder.find_installed_root(),
                                  './share/kolla-kubernetes')),
-    '/usr/share/kolla-kubernetes', '/usr/local/share/kolla-kubernetes',
-    # Then search development paths
-    os.path.abspath(os.path.join(PathFinder.find_development_root())),
+    os.path.abspath(os.path.join(PathFinder.find_development_root())
 ]
