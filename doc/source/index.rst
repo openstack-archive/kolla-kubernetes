@@ -8,7 +8,6 @@ Contents:
 
    contributing
    deployment-guide
-   development-environment
    multi-node
    private-registry
    running-tests
