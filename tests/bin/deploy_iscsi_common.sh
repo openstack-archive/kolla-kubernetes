@@ -526,14 +526,18 @@ helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
 
 $DIR/tools/wait_for_pods.sh kolla
 
-helm install kolla/nova-api-create-simple-cell-job --debug --version $VERSION \
+helm install kolla/nova-api-create-simple-cell-job --version $VERSION \
     --namespace kolla --name nova-api-create-simple-cell-job \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
+
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
 #kollakube res create pod keepalived
 
-kollakube res delete bootstrap openvswitch-set-external-ip
+#kollakube res delete bootstrap openvswitch-set-external-ip
 }
