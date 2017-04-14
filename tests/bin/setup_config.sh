@@ -34,7 +34,7 @@ if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
     echo 'enable_placement: "no"' >> kolla-ansible/etc/kolla/globals.yml
 fi
 
-kolla-ansible/tools/generate_passwords.py
+kolla-kubernetes/tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
 # Testing ansible-in-k8s approach

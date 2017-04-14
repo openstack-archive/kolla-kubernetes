@@ -288,7 +288,7 @@ Copy default kolla-kubernetes configuration to /etc::
 
 Generate default passwords via SPRNG::
 
-    sudo kolla-genpwd
+    sudo kolla-kubernetes-genpwd
 
 Create a kubernetes namespace to isolate this kolla deployment::
 
