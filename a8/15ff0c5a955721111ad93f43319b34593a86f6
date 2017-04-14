@@ -1,0 +1,10 @@
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review-1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Steven Dake <stdake@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 14 Apr 2017 23:58:20 +0000
+Reviewed-on: https://review.openstack.org/449790
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
