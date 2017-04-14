@@ -79,8 +79,6 @@ helm install kolla/keystone-internal-svc --version $VERSION \
       --set $common_vars,type=network,selector_key=kolla_controller \
       --namespace kolla --name openvswitch-vswitchd-network
 
-kollakube res create bootstrap openvswitch-set-external-ip
-
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
@@ -517,12 +515,25 @@ helm install kolla/nova-compute-daemonset --version $VERSION \
     --namespace kolla --name nova-compute-daemonset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-#kollakube res create pod keepalived
-
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
-kollakube res delete bootstrap openvswitch-set-external-ip
+#
+# keepalived debugging
+#
+sudo ifconfig -a br-ex
+sudo ifconfig br-ex up
+sudo ifconfig br-ex 172.18.0.254/24
+sudo ifconfig -a br-ex
+
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
+sudo ifconfig -a br-ex
+ping -c 20 -i 1 172.18.0.1 || true
+#
+# End keepalived debug
+#
