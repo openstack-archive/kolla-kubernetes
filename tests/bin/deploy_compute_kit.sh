@@ -98,7 +98,10 @@ helm install kolla/compute-kit --version $VERSION \
 
 $DIR/tools/wait_for_pods.sh kolla 900
 
-kollakube res create bootstrap openvswitch-set-external-ip
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 
