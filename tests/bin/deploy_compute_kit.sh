@@ -98,9 +98,25 @@ helm install kolla/compute-kit --version $VERSION \
 
 $DIR/tools/wait_for_pods.sh kolla 900
 
-kollakube res create bootstrap openvswitch-set-external-ip
-$DIR/tools/pull_containers.sh kolla
+#
+# keepalived debugging
+#
+sudo ifconfig -a br-ex
+sudo ifconfig br-ex up
+sudo ifconfig br-ex 172.18.0.254/24
+sudo ifconfig -a br-ex
+
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 $DIR/tools/wait_for_pods.sh kolla
+
+sudo ifconfig -a br-ex
+ping -c 20 -i 1 172.18.0.1 || true
+#
+# End keepalived debug
+#
 
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
