@@ -4,6 +4,12 @@
 Kolla Kubernetes Development Environment
 ==========================================
 
+.. warning::
+
+   The development environment guide is outdated.  It no longer
+   works with Kubernetes master.  We are debating what to do about that
+   but until that time, please use the deployment guide for development.
+
 Overview
 ========
 
