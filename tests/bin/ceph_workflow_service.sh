@@ -8,24 +8,12 @@ branch="$3"
 IP=${4:-172.18.0.1}
 tunnel_interface=${5:-docker0}
 
-# Break out devenv behavior since we will use different polling logic
-# and we also assume ceph-multi use in the devenv
-devenv=false
-if [ "x$gate_job" == "xdevenv" ]; then
-    devenv=true
-    gate_job="ceph-multi"
-fi
-
 . "$DIR/tests/bin/common_workflow_config.sh"
 . "$DIR/tests/bin/common_ceph_config.sh"
 
 function wait_for_pods {
-    if [ "$devenv" = true ]; then
-        $DIR/tools/wait_for_pods.py $1 $2 $3
-    else
-        $DIR/tools/pull_containers.sh $1
-        $DIR/tools/wait_for_pods.sh $1
-    fi
+    $DIR/tools/pull_containers.sh $1
+    $DIR/tools/wait_for_pods.sh $1
 }
 
 function general_config {
@@ -84,13 +72,8 @@ kollakube res create bootstrap openvswitch-set-external-ip
 
 wait_for_pods kolla openvswitch-set-external succeeded
 
-if [ "$devenv" = true ]; then
-    $DIR/tools/build_local_admin_keystonerc.sh ext
-    . ~/keystonerc_admin
-else
-    $DIR/tools/build_local_admin_keystonerc.sh
-    . ~/keystonerc_admin
-fi
+$DIR/tools/build_local_admin_keystonerc.sh
+. ~/keystonerc_admin
 
 [ -d "$WORKSPACE/logs" ] &&
 kubectl get jobs -o json > $WORKSPACE/logs/jobs-after-bootstrap.json \
