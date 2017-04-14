@@ -269,11 +269,6 @@ Clone kolla-kubernetes::
 
     git clone http://github.com/openstack/kolla-kubernetes
 
-    # apply a cherrypick that fixes kollakube tool
-    cd kolla-kubernetes
-    git review -x 439740
-    cd ..
-
 Install kolla-kubernetes::
 
     sudo pip install -U kolla-ansible/ kolla-kubernetes/
