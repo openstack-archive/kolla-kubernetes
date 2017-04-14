@@ -19,6 +19,8 @@ common:
                     container_config_directory: /var/lib/kolla/config_files
                     kubernetes_entrypoint: false
                     resolve_conf_net_host_workaround: true
+                    kolla_kubernetes_external_vip: 172.18.0.1
+                    kolla_kubernetes_external_subnet: 24
                     kube_logger: true
 
 common-mariadb:
@@ -292,6 +294,13 @@ openvswitch-vswitchd-daemonset:
                         add_port: false
                         ext_bridge_name: br-ex
                         ext_interface_name: eth1
+
+keepalived-daemonset:
+        global:
+            kolla:
+                keepalived:
+                    all:
+                        api_interface: br-ex 
 
 rabbitmq-init-element-job:
         global:
