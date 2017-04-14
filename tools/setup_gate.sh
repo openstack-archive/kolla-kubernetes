@@ -31,7 +31,7 @@ if [ "x$4" == "xiscsi" ]; then
 fi
 
 if [ "x$4" == "xhelm-operator" ]; then
-    echo "Not yet implemented..."  $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    echo "Not yet implemented..."  "$CONFIG" "$DISTRO" "$BRANCH"
     exit 1
 fi
 
