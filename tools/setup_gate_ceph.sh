@@ -38,6 +38,9 @@ tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
+# Setting up Helm
+setup_helm_common
+
 #
 # Setting up networking on master, before slave nodes in multinode
 # scenario will attempt to join the cluster
@@ -94,9 +97,6 @@ tools/pull_containers.sh kube-system
 tools/wait_for_pods.sh kube-system
 
 tools/test_kube_dns.sh
-
-# Setting up Helm
-setup_helm_common
 
 tools/build_example_yaml.py
 
