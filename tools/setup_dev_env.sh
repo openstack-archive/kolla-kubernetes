@@ -24,7 +24,7 @@ ceph_setup () {
 }
 
 config_setup () {
-    kolla-ansible/tools/generate_passwords.py
+    kolla-kubernetes/tools/secret-generator.py
     kolla-ansible/tools/kolla-ansible genconfig
 
     crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
