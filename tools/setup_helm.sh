@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
@@ -10,7 +10,20 @@ if [ ! -e ~/.kube/config ]; then
     sudo cat /etc/kubernetes/kubelet.conf > ~/.kube/config
 fi
 
-$DIR/pull_containers.sh kube-system
-$DIR/wait_for_pods.sh kube-system
+sudo curl -o /usr/bin/helm-init https://raw.githubusercontent.com/jascott1/bins/master/helm/nethost/_dist/linux-amd64/helm
+sudo chmod +x /usr/bin/helm-init
 
-helm init
+helm-init init --host-net
+
+set +e
+end=$(date +%s)
+end=$((end + 120))
+while true; do
+    helm ls > /dev/null 2>&1
+    [ $? -eq 0 ] && break
+    sleep 1
+    now=$(date +%s)
+    [ $now -gt $end ] && echo Helm failed to init. && \
+        exit -1
+done
+set -e
