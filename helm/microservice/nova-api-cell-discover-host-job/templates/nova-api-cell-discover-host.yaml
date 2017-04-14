@@ -1,0 +1,52 @@
+{{- $searchPath := ":global.kolla.nova.api.cell_discover_host.job:global.kolla.nova.api.cell_discover_host.all:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "nova-api" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $resourceName := "nova-api" }}
+{{- $serviceName := "nova-api" }}
+{{- $podTypeBootstrap := true }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "nova-api-cell-discover-host"
+spec:
+  template:
+    spec:
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      restartPolicy: OnFailure
+      containers:
+        - image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: "main"
+          volumeMounts:
+{{ include "common_volume_mounts" . | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: service-configmap
+              readOnly: true
+          env:
+            - name: KOLLA_KUBERNETES
+              value: ""
+            - name: KOLLA_BOOTSTRAP
+              value: ""
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ONCE"
+          command: [
+              "bash",
+              "-ce",
+              "/bin/cp -aLf {{ $containerConfigDirectory }}/..data/nova.conf /etc/nova/nova.conf;
+               nova-manage cell_v2 discover_hosts;
+              "]
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: service-configmap
+          configMap:
+            name: {{ .serviceName }}
+{{- end }}

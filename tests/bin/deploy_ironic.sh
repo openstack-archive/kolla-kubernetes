@@ -144,4 +144,9 @@ helm install kolla/ironic-dnsmasq-daemonset --version $VERSION \
 
 $DIR/tools/wait_for_pods.sh kolla
 
+helm install kolla/nova-api-cell-discover-host-job --debug --version $VERSION \
+    --namespace kolla --name nova-api-cell-discover-host-job \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
 }
