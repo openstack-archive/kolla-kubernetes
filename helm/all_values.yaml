@@ -293,6 +293,13 @@ openvswitch-vswitchd-daemonset:
                         ext_bridge_name: br-ex
                         ext_interface_name: eth1
 
+keepalived-daemonset:
+        global:
+            kolla:
+                keepalived:
+                    all:
+                        api_interface: br-ex 
+
 rabbitmq-init-element-job:
         global:
             element_name: rabbitmq

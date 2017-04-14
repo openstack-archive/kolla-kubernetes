@@ -1,0 +1,11 @@
+apiVersion: v1
+version: 0.6.0-1
+description: keepalived microservice chart
+name: keepalived-daemonset
+keywords:
+  - openstack
+  - keepalived
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
