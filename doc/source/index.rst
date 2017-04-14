@@ -14,14 +14,6 @@ Contents:
    usage
    running-tests
 
-Kolla-Kubernetes Services
-=========================
-
-.. toctree::
-   :maxdepth: 1
-
-   memcached-guide
-
 Indices and tables
 ==================
 
