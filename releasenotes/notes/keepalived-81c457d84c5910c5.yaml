@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds helm chart for keepalived.

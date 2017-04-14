@@ -517,6 +517,10 @@ helm install kolla/nova-compute-daemonset --version $VERSION \
     --namespace kolla --name nova-compute-daemonset \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
 #kollakube res create pod keepalived
 
 $DIR/tools/pull_containers.sh kolla
