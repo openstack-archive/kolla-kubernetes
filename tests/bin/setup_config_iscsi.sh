@@ -23,7 +23,7 @@ fi
 cat tests/conf/iscsi-all-in-one/kolla_kubernetes_config \
     >> etc/kolla-kubernetes/kolla-kubernetes.yml
 
-kolla-ansible/tools/generate_passwords.py
+tools/generate_passwords.py
 kolla-ansible/tools/kolla-ansible genconfig
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu

@@ -34,8 +34,10 @@ if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
     echo 'enable_placement: "no"' >> kolla-ansible/etc/kolla/globals.yml
 fi
 
-kolla-ansible/tools/generate_passwords.py
+# Generate passwords using SPRNG tool
+tools/generate_passwords.py
 
+# Generate configuration based upon defaults and overrides
 ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
 
