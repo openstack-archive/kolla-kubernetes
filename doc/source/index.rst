@@ -11,7 +11,6 @@ Contents:
    development-environment
    multi-node
    private-registry
-   usage
    running-tests
 
 Indices and tables
