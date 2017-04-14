@@ -1,0 +1,113 @@
+{{- $restype := .Values.type }}
+{{- $searchPath := ":global.kolla.keepalived.daemonset:global.kolla.keepalived.all:global.kolla.all" }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "keepalived" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $resourceName := "keepalived" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $apiInterface := include "kolla_val_get_str" (dict "key" "api_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $kollaKubernetesExternalVIP := include "kolla_val_get_str" (dict "key" "kolla_kubernetes_external_vip" "searchPath" $searchPath "Values" .Values ) }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: keepalived
+  labels:
+    component: keepalived
+    system: keepalived
+spec:
+  template:
+    metadata:
+      labels:
+        component: keepalived
+        system: keepalived
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+             "name": "initialize-keepalived",
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  API_INTERFACE={{ $apiInterface }};
+                  F=/var/lib/kolla-kubernetes/keepalived/api_interface;
+                  [ -f $F ] && API_INTERFACE=$(<$F);
+                  sed -i ''s|interface.*|interface ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+                  sed -i ''s|\\(dev*\\).*|\\1 ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+                  cat /srv/pod-main-config/keepalived.conf;
+                 "],
+             "volumeMounts": [
+                 {
+                     "name": "keepalived-configmap",
+                     "mountPath": "/srv/configmap"
+                 },
+                 {
+                     "name": "pod-main-config",
+                     "mountPath": "/srv/pod-main-config"
+                 },
+                 {
+                     "name": "host-var-lib-kk",
+                     "mountPath": "/var/lib/kolla-kubernetes"
+                 }
+             ]
+          }
+        ]'
+    spec:
+      hostNetwork: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: main
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - |
+                  sudo ifconfig {{ $apiInterface }} delete {{ $kollaKubernetesExternalVIP }};
+                  kill -HUP $(</var/run/keepalived.pid);
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: pod-main-config
+            - mountPath: /var/run
+              name: keepalived-run
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: true
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: pod-main-config
+          emptyDir: {}
+        - name: keepalived-run
+          hostPath:
+            path: /var/run
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: keepalived-configmap
+          configMap:
+            name: keepalived
+        - name: host-var-lib-kk
+          hostPath:
+            path: /var/lib/kolla-kubernetes
+{{- end }}
