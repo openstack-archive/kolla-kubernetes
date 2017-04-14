@@ -135,7 +135,7 @@ Firstly install Vagrant:
 .. code-block:: console
 
     sudo apt-get update
-    # Note that theres is a packaging bug in ubuntu so the upstream package must
+    # Note that there is a packaging bug in ubuntu so the upstream package must
     # be used: https://github.com/vagrant-libvirt/vagrant-libvirt/issues/575
     curl -L https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb > /tmp/vagrant_1.8.1_x86_64.deb
     sudo apt-get -y install /tmp/vagrant_1.8.1_x86_64.deb
