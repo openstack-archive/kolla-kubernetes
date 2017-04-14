@@ -1,0 +1,1 @@
+../kolla_kubernetes/commands/genpwd.py
