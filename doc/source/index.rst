@@ -1,10 +1,11 @@
-Welcome to kolla-kubernetes's documentation
-===========================================
+Welcome to kolla-kubernetes's documentation!
+============================================
 
-Contents:
+Contents
+========
 
 .. toctree::
-   :maxdepth:1
+   :maxdepth: 1
 
    contributing
    deployment-guide
