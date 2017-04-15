@@ -19,7 +19,7 @@ api_workers = {{ openstack_service_workers }}
 
 {% if service_name == 'ironic-conductor' %}
 [conductor]
-api_url = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ ironic_api_port }}
+api_url = {{ internal_protocol }}://ironic-api:{{ ironic_api_port }}
 automated_clean=false
 {% endif %}
 
