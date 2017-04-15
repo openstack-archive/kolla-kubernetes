@@ -5,6 +5,7 @@
   roles:
     - rabbitmq
     - mariadb
+    - iscsi
     - ceph
     - nova
     - neutron
