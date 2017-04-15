@@ -24,7 +24,7 @@ cat tests/conf/iscsi-all-in-one/kolla_kubernetes_config \
     >> etc/kolla-kubernetes/kolla-kubernetes.yml
 
 tools/generate_passwords.py
-kolla-ansible/tools/kolla-ansible genconfig
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
 crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
