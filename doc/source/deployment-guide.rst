@@ -498,17 +498,6 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
 
-Start some 4.0.0 charts related to the placement API required that are not
-yet in service charts::
-
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-deployment --namespace kolla --name nova-placement-deployment --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-user-job --namespace kolla --name nova-placement-create-keystone-user-job --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-service-job --namespace kolla --name nova-placement-create-keystone-service-job --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-svc --namespace kolla --name nova-placement-svc --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-internal-job --namespace kolla --name nova-placement-create-keystone-endpoint-internal --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-admin-job --namespace kolla --name nova-placement-create-keystone-endpoint-admin --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-placement-create-keystone-endpoint-public-job --namespace kolla --name nova-placement-create-keystone-endpoint-public --values ./cloud.yaml
-
 Wait for nova-compute the enter the running state before creating the cell0
 database::
 
@@ -614,7 +603,6 @@ To delete all helm charts::
     helm delete nova-control --purge
     helm delete nova-compute --purge
     helm delete nova-cell0-create-db-job --purge
-    helm delete nova-placement-deployment --purge
     helm delete cinder-volume-lvm --purge
 
 To clean up the host volumes between runs::
