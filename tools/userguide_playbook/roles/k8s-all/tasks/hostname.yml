@@ -1,0 +1,8 @@
+---
+
+- name: Add hostname to /etc/hosts
+  replace:
+    dest: /etc/hosts
+    regexp: 'localhost'
+    replace: 'localhost {{ inventory_hostname }}'
+  become: True

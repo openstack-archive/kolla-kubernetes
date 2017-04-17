@@ -1,0 +1,21 @@
+---
+
+- name: Kubeadm init
+  become: True
+  command: kubeadm init --pod-network-cidr="{{ pod_cidr }}" --service-cidr="{{ service_cidr }}" --token {{ token }} --apiserver-advertise-address={{ api_advertise_ip }}
+  register: kubeadm_init_out
+
+- name: Log Kubeadm init
+  debug: msg="{{ kubeadm_init_out }}"
+
+- name: Creates directory
+  file: path=.kube state=directory
+
+# Note ansible `copy` doesn't work here because of root privilege required for /etc
+-  name: Copy admin.conf to ~/.kube/config
+   command: cp /etc/kubernetes/admin.conf /home/{{ username }}/.kube/config
+   become: True
+
+- name: Chown .kube/config
+  become: True
+  command: chown -R {{ username }}:{{ username }} /home/{{ username }}/.kube/

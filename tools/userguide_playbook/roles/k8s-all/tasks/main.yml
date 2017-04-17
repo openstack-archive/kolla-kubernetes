@@ -1,0 +1,12 @@
+---
+
+- include: python.yml
+
+- include: disable-security.yml
+
+- include: hostname.yml
+
+- include: k8s-deps.yml
+
+- include: k8s-config.yml
+
