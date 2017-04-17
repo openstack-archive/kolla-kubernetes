@@ -291,6 +291,7 @@ openvswitch-vswitchd-daemonset:
                         setup_bridge: true
                         add_port: false
                         ext_bridge_name: br-ex
+                        ext_bridge_up: false
                         ext_interface_name: eth1
 
 rabbitmq-init-element-job:
