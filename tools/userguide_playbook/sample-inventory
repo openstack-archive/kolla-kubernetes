@@ -1,0 +1,21 @@
+[kube-masters]
+k8s-master ansible_ssh_host=192.168.1.128
+
+[etcd]
+k8s-master ansible_ssh_host=192.168.1.128
+
+[kube-workers]
+k8s-node-0 ansible_ssh_host=192.168.1.129
+k8s-node-1 ansible_ssh_host=192.168.1.126
+k8s-node-2 ansible_ssh_host=192.168.1.127
+
+[k8s-cluster:children]
+kube-workers
+kube-masters
+
+[k8s-cluster:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=<path to your ssh key>
+
+[kube-control]
+k8s-master

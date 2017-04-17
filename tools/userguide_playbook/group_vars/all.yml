@@ -1,0 +1,33 @@
+---
+# general
+
+## the default for become_user operations (typically ubuntu on ubuntu)
+username: "{{ ansible_user }}"
+## Taint master- and label master as kolla-worker
+master_works: True
+
+# kube
+token: c2d386.f79b2b89b6138441
+pod_cidr: 10.1.0.0/16
+service_cidr: 10.3.3.0/24
+## node .10 of service_cidr (10.3.3.10)
+kube_dns_ip: 10.3.3.10
+## typically change this to your master's eth0 ip
+api_advertise_ip: 10.0.0.17
+kube_version: 1.6.2
+
+# canal
+canal_dns_ip: 10.3.3.100
+canal_pod_network: 10.1.0.0
+
+# kolla
+base_distro: "centos"
+install_type: "source"
+## change this to eth0 equivalent
+management_iface: ens3
+management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
+## a second interface for neutron, typically without an ip
+neutron_iface: ens4
+external_vip: 192.168.7.105
+dns_name: 192.168.7.105
+cinder_lvm_ip: 192.168.7.105

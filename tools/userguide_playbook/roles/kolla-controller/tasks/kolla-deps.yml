@@ -1,0 +1,52 @@
+---
+
+# Kolla-Kubernetes Dependencies
+
+- name: Install kolla-k8s deps [Debian]
+  package: name={{item}} state=latest
+  become: True
+  with_items:
+    - ansible
+    - python-pip
+    - python-dev
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Install EPEL [RedHat]
+  yum:
+    package: "{{item}}"
+    state: present
+    update_cache: True
+  with_items:
+    - epel-release
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Install kolla-k8s deps [RedHat]
+  yum:
+    package: "{{item}}"
+    state: present
+    update_cache: True
+  with_items:
+    - epel-release
+    - ansible
+    - python-pip
+    - python-devel
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Clone kolla-ansible
+  git:
+    repo: 'http://github.com/openstack/kolla-ansible'
+    dest: /home/{{ username }}/kolla-ansible
+
+- name: Clone kolla-kubernetes
+  git:
+    repo: 'http://github.com/openstack/kolla-kubernetes'
+    dest: /home/{{ username }}/kolla-kubernetes
+
+- name: Install kolla-kubernetes
+  become: True
+  command: sudo pip install -U /home/{{ username }}/kolla-ansible/ /home/{{ username }}/kolla-kubernetes/

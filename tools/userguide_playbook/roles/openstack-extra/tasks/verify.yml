@@ -1,0 +1,5 @@
+#- name: Bootstrap the cloud envrionment and create a VM as requested
+# kolla-ansible/tools/init-runonce
+
+#- name: Create a floating IP address and add to the VM
+# openstack server add floating ip demo1 $(openstack floating ip create public1 -f value -c floating_ip_address)
