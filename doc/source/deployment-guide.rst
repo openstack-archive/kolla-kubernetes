@@ -294,6 +294,14 @@ Label the AIO node as the compute and controller node::
     kubectl label node $(hostname) kolla_compute=true
     kubectl label node $(hostname) kolla_controller=true
 
+.. warning:
+
+    The kolla-kubernetes deliverable has two configuraiton files.  This is a little
+    clunky and we know about the problem :)  We are working on getting all configuraiton
+    into cloud.yaml. Until that is fixed the variable in globals.yaml `kolla_install_type`
+    must have the same contents as the variable in cloud.yaml `install_type`. In this
+    document we use the setting `source` although `binary` could also be used.
+
 Modify kolla configuration::
 
     set network_interface in /etc/kolla/globals.yaml to the management interface name.
@@ -304,7 +312,7 @@ Modify kolla configuration::
 Add required configuration to the end of /etc/kolla/globals.yml::
 
     cat <<EOF > add-to-globals.yml
-    install_type: "source"
+    kolla_install_type: "source"
     tempest_image_alt_id: "{{ tempest_image_id }}"
     tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
 
