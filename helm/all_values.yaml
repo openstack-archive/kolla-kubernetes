@@ -290,6 +290,7 @@ openvswitch-vswitchd-daemonset:
                     all:
                         setup_bridge: true
                         add_port: false
+                        interface_up: false
                         ext_bridge_name: br-ex
                         ext_interface_name: eth1
 

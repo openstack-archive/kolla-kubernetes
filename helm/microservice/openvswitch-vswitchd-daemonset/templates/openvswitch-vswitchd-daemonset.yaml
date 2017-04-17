@@ -77,6 +77,9 @@ spec:
 {{- if $localVals.add_port }}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }} {{ $extInterfaceName }};
 {{- end }}
+{{- if $localVals.interface_up }}
+              ip link set {{ $extBridgeName }} up;
+{{- end }}
 {{- end }}
                   echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
              "volumeMounts": [

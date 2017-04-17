@@ -44,4 +44,7 @@ function common_workflow_config {
     echo "      external_vip: $IP"
     echo "      base_distro: $base_distro"
     echo "      tunnel_interface: $tunnel_interface"
+    echo "    openvswitch:"
+    echo "      all:"
+    echo "        interface_up: true"
 }
