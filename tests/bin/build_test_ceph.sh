@@ -88,8 +88,19 @@ wait_for_ceph_bootstrap kolla
 
 helm delete --purge test-ceph-init-osd0-job
 helm delete --purge test-ceph-init-osd1-job
-kollakube res create pod ceph-osd0
-kollakube res create pod ceph-osd1
+
+helm install kolla/test-ceph-osd-pod --version $VERSION \
+    --namespace kolla \
+    --name ceph-osds0 \
+    --values /tmp/general_config.yaml \
+    --values /tmp/ceph_config.yaml \
+    --set index=0
+helm install kolla/test-ceph-osd-pod --version $VERSION \
+    --namespace kolla \
+    --name ceph-osds0 \
+    --values /tmp/general_config.yaml \
+    --values /tmp/ceph_config.yaml \
+    --set index=1
 
 $DIR/tools/wait_for_pods.sh kolla
 
