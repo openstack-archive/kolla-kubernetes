@@ -1,0 +1,85 @@
+---
+
+- name: "Install python2 and python-simplejson"
+  become: True
+  raw: "yum install -y python python-simplejson || (apt-get update && apt-get install -y python2.7 python-simplejson)"
+
+- name: Gather facts
+  setup:
+
+- name: Add hostname to /etc/hosts
+  replace:
+    dest: /etc/hosts
+    regexp: 'localhost'
+    replace: 'localhost {{ inventory_hostname }}'
+
+- name: Install ubuntu ca certs
+  package: name={{item}} state=latest
+  become: True
+  with_items:
+    - ca-certificates
+    - apt-transport-https
+  when:
+    - ansible_os_family == 'Debian'
+
+
+- apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: Install google cloud apt gpg key
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+  become: True
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_distribution == 'Ubuntu'
+
+- name: Install k8s components
+  apt:
+    name: "{{ item }}"
+    state: present
+    allow_unauthenticated: yes
+    update_cache: True
+  with_items:
+    - docker.io
+    - kubelet
+    - kubeadm
+    - kubectl
+    - kubernetes-cni
+    - ebtables
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Enable and start docker
+  systemd: name=docker state=started enabled=yes
+
+- name: Disable cri and set Cgroup Driver
+  replace:
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: 'KUBELET_KUBECONFIG_ARGS='
+    replace: 'KUBELET_KUBECONFIG_ARGS=--cgroup-driver=cgroupfs --enable-cri=false '
+# CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
+
+- name: Replace DNS IP
+  replace:
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '10.96.0.10'
+    replace: '10.3.3.10'
+
+
+- name: reload systemd
+  become: True
+  command: systemctl daemon-reload
+
+- name: Stop kubelet
+  systemd: name=kubelet state=stopped
+
+- name: Enable and start kubelet
+  systemd: name=kubelet state=started enabled=yes
+
+
+
+
+

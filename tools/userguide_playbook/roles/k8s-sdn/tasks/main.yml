@@ -1,0 +1,30 @@
+---
+
+- name: Get canal.yaml
+  get_url:
+    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml
+    dest: /tmp/canal.yaml
+    mode: 0664
+
+- name: Replace canal network IP
+  replace:
+    destfile: /tmp/canal.yaml
+    regexp: '192.168.0.0'
+    replace: '10.1.0.0'
+
+- name: Replace canal DNS IP
+  replace:
+    destfile: /tmp/canal.yaml
+    regexp: '10.96.232.136'
+    replace: '10.3.3.100'
+
+- name: Kubectl apply canal
+  become: True
+  become_user: ubuntu
+  command: sudo kubectl apply -f /tmp/canal.yaml
+
+
+#curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml -o canal.yaml
+#sed -i "s@192.168.0.0/16@10.1.0.0/16@" canal.yaml
+#sed -i "s@10.96.232.136@10.3.3.100@" canal.yaml
+#kubectl apply -f canal.yaml

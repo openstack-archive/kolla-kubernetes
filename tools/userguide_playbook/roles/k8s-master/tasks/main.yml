@@ -1,0 +1,31 @@
+---
+
+- name: Kubeadm init
+  become: True
+  command: kubeadm init --pod-network-cidr=10.1.0.0/16 --service-cidr=10.3.3.0/24 --apiserver-advertise-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} --token {{ token }}
+  register: kubeadm_init_out
+
+- name: Log Kubeadm init
+  debug: msg="{{ kubeadm_init_out }}"
+
+- name: Creates directory
+  file: path=/home/ubuntu/.kube state=directory
+
+# TODO use ansible copy, use ansible vars for home
+- name: Copy admin.conf to ~/.kube/config
+  become: True
+  command: cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+
+# TODO use ansible vars for user, group and home
+- name: Chown .kube/config
+  become: True
+  command: chown ubuntu:ubuntu /home/ubuntu/.kube/config
+
+
+#mkdir -p $HOME/.kube
+#sudo -H cp /etc/kubernetes/admin.conf $HOME/.kube/config
+#sudo -H chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+
+

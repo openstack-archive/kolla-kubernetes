@@ -1,0 +1,26 @@
+---
+
+- hosts: all
+  gather_facts: false
+  become: yes
+  roles:
+    - k8s-all
+
+- hosts: kube-masters
+  gather_facts: false
+  become: yes
+  roles:
+    - k8s-master
+    - k8s-sdn
+
+- hosts: kube-workers
+  gather_facts: false
+  become: yes
+  roles:
+    - k8s-join
+
+- hosts: kube-masters
+  gather_facts: true
+  become: yes
+  roles:
+    - kolla-controller

@@ -1,0 +1,6 @@
+---
+- name: Join nodes to cluster
+  become: True
+  command: kubeadm join --token {{ token }} {{ hostvars[groups['kube-masters'][0]]['ansible_ssh_host']  }}:6443
+
+# kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
