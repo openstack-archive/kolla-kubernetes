@@ -1,0 +1,13 @@
+name: test-ceph-osd-pod
+version: 0.6.0-1 #FIXME make this changable
+description: ceph-osd pod for kolla-kubernetes
+keywords:
+  - openstack
+  - test
+  - ceph
+  - osd
+  - pod
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
