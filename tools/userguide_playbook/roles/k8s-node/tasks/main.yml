@@ -1,0 +1,8 @@
+---
+
+# TODO test and enable
+- name: Join nodes to cluster
+  become: True
+  become_user: "{{ username }}"
+  command: sudo kubeadm join --token {{ token }} {{ api_advertise_ip }}:6443
+

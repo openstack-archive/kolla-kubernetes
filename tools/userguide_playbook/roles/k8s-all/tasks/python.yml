@@ -1,0 +1,5 @@
+---
+
+- name: "Install python2 and python-simplejson"
+  become: True
+  raw: "yum install -y python python-simplejson || (apt-get update && apt-get install -y python2.7 python-simplejson)"

@@ -1,0 +1,77 @@
+---
+
+# Deps
+
+## Ubuntu
+- name: Install ca certs [Debian]
+  package: name={{item}} state=latest
+  become: True
+  with_items:
+    - ca-certificates
+    - apt-transport-https
+  when:
+    - ansible_os_family == 'Debian'
+
+
+- apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  become: True
+  when:
+      - ansible_os_family == 'Debian'
+
+- name: Install google cloud apt gpg key [Debian]
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+  become: True
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Install k8s components [Debian]
+  apt:
+    name: "{{ item }}"
+    state: present
+    allow_unauthenticated: yes
+    update_cache: True
+  become: True
+  with_items:
+    - docker.io
+    - kubelet={{ kube_version }}-00
+    - kubeadm={{ kube_version }}-00
+    - kubectl={{ kube_version }}-00
+    - kubernetes-cni
+    - ebtables
+  when:
+    - ansible_os_family == 'Debian'
+
+## CentOS
+- yum_repository:
+    name: kubernetes
+    description: Kubernetes repo
+    baseurl: http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
+    state: present
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    gpgcheck: no
+    repo_gpgcheck: yes
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Install k8s components [RedHat]
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: True
+  with_items:
+    - docker
+    - kubelet-{{ kube_version }}
+    - kubeadm-{{ kube_version }}
+    - kubectl-{{ kube_version }}
+    - kubernetes-cni
+    - ebtables
+    - git
+    - gcc
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'

@@ -1,0 +1,7 @@
+---
+
+- include: iptables.yml
+- include: kubeadm-init.yml
+- include: rbac.yml
+- include: helm.yml
+- include: canal.yml

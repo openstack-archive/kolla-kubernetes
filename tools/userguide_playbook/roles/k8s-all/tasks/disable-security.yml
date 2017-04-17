@@ -1,0 +1,14 @@
+---
+
+- name: Turn off SELINUX
+  lineinfile:
+    dest: /etc/selinux/config
+    regexp: '^SELINUX(.*)$'
+    line: 'SELINUX=permissive'
+  become: True
+  ignore_errors: True
+
+- name: Turn off Firewalld
+  shell: systemctl stop firewalld && systemctl disable firewalld
+  become: True
+  ignore_errors: True

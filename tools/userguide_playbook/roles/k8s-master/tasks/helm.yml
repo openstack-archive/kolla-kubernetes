@@ -1,0 +1,14 @@
+---
+
+# Helm
+- name: Download Helm setup script with +x permission
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+    dest: /tmp/get_helm.sh
+    mode: 0777
+
+- name: Install Helm
+  command: /tmp/get_helm.sh
+
+- name: Run Helm Init
+  command: helm init
