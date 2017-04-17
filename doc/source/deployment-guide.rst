@@ -304,7 +304,7 @@ Modify kolla configuration::
 Add required configuration to the end of /etc/kolla/globals.yml::
 
     cat <<EOF > add-to-globals.yml
-    install_type: "source"
+    kolla_install_type: "source"
     tempest_image_alt_id: "{{ tempest_image_id }}"
     tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
 
