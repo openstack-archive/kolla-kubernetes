@@ -1,0 +1,15 @@
+---
+
+# RBAC
+
+- name: Copy RBAC file
+  template:
+    src: rbac.yml.tpl
+    dest: /tmp/rbac.yml
+    mode: 0644
+
+- name: Override default RBAC settings
+  command: kubectl replace -f /tmp/rbac.yml
+
+- name: Remove master taint
+  command: kubectl taint nodes {{ ansible_hostname }} node-role.kubernetes.io/master-

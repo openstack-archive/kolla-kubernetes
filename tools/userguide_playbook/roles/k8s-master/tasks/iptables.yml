@@ -1,0 +1,20 @@
+---
+
+
+- name: Enable iptables [RedHat]
+  blockinfile:
+    dest: /etc/sysctl.conf
+    state: present
+    create: yes
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+  become: True
+  when:
+      - ansible_os_family == 'RedHat'
+
+- name: Reload sysctl [RedHat]
+  command: sysctl -p
+  become: True
+  when:
+      - ansible_os_family == 'RedHat'

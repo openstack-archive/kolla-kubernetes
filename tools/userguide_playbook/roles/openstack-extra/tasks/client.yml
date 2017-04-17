@@ -1,0 +1,17 @@
+---
+
+# Openstack clients
+
+- name: Generate openrc file
+  become: True
+  become_user: "{{ username }}"
+  command: kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext
+  ignore_errors: True
+
+- name: Install openstack clients
+  become: True
+  command: pip install {{ item }}
+  with_items:
+    - python-openstackclient
+    - python-neutronclient
+    - python-cinderclient

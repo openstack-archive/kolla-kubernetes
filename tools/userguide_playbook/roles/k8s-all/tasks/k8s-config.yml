@@ -1,0 +1,51 @@
+---
+
+# Configuration
+
+- name: Enable and start docker
+  systemd: name=docker state=started enabled=yes
+  become: True
+
+## Detect and set cgroup driver (Debian)
+- name: Get CGROUP_DRIVER [Debian]
+  become: True
+  shell: "docker info | grep \"Cgroup Driver\" | awk '{print $3}'"
+  register: cgroup_driver
+  when:
+      - ansible_os_family == 'Debian'
+
+- name: Log CGROUP_DRIVER [Debian]
+  debug: msg="{{ cgroup_driver }}"
+  when:
+      - ansible_os_family == 'Debian'
+
+- name: Set CGROUP_DRIVER [Debian]
+  lineinfile:
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^(.*)KUBELET_KUBECONFIG_ARGS=(.*)$'
+    line: '\1KUBELET_KUBECONFIG_ARGS=--cgroup-driver={{ cgroup_driver.stdout }} \2'
+    backup: yes
+    backrefs: yes
+  become: True
+  when:
+    - ansible_os_family == 'Debian'
+
+# DNS
+- name: Replace DNS IP
+  replace:
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '10.96.0.10'
+    replace: "{{ kube_dns_ip }}"
+  become: True
+
+- name: reload systemd
+  become: True
+  command: systemctl daemon-reload
+
+- name: Stop kubelet
+  become: True
+  systemd: name=kubelet state=stopped
+
+- name: Enable and start kubelet
+  become: True
+  systemd: name=kubelet state=started enabled=yes
