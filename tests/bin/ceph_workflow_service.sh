@@ -80,9 +80,16 @@ helm install kolla/openvswitch --version $VERSION \
 
 wait_for_pods kolla openvswitch running
 
-kollakube res create bootstrap openvswitch-set-external-ip
+#
+# Brining up br-ex so keepalived could bind VIP to it
+#
+sudo ifconfig br-ex up
 
-wait_for_pods kolla openvswitch-set-external succeeded
+helm install kolla/keepalived-daemonset --debug --version $VERSION \
+    --namespace kolla --name keepalived-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+$DIR/tools/wait_for_pods.sh kolla
 
 if [ "$devenv" = true ]; then
     $DIR/tools/build_local_admin_keystonerc.sh ext
@@ -151,6 +158,3 @@ helm install kolla/horizon --version $VERSION \
 #kollakube res create pod keepalived
 
 wait_for_pods kolla nova,horizon running,succeeded
-
-
-kollakube res delete bootstrap openvswitch-set-external-ip
