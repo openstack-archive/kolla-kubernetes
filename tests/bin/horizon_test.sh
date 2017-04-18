@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-VERSION=0.6.0-1
+VERSION=0.7.0-1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 

@@ -1,43 +1,43 @@
 dependencies:
   - name: cinder-api-svc
     repository: file://../../microservice/cinder-api-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-db-job
     repository: file://../../microservice/cinder-create-db-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-manage-db-job
     repository: file://../../microservice/cinder-manage-db-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-service-job
     repository: file://../../microservice/cinder-create-keystone-service-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-servicev2-job
     repository: file://../../microservice/cinder-create-keystone-servicev2-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-user-job
     repository: file://../../microservice/cinder-create-keystone-user-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-public-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-public-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-internal-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-internal-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-admin-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-admin-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-publicv2-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-publicv2-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-internalv2-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-internalv2-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-adminv2-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-adminv2-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-api-deployment
     repository: file://../../microservice/cinder-api-deployment
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: cinder-scheduler-statefulset
     repository: file://../../microservice/cinder-scheduler-statefulset
-    version: 0.6.0-1
+    version: 0.7.0-1

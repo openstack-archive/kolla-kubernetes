@@ -1,5 +1,5 @@
 name: keystone-admin-svc
-version: 0.6.0-1 #FIXME make this changable
+version: 0.7.0-1 #FIXME make this changable
 description: keystone-admin-svc subservice layer
 keywords:
   - openstack

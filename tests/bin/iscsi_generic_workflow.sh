@@ -4,7 +4,7 @@
 #
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-VERSION=0.6.0-1
+VERSION=0.7.0-1
 IP=172.18.0.1
 tunnel_interface=docker0
 base_distro="$2"

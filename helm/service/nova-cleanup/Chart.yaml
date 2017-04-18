@@ -1,5 +1,5 @@
 name: nova-cleanup
-version: 0.6.0-1
+version: 0.7.0-1
 description: Helm chart for nova cleanup package
 keywords:
   - openstack

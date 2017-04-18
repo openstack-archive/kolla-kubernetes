@@ -1,5 +1,5 @@
 name: nova-api-deployment
-version: 0.6.0-1 #FIXME make this changable
+version: 0.7.0-1 #FIXME make this changable
 description: FIXME
 keywords:
   - openstack
