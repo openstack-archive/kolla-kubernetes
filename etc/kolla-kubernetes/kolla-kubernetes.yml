@@ -11,6 +11,7 @@
 # This address is used in ALL public endpoints and it serves as an entry point
 # into kolla kubernetes cluster, needs to be changed by the operator.
 kolla_kubernetes_external_vip: "10.57.120.254"
+kolla_kubernetes_external_subnet: "24"
 kolla_kubernetes_namespace: "kolla"
 
 ##############################
