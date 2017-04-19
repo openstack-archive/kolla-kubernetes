@@ -1,5 +1,5 @@
 name: nova-placement-create-keystone-endpoint-public-job
-version: 0.6.0-1
+version: 0.7.0-1
 description: Helm chart for creating placement-api public keystone endpoint
 keywords:
   - openstack

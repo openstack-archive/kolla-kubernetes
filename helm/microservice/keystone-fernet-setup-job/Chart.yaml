@@ -1,5 +1,5 @@
 name: keystone-fernet-setup-job
-version: 0.6.0-1 #FIXME make this changable
+version: 0.7.0-1 #FIXME make this changable
 description: keystone fernet token setup job
 keywords:
   - openstack

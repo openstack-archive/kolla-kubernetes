@@ -1,4 +1,4 @@
 dependencies:
   - name: keystone-delete-db-job
     repository: file://../../microservice/keystone-delete-db-job
-    version: 0.6.0-1
+    version: 0.7.0-1

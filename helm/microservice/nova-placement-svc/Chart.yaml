@@ -1,5 +1,5 @@
 name: nova-placement-svc
-version: 0.6.0-1
+version: 0.7.0-1
 description: nova placeement api service
 keywords:
   - openstack

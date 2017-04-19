@@ -1,5 +1,5 @@
 name: nova-compute-ironic-statefulset
-version: 0.6.0-1
+version: 0.7.0-1
 description: Chart for nova compute ironic microservice
 keywords:
   - openstack

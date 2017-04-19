@@ -1,5 +1,5 @@
 name: cinder-volume-lvm-daemonset
-version: 0.6.0-1
+version: 0.7.0-1
 description: cinder volume lvm microservice layer
 keywords:
   - openstack

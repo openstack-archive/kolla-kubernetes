@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-PACKAGE_VERSION=0.6.0-1
+PACKAGE_VERSION=0.7.0-1
 DISTRO="$2"
 TYPE="$3"
 CONFIG="$4"

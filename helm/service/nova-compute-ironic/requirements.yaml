@@ -1,4 +1,4 @@
 dependencies:
   - name: nova-compute-ironic-statefulset
     repository: file://../../microservice/nova-compute-ironic-statefulset
-    version: 0.6.0-1
+    version: 0.7.0-1

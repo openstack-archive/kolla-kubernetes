@@ -1,5 +1,5 @@
 name: heat-manage-db-job
-version: 0.6.0-1
+version: 0.7.0-1
 description: Heat job for database management
 keywords:
   - openstack

@@ -1,5 +1,5 @@
 name: cinder-delete-db-job
-version: 0.6.0-1
+version: 0.7.0-1
 description: Helm chart to delete the cinder database
 keywords:
   - openstack

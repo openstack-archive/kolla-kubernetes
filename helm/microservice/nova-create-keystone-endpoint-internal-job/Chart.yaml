@@ -1,5 +1,5 @@
 name: nova-create-keystone-endpoint-internal-job
-version: 0.6.0-1 #FIXME make this changable
+version: 0.7.0-1 #FIXME make this changable
 description: Helm chart for the nova internal keystone endpoint
 keywords:
   - openstack

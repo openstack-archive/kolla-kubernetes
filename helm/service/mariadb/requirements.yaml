@@ -1,16 +1,16 @@
 dependencies:
   - name: mariadb-pv
     repository: file://../../microservice/mariadb-pv
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: mariadb-pvc
     repository: file://../../microservice/mariadb-pvc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: mariadb-svc
     repository: file://../../microservice/mariadb-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: mariadb-init-element-job
     repository: file://../../microservice/mariadb-init-element-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: mariadb-statefulset
     repository: file://../../microservice/mariadb-statefulset
-    version: 0.6.0-1
+    version: 0.7.0-1

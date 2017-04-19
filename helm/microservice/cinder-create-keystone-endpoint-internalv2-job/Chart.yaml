@@ -1,5 +1,5 @@
 name: cinder-create-keystone-endpoint-internalv2-job
-version: 0.6.0-1 #FIXME make this changable
+version: 0.7.0-1 #FIXME make this changable
 description: Helm chart for creating cinder internal keystone v2 endpoint
 keywords:
   - openstack

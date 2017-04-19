@@ -1,25 +1,25 @@
 dependencies:
   - name: keystone-admin-svc
     repository: file://../../microservice/keystone-admin-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-internal-svc
     repository: file://../../microservice/keystone-internal-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-public-svc
     repository: file://../../microservice/keystone-public-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-fernet-setup-job
     repository: file://../../microservice/keystone-fernet-setup-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-create-db-job
     repository: file://../../microservice/keystone-create-db-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-manage-db-job
     repository: file://../../microservice/keystone-manage-db-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-create-endpoints-job
     repository: file://../../microservice/keystone-create-endpoints-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: keystone-api-deployment
     repository: file://../../microservice/keystone-api-deployment
-    version: 0.6.0-1
+    version: 0.7.0-1

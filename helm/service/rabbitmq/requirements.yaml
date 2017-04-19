@@ -1,16 +1,16 @@
 dependencies:
   - name: rabbitmq-pv
     repository: file://../../microservice/rabbitmq-pv
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: rabbitmq-pvc
     repository: file://../../microservice/rabbitmq-pvc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: rabbitmq-svc
     repository: file://../../microservice/rabbitmq-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: rabbitmq-init-element-job
     repository: file://../../microservice/rabbitmq-init-element-job
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: rabbitmq-statefulset
     repository: file://../../microservice/rabbitmq-statefulset
-    version: 0.6.0-1
+    version: 0.7.0-1

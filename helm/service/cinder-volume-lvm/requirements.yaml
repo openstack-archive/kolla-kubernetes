@@ -1,10 +1,10 @@
 dependencies:
   - name: cinder-volume-lvm-daemonset
     repository: file://../../microservice/cinder-volume-lvm-daemonset
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: iscsid-daemonset
     repository: file://../../microservice/iscsid-daemonset
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: tgtd-daemonset
     repository: file://../../microservice/tgtd-daemonset
-    version: 0.6.0-1
+    version: 0.7.0-1

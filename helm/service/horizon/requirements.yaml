@@ -1,7 +1,7 @@
 dependencies:
   - name: horizon-svc
     repository: file://../../microservice/horizon-svc
-    version: 0.6.0-1
+    version: 0.7.0-1
   - name: horizon-deployment
     repository: file://../../microservice/horizon-deployment
-    version: 0.6.0-1
+    version: 0.7.0-1

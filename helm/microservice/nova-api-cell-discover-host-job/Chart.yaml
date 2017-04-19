@@ -1,5 +1,5 @@
 name: nova-api-cell-discover-host-job
-version: 0.6.0-1
+version: 0.7.0-1
 description: nova api job to discover new hosts and map to exisiting cell
 keywords:
   - openstack

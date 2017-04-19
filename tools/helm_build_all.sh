@@ -26,7 +26,7 @@ $DIR/helm_build_compute_kits.py "$REPODIR"
 # helm release k8s 1m configmap limit.
 D=/tmp/computekit-$$/
 mkdir -p $D
-tar -C $D --exclude "charts/*/kolla-common/templates/*" -xf "$REPODIR/compute-kit-0.6.0-1.tgz"
+tar -C $D --exclude "charts/*/kolla-common/templates/*" -xf "$REPODIR/compute-kit-0.7.0-1.tgz"
 pushd "$REPODIR"
 helm package "$D/compute-kit"
 popd

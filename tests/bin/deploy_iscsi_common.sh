@@ -48,7 +48,7 @@ function deploy_iscsi_common {
 #                     $3 - tunnel_interface, $4 - branch,
 #                     $5 - config
 #
-VERSION=0.6.0-1
+VERSION=0.7.0-1
 IP="$1"
 tunnel_interface="$3"
 base_distro="$2"
