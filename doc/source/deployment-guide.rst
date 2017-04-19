@@ -118,6 +118,11 @@ To enable the proper cgroup driver, start Docker and disable CRI::
     CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
     sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER --enable-cri=false |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
+.. note::
+
+    If cgroup driver is not enable and CRI is not disabled then kubeadm init will
+    leave you into waiting state to get kubernetes up. 
+
 Setup the DNS server with the service CIDR::
 
     sudo sed -i 's/10.96.0.10/10.3.3.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
@@ -188,7 +193,7 @@ Launch a busybox container::
 
     kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
 
-Verify DNS works properly by running within the container::
+Verify DNS works properly by running below command within the busybox container::
 
     nslookup kubernetes
 
