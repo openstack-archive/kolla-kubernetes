@@ -16,9 +16,8 @@ Bare Metal Deployment Guide for kolla-kubernetes
    This document was tested only against CentOS 7.3 Host OS and AIO
    environments.
 
-------------
 Introduction
-------------
+============
 
 There are many ways to deploy Kubernetes.  This guide has been tested only with
 kubeadm.  The documentation for Kubeadm is here:
@@ -50,9 +49,9 @@ Dependencies::
 
        watch -n 5 -c kubectl get pods --all-namespaces
 
--------------------------
+
 Step 1: Deploy Kubernetes
--------------------------
+=========================
 
 .. note::
 
@@ -95,6 +94,10 @@ Turn off firewalld::
    gpgcheck=0 is set below because the currently signed RPMs don't match
    the yum-key.gpg key distributed by Kubernetes.  YMMV.
 
+
+CentOS
+------
+
 Write the kubernetes repository file::
 
     cat <<EOF > kubernetes.repo
@@ -112,6 +115,23 @@ Write the kubernetes repository file::
 Install Kubernetes 1.6.1 or later::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni
+
+Ubuntu
+------
+write the kubernetes repository file::
+
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo -E apt-key add -
+    cat <<EOF > kubernetes.list
+    deb http://apt.kubernetes.io/ kubernetes-xenial main
+    EOF
+
+    sudo cp -aR kubernetes.list /etc/apt/sources.list.d/kubernetes.list
+
+    sudo apt-get update
+
+Install Kubernetes 1.6.1 or later::
+
+    sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
 To enable the proper cgroup driver, start Docker and disable CRI::
 
@@ -190,9 +210,8 @@ Finally untaint the node so that PODs can be scheduled to this AIO deployment::
 
     dns should be in 3/3 RUNNING. If you fail to wait, Step 2 will fail.
 
----------------------------
 Step 2: Validate Kubernetes
----------------------------
+===========================
 
 After executing Step 2, a working Kubernetes deployment should be achieved.
 
@@ -223,9 +242,8 @@ This should return a nslookup result without error::
    in a VM can cause nested virtualization and or performance issues. If still stuck
    seek further assistance from the Kubernetes or Kolla communities.
 
-----------------------------------
 Step 3: Deploying kolla-kubernetes
-----------------------------------
+==================================
 
 Override default RBAC settings::
 
@@ -600,9 +618,9 @@ Create a floating IP address and add to the VM::
 
     openstack server add floating ip demo1 $(openstack floating ip create public1 -f value -c floating_ip_address)
 
----------------
+
 Troubleshooting
----------------
+===============
 
 .. warning::
 
