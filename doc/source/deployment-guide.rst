@@ -264,6 +264,7 @@ Install repositories necessary to install packaging::
 
     sudo yum install -y epel-release
     sudo yum install -y ansible python-pip python-devel
+    sudo yum groupinstall -y "Development Tools"
 
 .. note::
 
