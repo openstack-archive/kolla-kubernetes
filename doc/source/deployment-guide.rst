@@ -483,9 +483,9 @@ Create a cloud.yaml file for the deployment of the charts::
 .. note::
 
    The next operation is not a simple copy and paste as the rest of this
-   document is structured.  You should determmine your mangement interface
+   document is structured.  You should determine your management interface
    which is the value of /etc/kolla/globals.yml and replace the contents
-   of YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the follwoing sed operation.
+   of YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following sed operation.
 
 Replace all occurances of 192.168.7.105 with your management interface nic (e.g. eth0)::
 
@@ -493,7 +493,7 @@ Replace all occurances of 192.168.7.105 with your management interface nic (e.g.
 
 Replace all occurances of enp1s0f1 with your neutron interface name (e.g. enp1s0f1)::
 
-   sed -i "s@1enp1s0f1@YOUR_NEUTRON_NETWORK_INTERFACE_FROM_GLOBALS.YML@" ./cloud.yaml
+   sed -i "s@enp1s0f1@YOUR_NEUTRON_NETWORK_INTERFACE_FROM_GLOBALS.YML@" ./cloud.yaml
 
 .. note::
 
