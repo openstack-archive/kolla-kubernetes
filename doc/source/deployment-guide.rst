@@ -4,10 +4,12 @@ Bare Metal Deployment Guide for kolla-kubernetes
 
 .. warning::
 
-   This documentation is under construction and may not work perfectly.  If you
-   run into trouble, please join #openstack-kolla and we can learn together how to
-   solve whatever issues faced.  Likely others in the community face the
-   same issues.
+   This documentation is under construction and some browsers do not update
+   on changes to docs.openstack.org.  To resolve this problem, click refresh
+   on the browser. The docs do work perfectly if followed but If you still run
+   into trouble, please join #openstack-kolla and we can learn together how to
+   solve whatever issues faced.  Likely others in the community face the same
+   issues.
 
 .. note::
 
