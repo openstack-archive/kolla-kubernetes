@@ -13,8 +13,11 @@ Bare Metal Deployment Guide for kolla-kubernetes
 
 .. note::
 
-   This document was tested only against CentOS 7.3 Host OS and AIO
-   environments.
+   This document was tested only against CentOS 7.3 Host OS and AIO environments.
+   All the steps should be run as non-root user. If we run with root user then
+   loading of kubeadm credential will go in wrong location ``/root/.kube.config``
+   not to the correct location ``/user/.kube/config`` In addition while installing
+   helm, tiller can not be found in ``/usr/local/bin``.
 
 ------------
 Introduction
