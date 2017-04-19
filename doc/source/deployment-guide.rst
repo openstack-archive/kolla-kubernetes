@@ -178,6 +178,16 @@ Finally untaint the node so that PODs can be scheduled to this AIO deployment::
 
     kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
+.. note::
+
+    Kubernetes must start completely before verification will function
+    properly. You will know kubernetes has completed initialization by
+    checking using below command:
+
+    $ kubectl get pods --all-namespaces | grep dns
+
+    dns should be in 3/3 RUNNING. If you fail to wait, Step 2 will fail.
+
 ---------------------------
 Step 2: Validate Kubernetes
 ---------------------------
@@ -188,7 +198,7 @@ Launch a busybox container::
 
     kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
 
-Verify DNS works properly by running within the container::
+Verify DNS works properly by running below command within the busybox container::
 
     nslookup kubernetes
 
