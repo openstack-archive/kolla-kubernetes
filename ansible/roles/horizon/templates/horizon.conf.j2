@@ -3,8 +3,13 @@ Listen {{ api_interface_address }}:{{ horizon_port }}
 
 <VirtualHost *:{{ horizon_port }}>
     LogLevel warn
+{% if std_logger %}
+    ErrorLog /proc/self/fd/2
+    CustomLog /proc/self/fd/1 combined
+{% else %}
     ErrorLog /var/log/kolla/horizon/horizon.log
     CustomLog /var/log/kolla/horizon/horizon-access.log combined
+{% endif %}
 
     WSGIScriptReloading On
     WSGIDaemonProcess horizon-http processes={{ openstack_service_workers }} threads=1 user=horizon group=horizon display-name=%{GROUP} python-path={{ python_path }}

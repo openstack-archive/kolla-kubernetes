@@ -1,9 +1,16 @@
 [global]
+{% if std_logger %}
+log to syslog = false
+err to syslog = false
+log to stderr = true
+err to stderr = true
+{% else %}
 log file = /var/log/kolla/ceph/$cluster-$name.log
 log to syslog = false
 err to syslog = false
 log to stderr = false
 err to stderr = false
+{% endif %}
 
 fsid = {{ ceph_cluster_fsid }}
 
