@@ -1,1 +1,7 @@
+{% if std_logger %}
+#KMF FIXME This breaks things for some reason...
+#log-facility=-
 log-facility=/var/log/kolla/neutron/dnsmasq.log
+{% else %}
+log-facility=/var/log/kolla/neutron/dnsmasq.log
+{% endif %}
