@@ -1,1 +1,5 @@
+{% if std_logger %}
+log-facility=-
+{% else %}
 log-facility=/var/log/kolla/neutron/dnsmasq.log
+{% endif %}
