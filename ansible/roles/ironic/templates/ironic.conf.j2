@@ -1,7 +1,12 @@
 [DEFAULT]
 debug = {{ ironic_logging_debug }}
 
+{% if std_logger %}
+use_syslog = False
+use_stderr = True
+{% else %}
 log_dir = /var/log/kolla/ironic
+{% endif %}
 
 admin_user = {{ openstack_auth.username }}
 admin_password = {{ keystone_admin_password }}

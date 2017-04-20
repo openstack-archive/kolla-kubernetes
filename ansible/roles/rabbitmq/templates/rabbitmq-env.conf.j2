@@ -1,6 +1,10 @@
 RABBITMQ_NODENAME=rabbit
 
+{% if std_logger %}
+RABBITMQ_LOGS=-
+{% else %}
 RABBITMQ_LOG_BASE=/var/log/kolla/rabbitmq
+{% endif %}
 
 # TODO(sdake, vhosakot)
 # erlang by default binds to wildcard (all interfaces) and can potentially
