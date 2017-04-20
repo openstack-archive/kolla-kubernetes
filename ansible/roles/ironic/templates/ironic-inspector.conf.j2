@@ -1,6 +1,11 @@
 [DEFAULT]
 debug = {{ ironic_logging_debug }}
+
+{% if std_logger %}
+use_syslog = False
+{% else %}
 log_dir = /var/log/kolla/ironic
+{% endif %}
 
 listen_address = 0.0.0.0
 listen_port = {{ ironic_inspector_port }}

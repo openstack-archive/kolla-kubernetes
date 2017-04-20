@@ -1,7 +1,11 @@
 [DEFAULT]
 debug = {{ heat_logging_debug }}
 
+{% if std_logger %}
+use_syslog = False
+{% else %}
 log_dir = /var/log/kolla/heat
+{% endif %}
 
 heat_watch_server_url = {{ public_protocol }}://{{ kolla_external_fqdn }}:{{ heat_api_cfn_port }}
 heat_metadata_server_url = {{ public_protocol }}://{{ kolla_external_fqdn }}:{{ heat_api_cfn_port }}
