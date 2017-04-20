@@ -2,7 +2,13 @@
 [DEFAULT]
 debug = {{ nova_logging_debug }}
 
+{% if std_logger %}
+#KMF
+#use_syslog = False
+#use_stderr = True
+{% else %}
 log_dir = /var/log/kolla/nova
+{% endif %}
 
 state_path = /var/lib/nova
 
