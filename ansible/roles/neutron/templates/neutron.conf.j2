@@ -2,11 +2,16 @@
 [DEFAULT]
 debug = {{ neutron_logging_debug }}
 
-log_dir = /var/log/kolla/neutron
-
+{% if std_logger %}
+#KMF FIXME
+#use_syslog = True
+{% else %}
 # NOTE(elemoine): set use_stderr to False or the logs will also be sent to
 # stderr and collected by Docker
 use_stderr = False
+
+log_dir = /var/log/kolla/neutron
+{% endif %}
 
 bind_host = {{ api_interface_address }}
 bind_port = {{ neutron_server_port }}
