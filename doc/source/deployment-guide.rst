@@ -20,7 +20,7 @@ Introduction
 ============
 
 There are many ways to deploy Kubernetes.  This guide has been tested only with
-kubeadm.  The documentation for Kubeadm is here:
+kubeadm.  The documentation for kubeadm is here:
 
 https://kubernetes.io/docs/getting-started-guides/kubeadm/
 
@@ -47,7 +47,7 @@ Dependencies::
    processes.  This operation will show changes as they occur within
    Kubernetes and also shows the PODs IP addresses::
 
-       watch -n 5 -c kubectl get pods --all-namespaces
+       watch -d kubectl get pods --all-namespaces
 
 
 Step 1: Deploy Kubernetes
@@ -87,7 +87,7 @@ Turn off firewalld::
 .. note::
 
    This operation configures the Kubernetes YUM repository.  This step only
-   needs to be done one time.
+   needs to be done once per server or VM.
 
 .. warning::
 
@@ -116,6 +116,11 @@ Install Kubernetes 1.6.1 or later::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni
 
+.. note::
+   A minimal Centos OS may also require the installation of git and
+   gcc
+
+
 Ubuntu
 ------
 write the kubernetes repository file::
@@ -132,6 +137,10 @@ write the kubernetes repository file::
 Install Kubernetes 1.6.1 or later::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
+
+
+Centos and Ubuntu
+-----------------
 
 To enable the proper cgroup driver, start Docker and disable CRI::
 
@@ -183,6 +192,12 @@ Load the kubedm credentials into the system::
     sudo -H cp /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo -H chown $(id -u):$(id -g) $HOME/.kube/config
 
+.. note::
+
+   Until this step is done, the 'watch -d kubectl get pods
+   --all-namespaces' command will not return information.
+
+
 The CNI driver is the networking driver that Kubernetes uses.  Kolla uses canal
 currently in the gate and tests with it hundreds of times per day via
 extensive gating mechanisms.  Kolla recommends the use of canal although other
@@ -210,6 +225,7 @@ Finally untaint the node so that PODs can be scheduled to this AIO deployment::
 
     dns should be in 3/3 RUNNING. If you fail to wait, Step 2 will fail.
 
+
 Step 2: Validate Kubernetes
 ===========================
 
@@ -225,7 +241,7 @@ Verify DNS works properly by running below command within the busybox container:
 
 This should return a nslookup result without error::
 
-    [sdake@kolla ~]$ kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
+    $ kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
     Waiting for pod default/33c30c3b-8130-408a-b32f-83172bca19d0 to be running, status is Pending, pod ready: false
     # nslookup kubernetes
     Server:    10.3.3.10
@@ -241,6 +257,7 @@ This should return a nslookup result without error::
    the range of IP addresses chosen make sense to your particular environment. Running
    in a VM can cause nested virtualization and or performance issues. If still stuck
    seek further assistance from the Kubernetes or Kolla communities.
+
 
 Step 3: Deploying kolla-kubernetes
 ==================================
@@ -326,7 +343,7 @@ Label the AIO node as the compute and controller node::
 
 .. warning:
 
-    The kolla-kubernetes deliverable has two configuraiton files.  This is a little
+    The kolla-kubernetes deliverable has two configuration files.  This is a little
     clunky and we know about the problem :)  We are working on getting all configuraiton
     into cloud.yaml. Until that is fixed the variable in globals.yaml `kolla_install_type`
     must have the same contents as the variable in cloud.yaml `install_type`. In this
@@ -334,10 +351,10 @@ Label the AIO node as the compute and controller node::
 
 Modify kolla configuration::
 
-    set network_interface in /etc/kolla/globals.yaml to the management interface name.
-    set neutron_external_interface in /etc/kolla/globals.yml to the Neutron interface name.
-    This is the external interface that neutron will use.  It must not have an IP
-    address assigned to it.
+    - set network_interface in /etc/kolla/globals.yaml to the management interface name.
+    - set neutron_external_interface in /etc/kolla/globals.yml to the Neutron interface name.
+      This is the external interface that neutron will use.  It must not have an IP
+      address assigned to it.
 
 Add required configuration to the end of /etc/kolla/globals.yml::
 
@@ -433,7 +450,7 @@ Check that all helm images have been built by verifying the number is > 150::
 
     ls | grep ".tgz" | wc -l
 
-Create a cloud.yaml file for the deployment of the charts::
+Create a local cloud.yaml file for the deployment of the charts::
 
     global:
        kolla:
@@ -502,10 +519,12 @@ Create a cloud.yaml file for the deployment of the charts::
 
    The next operation is not a simple copy and paste as the rest of this
    document is structured.  You should determine your management interface
-   which is the value of /etc/kolla/globals.yml and replace the contents
-   of YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following sed operation.
+   which is the value of 'network_interface' in /etc/kolla/globals.yml
+   e.g. 'eth0' and replace the contents of
+   YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following sed
+   operation with this ip address.
 
-Replace all occurrences of 192.168.7.105 with your management interface nic (e.g. eth0)::
+Replace all occurrences of 192.168.7.105 with your management interface ip (e.g. 10.240.43.81)::
 
    sed -i "s@192.168.7.105@YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML@" ./cloud.yaml
 
@@ -517,14 +536,19 @@ Replace all occurrences of enp1s0f1 with your neutron interface name (e.g. eth1)
 
    Some of the variables in the cloud.yaml file that may need to be customized are:
 
-   set 'external_vip': to the IP address of your management interface
-   set 'dns_name' to the IP address of your management network
-   set 'tunnel_interface': to the IP address of your management interface
-   interface name used for connectivity between nodes in kubernetes
-   cluster, in most of cases it matches the name of the kubernetes
-   host management interface.  To determine this,
-   ``grep network_interface /etc/kolla/globals.yml``.
-   set ext_interface_name: to the interface name used for your Neutron network.
+   - set 'external_vip': to the IP address of your management interface
+     (sed operation above takes care of this)
+   - set 'dns_name' to the IP address of your management network
+     (sed operation above takes care of this)
+   - set 'tunnel_interface': to the IP address of your management interface
+     interface name used for connectivity between nodes in kubernetes
+     cluster, in most of cases it matches the name of the kubernetes
+     host management interface.  To determine this,
+     ``grep network_interface /etc/kolla/globals.yml``.
+     Note that this is the same address as
+     YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML -from above
+   - set ext_interface_name: to the interface name used for your
+     neutron interface name (e.g. eth1)
 
 Start mariadb first and wait for it to enter the RUNNING state::
 
@@ -543,7 +567,7 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
 
-Wait for nova-compute the enter the running state before creating the cell0
+Wait for nova-compute to enter the running state before creating the cell0
 database::
 
     helm install --debug kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values ./cloud.yaml
@@ -619,9 +643,11 @@ Create a floating IP address and add to the VM::
     openstack server add floating ip demo1 $(openstack floating ip create public1 -f value -c floating_ip_address)
 
 
-Troubleshooting
-===============
+Troubleshooting and Tear Down
+=============================
 
+Tear Down
+---------
 .. warning::
 
    Some of these steps are dangerous.  Be warned.
@@ -658,3 +684,119 @@ To clean up Kubernetes and all docker containers entirely, run
 this command, reboot, and run these commands again::
 
     sudo kubeadm reset
+
+TroubleShooting
+---------------
+.. note::
+
+   This is just a list of popular commands the community has suggested
+   they use a lot. This is but no means a comprehensive guide to
+   debugging kubernetes or kolla.
+
+Determine IP and port information::
+  $ kubectl get svc -n kube-system
+  NAME            CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+  canal-etcd      10.3.3.100   <none>        6666/TCP        16h
+  kube-dns        10.3.3.10    <none>        53/UDP,53/TCP   16h
+  tiller-deploy   10.3.3.7     <none>        44134/TCP       16h
+
+  $ kubectl get svc -n kolla
+  NAME                 CLUSTER-IP   EXTERNAL-IP    PORT(S)     AGE
+  cinder-api           10.3.3.6     10.240.43.81   8776/TCP    15h
+  glance-api           10.3.3.150   10.240.43.81   9292/TCP    15h
+  glance-registry      10.3.3.119   <none>         9191/TCP    15h
+  horizon              10.3.3.15    10.240.43.81   80/TCP      15h
+  keystone-admin       10.3.3.253   10.240.43.81   35357/TCP   15h
+  keystone-internal    10.3.3.155   <none>         5000/TCP    15h
+  keystone-public      10.3.3.214   10.240.43.81   5000/TCP    15h
+  mariadb              10.3.3.57    <none>         3306/TCP    15h
+  memcached            10.3.3.180   <none>         11211/TCP   15h
+  neutron-server       10.3.3.145   10.240.43.81   9696/TCP    15h
+  nova-api             10.3.3.96    10.240.43.81   8774/TCP    15h
+  nova-metadata        10.3.3.118   <none>         8775/TCP    15h
+  nova-novncproxy      10.3.3.167   10.240.43.81   6080/TCP    15h
+  nova-placement-api   10.3.3.192   10.240.43.81   8780/TCP    15h
+  rabbitmq             10.3.3.158   <none>         5672/TCP    15h
+  rabbitmq-mgmt        10.3.3.105   <none>         15672/TCP   15h
+
+View all k8's namespaces::
+  $ kubectl get namespaces
+  NAME          STATUS    AGE
+  default       Active    16h
+  kolla         Active    15h
+  kube-public   Active    16h
+  kube-system   Active    16h
+
+Kolla Describe a pod in full detail::
+  kubectl describe pod ceph-admin -n kolla
+  ...<lots of information>
+
+View all deployed services::
+  $ kubectl get deployment -n kube-system
+  NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+  kube-dns        1         1         1            1           20h
+  tiller-deploy   1         1         1            1           20h
+
+View configuration maps::
+  $ kubectl get configmap -n kube-system
+  NAME                                 DATA      AGE
+  canal-config                         4         20h
+  cinder-control.v1                    1         20h
+  extension-apiserver-authentication   6         20h
+  glance.v1                            1         20h
+  horizon.v1                           1         20h
+  keystone.v1                          1         20h
+  kube-proxy                           1         20h
+  mariadb.v1                           1         20h
+  memcached.v1                         1         20h
+  neutron.v1                           1         20h
+  nova-api-create.v1                   1         19h
+  nova-cell0-create-db-job.v1          1         19h
+  nova-compute.v1                      1         19h
+  nova-control.v1                      1         19h
+  openvswitch.v1                       1         20h
+  rabbitmq.v1                          1         20h
+
+General Cluster information::
+  $ kubectl cluster-info
+  Kubernetes master is running at https://192.168.122.2:6443
+  KubeDNS is running at https://192.168.122.2:6443/api/v1/proxy/namespaces/kube-system/services/kube-dns
+
+View all jobs::
+  $ kubectl get jobs --all-namespaces
+  NAMESPACE     NAME                                              DESIRED   SUCCESSFUL   AGE
+  kolla         cinder-create-db                                  1         1            20h
+  kolla         cinder-create-keystone-endpoint-admin             1         1            20h
+  kolla         cinder-create-keystone-endpoint-adminv2           1         1            20h
+  kolla         cinder-create-keystone-endpoint-internal          1         1            20h
+  kolla         cinder-create-keystone-endpoint-internalv2        1         1            20h
+  kolla         cinder-create-keystone-endpoint-public            1         1            20h
+
+View all deployments::
+  $ kubectl get deployments --all-namespaces
+  NAMESPACE     NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+  kolla         cinder-api        1         1         1            1           20h
+  kolla         glance-api        1         1         1            1           20h
+  kolla         glance-registry   1         1         1            1           20h
+  kolla         horizon           1         1         1            1           20h
+  kolla         keystone          1         1         1            1           20h
+  kolla         memcached         1         1         1            1           20h
+  kolla         neutron-server    1         1         1            1           20h
+  kolla         nova-api          1         1         1            1           20h
+  kolla         nova-novncproxy   1         1         1            1           20h
+  kolla         placement-api     1         1         1            1           20h
+  kube-system   kube-dns          1         1         1            1           20h
+  kube-system   tiller-deploy     1         1         1            1           20h
+
+View secrets::
+  $ kubectl get secrets
+  NAME                  TYPE                                  DATA      AGE
+  default-token-3dzfp   kubernetes.io/service-account-token   3         20h
+
+View docker images::
+  $ sudo docker images
+  REPOSITORY                                                TAG                 IMAGE ID            CREATED             SIZE
+  gcr.io/kubernetes-helm/tiller                             v2.3.1              38527daf791d        7 days ago          56 MB
+  quay.io/calico/cni                                        v1.6.2              db2dedf2181a        2 weeks ago         65.08 MB
+  gcr.io/google_containers/kube-proxy-amd64                 v1.6.0              746d1460005f        3 weeks ago         109.2 MB
+  ...
