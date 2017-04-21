@@ -1,4 +1,4 @@
-name: kolla-common
+name: kolla-common  
 version: 0.7.0-1 #FIXME make this changable
 description: FIXME
 keywords:
