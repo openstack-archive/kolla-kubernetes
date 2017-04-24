@@ -118,7 +118,8 @@ Install Kubernetes 1.6.1 or later::
 
 Ubuntu
 ------
-write the kubernetes repository file::
+
+Write the kubernetes repository file::
 
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo -E apt-key add -
     cat <<EOF > kubernetes.list
@@ -278,10 +279,20 @@ Verify both the client and server version of Helm are consistent::
 
     helm version
 
+
+
+CentOS
+------
 Install repositories necessary to install packaging::
 
     sudo yum install -y epel-release
     sudo yum install -y ansible python-pip python-devel
+
+Ubuntu
+------
+Install packaging::
+
+   sudo apt-get install ansible python-pip python-dev
 
 .. note::
 
@@ -306,6 +317,13 @@ Install kolla-kubernetes::
 Copy default kolla configuration to etc::
 
     sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+
+.. note::
+
+   Ubuntu users can find directories, kolla and kolla-kubernetes,  under /usr/local/share/.
+   So change source path::
+
+       sudo cp -aR /usr/local/share/kolla-ansible/etc_examples/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
