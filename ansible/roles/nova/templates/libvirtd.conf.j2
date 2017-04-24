@@ -2,5 +2,13 @@ listen_tcp = 1
 auth_tcp = "none"
 ca_file = ""
 log_level = 3
+
+{% if std_logger %}
+#KMF
+#log_outputs = "3:stderr"
 log_outputs = "3:file:/var/log/kolla/libvirt/libvirtd.log"
+{% else %}
+log_outputs = "3:file:/var/log/kolla/libvirt/libvirtd.log"
+{% endif %}
+
 listen_addr = "{{ api_interface_address }}"
