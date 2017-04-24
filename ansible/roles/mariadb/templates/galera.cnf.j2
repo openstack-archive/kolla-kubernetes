@@ -8,7 +8,9 @@ default-character-set=utf8
 bind-address={{ api_interface_address }}
 port={{ mariadb_port }}
 
+{% if not std_logger %}
 log-error=/var/log/kolla/mariadb/mariadb.log
+{% endif %}
 
 log-bin=mysql-bin
 binlog_format=ROW

@@ -12,9 +12,14 @@ Listen {{ api_interface_address }}:{{ keystone_admin_port }}
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    ErrorLog "{{ keystone_log_dir }}/keystone-apache-public-error.log"
     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+{% if std_logger %}
+    ErrorLog /proc/self/fd/2
+    CustomLog /proc/self/fd/1 combined
+{% else %}
+    ErrorLog "{{ keystone_log_dir }}/keystone-apache-public-error.log"
     CustomLog "{{ keystone_log_dir }}/keystone-apache-public-access.log" logformat
+{% endif %}
 </VirtualHost>
 
 <VirtualHost *:{{ keystone_admin_port }}>
@@ -26,7 +31,12 @@ Listen {{ api_interface_address }}:{{ keystone_admin_port }}
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    ErrorLog "{{ keystone_log_dir }}/keystone-apache-admin-error.log"
     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+{% if std_logger %}
+    ErrorLog /proc/self/fd/2
+    CustomLog /proc/self/fd/1 combined
+{% else %}
+    ErrorLog "{{ keystone_log_dir }}/keystone-apache-admin-error.log"
     CustomLog "{{ keystone_log_dir }}/keystone-apache-admin-access.log" logformat
+{% endif %}
 </VirtualHost>
