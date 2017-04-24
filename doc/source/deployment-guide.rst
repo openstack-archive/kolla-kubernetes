@@ -339,9 +339,17 @@ Verify both the client and server version of Helm are consistent::
 
     helm version
 
+CentOS
+------
 Install repositories necessary to install packaging::
 
     sudo yum install -y epel-release ansible python-pip python-devel
+
+Ubuntu
+------
+Install packaging::
+
+   sudo apt-get install ansible python-pip python-dev
 
 .. note::
 
@@ -366,6 +374,13 @@ Install kolla-ansible and kolla-kubernetes::
 Copy default Kolla configuration to /etc::
 
     sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+
+.. note::
+
+   Ubuntu users can find directories, kolla and kolla-kubernetes,  under /usr/local/share/.
+   So change source path::
+
+       sudo cp -aR /usr/local/share/kolla-ansible/etc_examples/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
