@@ -43,7 +43,7 @@ Dependencies::
 .. note::
 
    When working with Kubernetes it is considered a useful practice to open a
-   unique terminal window and run the command that watches all kubernetes's
+   unique terminal window and run the command that watches all Kubernetes's
    processes.  This operation will show changes as they occur within
    Kubernetes and also shows the PODs IP addresses::
 
@@ -67,12 +67,12 @@ Step 1: Deploy Kubernetes
 
    If the POD and CIDR addresses overlap in this documentation with your organizations's
    IP address ranges, they may be changed.  Simply subtitute anywhere these addresses
-   are used with the custom cidrs you hae chosen.
+   are used with the custom cidrs you have chosen.
 
 
 .. note::
 
-   If you fail to turn off SELinux, kubernetes will fail.
+   If you fail to turn off SELinux and firewalld, Kubernetes will fail.
 
 Turn off SELinux::
 
@@ -98,9 +98,9 @@ Turn off firewalld::
 CentOS
 ------
 
-Write the kubernetes repository file::
+Write the Kubernetes repository \file::
 
-    cat <<EOF > kubernetes.repo
+    sudo tee /etc/yum.repos.d/kubernetes.repo<<EOF
     [kubernetes]
     name=Kubernetes
     baseurl=http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
@@ -110,7 +110,6 @@ Write the kubernetes repository file::
     gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
-    sudo cp -a kubernetes.repo /etc/yum.repos.d
 
 Install Kubernetes 1.6.1 or later::
 
@@ -155,7 +154,7 @@ Then reload the hand-modified service files::
 
     sudo systemctl daemon-reload
 
-Then stop kubelet if it is running::
+Then stop kubelet if it is Running::
 
     sudo systemctl stop kubelet
 
@@ -183,12 +182,12 @@ Load the kubedm credentials into the system::
     sudo -H cp /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo -H chown $(id -u):$(id -g) $HOME/.kube/config
 
-The CNI driver is the networking driver that Kubernetes uses.  Kolla uses canal
+The CNI driver is the networking driver that Kubernetes uses.  Kolla uses Canal
 currently in the gate and tests with it hundreds of times per day via
-extensive gating mechanisms.  Kolla recommends the use of canal although other
+extensive gating mechanisms.  Kolla recommends the use of Canal although other
 CNI drivers may be used if they are properly configured.
 
-Deploy the canal CNI driver::
+Deploy the Canal CNI driver::
 
     curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml -o canal.yaml
     sed -i "s@192.168.0.0/16@10.1.0.0/16@" canal.yaml
@@ -208,7 +207,7 @@ Finally untaint the node so that PODs can be scheduled to this AIO deployment::
 
     $ kubectl get pods --all-namespaces | grep dns
 
-    dns should be in 3/3 RUNNING. If you fail to wait, Step 2 will fail.
+    dns should be in 3/3 Running. If you fail to wait, Step 2 will fail.
 
 Step 2: Validate Kubernetes
 ===========================
@@ -286,7 +285,7 @@ Install repositories necessary to install packaging::
 .. note::
 
    You may find it helpful to create a directory to contain the files downloaded
-   during the installaiton of kolla-Kubernetes.  To do that::
+   during the installation of kolla-kubernetes.  To do that::
 
        mkdir kolla-bringup
        cd kolla-bringup
@@ -299,11 +298,11 @@ Clone kolla-kubernetes::
 
     git clone http://github.com/openstack/kolla-kubernetes
 
-Install kolla-kubernetes::
+Install kolla-ansible and kolla-kubernetes::
 
     sudo pip install -U kolla-ansible/ kolla-kubernetes/
 
-Copy default kolla configuration to etc::
+Copy default Kolla configuration to etc::
 
     sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
 
@@ -315,7 +314,7 @@ Generate default passwords via SPRNG::
 
     sudo kolla-kubernetes-genpwd
 
-Create a kubernetes namespace to isolate this kolla deployment::
+Create a Kubernetes namespace to isolate this Kolla deployment::
 
     kubectl create namespace kolla
 
@@ -326,15 +325,15 @@ Label the AIO node as the compute and controller node::
 
 .. warning:
 
-    The kolla-kubernetes deliverable has two configuraiton files.  This is a little
-    clunky and we know about the problem :)  We are working on getting all configuraiton
+    The kolla-kubernetes deliverable has two configuration files.  This is a little
+    clunky and we know about the problem :)  We are working on getting all configuration
     into cloud.yaml. Until that is fixed the variable in globals.yaml `kolla_install_type`
     must have the same contents as the variable in cloud.yaml `install_type`. In this
     document we use the setting `source` although `binary` could also be used.
 
-Modify kolla configuration::
+Modify Kolla configuration::
 
-    set network_interface in /etc/kolla/globals.yaml to the management interface name.
+    set network_interface in /etc/kolla/globals.yml to the management interface name.
     set neutron_external_interface in /etc/kolla/globals.yml to the Neutron interface name.
     This is the external interface that neutron will use.  It must not have an IP
     address assigned to it.
@@ -384,14 +383,12 @@ Add required configuration to the end of /etc/kolla/globals.yml::
 For operators using virtualization for evaluation purposes please enable
 QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
-    cat <<EOF > nova.conf
+    sudo mkdir /etc/kolla/config
+    sudo tee /etc/kolla/config/nova.conf<<EOF
     [libvirt]
     virt_type=qemu
     cpu_mode=none
     EOF
-
-    sudo mkdir /etc/kolla/config
-    sudo cp -a nova.conf /etc/kolla/config
 
 .. note::
 
@@ -425,11 +422,11 @@ Enable resolv.conf workaround::
 
     kolla-kubernetes/tools/setup-resolv-conf.sh kolla
 
-Build all helm microcharts, service charts, and metacharts::
+Build all Helm microcharts, service charts, and metacharts::
 
     kolla-kubernetes/tools/helm_build_all.sh .
 
-Check that all helm images have been built by verifying the number is > 150::
+Check that all Helm images have been built by verifying the number is > 150::
 
     ls | grep ".tgz" | wc -l
 
@@ -503,30 +500,30 @@ Create a cloud.yaml file for the deployment of the charts::
    The next operation is not a simple copy and paste as the rest of this
    document is structured.  You should determine your management interface
    which is the value of /etc/kolla/globals.yml and replace the contents
-   of YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following sed operation.
+   of YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following Sed operation.
 
 Replace all occurrences of 192.168.7.105 with your management interface nic (e.g. eth0)::
 
-   sed -i "s@192.168.7.105@YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML@" ./cloud.yaml
+   sed -i "s@192.168.7.105@YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML@g" ./cloud.yaml
 
 Replace all occurrences of enp1s0f1 with your neutron interface name (e.g. eth1)::
 
-   sed -i "s@enp1s0f1@YOUR_NEUTRON_NETWORK_INTERFACE_FROM_GLOBALS.YML@" ./cloud.yaml
+   sed -i "s@enp1s0f1@YOUR_NEUTRON_NETWORK_INTERFACE_FROM_GLOBALS.YML@g" ./cloud.yaml
 
 .. note::
 
    Some of the variables in the cloud.yaml file that may need to be customized are:
 
-   set 'external_vip': to the IP address of your management interface
+   set 'external_vip' to the IP address of your management interface
    set 'dns_name' to the IP address of your management network
-   set 'tunnel_interface': to the IP address of your management interface
-   interface name used for connectivity between nodes in kubernetes
-   cluster, in most of cases it matches the name of the kubernetes
+   set 'tunnel_interface' to the IP address of your management interface
+   interface name used for connectivity between nodes in Kubernetes
+   cluster, in most of cases it matches the name of the Kubernetes
    host management interface.  To determine this,
    ``grep network_interface /etc/kolla/globals.yml``.
-   set ext_interface_name: to the interface name used for your Neutron network.
+   set 'ext_interface_name' to the interface name used for your Neutron network.
 
-Start mariadb first and wait for it to enter the RUNNING state::
+Start mariadb first and wait for it to enter the Running state::
 
     helm install --debug kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
 
@@ -543,7 +540,7 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
 
-Wait for nova-compute the enter the running state before creating the cell0
+Wait for nova-compute the enter the Running state before creating the cell0
 database::
 
     helm install --debug kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values ./cloud.yaml
@@ -574,7 +571,7 @@ system. ::
     vgcreate cinder-volumes /dev/loop2
 
 Note that in the event where iSCSI daemon is active on the host, there is a
-need to perform the following steps before executing the cinder-volume-lvm helm
+need to perform the following steps before executing the cinder-volume-lvm Helm
 chart to avoid the iscsd container from going into crash loops:
 
 ::
@@ -582,14 +579,14 @@ chart to avoid the iscsd container from going into crash loops:
     sudo systemctl stop iscsid
     sudo systemctl stop iscsid.socket
 
-Execute the cinder-volume-lvm helm chart:
+Execute the cinder-volume-lvm Helm chart:
 
 ::
 
     helm install --debug kolla-kubernetes/helm/service/cinder-volume-lvm --namespace kolla --name cinder-volume-lvm --values ./cloud.yaml
 
 Observe the previously running watch command in a different terminal. Wait
-for all pods to to enter the running state.  If you didn't run watch in a
+for all pods to enter the Running state.  If you didn't run watch in a
 different terminal, you can run it now::
 
     watch -d -n 5 -c kubectl get pods --all-namespaces
@@ -604,13 +601,13 @@ Generate openrc file::
    The ``ext`` option to create the keystonerc creates a keystonerc file
    that is compatible with this guide.
 
-Install OpenStack Clients::
+Install OpenStack clients::
 
     sudo pip install "python-openstackclient"
     sudo pip install "python-neutronclient"
     sudo pip install "python-cinderclient"
 
-Bootstrap the cloud envrionment and create a VM as requested::
+Bootstrap the cloud environment and create a VM as requested::
 
     kolla-ansible/tools/init-runonce
 
@@ -626,15 +623,15 @@ Troubleshooting
 
    Some of these steps are dangerous.  Be warned.
 
-To cleanup the database entry for a specific service such as nova:
+To cleanup the database entry for a specific service such as nova::
 
-    helm install --debug /opt/kolla-kubernetes//helm/service/nova-cleanup --namespace kolla --name nova-cleanup --values cloud.yaml
+    helm install --debug /opt/kolla-kubernetes/helm/service/nova-cleanup --namespace kolla --name nova-cleanup --values cloud.yaml
 
-To delete a helm chart::
+To delete a Helm release::
 
-    helm delete --purge mariadb
+    helm delete mariadb --purge
 
-To delete all helm charts::
+To delete all Helm releases::
 
     helm delete mariadb --purge
     helm delete rabbitmq --purge
