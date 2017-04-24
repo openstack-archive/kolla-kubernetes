@@ -41,6 +41,10 @@ class PathFinder(object):
         return PathFinder._find(KOLLA_SEARCH_PATHS, None)
 
     @staticmethod
+    def find_kolla_ansible_dir():
+        return PathFinder._find(KOLLA_ANSIBLE_SEARCH_PATHS, None)
+
+    @staticmethod
     def find_kolla_kubernetes_dir():
         return PathFinder._find(KOLLA_KUBERNETES_SEARCH_PATHS, None)
 
@@ -113,18 +117,24 @@ CONFIG_SEARCH_PATHS = [
 KOLLA_SEARCH_PATHS = [
     '/usr/share/kolla',
     '/usr/local/share/kolla',
-    '/usr/share/kolla-ansible',
-    '/usr/local/share/kolla-ansible',
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  'kolla')),
+    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
+                                 './share/kolla'))
+]
+
+# prioritize directories to search for kolla-ansible sources
+# Search installation paths first
+# Then search development paths
+KOLLA_ANSIBLE_SEARCH_PATHS = [
+    '/usr/share/kolla-ansible',
+    '/usr/local/share/kolla-ansible',
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  '../kolla-ansible')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  'kolla-ansible')),
-    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
-                                 './share/kolla'))
 ]
 
 # prioritize directories to search for kolla-kubernetes sources
