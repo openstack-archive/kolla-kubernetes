@@ -59,7 +59,7 @@ spec:
             }
             EOF
 
-            curl -f --tlsv1.2 -sS  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+            curl --insecure --tlsv1.2 -sS  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
                 -d '@/tmp/tokens.json' \
                 -H 'Content-type:application/json' \
                 -H "Authorization: Bearer $KUBE_TOKEN" \
