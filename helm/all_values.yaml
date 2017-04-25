@@ -22,6 +22,8 @@ common:
                     kolla_kubernetes_external_vip: 172.18.0.1
                     kolla_kubernetes_external_subnet: 24
                     kube_logger: true
+                    prometheus_exporter: true
+                    prometheus_port: 9101
 
 common-mariadb:
         global:
@@ -48,6 +50,7 @@ pod-http-termination:
                 all:
                     haproxy_python_termination: true
                     haproxy_image_tag: 3.0.2
+                    haproxy_prometheus_image_full: "prom/haproxy-exporter:v0.7.1"
                     grace_period_seconds: 172800
 
 stateful-service:

@@ -11,6 +11,10 @@
 {{- $localVals := dict }}
 {{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $localVals "retKey" "haproxy" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
+{{- $c := dict "searchPath" .searchPath "key" "prometheus_exporter" "retDict" $localVals "retKey" "prometheus" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
+{{- $c := dict "searchPath" .searchPath "key" "prometheus_port" "retDict" $localVals "retKey" "prometheusPort" "Values" .Values }}
+{{- include "kolla_val_get_raw" $c }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -30,6 +34,10 @@ spec:
       annotations:
 {{- if $localVals.haproxy }}
         kolla_upgrade: minor_rolling_safe
+{{- if $localVals.prometheus }}
+        "prometheus.io/port": {{ $localVals.prometheusPort | quote }}
+        "prometheus.io/scrape": "true"
+{{- end }}
 {{- end }}
 #FIXME Once out of alpha, this should be converted to yaml.
 #FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
@@ -115,6 +123,8 @@ spec:
               name: kolla-kubernetes-events
             - mountPath: {{ $containerConfigDirectory }}
               name: haproxy-config
+            - mountPath: /haproxy
+              name: socket
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
@@ -124,6 +134,18 @@ spec:
 {{- if eq .resourceName "nova-api" }}
             - containerPort: {{ $novaMetadataPort }}
               name: nova-metadata
+{{- end }}
+{{- if $localVals.prometheus }}
+        - name: exporter
+          image: {{ include "haproxy_prometheus_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command: [haproxy_exporter, "-haproxy.scrape-uri=unix:/haproxy/haproxy.sock", "-web.listen-address=:{{ $localVals.prometheusPort}}"]
+          volumeMounts:
+            - mountPath: /haproxy
+              name: socket
+          ports:
+            - containerPort: {{ $localVals.prometheusPort }}
+              name: prometheus
 {{- end }}
 {{- end }}
         - name: main
@@ -167,6 +189,8 @@ spec:
       volumes:
 {{- include "common_volumes" . | indent 8 }}
         - name: kolla-kubernetes-events
+          emptyDir: {}
+        - name: socket
           emptyDir: {}
         - name: pod-main-config
           emptyDir: {}
