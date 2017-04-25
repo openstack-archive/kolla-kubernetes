@@ -55,6 +55,9 @@ base_distro="$2"
 branch="$4"
 config="$5"
 
+# IP address to configure on the Ironic conductor network interface
+IRONIC_CONDUCTOR_IP=${6:-172.21.0.10}
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
@@ -244,8 +247,7 @@ if [ "x$config" == "xironic" ]; then
     sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd@ \
          | awk '{print $1}') ovs-vsctl add-br br-tenants
     sudo ifconfig br-tenants up
-    sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
-                                    | awk '{print $2}')/24
+    sudo ifconfig br-tenants ${IRONIC_CONDUCTOR_IP}/24
 fi
 
 helm install kolla/neutron-create-keystone-service-job --version $VERSION \
