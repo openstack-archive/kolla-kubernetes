@@ -47,6 +47,8 @@ spec:
         - image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: "main"
+          securityContext:
+            runAsUser: 0
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
@@ -62,7 +64,8 @@ spec:
           command: [
               "bash",
               "-ce",
-              "/bin/cp -aLf {{ $containerConfigDirectory }}/..data/nova.conf /etc/nova/nova.conf;
+              "if [ ! -d /etc/nova ]; then mkdir /etc/nova; fi;
+               /bin/cp -aLf {{ $containerConfigDirectory }}/..data/nova.conf /etc/nova/nova.conf;
                nova-manage cell_v2 simple_cell_setup;
               "]
       volumes:
