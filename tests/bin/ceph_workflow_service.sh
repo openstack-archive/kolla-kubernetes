@@ -128,8 +128,7 @@ sudo docker ps | grep openvswitch
 sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd@ \
                           | awk '{print $1}') ovs-vsctl add-br br-tenants
 sudo ifconfig br-tenants up
-sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
-                         | awk '{print $2}')/24
+sudo ifconfig br-tenants 172.21.0.10/24
 
 helm install kolla/ironic --version $VERSION  --namespace kolla \
     --name ironic \
