@@ -31,6 +31,15 @@ There are two steps to deploying kolla-kubernetes.  The first step involves
 deploying Kubernetes.  The second step involves deploying Kolla that is
 compatible with Kubernetes.
 
+Host machine requirements
+=========================
+
+The host machine must satisfy the following minimum requirements:
+
+- 2 network interfaces
+- 8GB main memory
+- 40GB disk space
+
 Dependencies::
 
     docker == 1.12.6
