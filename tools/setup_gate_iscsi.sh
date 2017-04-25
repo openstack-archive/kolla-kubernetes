@@ -92,6 +92,7 @@ cinder service-list >> $WORKSPACE/logs/cinder_service_list.txt
 
 tests/bin/basic_tests.sh
 tests/bin/horizon_test.sh
+tests/bin/prometheus_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
 #
 # Workflow specific tests
