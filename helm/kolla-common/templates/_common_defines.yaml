@@ -32,6 +32,14 @@
 {{- include "kolla_build_image_full" $c }}
 {{- end }}
 
+{{- define "haproxy_prometheus_image_full" }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "haproxy" }}
+{{- $_ := set $c "imageName" "haproxy_prometheus_image_full" }}
+{{- $_ := set $c "tagName" "haproxy_prometheus_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
+{{- end }}
+
 {{- define "fluentd_image_full" }}
 {{- $c := dict "searchPath" .searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "fluentd" }}
