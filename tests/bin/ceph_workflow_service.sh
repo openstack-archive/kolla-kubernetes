@@ -8,6 +8,9 @@ branch="$3"
 IP=${4:-172.18.0.1}
 tunnel_interface=${5:-docker0}
 
+# IP address to configure on the Ironic conductor network interface
+IRONIC_CONDUCTOR_IP=${6:-172.21.0.10}
+
 # Break out devenv behavior since we will use different polling logic
 # and we also assume ceph-multi use in the devenv
 devenv=false
@@ -128,8 +131,7 @@ sudo docker ps | grep openvswitch
 sudo docker exec -tu root $(sudo docker ps | grep openvswitch-vswitchd@ \
                           | awk '{print $1}') ovs-vsctl add-br br-tenants
 sudo ifconfig br-tenants up
-sudo ifconfig br-tenants $(grep ironic_tftp_server $DIR/helm/all_values.yaml \
-                         | awk '{print $2}')/24
+sudo ifconfig br-tenants ${IRONIC_CONDUCTOR_IP}/24
 
 helm install kolla/ironic --version $VERSION  --namespace kolla \
     --name ironic \
