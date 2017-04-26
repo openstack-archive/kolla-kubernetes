@@ -462,6 +462,7 @@ Create a local cloud.yaml file for the deployment of the charts::
     global:
        kolla:
          all:
+           docker_registry: docker.io
            image_tag: "4.0.0"
            kube_logger: false
            external_vip: "192.168.7.105"
@@ -521,6 +522,10 @@ Create a local cloud.yaml file for the deployment of the charts::
    placement API to run Mitaka or Newton images, this can be done by
    setting the variable global.kolla.nova.all.placement_api_enabled to false
    in the cloud.yaml file.
+
+.. note::
+   The default docker registry is ``docker.io``. If you want to use local
+   registry, modify the value of ``docker_registry`` to your local registry
 
 .. note::
 
