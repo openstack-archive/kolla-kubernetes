@@ -362,6 +362,8 @@ memcached-deployment:
                     all:
                         enabled: true
                         port: 11211
+                        prometheus_port: 9106
+                        memcached_prometheus_image_full: "prom/memcached-exporter:v0.3.0"
 
 mariadb-init-element-job:
         global:
