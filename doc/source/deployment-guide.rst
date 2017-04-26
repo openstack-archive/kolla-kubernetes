@@ -13,8 +13,10 @@ Bare Metal Deployment Guide for kolla-kubernetes
 
 .. note::
 
-   This document was tested only against CentOS 7.3 Host OS and AIO
-   environments.
+   This document was tested only against CentOS 7.3 Host OS and AIO environments.
+   All the steps should be run as non-root user. If you follow this guide as the
+   root user, helm cannot be found in ``/usr/local/bin/`` because the path ``/usr/local/bin``
+   is not defaulted to enabled in CentOS 7.
 
 Introduction
 ============
