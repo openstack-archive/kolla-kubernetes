@@ -75,7 +75,10 @@ spec:
 {{- if $localVals.setup_bridge }}
                   ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }} ;
 {{- if $localVals.add_port }}
-                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }} {{ $extInterfaceName }};
+                  EXTERNAL_INTERFACE={{ $extInterfaceName }};
+                  F=/var/lib/kolla-kubernetes/openvswitch-vswitchd/external_interface;
+                  [ -f $F ] && EXTERNAL_INTERFACE=$(<$F);
+                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
 {{- end }}
 {{- if $localVals.ext_bridge_up }}
               ip link set {{ $extBridgeName }} up;
@@ -90,6 +93,10 @@ spec:
                 {
                    "name": "openvswitch-run",
                    "mountPath": "/var/run/openvswitch/"
+                },
+                {
+                    "name": "host-var-lib-kk",
+                    "mountPath": "/var/lib/kolla-kubernetes"
                 }
              ]
           }
@@ -145,4 +152,7 @@ spec:
         - name: host-lib-modules
           hostPath:
             path: /lib/modules
+        - name: host-var-lib-kk
+          hostPath:
+            path: /var/lib/kolla-kubernetes
 {{- end }}
