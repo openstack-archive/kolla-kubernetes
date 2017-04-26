@@ -1,0 +1,10 @@
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+2: Pete Birley <pete@port.direct>
+Workflow+1: Pete Birley <pete@port.direct>
+Code-Review+1: Zhaokun Fu <fuzk@inspur.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 26 Apr 2017 00:29:06 +0000
+Reviewed-on: https://review.openstack.org/452858
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
