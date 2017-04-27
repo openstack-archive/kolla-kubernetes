@@ -56,10 +56,17 @@ Dependencies::
    When working with Kubernetes it is considered a useful practice to open a
    unique terminal window and run the command that watches all Kubernetes's
    processes.  This operation will show changes as they occur within
-   Kubernetes and also shows the PODs IP addresses::
+   Kubernetes. This is referred to as the `watch terminal` in this
+   documentation::
 
-       watch -d kubectl get pods --all-namespaces
+     watch -d kubectl get pods --all-namespaces
 
+.. note::
+
+   Alternatively run this which will provide more information
+   including pod ip addresses, but needs a wider terminal as a result:
+
+     watch -d kubectl get pods --all-namespaces -o wide
 
 Step 1: Deploy Kubernetes
 =========================
@@ -77,7 +84,7 @@ Step 1: Deploy Kubernetes
    2. The address spaces cannot already be allocated by your organization
 
    If the POD and CIDR addresses overlap in this documentation with your organizations's
-   IP address ranges, they may be changed.  Simply subtitute anywhere these addresses
+   IP address ranges, they may be changed.  Simply substitute anywhere these addresses
    are used with the custom cidrs you have chosen.
 
 
@@ -122,14 +129,14 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.1 or later::
+Install Kubernetes 1.6.1 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
 
 
 Ubuntu
 ------
-write the kubernetes repository file::
+Write the kubernetes repository file::
 
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo -E apt-key add -
     cat <<EOF > kubernetes.list
@@ -140,7 +147,7 @@ write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.1 or later::
+Install Kubernetes 1.6.1 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
@@ -166,15 +173,15 @@ Setup the DNS server with the service CIDR::
    that 1..9 are reserved for future expansion of Kubernetes infrastructure
    services.
 
-Then reload the hand-modified service files::
+Reload the hand-modified service files::
 
     sudo systemctl daemon-reload
 
-Then stop kubelet if it is running::
+Stop kubelet if it is running::
 
     sudo systemctl stop kubelet
 
-Then enable and start docker and kubelet::
+Enable and start docker and kubelet::
 
     sudo systemctl enable kubelet
     sudo systemctl start kubelet
@@ -192,6 +199,24 @@ Deploy Kubernetes with kubeadm::
    Kolla developers have found through experience that each node consumes
    an entire /24 network, so this configuration would permit 255 Kubernetes nodes.
 
+.. note::
+
+   If the following issue occurs after running this command:
+
+   `preflight] Some fatal errors occurred:
+   /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set
+   to 1`
+
+   There are two work-arounds:
+
+   1. Add `net.bridge.bridge-nf-call-ip6tables = 1` and
+      `net.bridge.bridge-nf-call-iptables = 1` to  ``/etc/sysctl.conf``
+   2. Run with `--skip-preflight-checks`
+
+   The former will require you to log out and in for the change to
+   take effect. The latter runs the risk of missing other issues that
+   may be flagged.
+
 Load the kubedm credentials into the system::
 
     mkdir -p $HOME/.kube
@@ -200,8 +225,7 @@ Load the kubedm credentials into the system::
 
 .. note::
 
-   Until this step is done, the 'watch -d kubectl get pods
-   --all-namespaces' command will not return information.
+   Until this step is done, the `watch terminal` will not return information.
 
 The CNI driver is the networking driver that Kubernetes uses.  Kolla uses Canal
 currently in the gate and tests with it hundreds of times per day via
@@ -216,20 +240,19 @@ Deploy the Canal CNI driver::
     kubectl apply -f canal.yaml
 
 
-Finally untaint the node so that PODs can be scheduled to this AIO deployment::
+Finally untaint the node (mark the master node as schedulable) so that
+PODs can be scheduled to this AIO deployment::
 
     kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 .. note::
 
     Kubernetes must start completely before verification will function
-    properly. You will know kubernetes has completed initialization by
-    checking using below command:
+    properly.
 
-    $ kubectl get pods --all-namespaces | grep dns
-
-    dns should be in 3/3 Running. If you fail to wait, Step 2 will fail.
-
+    In your `watch terminal`, confirm that Kubernetes has completed
+    initialization by observing that the dns pod is in `3/3 Running`
+    state. If you fail to wait, Step 2 will fail.
 
 Step 2: Validate Kubernetes
 ===========================
@@ -248,6 +271,7 @@ This should return a nslookup result without error::
 
     $ kubectl run -i -t $(uuidgen) --image=busybox --restart=Never
     Waiting for pod default/33c30c3b-8130-408a-b32f-83172bca19d0 to be running, status is Pending, pod ready: false
+
     # nslookup kubernetes
     Server:    10.3.3.10
     Address 1: 10.3.3.10 kube-dns.kube-system.svc.cluster.local
@@ -294,7 +318,10 @@ Install and deploy Helm::
     chmod 700 get_helm.sh
     ./get_helm.sh
     helm init
-    watch "kubectl get pods -n kube-system | grep tiller"
+
+.. note::
+   In your `watch terminal` wait for the tiller pod to successfully
+   come up.
 
 Verify both the client and server version of Helm are consistent::
 
@@ -302,8 +329,7 @@ Verify both the client and server version of Helm are consistent::
 
 Install repositories necessary to install packaging::
 
-    sudo yum install -y epel-release
-    sudo yum install -y ansible python-pip python-devel
+    sudo yum install -y epel-release ansible python-pip python-devel
 
 .. note::
 
@@ -354,14 +380,16 @@ Label the AIO node as the compute and controller node::
     must have the same contents as the variable in cloud.yaml `install_type`. In this
     document we use the setting `source` although `binary` could also be used.
 
-Modify Kolla configuration::
+Modify Kolla ``/etc/kolla/globals.yml`` configuration file::
 
-    - set network_interface in /etc/kolla/globals.yml to the management interface name.
-    - set neutron_external_interface in /etc/kolla/globals.yml to the Neutron interface name.
-      This is the external interface that neutron will use.  It must not have an IP
-      address assigned to it.
+    1. Set `network_interface` in `/etc/kolla/globals.yml` to the
+       Management interface name. E.g: `eth0`.
+    2. Set `neutron_external_interface` in `/etc/kolla/globals.yml` to the
+       Neutron interface name. E.g: `eth1`. This is the external
+       interface that Neutron will use.  It must not have an IP address
+       assigned to it.
 
-Add required configuration to the end of /etc/kolla/globals.yml::
+Add required configuration to the end of ``/etc/kolla/globals.yml``::
 
     cat <<EOF > add-to-globals.yml
     kolla_install_type: "source"
@@ -453,8 +481,9 @@ Check that all Helm images have been built by verifying the number is > 150::
 
     ls | grep ".tgz" | wc -l
 
-Create a local cloud.yaml file for the deployment of the charts::
+Create a local cloud.yml file for the deployment of the charts::
 
+    cat <<EOF > cloud.yml
     global:
        kolla:
          all:
@@ -510,48 +539,67 @@ Create a local cloud.yaml file for the deployment of the charts::
          horizon:
            all:
              port_external: true
+    EOF
+
+.. warning::
+
+   This file is populated with several values that will need to
+   be customized to your environment, this is explained below.
 
 .. note::
 
    The placement api is enabled by default.  If you wish to disable the
    placement API to run Mitaka or Newton images, this can be done by
-   setting the variable global.kolla.nova.all.placement_api_enabled to false
+   setting the `variable global.kolla.nova.all.placement_api_enabled` to `false`
    in the cloud.yaml file.
 
 .. note::
 
-   The next operation is not a simple copy and paste as the rest of this
-   document is structured.  You should determine your management interface
-   which is the value of 'network_interface' in ``/etc/kolla/globals.yml``
-   e.g. 'eth0' and replace the contents of
-   YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML in the following sed
-   operation, using the ip address assigned to that network interface.
+   The next operations are not a simple copy and paste as the rest of this
+   document is structured.
 
-Replace all occurrences of 192.168.7.105 with your management interface ip (e.g. 10.240.43.81)::
+   In `/etc/kolla/globals.yml` you assigned your Management interface
+   name to `network_interface` (E.g. `eth0`) - we will refer to this
+   as: `YOUR_NETWORK_INTERFACE_NAME_FROM_GLOBALS.YML`.
 
-   sed -i "s@192.168.7.105@YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML@g" ./cloud.yaml
+   Record the ip address assigned to
+   `YOUR_NETWORK_INTERFACE_NAME_FROM_GLOBALS.YML`
+   (E.g. `10.240.43.81`). We will refer to this as:
+   `YOUR_NETWORK_INTERFACE_ADDRESS_FROM_GLOBALS.YML`.
 
-Replace all occurrences of enp1s0f1 with your neutron interface name (e.g. eth1)::
+   Also record the name of the `neutron_external_interface` from
+   `/etc/kolla/globals.yml` (E.g. `eth1`). We will refer to this as:
+   `YOUR_NEUTRON_INTERFACE_NAME_FROM_GLOBALS.YML`.
 
-   sed -i "s@enp1s0f1@YOUR_NEUTRON_NETWORK_INTERFACE_FROM_GLOBALS.YML@g" ./cloud.yaml
+Replace all occurrences of `192.168.7.105` with
+`YOUR_NETWORK_INTERFACE_ADDRESS_FROM_GLOBALS.YML`::
+
+   sed -i "s@192.168.7.105@YOUR_NETWORK_INTERFACE_ADDRESS_FROM_GLOBALS.YML@g" ./cloud.yaml
 
 .. note::
 
-   Some of the variables in the cloud.yaml file that may need to be customized are:
+   This operation will have changed the values set in: `external_vip`, `dns_name` and
+   `cinder-volumes` variables.
 
-   - set ``external_vip`` to the IP address of your management interface
-     (sed operation above takes care of this)
-   - set ``dns_name`` to the IP address of your management network
-     (sed operation above takes care of this)
-   - set ``tunnel_interface`` to the IP address of your management interface
-     interface name used for connectivity between nodes in kubernetes
-     cluster, in most of cases it matches the name of the kubernetes
-     host management interface.  To determine this,
-     ``grep network_interface /etc/kolla/globals.yml``.
-     Note that this is the same address as
-     YOUR_NETWORK_INTERFACE_FROM_GLOBALS.YML -from above
-   - set ``ext_interface_name`` to the interface name used for your
-     neutron interface name (e.g. eth1)
+Replace `enp1s0f1` with `YOUR_NEUTRON_INTERFACE_NAME_FROM_GLOBALS.YML`::
+
+   sed -i "s@enp1s0f1@YOUR_NEUTRON_INTERFACE_NAME_FROM_GLOBALS.YML@g" ./cloud.yaml
+
+.. note::
+
+   This operation will have changed the value set in:
+   `ext_interface_name` variable.
+
+Replace `docker0` with the management interface name (E.g. `eth0`) used for
+connectivity between nodes in kubernetes cluster, in most cases it
+is `YOUR_NETWORK_INTERFACE_NAME_FROM_GLOBALS.YML`::
+
+   sed -i "s@docker0@YOUR_NETWORK_INTERFACE_NAME_FROM_GLOBALS.YML@g" ./cloud.yaml
+
+.. note::
+
+   This operation will have changed the value set in:
+   `tunnel_interface` variable.
 
 Start mariadb first and wait for it to enter into Running state::
 
@@ -581,9 +629,7 @@ Deploy iSCSI support with Cinder LVM (Optional)
 The Cinder LVM implementation requires a volume group to be set up. This can
 either be a real physical volume or a loopback mounted file for development.
 Use ``pvcreate`` and ``vgcreate`` to create the volume group.  For example
-with the devices ``/dev/sdb`` and ``/dev/sdc``:
-
-::
+with the devices ``/dev/sdb`` and ``/dev/sdc``::
 
     <WARNING ALL DATA ON /dev/sdb and /dev/sdc will be LOST!>
 
@@ -592,7 +638,7 @@ with the devices ``/dev/sdb`` and ``/dev/sdc``:
 
 During development, it may be desirable to use file backed block storage. It
 is possible to use a file and mount it as a block device via the loopback
-system. ::
+system::
 
     mknod /dev/loop2 b 7 2
     dd if=/dev/zero of=/var/lib/cinder_data.img bs=1G count=20
@@ -602,24 +648,19 @@ system. ::
 
 Note that in the event where iSCSI daemon is active on the host, there is a
 need to perform the following steps before executing the cinder-volume-lvm Helm
-chart to avoid the iscsd container from going into crash loops:
-
-::
+chart to avoid the iscsd container from going into crash loops::
 
     sudo systemctl stop iscsid
     sudo systemctl stop iscsid.socket
 
-Execute the cinder-volume-lvm Helm chart:
-
-::
+Execute the cinder-volume-lvm Helm chart::
 
     helm install --debug kolla-kubernetes/helm/service/cinder-volume-lvm --namespace kolla --name cinder-volume-lvm --values ./cloud.yaml
 
-Observe the previously running watch command in a different terminal. Wait
-for all pods to enter into Running state.  If you didn't run watch in a
-different terminal, you can run it now::
+In the `watch terminal` wait for all pods to enter into Running state.
+If you didn't run watch in a different terminal, you can run it now::
 
-    watch -d -n 5 -c kubectl get pods --all-namespaces
+    watch -d kubectl get pods --all-namespaces
 
 Generate openrc file::
 
@@ -654,10 +695,11 @@ TroubleShooting
 .. note::
 
    This is just a list of popular commands the community has suggested
-   they use a lot. This is but no means a comprehensive guide to
+   they use a lot. This is by no means a comprehensive guide to
    debugging kubernetes or kolla.
 
 Determine IP and port information::
+
   $ kubectl get svc -n kube-system
   NAME            CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
   canal-etcd      10.3.3.100   <none>        6666/TCP        16h
@@ -684,6 +726,7 @@ Determine IP and port information::
   rabbitmq-mgmt        10.3.3.105   <none>         15672/TCP   15h
 
 View all k8's namespaces::
+
   $ kubectl get namespaces
   NAME          STATUS    AGE
   default       Active    16h
@@ -692,16 +735,19 @@ View all k8's namespaces::
   kube-system   Active    16h
 
 Kolla Describe a pod in full detail::
+
   kubectl describe pod ceph-admin -n kolla
   ...<lots of information>
 
 View all deployed services::
+
   $ kubectl get deployment -n kube-system
   NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
   kube-dns        1         1         1            1           20h
   tiller-deploy   1         1         1            1           20h
 
 View configuration maps::
+
   $ kubectl get configmap -n kube-system
   NAME                                 DATA      AGE
   canal-config                         4         20h
@@ -722,11 +768,13 @@ View configuration maps::
   rabbitmq.v1                          1         20h
 
 General Cluster information::
+
   $ kubectl cluster-info
   Kubernetes master is running at https://192.168.122.2:6443
   KubeDNS is running at https://192.168.122.2:6443/api/v1/proxy/namespaces/kube-system/services/kube-dns
 
 View all jobs::
+
   $ kubectl get jobs --all-namespaces
   NAMESPACE     NAME                                              DESIRED   SUCCESSFUL   AGE
   kolla         cinder-create-db                                  1         1            20h
@@ -737,6 +785,7 @@ View all jobs::
   kolla         cinder-create-keystone-endpoint-public            1         1            20h
 
 View all deployments::
+
   $ kubectl get deployments --all-namespaces
   NAMESPACE     NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
   kolla         cinder-api        1         1         1            1           20h
@@ -753,11 +802,13 @@ View all deployments::
   kube-system   tiller-deploy     1         1         1            1           20h
 
 View secrets::
+
   $ kubectl get secrets
   NAME                  TYPE                                  DATA      AGE
   default-token-3dzfp   kubernetes.io/service-account-token   3         20h
 
 View docker images::
+
   $ sudo docker images
   REPOSITORY                                                TAG                 IMAGE ID            CREATED             SIZE
   gcr.io/kubernetes-helm/tiller                             v2.3.1              38527daf791d        7 days ago          56 MB
@@ -803,3 +854,30 @@ To clean up Kubernetes and all docker containers entirely, run
 this command, reboot, and run these commands again::
 
     sudo kubeadm reset
+
+Using OpenStack
+===============
+
+If you were able to successfully reach the end of this guide and
+`demo1` was successfully deployed, here is a fun list of things you
+can do with your new cluster.
+
+Access Horizon GUI
+------------------
+1. Determine Horizon IP Address::
+
+     $ kubectl get pods --all-namespaces -o wide | grep horizon | awk '{ print $7 }'
+     10.1.49.37
+
+2. Determine username and password from keystone::
+
+     $ cat ~/keystonerc_admin | grep OS_USERNAME
+     export OS_USERNAME=admin
+
+     $ cat ~/keystonerc_admin | grep OS_PASSWORD
+     export OS_PASSWORD=Sr6XMFXvbvxQCJ3Cib1xb0gZ3lOtBOD8FCxOcodU
+
+3. Install a brower, E.g. firefox on the host running kolla-kubernetes
+
+4. Run the browser, and access Horizon GUI with the IP from Step 1,
+   using the credentials from Step 2.
