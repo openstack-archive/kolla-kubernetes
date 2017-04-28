@@ -266,6 +266,6 @@ wait_for_vm baremetal-1
 vm_id=$(openstack server list | grep baremetal | awk '{print $2}')
 ip_addr=$(openstack server show $vm_id -f value -c addresses)
 ip_addr=${ip_addr#*=}
-ping -c 20 -i 1 $ip_addr
+ping -c 20 -i 2 $ip_addr
 
 exit 0
