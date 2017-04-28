@@ -177,7 +177,7 @@ def main():
     count = 1
     for package in packages:
         if sys.stdout.isatty():
-            sys.stdout.write("\rProcessing %i/%i" % (count, len(packages)))
+            sys.stdout.write("\rProcessing %3i/%i " % (count, len(packages)))
             sys.stdout.flush()
             count += 1
         pkgdir = os.path.join(microdir, package)
