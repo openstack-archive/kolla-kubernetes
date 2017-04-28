@@ -53,6 +53,7 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
     cat /etc/nodepool/sub_nodes_private | while read line; do
         NODES=$((NODES+1))
         echo $line
+        ssh-keyscan $line >> ~/.ssh/known_hosts
         scp tools/setup_kubernetes.sh $line:
         scp tests/bin/fix_gate_iptables.sh $line:
         scp /usr/bin/kubectl $line:kubectl
