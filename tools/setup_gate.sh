@@ -1,5 +1,7 @@
 #!/bin/bash -xe
 
+# test
+
 PACKAGE_VERSION=0.7.0-1
 DISTRO="$2"
 TYPE="$3"
