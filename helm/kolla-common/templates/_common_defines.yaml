@@ -40,6 +40,14 @@
 {{- include "kolla_build_image_full" $c }}
 {{- end }}
 
+{{- define "memcached_prometheus_image_full" }}
+{{- $c := dict "searchPath" .searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "memcached" }}
+{{- $_ := set $c "imageName" "memcached_prometheus_image_full" }}
+{{- $_ := set $c "tagName" "memcached_prometheus_image_tag" }}
+{{- include "kolla_build_image_full" $c }}
+{{- end }}
+
 {{- define "fluentd_image_full" }}
 {{- $c := dict "searchPath" .searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "fluentd" }}
