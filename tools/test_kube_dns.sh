@@ -26,7 +26,6 @@ spec:
           command: ["sh", "-xc"]
           args:
             - |
-                curl -s http://172.16.128.100:6666/version
                 cat /etc/resolv.conf
                 ping -c 20 8.8.8.8
                 cat > /tmp/dns-test.py << "EOEF"
