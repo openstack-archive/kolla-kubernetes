@@ -14,8 +14,6 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
 yum install -y docker kubeadm kubelet kubectl kubernetes-cni ebtables
-sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=systemd --enable-cri=false |g' \
-        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
 else
@@ -63,6 +61,15 @@ if [ "$1" == "master" ]; then
     mkdir -p ~/.kube
     sudo cp /etc/kubernetes/admin.conf ~/.kube/config
     sudo chown $(id -u):$(id -g) ~/.kube/config
+#
+# Now Canal plugin requires below two confiugration parameters to be present
+# in controller manager manifest.
+#
+    cluster_cidr=$(sudo grep cluster-cidr /etc/kubernetes/manifests/kube-controller-manager.yaml || true)
+    if [ "x$cluster_cidr" == "x" ]; then
+       sudo sed -i '/--kubeconfig/a\    - --allocate-node-cidrs=true' /etc/kubernetes/manifests/kube-controller-manager.yaml
+       sudo sed -i '/--kubeconfig/a\    - --cluster-cidr=10.244.0.0/16' /etc/kubernetes/manifests/kube-controller-manager.yaml
+    fi
     tools/wait_for_kube_control_plane.sh
 
 # NOTE(sbezverk/kfox111) This is a horible hack to get k8s 1.6 working. This should be
