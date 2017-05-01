@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 url="https://raw.githubusercontent.com/projectcalico/canal/master"
-url="$url/k8s-install/kubeadm/1.6/canal.yaml"
+url="$url/k8s-install/1.6/canal.yaml"
 
 curl "$url" -o /tmp/canal.yaml
 
