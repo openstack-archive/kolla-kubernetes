@@ -11,11 +11,11 @@ IP=172.18.0.1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 . "$DIR/setup_gate_common.sh"
 
-# Setting up iptables
-setup_iptables
-
 # Installating required software packages
 setup_packages $DISTRO $CONFIG
+
+# Setting up iptables
+setup_iptables
 
 # Setting up an interface and a bridge
 setup_bridge
