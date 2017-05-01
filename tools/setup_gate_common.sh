@@ -10,7 +10,7 @@ DISTRO=$1
 CONFIG=$2
 if [ "x$DISTRO" == "xubuntu" ]; then
     sudo apt-get update
-    sudo apt-get install lvm2
+    sudo apt-get install lvm2 iproute2
     sudo apt-get remove -y open-iscsi
     sudo apt-get install -y bridge-utils tftp
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
@@ -20,7 +20,7 @@ else
     sudo yum-config-manager --enable epel
     sudo yum remove -y iscsi-initiator-utils
     sudo yum install -y bridge-utils tftp
-    sudo yum install -y lvm2
+    sudo yum install -y lvm2 iproute2
     (echo server:; echo "  interface: 172.19.0.1"; echo "  access-control: 0.0.0.0/0 allow") | \
         sudo /bin/bash -c "cat > /etc/unbound/conf.d/kubernetes.conf"
 fi
