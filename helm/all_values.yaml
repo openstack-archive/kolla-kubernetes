@@ -1167,6 +1167,8 @@ ironic-dnsmasq-daemonset:
         global:
             kolla:
                 ironic:
+                    all:
+                        ironic_inspection_cidr: 172.22.0.0/24
                     dnsmasq:
                         all:
                             initramfs_url:
