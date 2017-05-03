@@ -1105,6 +1105,7 @@ ironic-inspector-svc:
                             node_port_enabled: false
                             ironic_provision: true
                             ironic_inspector_provision_vip: 172.22.0.10
+                            ironic_inspection_cidr: 172.22.0.0/24
 
 ironic-api-create-db-job:
         global:
