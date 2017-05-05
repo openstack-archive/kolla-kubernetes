@@ -46,9 +46,9 @@ Dependencies::
 
     docker == 1.12.6
     helm >= 2.2.3
-    kubectl >= 1.6.1
-    kubeadm >= 1.6.1
-    kubelet >= 1.6.1
+    kubectl >= 1.6.2
+    kubeadm >= 1.6.2
+    kubelet >= 1.6.2
     kubernetes-cni >= 0.5.1
 
 .. note::
@@ -73,7 +73,7 @@ Step 1: Deploy Kubernetes
 
 .. note::
 
-   This document recommends Kubernetes 1.6.1 or later.
+   This document recommends Kubernetes 1.6.2 or later.
 
 .. warning::
 
@@ -129,7 +129,7 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.1 or later and other dependencies::
+Install Kubernetes 1.6.2 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
 
@@ -147,7 +147,7 @@ Write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.1 or later and other dependencies::
+Install Kubernetes 1.6.2 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
@@ -155,12 +155,18 @@ Install Kubernetes 1.6.1 or later and other dependencies::
 Centos and Ubuntu
 -----------------
 
-To enable the proper cgroup driver, start Docker and disable CRI::
+Enable and start Docker::
 
     sudo systemctl enable docker
     sudo systemctl start docker
+
+Ubuntu
+------
+
+Enable the proper CGROUP driver::
+
     CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
-    sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER --enable-cri=false |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 Setup the DNS server with the service CIDR::
 
@@ -235,11 +241,13 @@ CNI drivers may be used if they are properly configured.
 
 Deploy the Canal CNI driver::
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml -o canal.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml -o rbac.yaml
+    kubectl apply -f rbac.yaml
+
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml -o canal.yaml
     sed -i "s@192.168.0.0/16@10.1.0.0/16@" canal.yaml
     sed -i "s@10.96.232.136@10.3.3.100@" canal.yaml
     kubectl apply -f canal.yaml
-
 
 Finally untaint the node (mark the master node as schedulable) so that
 PODs can be scheduled to this AIO deployment::
