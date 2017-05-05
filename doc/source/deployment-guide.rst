@@ -160,6 +160,13 @@ To enable the proper cgroup driver, start Docker and disable CRI::
     sudo systemctl enable docker
     sudo systemctl start docker
     CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
+
+Centos::
+
+    sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+Ubuntu (needs enable-cri flagi set to false)::
+
     sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER --enable-cri=false |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 Setup the DNS server with the service CIDR::
@@ -235,11 +242,13 @@ CNI drivers may be used if they are properly configured.
 
 Deploy the Canal CNI driver::
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml -o canal.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml -o rbac.yaml
+    kubectl apply -f rbac.yaml
+
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml -o canal.yaml
     sed -i "s@192.168.0.0/16@10.1.0.0/16@" canal.yaml
     sed -i "s@10.96.232.136@10.3.3.100@" canal.yaml
     kubectl apply -f canal.yaml
-
 
 Finally untaint the node (mark the master node as schedulable) so that
 PODs can be scheduled to this AIO deployment::
