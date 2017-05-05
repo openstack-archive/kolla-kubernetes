@@ -10,6 +10,11 @@
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "ironic-pxe" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFullPXE := include "kolla_build_image_full" $c }}
 {{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
@@ -48,8 +53,11 @@ spec:
                  "IP=$(ip addr show dev {{ $ironicInterface }} to {{ $ironicInspectionCIDR }} | grep -m1 -G ''inet'' | awk ''{print $2}'' | cut -d ''/'' -f 1);
                   if test -z $IP; then exit 1; fi;
                   cp -a /config/dnsmasq/..data/* /dnsmasq/;
+                  cp -a /config/pxe/..data/* /pxe/;
                   curl -L {{ $url1 }} -o /tftpboot/ironic-agent.initramfs;
                   curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
+                  jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
+                  sed -i ''s|ironic-inspector|''$IP''|g'' /pxe/default;
                   sed -i ''s|interface=.*|interface={{ $ironicInterface }}|g'' /dnsmasq/dnsmasq.conf;
                   sed -i ''s|dhcp-option=option:tftp-server,.*|dhcp-option=option:tftp-server,''$IP''|g'' /dnsmasq/dnsmasq.conf;
                   sed -i ''s|dhcp-option=option:server-ip-address,.*|dhcp-option=option:server-ip-address,''$IP''|g'' /dnsmasq/dnsmasq.conf;
@@ -65,9 +73,44 @@ spec:
                    "mountPath": "/config/dnsmasq"
                 },
                 {
+                   "name": "ironic-pxe-config",
+                   "mountPath": "/pxe/"
+                },
+                {
+                   "name": "pxe-config",
+                   "mountPath": "/config/pxe"
+                },
+                {
                    "name": "ironic-dnsmasq-config",
                    "mountPath": "/dnsmasq/"
                 },
+                {
+                   "name": "tftpboot",
+                   "mountPath": "/tftpboot/"
+                }
+             ]
+          },
+          {
+             "name": "pxelinux",
+             "image": {{ $imageFullPXE | quote }},
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+             "command": [
+                 "sh",
+                 "-xec",
+                 "if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
+                     cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+                  fi;
+                  if [ -f /usr/share/syslinux/chain.c32 ]; then
+                     cp /usr/share/syslinux/chain.c32 /tftpboot;
+                  fi;
+                  if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
+                     cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
+                  fi;
+                  if [ -f /usr/lib/syslinux/modules/bios/chain.c32 ]; then
+                     cp /usr/lib/syslinux/modules/bios/chain.c32 /tftpboot;
+                  fi;
+             "],
+             "volumeMounts": [
                 {
                    "name": "tftpboot",
                    "mountPath": "/tftpboot/"
@@ -80,6 +123,17 @@ spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
+        - name: pxe
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          image: "{{ $imageFullPXE }}"
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: {{ $containerConfigDirectory }}
+              name: ironic-pxe-config
+            - mountPath: /tftpboot
+              name: tftpboot
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
         - name: main
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           image: "{{ $imageFull }}"
@@ -100,5 +154,10 @@ spec:
         - name: ironic-dnsmasq-config
           emptyDir: {}
         - name: tftpboot
+          emptyDir: {}
+        - name: pxe-config
+          configMap:
+            name: ironic-pxe
+        - name: ironic-pxe-config
           emptyDir: {}
 {{- end }}
