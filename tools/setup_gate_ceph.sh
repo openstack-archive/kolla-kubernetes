@@ -169,3 +169,4 @@ tests/bin/horizon_test.sh
 tests/bin/prometheus_tests.sh
 tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+tests/bin/mirror_k8s.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
