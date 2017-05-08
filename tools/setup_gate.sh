@@ -11,6 +11,10 @@ trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
 
+if [ "x$DISTRO" == "xcentos" ]; then
+    sudo sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+fi
+
 if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi
