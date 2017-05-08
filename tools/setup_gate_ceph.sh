@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.7.0-1
+ACTION="$1"
 DISTRO="$2"
 TYPE="$3"
 CONFIG="$4"
@@ -169,3 +170,7 @@ tests/bin/horizon_test.sh
 tests/bin/prometheus_tests.sh
 tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+
+if [ "x$ACTION" == "xupgrade" ]; then
+    echo Upgrade called.
+fi
