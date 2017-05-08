@@ -11,6 +11,12 @@ trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
 
+if [ "x$DISTRO" == "xcentos" ]; then
+    yum install -y crudini || true
+    sudo crudini --set /etc/yum.conf main keepcache 1
+    sudo crudini --set /etc/yum.conf main cachedir '/var/cache/yum/$basearch/$releasever'
+fi
+
 if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi

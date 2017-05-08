@@ -2,10 +2,13 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
+mkdir -p $WORKSPACE/UPLOAD_MISC/canal/
+
 url="https://raw.githubusercontent.com/projectcalico/canal/master"
 url="$url/k8s-install/1.6/canal.yaml"
 
 curl "$url" -o /tmp/canal.yaml
+cp -a /tmp/canal.yaml $WORKSPACE/UPLOAD_MISC/canal/
 
 url="https://raw.githubusercontent.com/projectcalico/canal/master"
 url="$url/k8s-install/1.6/rbac.yaml"
@@ -13,6 +16,8 @@ url="$url/k8s-install/1.6/rbac.yaml"
 curl "$url" -o /tmp/rbac.yaml
 
 kubectl create -f /tmp/rbac.yaml
+
+cp -a /tmp/rbac.yaml $WORKSPACE/UPLOAD_MISC/canal/
 
 #
 # Instead of hardcoding cluster cidr, let's get it from
