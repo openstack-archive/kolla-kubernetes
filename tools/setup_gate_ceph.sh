@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.7.0-1
+ACTION="$1"
 DISTRO="$2"
 TYPE="$3"
 CONFIG="$4"
@@ -169,3 +170,21 @@ tests/bin/horizon_test.sh
 tests/bin/prometheus_tests.sh
 tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
+
+if [ "x$ACTION" == "xupgrade" ]; then
+    echo Upgrade called.
+
+    if [ "x$BRANCH" == "x3" ]; then
+        sed -i 's/2\.0\.2/3.0.2/g' helm/all_values.yaml
+        sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
+    fi
+
+    helm repo remove kolla
+    mkdir -p ~/.helm/repository/kollanew
+    tools/helm_buildrepo.sh ~/.helm/repository/kollanew 10193 kolla &
+    tools/helm_build_all.sh ~/.helm/repository/kollanew
+    helm update
+    helm search
+
+    tests/bin/upgrade_test_ceph.sh $CONFIG $DISTRO $IP $tunnel_interface $BRANCH
+fi
