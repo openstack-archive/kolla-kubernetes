@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
 PACKAGE_VERSION=0.7.0-1
+ACTION="$1"
 DISTRO="$2"
 TYPE="$3"
 CONFIG="$4"
@@ -50,5 +51,5 @@ fi
 #
 
 echo "1 "$1 "2 "$2 "3 "$3 "4 "$4 "5 "$5 "BRANCH "$BRANCH "PIPELINE "$PIPELINE
-tools/setup_gate_ceph.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+tools/setup_gate_ceph.sh $ACTION $2 $3 $4 $5 $BRANCH $PIPELINE
 exit 0
