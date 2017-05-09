@@ -365,13 +365,13 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
    If you need to use a proxy then you should also edit the ``config.rb`` file
    as follows:
-    * Set ``proxy_enable = true``
-    * Set ``proxy_http`` and ``proxy_https`` values for your proxy
-    * Configure ``proxy_no`` as appropriate. ``proxy_no`` should also include
-      the ip's of all kube cluster members.
-      (i.e. 172.16.35.11,172.16.35.12,172.16.35.13,172.16.35.14)
-    * Edit the no_proxy environment variable on your host to include the kube
-      master IP (172.16.35.11)
+   * Set ``proxy_enable = true``
+   * Set ``proxy_http`` and ``proxy_https`` values for your proxy
+   * Configure ``proxy_no`` as appropriate. ``proxy_no`` should also include
+   the ip's of all kube cluster members
+   (i.e. 172.16.35.11,172.16.35.12,172.16.35.13,172.16.35.14)
+   * Edit the no_proxy environment variable on your host to include the kube
+   master IP (172.16.35.11)
 
 
 Managing and interacting with the environment
