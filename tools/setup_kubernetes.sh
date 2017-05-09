@@ -1,5 +1,13 @@
 #!/bin/bash -e
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+BASE_DISTRO=$2
+INSTALL_TYPE=$3
+ZUUL_BRANCH=$4
+T1=$5
+T2=$6
+
 if [ -f /etc/redhat-release ]; then
     cat > /tmp/setup.$$ <<"EOF"
 setenforce 0
@@ -56,7 +64,7 @@ rm -f /tmp/kubeout
 EOF
 else
     cat >> /tmp/setup.$$ <<EOF
-kubeadm join --token "$2" "$3" --skip-preflight-checks
+kubeadm join --token "$T1" "$T2" --skip-preflight-checks
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
@@ -64,6 +72,9 @@ EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a
 sudo /usr/bin/kubelet --version
+
+. $DIR/setup_registry.sh
+setup_registry $BASE_DISTRO $INSTALL_TYPE $ZUUL_BRANCH 1 /tmp
 
 if [ "$1" == "master" ]; then
     mkdir -p ~/.kube

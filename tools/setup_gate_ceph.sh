@@ -34,7 +34,7 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $DISTRO $TYPE $ZUUL_BRANCH
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
@@ -42,6 +42,9 @@ kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 # Setting up networking on master, before slave nodes in multinode
 # scenario will attempt to join the cluster
 tests/bin/setup_canal.sh
+
+source ./tools/setup_registry.sh
+registry_filename=$(registry_file $DISTRO $TYPE $ZUUL_BRANCH)
 
 # Turn up kube-proxy logging enable only for debug 
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
@@ -55,6 +58,7 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
         echo $line
         ssh-keyscan $line >> ~/.ssh/known_hosts
         scp tools/setup_kubernetes.sh $line:
+        scp tools/setup_registry.sh $line:
         scp tests/bin/fix_gate_iptables.sh $line:
         scp /usr/bin/kubectl $line:kubectl
         NODENAME=$(ssh -n $line hostname)
@@ -67,7 +71,9 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
            ssh -n $line sudo yum remove -y iscsi-initiator-utils
         fi
         ssh -n $line sudo mv kubectl /usr/bin/
-        ssh -n $line bash setup_kubernetes.sh slave "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        scp /tmp/$registry_filename $line:/tmp/$registry_filename
+        ssh -n $line bash setup_kubernetes.sh slave $DISTRO $TYPE $ZUUL_BRANCH "$(cat /etc/kubernetes/token.txt)" "$(cat /etc/kubernetes/ip.txt)"
+        ssh -n $line rm -f $registry_filename
         set +xe
         count=0
         while true; do
@@ -83,6 +89,8 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
         kubectl label node $NODENAME kolla_compute=true
     done
 fi
+
+rm -f /tmp/$registry_filename
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true
