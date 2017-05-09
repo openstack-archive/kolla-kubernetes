@@ -26,11 +26,15 @@ tests/bin/setup_config_iscsi.sh "$2" "$4" "$BRANCH" "$TYPE"
 
 tests/bin/setup_gate_loopback_lvm.sh
 
-tools/setup_kubernetes.sh master
+tools/setup_kubernetes.sh master $DISTRO $TYPE $ZUUL_BRANCH
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 tests/bin/setup_canal.sh
+
+source ./tools/setup_registry.sh
+registry_filename=$(registry_file $DISTRO $TYPE $ZUUL_BRANCH)
+rm -f /tmp/$registry_filename
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true kolla_compute=true \
