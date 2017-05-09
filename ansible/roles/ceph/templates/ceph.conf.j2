@@ -7,9 +7,12 @@ err to stderr = false
 
 fsid = {{ ceph_cluster_fsid }}
 
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
+#auth cluster required = cephx
+#auth service required = cephx
+#auth client required = cephx
+auth cluster required = none
+auth service required = none
+auth client required = none
 
 # NOTE(inc0): This line will mean that if ceph was upgraded, it will run as root
 #             until contents of /var/lib/ceph are chowned to ceph user.
