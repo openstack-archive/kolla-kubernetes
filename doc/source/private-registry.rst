@@ -6,8 +6,8 @@ Kolla Kubernetes Private Docker Registry Guide
 
 This guide documents how to configure the authentication and use of a
 private registry within a Kubernetes cluster.  The official Kubernetes
-documentation may be found `here
-<http://kubernetes.io/docs/user-guide/images/#configuring-nodes-to-authenticate-to-a-private-repository>`_.
+documentation may be found here
+`<http://kubernetes.io/docs/user-guide/images/#configuring-nodes-to-authenticate-to-a-private-repository>`_.
 Please note that several methods exist, and more than one may work for
 your setup.
 

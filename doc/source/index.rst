@@ -7,12 +7,13 @@ Contents
 .. toctree::
    :maxdepth: 1
 
+   ceph-guide
    contributing
    deployment-guide
    development-environment
-   multi-node
    private-registry
    running-tests
+   service-security
 
 Indices and tables
 ==================
