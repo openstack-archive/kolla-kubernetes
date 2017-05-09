@@ -50,13 +50,13 @@ Create a pool a user:
     #FIXME probably needs a pool per region name?
     str="ceph osd pool create kollavolumes 32"
     kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
-        "$str" > /tmp/$$
-    str="ceph auth get-or-create client.kolla mon 'allow r' osd 'allow "
+    "$str" > /tmp/$$
+    str="ceph auth get-or-create client.kolla mon 'allow r' osd 'allow"
     str="$str class-read object_prefix rbd_children, allow rwx pool=kollavolumes"
     kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
-        "$str" | awk '{if($1 == "key"){print $3}}' > /tmp/$$
+    "$str" | awk '{if($1 == "key"){print $3}}' > /tmp/$$
     kubectl create secret generic ceph-kolla --namespace=kolla \
-        --from-file=key=/tmp/$$
+    --from-file=key=/tmp/$$
     rm -f /tmp/$$
 
 Create disks for 'rabbitmq' and 'mariadb' like so
