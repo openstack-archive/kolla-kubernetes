@@ -50,12 +50,12 @@ spec:
                     admin
                     admin
 {{- if $adminPortExternal }}
-                    http://{{ $adminDnsName }}:{{ $adminPort }}/v3
+                    http://{{ $adminDnsName }}:{{ $adminPort }}
 {{- else }}
-                    http://{{ $elementName }}-admin:{{ $adminPort }}/v3
+                    http://{{ $elementName }}-admin:{{ $adminPort }}
 {{- end }}
-                    http://{{ $elementName }}-internal:{{ $port }}/v3
-                    http://{{ $publicDnsName }}:{{ $port }}/v3
+                    http://{{ $elementName }}-internal:{{ $port }}
+                    http://{{ $publicDnsName }}:{{ $port }}
                     {{ $region }}"]
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
