@@ -16,8 +16,14 @@ if [ "x$PIPELINE" == "xperiodic" ]; then
 fi
 
 if [ "x$BRANCH" == "xt" ]; then
-    echo Version: $BRANCH is not implemented yet.
-    exit 1
+    sed -i 's/2\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+    sed -i 's/3\.0\.2/4.0.0/g' helm/all_values.yaml
+    sed -i 's/3\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+    echo 'docker_registry: "127.0.0.1:4000"' >> tests/conf/ceph-all-in-one/kolla_config
+    echo 'docker_namespace: "lokolla"' >> tests/conf/ceph-all-in-one/kolla_config
+    sed -i 's/docker_registry:.*/docker_registry: "127.0.0.1:4000"/g' helm/all_values.yaml
+    sed -i 's/docker_namespace:.*/docker_namespace: "lokolla"/g' helm/all_values.yaml
 fi
 
 if [ "x$BRANCH" == "x3" ]; then
