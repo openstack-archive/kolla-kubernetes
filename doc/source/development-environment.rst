@@ -224,6 +224,7 @@ Download and install VirtualBox from:
 
 Download and install vagrant using the following url to obtain the package:
  * https://releases.hashicorp.com/vagrant/1.8.7/vagrant_1.8.7.dmg
+
 There is a bug in Vagrant 1.8.7's embedded curl that prevents boxes being
 downloaded, as described in: https://github.com/mitchellh/vagrant/issues/7997.
 This can be resolved by running the following command:
@@ -237,7 +238,7 @@ This can be resolved by running the following command:
 
 
 If your version of MacOS doesn't not include git in the CLI Developer tools
-installed above, you can download and install git from:
+ installed above, you can download and install git from:
  * https://git-scm.com/download/mac
 
 Now we can install Ansible:
@@ -365,13 +366,13 @@ supported by the Vagrant VirtualBox and OpenStack providers.
 
    If you need to use a proxy then you should also edit the ``config.rb`` file
    as follows:
-    * Set ``proxy_enable = true``
-    * Set ``proxy_http`` and ``proxy_https`` values for your proxy
-    * Configure ``proxy_no`` as appropriate. ``proxy_no`` should also include
-      the ip's of all kube cluster members.
-      (i.e. 172.16.35.11,172.16.35.12,172.16.35.13,172.16.35.14)
-    * Edit the no_proxy environment variable on your host to include the kube
-      master IP (172.16.35.11)
+   * Set ``proxy_enable = true``
+   * Set ``proxy_http`` and ``proxy_https`` values for your proxy
+   * Configure ``proxy_no`` as appropriate. ``proxy_no`` should also include
+   the ip's of all kube cluster members
+   (i.e. 172.16.35.11,172.16.35.12,172.16.35.13,172.16.35.14)
+   * Edit the no_proxy environment variable on your host to include the kube
+   master IP (172.16.35.11)
 
 
 Managing and interacting with the environment
@@ -460,7 +461,7 @@ To test that helm is working you can run the following:
 
 
 Containerized development environment requirements and usage
-=====================================================
+============================================================
 
 Make sure to run the ./get-k8s-creds.sh script or the development environment
 container will not be able to connect to the vagrant kubernetes cluster.
