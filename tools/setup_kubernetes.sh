@@ -13,7 +13,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
-yum install -y docker kubeadm kubelet kubectl kubernetes-cni ebtables
+yum install -y docker kubeadm kubelet-1.6.2 kubectl kubernetes-cni ebtables
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
 else
@@ -22,7 +22,7 @@ apt-get install -y apt-transport-https
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y docker.io kubeadm kubelet kubectl kubernetes-cni
+apt-get install -y docker.io kubeadm kubelet-1.6.2 kubectl kubernetes-cni
 cgroup_driver=$(docker info | grep "Cgroup Driver" | awk '{print $3}')
 sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver='$cgroup_driver' |g' \
         /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
