@@ -42,6 +42,12 @@ fi
 
 if [ "x$4" == "xironic" ]; then
     tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    # destroy kolla-kubernetes deployment and validate kolla-kubernetes is
+    # indeed destroyed
+
+    . .venv/bin/activate
+    ansible-playbook -e ansible_python_interpreter=/usr/bin/python ansible/destroy.yml
+    . tests/bin/destroy_tests.sh
     exit 0
 fi
 
@@ -51,4 +57,5 @@ fi
 
 echo "1 "$1 "2 "$2 "3 "$3 "4 "$4 "5 "$5 "BRANCH "$BRANCH "PIPELINE "$PIPELINE
 tools/setup_gate_ceph.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+
 exit 0
