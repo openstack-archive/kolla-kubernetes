@@ -51,4 +51,8 @@ fi
 
 echo "1 "$1 "2 "$2 "3 "$3 "4 "$4 "5 "$5 "BRANCH "$BRANCH "PIPELINE "$PIPELINE
 tools/setup_gate_ceph.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+
+# destroy kolla-kubernetes deployment
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python ansible/destroy.yml
+
 exit 0
