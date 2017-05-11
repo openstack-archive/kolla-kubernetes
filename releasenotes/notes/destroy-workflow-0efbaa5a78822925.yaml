@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add an Ansible workflow to destroy a kolla-kubernetes deployment.  This
+    will be followed up with a container which runs this specific workflow.
