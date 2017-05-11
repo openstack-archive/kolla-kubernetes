@@ -2,6 +2,10 @@
 set +xe
 echo Capturing error logs.
 
+# Clear the trap so any failure in capture logs does not create
+# an infinite trap loop.
+trap - ERR
+
 exec 1<&-
 exec 2<&-
 
@@ -142,5 +146,12 @@ ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) \
                  > $WORKSPACE/logs/ironic_port_show.txt
 sudo virsh list > $WORKSPACE/logs/virsh_list.txt
 sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
+
+#
+# Capture destroy workflow objects left over (there should be none)
+#
+kubectl get all -n kolla -o name | wc -l > $WORKSPACE/logs/objects_list.txt
+kubectl get nodes -o name --show-labels | grep kolla | wc -l > $WORKSPACE/logs/labels_list.txt
+kubectl get pv | wc -l > $WORKSPACE/logs/pv_list.txt
 
 exit -1
