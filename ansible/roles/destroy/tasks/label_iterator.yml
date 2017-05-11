@@ -1,0 +1,5 @@
+---
+- name: "Removing label on node {{ host['metadata']['name'] }}"
+  command: "kubectl label node {{ host['metadata']['name'] }} {{ item.key }}-"
+  when: item.key.startswith('kolla_')
+  with_dict: "{{ host['metadata']['labels'] }}"
