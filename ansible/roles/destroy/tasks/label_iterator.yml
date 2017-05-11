@@ -1,0 +1,5 @@
+---
+- name: Delete all labels relating to Kolla
+  command: "kubectl label node {{ host['metadata']['name'] }} {{ item.key }}-"
+  when: item.key.startswith('kolla_')
+  with_dict: "{{ host['metadata']['labels'] }}"
