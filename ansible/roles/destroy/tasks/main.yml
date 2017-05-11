@@ -1,0 +1,42 @@
+---
+- name: Get helm list
+  command: helm list --namespace kolla --all -q
+  register: helm_list
+  changed_when:
+    - helm_list | success
+  failed_when:
+    - helm_list.rc != 0
+
+- name: Delete helm
+  command: helm delete {{ item }} --purge
+  when: helm_list.stdout | length != 0
+  with_items:
+    - "{{ helm_list.stdout }}"
+
+- name: Get secrets list
+  command: kubectl get secrets -n kolla -o name
+  register: secrets_list
+  changed_when:
+    - secrets_list | success
+  failed_when:
+    - secrets_list.rc != 0
+
+- name: Delete secrets
+  command: kubectl delete -n kolla {{ item }}
+  when: secrets_list.stdout | length != 0
+  with_items:
+    - "{{ secrets_list.stdout }}"
+
+- name: Get configmaps list
+  command: kubectl get configmaps -n kolla -o name
+  register: configmaps_list
+  changed_when:
+    - configmaps_list | success
+  failed_when:
+    - secrets_list.rc != 0
+
+- name: Delete configmaps
+  command: kubectl delete -n kolla {{ item }}
+  when: configmaps_list.stdout | length != 0
+  with_items:
+    - "{{ configmaps_list.stdout }}"
