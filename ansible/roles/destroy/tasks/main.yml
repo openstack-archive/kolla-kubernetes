@@ -1,0 +1,15 @@
+---
+- name: Delete existing Kolla Helm charts
+  command: "helm delete {{ item }} --purge"
+  when: helm_list.stdout | length != 0
+  with_items:
+    - "nova-control"
+
+- name: Delete Kolla related PVs
+  command: "kubectl delete pv {{ item }}"
+  with_items:
+    - "helm-repo"
+    - "glance"
+    - "mariadb"
+    - "rabbitmq"
+  ignore_errors: yes
