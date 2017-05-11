@@ -51,4 +51,28 @@ fi
 
 echo "1 "$1 "2 "$2 "3 "$3 "4 "$4 "5 "$5 "BRANCH "$BRANCH "PIPELINE "$PIPELINE
 tools/setup_gate_ceph.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+
+# destroy kolla-kubernetes deployment
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python ansible/destroy.yml
+
+# Validate the deployment was indeed deleted
+NAMESPACED_OBJECTS=`kubectl get all -n kolla -o name | wc -l`
+LABELED_NODE_OBJECTS=`kubectl get nodes -o name --show-labels | grep kolla | wc -l`
+PV_OBJECTS=`kubectl get pv | wc -l`
+
+# If namespaced objects still exist, exit with failure
+if [ $NAMESPACED_OBJECTS -eq 0 ]; then
+    exit 1
+fi
+
+# If labeled nodes still exist, exit with failure
+if [ $LABELED_NODE_OBJECTS -eq 0 ]; then
+    exit 1
+fi
+
+# If PVs (which have no label) still exist, exit with failure
+if [ $PV_OBJECTS -eq 0 ]; then
+    exit 1
+fi
+
 exit 0
