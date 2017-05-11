@@ -1,0 +1,96 @@
+---
+- name: Obtain list of Kolla PVs
+  command: "kubectl get pvc -n kolla | grep Bound | awk '{print $1}' | xargs -i kubectl get pvc -n kolla -o jsonpath={.spec.volumeName} {}"
+  register: pv_list
+  failed_when:
+    - pv_list.rc != 0
+
+- name: Obtain list of Kolla Helm charts
+  command: "helm list --namespace kolla --all -q"
+  register: helm_list
+  changed_when:
+    - helm_list | success
+  failed_when:
+    - helm_list.rc != 0
+
+- name: Delete existing Kolla Helm charts
+  command: "helm delete {{ item }} --purge"
+  when: helm_list.stdout | length != 0
+  with_items:
+    - "{{ helm_list.stdout }}"
+
+- name: Get existing Kolla Kubernetes secrets
+  command: "kubectl get secrets -n kolla -o name"
+  register: secrets_list
+  changed_when:
+    - secrets_list | success
+  failed_when:
+    - secrets_list.rc != 0
+
+- name: Delete existing Kolla Kubernetes secrets
+  command: "kubectl delete -n kolla {{ item }}"
+  when: secrets_list.stdout | length != 0
+  with_items:
+    - "{{ secrets_list.stdout }}"
+
+- name: Get existing Kolla Kubernetes configmaps
+  command: "kubectl get configmaps -n kolla -o name"
+  register: configmaps_list
+  changed_when:
+    - configmaps_list | success
+  failed_when:
+    - configmaps_list.rc != 0
+
+- name: Delete existing Kolla Kubernetes cnfigmaps
+  command: "kubectl delete -n kolla {{ item }}"
+  when: configmaps_list.stdout | length != 0
+  with_items:
+    - "{{ configmaps_list.stdout }}"
+
+- name: Get nodes labeled with kolla_controller
+  command: "kubectl get nodes --selector=kolla_controller -o name"
+  register: controller_nodes
+  changed_when:
+    - controller_nodes | success
+  failed_when:
+    - controller_nodes.rc != 0
+
+- name: Delete kolla_controller labels
+  command: "kubectl label {{ item }} kolla_controller-"
+  when: controller_nodes.stdout | length != 0
+  with_items:
+    - "{{ controller_nodes.stdout }}"
+
+- name: Get nodes labeled with kolla_compute
+  command: "kubectl get nodes --selector=kolla_compute -o name"
+  register: compute_nodes
+  changed_when:
+    - compute_nodes | success
+  failed_when:
+    - compute_nodes.rc != 0
+
+- name: Delete kolla_compute labels
+  command: "kubectl label {{ item }} kolla_compute-"
+  when: compute_nodes.stdout | length != 0
+  with_items:
+    - "{{ compute_nodes.stdout }}"
+
+- name: Get nodes labeled with kolla_conductor
+  command: "kubectl get nodes --selector=kolla_conductor -o name"
+  register: conductor_nodes
+  changed_when:
+    - conductor_nodes | success
+  failed_when:
+    - conductor_nodes.rc != 0
+
+- name: Delete kolla_conductor labels
+  command: "kubectl label {{ item }} kolla_conductor-"
+  when: conductor_nodes.stdout | length != 0
+  with_items:
+    - "{{ conductor_nodes.stdout }}"
+
+- Delete Kolla related PVs
+  command: "kubectl delete pv {{ item }}"
+  when: pv_list.stdout | length != 0
+  with_items:
+    - "{{ pv_list.stdout }}"
