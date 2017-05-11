@@ -1,0 +1,73 @@
+---
+- name: Obtain list of Kolla PVCs
+  command: "kubectl get pvc -n kolla | grep Bound | awk '{print $1}'"
+  register: pvc_list
+  failed_when:
+    - pvc_list.rc != 0
+
+- name: Obtain list of Kolla PVs
+  command: "kubectl get pvc -n kolla -o jsonpath={.spec.volumeName} {{ item }}"
+  register: pv_list
+  failed_when:
+    - pv_lsit.rc != 0
+  with_items:
+    - "{{ pvc_list.stdout }}"
+
+- name: Obtain list of Kolla Helm charts
+  command: "helm list --namespace kolla --all -q"
+  register: helm_list
+  changed_when:
+    - helm_list | success
+  failed_when:
+    - helm_list.rc != 0
+
+- name: Delete existing Kolla Helm charts
+  command: "helm delete {{ item }} --purge"
+  when: helm_list.stdout | length != 0
+  with_items:
+    - "{{ helm_list.stdout }}"
+
+- name: Get existing Kolla Kubernetes secrets
+  command: "kubectl get secrets -n kolla -o name"
+  register: secrets_list
+  changed_when:
+    - secrets_list | success
+  failed_when:
+    - secrets_list.rc != 0
+
+- name: Delete existing Kolla Kubernetes secrets
+  command: "kubectl delete -n kolla {{ item }}"
+  when: secrets_list.stdout | length != 0
+  with_items:
+    - "{{ secrets_list.stdout }}"
+
+- name: Get existing Kolla Kubernetes configmaps
+  command: "kubectl get configmaps -n kolla -o name"
+  register: configmaps_list
+  changed_when:
+    - configmaps_list | success
+  failed_when:
+    - configmaps_list.rc != 0
+
+- name: Delete existing Kolla Kubernetes configmaps
+  command: "kubectl delete -n kolla {{ item }}"
+  when: configmaps_list.stdout | length != 0
+  with_items:
+    - "{{ configmaps_list.stdout }}"
+
+- include: "label_iterator.yml"
+  with_items: "{{ kubectl_dict['items'] }}"
+  loop_control:
+    loop_var: host
+
+- name: Delete Kolla related PVs
+  command: "kubectl delete pv {{ item }}"
+  when: pv_list.stdout | length != 0
+  with_items:
+    - "{{ pv_list.stdout }}"
+
+- name: Delete Kolla namespace
+  command: "kubectl delete namespace kolla"
+  register: namespace_delete
+  failed_when:
+    - namespace_delete.rc != 0
