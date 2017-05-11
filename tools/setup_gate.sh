@@ -42,6 +42,27 @@ fi
 
 if [ "x$4" == "xironic" ]; then
     tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    # destroy kolla-kubernetes deployment and validate kolla-kubernetes is
+    # indeed destroyed
+
+    # Delete Helm Charts
+    helm list --namespace kolla --all -q | xargs -i helm delete {} --purge
+
+    # Delete Configmaps
+    kubectl get configmaps -n kolla -o name | xargs -i kubectl delete -n kolla {}
+
+    # Delete Secrets
+    kubectl get secrets -n kolla -o name | xargs -i kubectl delete -n kolla {}
+
+    # Unlabel the nodes
+    kubectl get nodes -o name | xargs -i kubectl label {} kolla_compute- kolla_controller- kolla_conductor-
+
+    kubectl delete pv mariadb
+    kubectl delete pv glance
+    kubectl delete pv rabbitmq
+    kubectl delete pv helm-wrong
+
+    . tests/bin/destroy_tests.sh
     exit 0
 fi
 
