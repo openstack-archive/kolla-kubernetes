@@ -118,29 +118,40 @@ kubectl get clusterrolebindings -o yaml > $WORKSPACE/logs/rbac/clusterrolebindin
 kubectl get rolebindings -o yaml > $WORKSPACE/logs/rbac/rolebindings.yaml
 
 #
+# The following commands are very scenario specific and might not always work
+# well. Adding || true will prevent any recursive error handling script calls.
+
+#
 # Check power status and status of vbmc
 #
-sudo ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power status \
+sudo ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power status || true \
                  > $WORKSPACE/logs/ipmitool_status.txt
-sudo vbmc list > $WORKSPACE/logs/vbmc_list.txt
-sudo vbmc show vm-1 > $WORKSPACE/logs/vbmc_show.txt
+sudo vbmc list || true > $WORKSPACE/logs/vbmc_list.txt
+sudo vbmc show vm-1 || true > $WORKSPACE/logs/vbmc_show.txt
 
 #
 # Ironic realted logs
 #
 $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
-openstack baremetal node list > $WORKSPACE/logs/baremetal_node_list.txt
+openstack baremetal node list || true > $WORKSPACE/logs/baremetal_node_list.txt
 node_id=$(openstack baremetal node list -c "UUID" -f value)
-openstack baremetal node show $node_id > $WORKSPACE/logs/baremetal_node_show.txt
-openstack baremetal introspection rule list > $WORKSPACE/logs/baremetal_inspection_rule.txt
-openstack server list > $WORKSPACE/logs/openstack_server_list.txt
-openstack port list > $WORKSPACE/logs/openstack_port_list.txt
-ironic node-validate $node_id > $WORKSPACE/logs/ironic_node_validate.txt
-ironic port-list > $WORKSPACE/logs/ironic_port_list.txt
-ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) \
+openstack baremetal node show $node_id || true> $WORKSPACE/logs/baremetal_node_show.txt
+openstack baremetal introspection rule list || true > $WORKSPACE/logs/baremetal_inspection_rule.txt
+openstack server list || true > $WORKSPACE/logs/openstack_server_list.txt
+openstack port list || true > $WORKSPACE/logs/openstack_port_list.txt
+ironic node-validate $node_id || true > $WORKSPACE/logs/ironic_node_validate.txt
+ironic port-list || true > $WORKSPACE/logs/ironic_port_list.txt
+ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) || true \
                  > $WORKSPACE/logs/ironic_port_show.txt
-sudo virsh list > $WORKSPACE/logs/virsh_list.txt
-sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
+sudo virsh list || true > $WORKSPACE/logs/virsh_list.txt
+sudo virsh dumpxml vm-1 || true > $WORKSPACE/logs/virsh_dumpxml.txt
+
+#
+# Capture destroy workflow objects left over (there should be none)
+#
+kubectl get all -n kolla -o name | wc -l || true > $WORKSPACE/logs/objects_list.txt
+kubectl get nodes -o name --show-labels | grep kolla | wc -l || true > $WORKSPACE/logs/labels_list.txt
+kubectl get pv | wc -l || true > $WORKSPACE/logs/pv_list.txt
 
 exit -1
