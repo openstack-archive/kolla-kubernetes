@@ -150,4 +150,8 @@ ironic port-show $(ironic port-list | grep be:ef | awk '{print $2}' ) \
 sudo virsh list > $WORKSPACE/logs/virsh_list.txt
 sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
 
+kubectl get all -n kolla -o name > $WORKSPACE/logs/objects_list.txt
+kubectl get nodes -o name --show-labels | grep kolla > $WORKSPACE/logs/labels_list.txt
+kubectl get pv > $WORKSPACE/logs/pv_list.txt
+
 exit -1
