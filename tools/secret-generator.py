@@ -50,8 +50,7 @@ for element in passwords:
     if isinstance(passwords[element], six.string_types):
         service_name = element.replace('_', '-')
         password_value = passwords[element]
-        nsname = 'kolla_kubernetes_namespace'
-        nsname = KollaKubernetesResources.GetJinjaDict()[nsname]
+        nsname = 'kolla'
         if command == "create":
             command_line = 'kubectl create secret generic {} {}{} {}{}'.format(
                            service_name,
