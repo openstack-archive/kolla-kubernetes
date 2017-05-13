@@ -365,7 +365,7 @@ Install kolla-ansible and kolla-kubernetes::
 
 Copy default Kolla configuration to /etc::
 
-    sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+    sudo cp -aR /usr/share/kolla-ansible/etc/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
