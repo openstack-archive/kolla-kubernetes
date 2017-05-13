@@ -88,17 +88,17 @@ sudo pip install libvirt-python
 
 #
 # Testing ironic-pxe's tftp server and presence of pxelinux.0
-#
-tftp_srv=$(sudo netstat -tunlp | grep tftpd | awk '{print $4}')
-tftp_addr=${tftp_srv%:*}
-tftp $tftp_addr <<'EOF'
+for tftp_srv in $(sudo netstat -tunlp | grep tftp | awk '{print $4}'); do
+  tftp_addr=${tftp_srv%:*}
+  tftp $tftp_addr <<'EOF'
 get /pxelinux.0 ./pxelinux.0
 quit
 EOF
-downloaded=$(ls -l ./pxelinux.0 | wc -l)
-if [ $downloaded -eq 0 ]; then
-  exit 1
-fi
+  downloaded=$(ls -l ./pxelinux.0 | wc -l)
+  if [ $downloaded -eq 0 ]; then
+    exit 1
+  fi
+done
 
 openstack baremetal node create \
           --driver pxe_ipmitool \
