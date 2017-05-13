@@ -1,0 +1,9 @@
+---
+project_name: "keepalived"
+
+####################
+# Docker
+####################
+keepalived_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-keepalived"
+keepalived_tag: "{{ openstack_release }}"
+keepalived_image_full: "{{ keepalived_image }}:{{ keepalived_tag }}"

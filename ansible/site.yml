@@ -16,3 +16,4 @@
     - cinder
     - heat
     - ironic
+    - keepalived
