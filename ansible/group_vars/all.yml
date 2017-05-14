@@ -21,7 +21,7 @@ node_config_directory: "/etc/kolla/{{ project }}"
 ###################
 
 # Which orchestration engine to use. Valid options are [ ANSIBLE, KUBERNETES ]
-orchestration_engine: "ANSIBLE"
+orchestration_engine: "KUBERNETES"
 
 # Valid options are [ COPY_ONCE, COPY_ALWAYS ]
 config_strategy: "COPY_ALWAYS"
@@ -72,7 +72,14 @@ external_ntp_servers:
 database_address: "{{ kolla_internal_fqdn }}"
 database_user: "root"
 database_port: "3306"
-
+keystone_database_address: "mariadb"
+glance_database_address: "mariadb"
+nova_database_address: "mariadb"
+nova_api_database_address: "mariadb"
+neutron_database_address: "mariadb"
+cinder_database_address: "mariadb"
+ironic_database_address: "mariadb"
+placement_database_address: "mariadb"
 
 ####################
 # Docker options
@@ -157,6 +164,7 @@ rabbitmq_port: "5672"
 rabbitmq_management_port: "15672"
 rabbitmq_cluster_port: "25672"
 rabbitmq_epmd_port: "4369"
+rabbitmq_servers: "rabbitmq"
 
 mongodb_port: "27017"
 mongodb_web_port: "28017"
@@ -254,7 +262,7 @@ admin_protocol: "http"
 # OpenStack options
 ####################
 openstack_release: "auto"
-openstack_logging_debug: "False"
+openstack_logging_debug: "True"
 
 openstack_region_name: "RegionOne"
 
@@ -432,6 +440,7 @@ keystone_default_user_role: "_member_"
 #######################
 glance_backend_file: "{{ not enable_ceph | bool }}"
 glance_backend_ceph: "{{ enable_ceph }}"
+glance_registry_host: "glance-registry"
 
 
 #######################
@@ -485,6 +494,7 @@ designate_ns_record: "sample.openstack.org"
 # Neutron options
 #######################
 neutron_bgp_router_id: "1.1.1.1"
+neutron_host: "neutron"
 
 
 #######################
