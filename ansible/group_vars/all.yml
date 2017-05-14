@@ -21,7 +21,7 @@ node_config_directory: "/etc/kolla/{{ project }}"
 ###################
 
 # Which orchestration engine to use. Valid options are [ ANSIBLE, KUBERNETES ]
-orchestration_engine: "ANSIBLE"
+orchestration_engine: "KUBERNETES"
 
 # Valid options are [ COPY_ONCE, COPY_ALWAYS ]
 config_strategy: "COPY_ALWAYS"
@@ -29,7 +29,7 @@ config_strategy: "COPY_ALWAYS"
 # Valid options are [ centos, oraclelinux, ubuntu ]
 kolla_base_distro: "centos"
 # Valid options are [ binary, source ]
-kolla_install_type: "binary"
+kolla_install_type: "source"
 
 kolla_internal_vip_address: "{{ kolla_internal_address }}"
 kolla_internal_fqdn: "{{ kolla_internal_vip_address }}"
@@ -72,7 +72,14 @@ external_ntp_servers:
 database_address: "{{ kolla_internal_fqdn }}"
 database_user: "root"
 database_port: "3306"
-
+keystone_database_address: "mariadb"
+glance_database_address: "mariadb"
+nova_database_address: "mariadb"
+nova_api_database_address: "mariadb"
+neutron_database_address: "mariadb"
+cinder_database_address: "mariadb"
+ironic_database_address: "mariadb"
+placement_database_address: "mariadb"
 
 ####################
 # Docker options
@@ -157,6 +164,7 @@ rabbitmq_port: "5672"
 rabbitmq_management_port: "15672"
 rabbitmq_cluster_port: "25672"
 rabbitmq_epmd_port: "4369"
+rabbitmq_servers: "rabbitmq"
 
 mongodb_port: "27017"
 mongodb_web_port: "28017"
@@ -254,7 +262,7 @@ admin_protocol: "http"
 # OpenStack options
 ####################
 openstack_release: "auto"
-openstack_logging_debug: "False"
+openstack_logging_debug: "True"
 
 openstack_region_name: "RegionOne"
 
@@ -282,7 +290,7 @@ openstack_auth:
 # These roles are required for Kolla to be operation, however a savvy deployer
 # could disable some of these required roles and run their own services.
 enable_glance: "yes"
-enable_haproxy: "yes"
+enable_haproxy: "no"
 enable_keystone: "yes"
 enable_mariadb: "yes"
 enable_memcached: "yes"
@@ -299,12 +307,13 @@ enable_central_logging: "no"
 enable_ceph: "no"
 enable_ceph_rgw: "no"
 enable_chrony: "no"
-enable_cinder: "no"
+enable_cinder: "yes"
 enable_cinder_backend_hnas_iscsi: "no"
 enable_cinder_backend_hnas_nfs: "no"
-enable_cinder_backend_iscsi: "no"
-enable_cinder_backend_lvm: "no"
+enable_cinder_backend_iscsi: "yes"
+enable_cinder_backend_lvm: "yes"
 enable_cinder_backend_nfs: "no"
+enable_cinder_backend_rbd: "no"
 enable_cloudkitty: "no"
 enable_congress: "no"
 enable_designate: "no"
@@ -312,7 +321,7 @@ enable_etcd: "no"
 enable_freezer: "no"
 enable_gnocchi: "no"
 enable_grafana: "no"
-enable_heat: "yes"
+enable_heat: "no"
 enable_horizon: "yes"
 enable_horizon_cloudkitty: "{{ enable_cloudkitty | bool }}"
 enable_horizon_freezer: "{{ enable_freezer | bool }}"
@@ -432,6 +441,7 @@ keystone_default_user_role: "_member_"
 #######################
 glance_backend_file: "{{ not enable_ceph | bool }}"
 glance_backend_ceph: "{{ enable_ceph }}"
+glance_registry_host: "glance-registry"
 
 
 #######################
@@ -485,6 +495,7 @@ designate_ns_record: "sample.openstack.org"
 # Neutron options
 #######################
 neutron_bgp_router_id: "1.1.1.1"
+neutron_host: "neutron"
 
 
 #######################
