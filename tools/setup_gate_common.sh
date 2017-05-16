@@ -50,15 +50,9 @@ clonemap:
    dest: kolla
 EOF
 
-[ -x /usr/zuul-env/bin/zuul-cloner ] && \
-/usr/zuul-env/bin/zuul-cloner -m /tmp/clonemap --workspace `pwd` \
-    --branch master --cache-dir /opt/git git://git.openstack.org \
-    openstack/kolla-ansible && true
-[ ! -d kolla-ansible ] && git clone https://github.com/openstack/kolla-ansible.git
-
-sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
-sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
-sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
+sudo cp -aR `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
+sudo cp -aR `pwd`/etc/kolla /etc/kolla
+sudo mkdir -p /etc/kolla/config
 
 if [ -f /etc/redhat-release ]; then
     sudo yum install -y crudini jq sshpass bzip2
@@ -67,7 +61,6 @@ else
     sudo apt-get install -y crudini jq sshpass bzip2
 fi
 
-pushd kolla-ansible;
 pip install pip --upgrade
 pip install "ansible<2.1"
 pip install "python-cinderclient==1.11.0"
@@ -76,10 +69,8 @@ pip install "python-neutronclient"
 pip install "selenium"
 pip install -r requirements.txt
 pip install pyyaml
-popd
-pip install -r requirements.txt
 pip install .
-sudo mkdir -p /etc/kolla/config
+
 # NOTE (sbezverk) Added as a workaround since kolla-ansible master had
 # use_neutron config option removed. Next 4 lines can be removed after
 # kolla_kubernetes stop using mitake 2.0.X images.
