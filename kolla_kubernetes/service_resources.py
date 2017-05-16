@@ -57,27 +57,23 @@ class KollaKubernetesResources(object):
         # path where the file exists.  Search method for template files:
         # locks onto the first path that exists, and then expects the file
         # to be there.
-        kolla_dir = PathFinder.find_kolla_dir()
+        kolla_k8s_dir = PathFinder.find_kolla_kubernetes_dir()
         files = [
             PathFinder.find_config_file('kolla-kubernetes.yml'),
             PathFinder.find_config_file('globals.yml'),
             PathFinder.find_config_file('passwords.yml'),
-            os.path.join(kolla_dir, 'ansible/group_vars/all.yml')]
+            os.path.join(kolla_k8s_dir, 'ansible/group_vars/all.yml')]
         if service_name is not None:
             service_ansible_file = os.path.join(
-                kolla_dir, 'ansible/roles', service_name, 'defaults/main.yml')
+                kolla_k8s_dir, 'ansible/roles', service_name, 'defaults/main.yml')
             if os.path.exists(service_ansible_file):
                 files.append(service_ansible_file)
-        files.append(os.path.join(kolla_dir,
+        files.append(os.path.join(kolla_k8s_dir,
                                   'ansible/roles/common/defaults/main.yml'))
-        # FIXME probably should move this stuff into
-        # ansible/roles/common/defaults/main.yml instead.
-        files.append(os.path.join(kolla_dir,
-                                  'ansible/roles/haproxy/defaults/main.yml'))
 
         # FIXME I think we need a way to add aditional roles to services
         # in the service_resources.yaml.
-        files.append(os.path.join(kolla_dir,
+        files.append(os.path.join(kolla_k8s_dir,
                                   'ansible/roles/neutron/defaults/main.yml'))
 
         # Create the config dict
