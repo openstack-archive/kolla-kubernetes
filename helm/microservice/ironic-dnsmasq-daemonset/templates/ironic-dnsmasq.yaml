@@ -135,6 +135,8 @@ spec:
           env:
 {{- include "common_env_vars" $env | indent 12 }}
         - name: main
+          securityContext:
+            privileged: true
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           image: "{{ $imageFull }}"
           volumeMounts:
