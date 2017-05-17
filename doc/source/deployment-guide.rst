@@ -45,10 +45,10 @@ The host machine must satisfy the following minimum requirements:
 Dependencies::
 
     docker == 1.12.6
-    helm >= 2.2.3
-    kubectl >= 1.6.2
-    kubeadm >= 1.6.2
-    kubelet >= 1.6.2
+    helm >= 2.4.1
+    kubectl >= 1.6.3
+    kubeadm >= 1.6.3
+    kubelet >= 1.6.3 + fix - see below
     kubernetes-cni >= 0.5.1
 
 .. note::
@@ -132,6 +132,12 @@ Write the Kubernetes repository file::
 Install Kubernetes 1.6.2 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
+
+Currently kubelet 1.6.3 is broken. Until #45613 is in the repo install
+the following work-around::
+
+    curl -L  https://github.com/sbezverk/kubelet--45613/raw/master/kubelet.gz | gzip -d > /usr/bin/kubelet
+    chmod +x /usr/bin/kubelet
 
 
 Ubuntu
@@ -871,6 +877,13 @@ To clean up Kubernetes and all docker containers entirely, run
 this command, reboot, and run these commands again::
 
     sudo kubeadm reset
+
+Other cleanups if your environment is corrup that may be useful::
+
+    sudo rm -rf /etc/kolla
+    sudo rm -rf /etc/kubernetes
+    sudo rm -rf /etc/kolla-kubernetes
+
 
 Using OpenStack
 ===============
