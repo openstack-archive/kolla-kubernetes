@@ -37,10 +37,6 @@ class PathFinder(object):
             os.path.dirname(os.path.abspath(__file__)))
 
     @staticmethod
-    def find_kolla_dir():
-        return PathFinder._find(KOLLA_SEARCH_PATHS, None)
-
-    @staticmethod
     def find_kolla_kubernetes_dir():
         return PathFinder._find(KOLLA_KUBERNETES_SEARCH_PATHS, None)
 
@@ -104,36 +100,12 @@ CONFIG_SEARCH_PATHS = [
                                  './etc/kolla-kubernetes'))
 ]
 
-# prioritize directories to search for kolla sources
-# Search installation paths first
-# Then search development paths
-# This has a terrible hack to work with the gate.  Sadly this is not
-# trivial to fix without said hack.  As this code is going bye-bye it
-# doesn't matter.
-KOLLA_SEARCH_PATHS = [
-    '/usr/share/kolla',
-    '/usr/local/share/kolla',
-    '/usr/share/kolla-ansible',
-    '/usr/local/share/kolla-ansible',
-    os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 '../kolla')),
-    os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 'kolla')),
-    os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 '../kolla-ansible')),
-    os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 'kolla-ansible')),
-    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
-                                 './share/kolla'))
-]
-
 # prioritize directories to search for kolla-kubernetes sources
 # Search installation paths first
 # Then search development paths
 KOLLA_KUBERNETES_SEARCH_PATHS = [
     '/usr/share/kolla-kubernetes',
     '/usr/local/share/kolla-kubernetes',
-    os.path.abspath(os.path.join(PathFinder.find_installed_root(),
-                                 './share/kolla-kubernetes')),
-    os.path.abspath(os.path.join(PathFinder.find_development_root()))
+    os.path.abspath(os.path.join(sys.prefix, './share/kolla-kubernetes')),
+    os.path.abspath(PathFinder.find_development_root())
 ]
