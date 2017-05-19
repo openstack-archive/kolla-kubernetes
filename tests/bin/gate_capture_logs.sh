@@ -8,6 +8,8 @@ exec 2<&-
 exec 1<>$WORKSPACE/logs/gate_log_capture.txt
 exec 2>&1
 
+CRATER
+
 . ~/keystonerc_admin
 mkdir -p $WORKSPACE/logs/pods
 mkdir -p $WORKSPACE/logs/svc

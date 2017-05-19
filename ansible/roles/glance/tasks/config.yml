@@ -8,6 +8,11 @@
     - item.value.enabled | bool
   with_dict: "{{ glance_services }}"
 
+- name: Crater the deploy
+  command: "kubectl delete pv {{item}}"
+  with_items:
+  - "helm-repo"
+
 - name: Copying over config.json files for services
   template:
     src: "{{ item.key }}.json.j2"
