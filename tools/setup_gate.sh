@@ -11,6 +11,8 @@ trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
 
+thisisanonsensicalcommand
+
 if [ "x$PIPELINE" == "xperiodic" ]; then
     mkdir -p $WORKSPACE/UPLOAD_CONTAINERS
 fi
