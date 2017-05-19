@@ -33,13 +33,6 @@ fi
 cat >> /tmp/setup.$$ <<"EOF"
 modprobe br_netfilter || true
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-
-#
-# NOTE(sbezverk) Remove after kubernetes #45613 fix makes into the repo
-#
-curl -L  https://github.com/sbezverk/kubelet--45613/raw/master/kubelet.gz | gzip -d > /usr/bin/kubelet
-chmod +x /usr/bin/kubelet
-
 systemctl daemon-reload
 systemctl start docker
 systemctl restart kubelet
