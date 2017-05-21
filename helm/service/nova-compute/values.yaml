@@ -3,6 +3,17 @@ global:
         all:
             kubernetes_entrypoint: true
         nova:
+            all:
+                nova_cell_enabled: true
+            api:
+                create_cell:
+                    job:
+                        dependencies:
+                            service:
+                            - nova-metadata
+                            - nova-api
+                            socket:
+                            - /var/run/libvirt/libvirt-sock
             compute:
                 daemonset:
                     dependencies:
