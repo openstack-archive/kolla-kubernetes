@@ -25,6 +25,22 @@ if [ "x$BRANCH" == "x3" ]; then
     sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
 fi
 
+#
+# If TYPE is 'source', kolla_install_type 'source' must be added
+# to kolla_config, to generate source based configs and not binary
+# which is default.
+#
+if [ "x$TYPE" == "xsource" ]; then
+    for kolla_config in tests/conf/ceph-all-in-one/kolla_config \
+                        tests/conf/iscsi-all-in-one/kolla_config ; do
+        if [ "x$(grep kolla_install_type $kolla_config)" == "x" ]; then
+           sed -i '1s/^/kolla_install_type: source\n/' $kolla_config
+        else
+           sed -i 's/kolla_install_type.*/kolla_install_type: source/g' $kolla_config
+        fi
+    done
+fi
+
 if [ "x$4" == "xiscsi" ]; then
     tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
     exit 0
