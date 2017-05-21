@@ -5,6 +5,7 @@ global:
         nova:
             all:
                 placement_api_enabled: true
+                cell_enabled: true
             api:
                 create_db:
                     job:
@@ -145,3 +146,10 @@ global:
                     dependencies:
                         service:
                         - nova-api
+            cell0:
+                create_db:
+                    job:
+                        dependencies:
+                            service:
+                            - mariadb
+                            - nova-api

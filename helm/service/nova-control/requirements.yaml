@@ -75,3 +75,7 @@ dependencies:
     repository: file://../../microservice/nova-placement-create-keystone-endpoint-public-job
     version: 0.7.0-1
     condition: global.kolla.nova.all.placement_api_enabled
+  - name: nova-cell0-create-db-job
+    repository: file://../../microservice/nova-cell0-create-db-job
+    version: 0.7.0-1
+    condition: global.kolla.nova.all.cell_enabled
