@@ -18,6 +18,8 @@ function common_iscsi_config {
     echo "    nova:"
     echo "      all:"
     echo "        image_tag: 4.0.0"
+    echo "        placement_api_enabled: true"
+    echo "        nova_cell_enabled: true"
     echo "    ironic:"
     echo "      all:"
     echo "        image_tag: 4.0.0"

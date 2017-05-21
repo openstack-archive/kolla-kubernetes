@@ -49,6 +49,7 @@ function common_workflow_config {
         echo "    nova:"
         echo "      all:"
         echo "        placement_api_enabled: false"
+        echo "        nova_cell_enabled: false"
     fi
 
     echo "    all:"
