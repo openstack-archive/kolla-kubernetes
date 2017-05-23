@@ -22,7 +22,7 @@
 {{- $_ := include "kolla_val_get_raw" $c3 }}
 {{- $nodePort := include "kolla_val_get_str" (dict "key" $localVals.nodePort "searchPath" $searchPath "Values" .Values) }}
 {{- $externalVip := include "kolla_val_get_str" (dict "key" "external_vip" "searchPath" $searchPath "Values" .Values) }}
-{{- $ironicVip := include "kolla_val_get_str" (dict "key" "ironic_inspector_provision_vip" "searchPath" $searchPath "Values" .Values) }}
+{{- $ironicVip := include "kolla_val_get_str" (dict "key" "ironic_inspector_vip" "searchPath" $searchPath "Values" .Values) }}
 apiVersion: v1
 kind: Service
 spec:
