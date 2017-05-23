@@ -1104,7 +1104,7 @@ ironic-inspector-svc:
                             port_external: true
                             node_port_enabled: false
                             ironic_provision: true
-                            ironic_inspector_provision_vip: 172.22.0.10
+                            ironic_inspector_vip: 172.22.0.10
 
 ironic-api-create-db-job:
         global:
@@ -1162,19 +1162,11 @@ ironic-inspector-deployment:
                         all:
                             port: 5050
                             ironic_interface: net2
-
-ironic-dnsmasq-daemonset:
-        global:
-            kolla:
-                ironic:
-                    all:
-                        ironic_inspection_cidr: 172.22.0.0/24
-                    dnsmasq:
-                        all:
                             initramfs_url:
                             kernel_url:
-                            ironic_interface: net2
                             ironic_dhcp_range:
+                            ironic_inspection_cidr: 172.22.0.0/24
+                            ironic_inspector_vip: 172.22.0.10
 
 ironic-create-keystone-user-job:
         global:
