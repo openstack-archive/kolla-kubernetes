@@ -1,10 +1,11 @@
 name: ironic-inspector-deployment
 version: 0.7.0-1
-description: ironic inspector deployment microservice package
+description: ironic inspector dnsmasq deployment microservice package
 keywords:
   - openstack
   - ironic
   - inspector
+  - dnsmasq
 sources:
   - http://github.com/openstack
 engine: gotpl
