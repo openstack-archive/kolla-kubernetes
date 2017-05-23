@@ -16,13 +16,8 @@
 {{- $_ := set $c2 "retDict" $localVals }}
 {{- $_ := set $c2 "retKey" "port_external" }}
 {{- $_ := include "kolla_val_get_raw" $c2 }}
-{{- $c3 := dict "key" $localVals.ironicProvision "searchPath" $searchPath "Values" .Values }}
-{{- $_ := set $c3 "retDict" $localVals }}
-{{- $_ := set $c3 "retKey" "ironic_provision" }}
-{{- $_ := include "kolla_val_get_raw" $c3 }}
 {{- $nodePort := include "kolla_val_get_str" (dict "key" $localVals.nodePort "searchPath" $searchPath "Values" .Values) }}
 {{- $externalVip := include "kolla_val_get_str" (dict "key" "external_vip" "searchPath" $searchPath "Values" .Values) }}
-{{- $ironicVip := include "kolla_val_get_str" (dict "key" "ironic_inspector_provision_vip" "searchPath" $searchPath "Values" .Values) }}
 apiVersion: v1
 kind: Service
 spec:
@@ -35,9 +30,6 @@ spec:
 {{- else if  $localVals.port_external }}
   externalIPs:
     - {{ $externalVip }}
-{{- if $localVals.ironic_provision }}
-    - {{ $ironicVip }}
-{{- end }}
 {{- end }}
   selector:
     service: {{ $elementService | quote }}
