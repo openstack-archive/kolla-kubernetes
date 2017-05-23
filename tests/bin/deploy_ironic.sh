@@ -138,8 +138,8 @@ helm install kolla/ironic-inspector-deployment --version $VERSION \
     --namespace kolla --name ironic-inspector-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/ironic-dnsmasq-daemonset --version $VERSION \
-    --namespace kolla --name ironic-dnsmasq-daemonset \
+helm install kolla/ironic-dnsmasq-deployment --version $VERSION \
+    --namespace kolla --name ironic-dnsmasq-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla

@@ -1,11 +1,11 @@
-name: ironic-dnsmasq-daemonset
+name: ironic-dnsmasq-deployment
 version: 0.7.0-1
-description: ironic dnsmask daemonset microservice package
+description: ironic dnsmasq deployment microservice package
 keywords:
   - openstack
   - ironic
   - inspector
-  - dnsmask
+  - dnsmasq
 sources:
   - http://github.com/openstack
 engine: gotpl
