@@ -1163,7 +1163,7 @@ ironic-inspector-deployment:
                             port: 5050
                             ironic_interface: net2
 
-ironic-dnsmasq-daemonset:
+ironic-dnsmasq-deployment:
         global:
             kolla:
                 ironic:

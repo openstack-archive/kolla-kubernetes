@@ -1,4 +1,5 @@
 {{- $searchPath := ":global.kolla.ironic.dnsmasq.daemonset:global.kolla.ironic.dnsmasq.all:global.kolla.ironic.all:global.kolla.all" }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" .searchPath "Values" .Values ) }}
 {{- $resourceName := "ironic-dnsmasq" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
@@ -28,13 +29,14 @@
 {{- $ironicDHCPrange :=  include "kolla_val_get_str" (dict "key" "ironic_dhcp_range" "searchPath" $searchPath "Values" .Values )}}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: {{ $elementName }}
   labels:
     component: {{ $serviceName }}
     system: {{ $elementName }}
 spec:
+  replicas: {{ $replicas }}
   template:
     metadata:
       labels:
