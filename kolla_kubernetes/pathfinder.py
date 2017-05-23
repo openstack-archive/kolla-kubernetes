@@ -95,7 +95,7 @@ CONFIG_SEARCH_PATHS = [
     '/etc/kolla',
     '/etc/kolla-kubernetes',
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
-                                 '../kolla/etc/kolla')),
+                                 './etc/kolla')),
     os.path.abspath(os.path.join(PathFinder.find_development_root(),
                                  './etc/kolla-kubernetes'))
 ]
