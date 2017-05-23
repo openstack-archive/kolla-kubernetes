@@ -53,12 +53,9 @@ for element in passwords:
         nsname = 'kolla_kubernetes_namespace'
         nsname = KollaKubernetesResources.GetJinjaDict()[nsname]
         if command == "create":
-            command_line = 'kubectl create secret generic {} {}{} {}{}'.format(
-                           service_name,
-                           " --from-literal=password=",
-                           password_value,
-                           "--namespace=",
-                           nsname)
+            command_line = "kubectl create secret generic {} " \
+                           "--from-literal=password={} --namespace={}".format(
+                           service_name, password_value, nsname)
         else:
             command_line = "kubectl delete secret {} --namespace={}".format(
                            service_name, nsname)
