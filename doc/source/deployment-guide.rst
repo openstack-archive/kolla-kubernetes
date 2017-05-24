@@ -73,7 +73,7 @@ Step 1: Deploy Kubernetes
 
 .. note::
 
-   This document recommends Kubernetes 1.6.2 or later.
+   This document recommends Kubernetes 1.6.4 or later.
 
 .. warning::
 
@@ -129,15 +129,9 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
-
-Currently kubelet 1.6.3 is broken. Until #45613 is in the repo install
-the following work-around::
-
-    curl -L  https://github.com/sbezverk/kubelet--45613/raw/master/kubelet.gz | gzip -d > /usr/bin/kubelet
-    chmod +x /usr/bin/kubelet
 
 
 Ubuntu
@@ -153,7 +147,7 @@ Write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
@@ -310,7 +304,7 @@ Step 3: Deploying kolla-kubernetes
 
 Override default RBAC settings::
 
-    kubectl update -f <(cat <<EOF
+    kubectl replace -f <(cat <<EOF
     apiVersion: rbac.authorization.k8s.io/v1alpha1
     kind: ClusterRoleBinding
     metadata:
@@ -356,21 +350,17 @@ Install repositories necessary to install packaging::
        mkdir kolla-bringup
        cd kolla-bringup
 
-Clone kolla-ansible::
-
-    git clone http://github.com/openstack/kolla-ansible
-
 Clone kolla-kubernetes::
 
     git clone http://github.com/openstack/kolla-kubernetes
 
-Install kolla-ansible and kolla-kubernetes::
+Install kolla-kubernetes::
 
-    sudo pip install -U kolla-ansible/ kolla-kubernetes/
+    sudo pip install -U kolla-kubernetes/
 
 Copy default Kolla configuration to /etc::
 
-    sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+    sudo cp -aR /usr/share/kolla-kubernetes/etc_examples/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
@@ -467,7 +457,13 @@ QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
 Generate the default configuration::
 
-    sudo kolla-ansible genconfig
+    sudo ansible-playbook \
+      -e ansible_python_interpreter=/usr/bin/python \
+      -e @/etc/kolla/globals.yml \
+      -e @/etc/kolla/passwords.yml \
+      -e CONFIG_DIR=/etc/kolla \
+      ./kolla-kubernetes/ansible/site.yml
+
 
 Generate the Kubernetes secrets and register them with Kubernetes::
 
@@ -476,15 +472,18 @@ Generate the Kubernetes secrets and register them with Kubernetes::
 Create and register the Kolla config maps::
 
     kollakube res create configmap \
-        mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-        nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-        glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-        neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-        openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-        nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-        nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-        cinder-scheduler cinder-volume iscsid tgtd keepalived \
-        placement-api placement-api-haproxy
+      mariadb \
+      rabbitmq memcached keystone \
+      iscsid tgtd keepalived \
+      cinder-api cinder-api-haproxy cinder-backup cinder-scheduler cinder-volume \
+      glance-api-haproxy glance-registry-haproxy glance-api glance-registry \
+      openvswitch-db-server openvswitch-vswitchd \
+      neutron-server neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent \
+        neutron-openvswitch-agent neutron-server-haproxy \
+      nova-api nova-conductor nova-scheduler nova-libvirt nova-compute \
+        nova-consoleauth nova-novncproxy nova-novncproxy-haproxy nova-api-haproxy \
+      placement-api placement-api-haproxy \
+      horizon
 
 Enable resolv.conf workaround::
 
@@ -500,7 +499,7 @@ Check that all Helm images have been built by verifying the number is > 150::
 
 Create a local cloud.yml file for the deployment of the charts::
 
-    cat <<EOF > cloud.yml
+    cat <<EOF > cloud.yaml
     global:
        kolla:
          all:
@@ -640,11 +639,20 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
 
-Wait for nova-compute to enter into Running state before creating the cell0
-database::
+Previously, one was required to wait for nova-compute to enter into Running
+state and then create two jobs manually for VM (cell) placement. Those jobs
+are now automatically created by the above helm invocations. Use this
+opportunity to verify that these jobs are properly running on Kubernetes.
+Note that this job is only required for 4.0.0 images and would fail for lower
+version images::
 
-    helm install --debug kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-api-create-simple-cell-job --namespace kolla --name nova-api-create-simple-cell --values ./cloud.yaml
+    kubectl --namespace=kolla get job/nova-cell0-create-db job/nova-api-create-cell
+
+Output should resemble::
+
+    NAME                   DESIRED   SUCCESSFUL   AGE
+    nova-cell0-create-db   1         1            14m
+    nova-api-create-cell   1         1            9m
 
 Deploy iSCSI support with Cinder LVM (Optional)
 
@@ -702,7 +710,7 @@ Install OpenStack clients::
 
 Bootstrap the cloud environment and create a VM as requested::
 
-    kolla-ansible/tools/init-runonce
+    kolla-kubernetes/tools/init-runonce
 
 Create a floating IP address and add to the VM::
 
