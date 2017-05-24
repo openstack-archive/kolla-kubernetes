@@ -78,6 +78,10 @@ curl -Lsf http://`kubectl get svc horizon --namespace=kolla -o \
 # Test that endpoint list works correctly
 timeout 120s openstack endpoint list
 
+# basic openstack works; verify that rabbitmq-mgmt has an endpoint
+curl http://`kubectl get svc rabbitmq-mgmt --namespace=kolla -o \
+    jsonpath='{.spec.clusterIP}'`:15672/ --max-time 3
+
 curl -o cirros.qcow2 \
     http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img
 echo testing cluster glance-api
