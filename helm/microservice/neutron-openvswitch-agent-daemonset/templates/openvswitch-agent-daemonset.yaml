@@ -10,6 +10,11 @@
 {{- $_ := set $c1 "retDict" $localVals }}
 {{- $_ := set $c1 "retKey" "openvswitch_tcp" }}
 {{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "key" "openvswitch_no_kernel_module" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "openvswitch_no_kernel_module" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
@@ -80,9 +85,17 @@ spec:
                   "/bin/sh",
                   "-c",
                   "chown --recursive neutron.kolla /var/log/kolla;
+{{- if $localVals.openvswitch_no_kernel_module }}
+                   echo Waiting for openvswitch to be available;
+{{- else }}
                    echo Waiting for openvswitch kernel module to load;
+{{- end }}
                    while true; do
+{{- if $localVals.openvswitch_no_kernel_module }}
+                     loaded=$(timeout 5s ovs-vsctl show >/dev/null 2>&1 && echo 1 || echo 0);
+{{- else }}
                      loaded=$(lsmod | grep openvswitch | wc -l);
+{{- end }}
                      [ $loaded -ne 0 ] && break;
                      sleep 1;
                    done;
