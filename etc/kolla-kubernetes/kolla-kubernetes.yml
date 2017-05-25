@@ -84,6 +84,13 @@ dns_domain_name: "openstack.kolla"
 ########################
 storage_provider: "host"  # host, ceph, gce, aws
 storage_provider_fstype: "ext4"
+# glance nfs provider: if want to use nfs, need to change
+# glance_storage_provider value to nfs and provide nfs-server
+# name or ip, server path
+glance_storage_provider: "{{ storage_provider }}"
+# glance_storage_provider: nfs
+# glance_nfs_storage_server: "nfs-server"
+# glance_nfs_storage_server_path: "/home/nfs"
 storage_ceph:
   # - WARNING: These sample defaults configure ceph access using the
   #   ceph "admin" user/key, because it involves the least amount of
