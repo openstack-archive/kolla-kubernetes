@@ -1165,6 +1165,7 @@ ironic-inspector-deployment:
                             kernel_url:
                             ironic_dhcp_range:
                             ironic_inspection_cidr: 172.22.0.0/24
+                            inspect_lldp: false
 
 ironic-create-keystone-user-job:
         global:
