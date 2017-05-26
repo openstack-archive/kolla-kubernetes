@@ -7,8 +7,9 @@
   with_items:
     - "ironic-api"
     - "ironic-conductor"
+    - "ironic-conductor-tftp"
     - "ironic-inspector"
-    - "ironic-pxe"
+    - "ironic-inspector-tftp"
     - "ironic-dnsmasq"
 
 - name: Copying over config.json files for services
@@ -18,8 +19,9 @@
   with_items:
     - "ironic-api"
     - "ironic-conductor"
+    - "ironic-conductor-tftp"
     - "ironic-inspector"
-    - "ironic-pxe"
+    - "ironic-inspector-tftp"
     - "ironic-dnsmasq"
 
 - name: Copying over ironic.conf
@@ -65,7 +67,7 @@
 - name: Copying pxelinux.cfg default
   template:
     src: "{{ item }}"
-    dest: "{{ node_config_directory }}/ironic-pxe/default"
+    dest: "{{ node_config_directory }}/ironic-inspector-tftp/default"
   with_first_found:
     - "{{ node_custom_config }}/ironic/pxelinux.default"
     - "{{ node_custom_config }}/ironic/{{ inventory_hostname }}/pxelinux.default"
@@ -83,6 +85,6 @@
     - "ironic-api"
     - "ironic-conductor"
     - "ironic-inspector"
-    - "ironic-pxe"
+    - "ironic-inspector-tftp"
   when:
     ironic_policy.stat.exists
