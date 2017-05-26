@@ -87,7 +87,7 @@ pip install -U python-ironic-inspector-client
 sudo pip install libvirt-python
 
 #
-# Testing ironic-pxe's tftp server and presence of pxelinux.0
+# Testing running tftp servers for presence of pxelinux.0
 for tftp_srv in $(sudo netstat -tunlp | grep tftp | awk '{print $4}'); do
   tftp_addr=${tftp_srv%:*}
   tftp $tftp_addr <<'EOF'

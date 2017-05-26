@@ -63,9 +63,9 @@ kollakube res create configmap \
 
 if [ "x$4" == "xironic" ]; then
 kollakube res create configmap \
-    ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
-    ironic-inspector ironic-inspector-haproxy ironic-pxe \
-    nova-compute-ironic;
+    ironic-api ironic-api-haproxy ironic-conductor ironic-conductor-tftp \
+    ironic-dnsmasq ironic-inspector ironic-inspector-haproxy \
+    ironic-inspector-tftp nova-compute-ironic;
 fi
 
 kollakube res create secret nova-libvirt

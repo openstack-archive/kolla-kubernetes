@@ -150,8 +150,8 @@ kollakube res create configmap \
     nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
     cinder-scheduler cinder-volume keepalived nova-compute-ironic\
     ironic-api ironic-api-haproxy ironic-conductor ironic-dnsmasq \
-    ironic-inspector ironic-inspector-haproxy ironic-pxe \
-    placement-api placement-api-haproxy;
+    ironic-inspector ironic-inspector-haproxy ironic-inspector-tftp \
+    ironic-conductor-tftp placement-api placement-api-haproxy;
 
 kollakube res create secret nova-libvirt
 
