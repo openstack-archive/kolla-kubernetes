@@ -2,6 +2,7 @@ dependencies:
   - name: mariadb-pv
     repository: file://../../microservice/mariadb-pv
     version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
   - name: mariadb-pvc
     repository: file://../../microservice/mariadb-pvc
     version: 0.7.0-1

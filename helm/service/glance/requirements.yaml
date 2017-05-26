@@ -2,6 +2,7 @@ dependencies:
   - name: glance-pv
     repository: file://../../microservice/glance-pv
     version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
   - name: glance-pvc
     repository: file://../../microservice/glance-pvc
     version: 0.7.0-1
