@@ -2,6 +2,7 @@ dependencies:
   - name: rabbitmq-pv
     repository: file://../../microservice/rabbitmq-pv
     version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
   - name: rabbitmq-pvc
     repository: file://../../microservice/rabbitmq-pvc
     version: 0.7.0-1

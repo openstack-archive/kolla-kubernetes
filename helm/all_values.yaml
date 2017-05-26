@@ -24,6 +24,7 @@ common:
                     kube_logger: true
                     prometheus_exporter: true
                     prometheus_port: 9101
+                    global.kolla.all.pv_enabled: true
 
 common-mariadb:
         global:
