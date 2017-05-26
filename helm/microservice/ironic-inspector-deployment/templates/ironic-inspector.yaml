@@ -34,6 +34,7 @@
 {{- $ironicInterface :=  include "kolla_val_get_str" (dict "key" "ironic_interface" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicInspectionCIDR :=  include "kolla_val_get_str" (dict "key" "ironic_inspection_cidr" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicDHCPrange :=  include "kolla_val_get_str" (dict "key" "ironic_dhcp_range" "searchPath" $searchPath "Values" .Values )}}
+{{- $ironicInspectLLDP :=  include "kolla_val_get_str" (dict "key" "inspect_lldp" "searchPath" $searchPath "Values" .Values )}}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -67,6 +68,9 @@ spec:
                   curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
                   jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
                   sed -i ''s|ironic-inspector|''$IP''|g'' /pxe/default;
+{{- if $ironicInspectLLDP }}
+                  sed -i ''/^append/ s/$/ ipa-collect-lldp=1/'' /pxe/default;
+{{- end }}
                   sed -i ''s|interface=.*|interface={{ $ironicInterface }}|g'' /dnsmasq/dnsmasq.conf;
                   sed -i ''s|dhcp-option=option:tftp-server,.*|dhcp-option=option:tftp-server,''$IP''|g'' /dnsmasq/dnsmasq.conf;
                   sed -i ''s|dhcp-option=option:server-ip-address,.*|dhcp-option=option:server-ip-address,''$IP''|g'' /dnsmasq/dnsmasq.conf;
