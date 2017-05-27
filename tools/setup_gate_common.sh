@@ -62,7 +62,7 @@ else
 fi
 
 pip install pip --upgrade
-pip install "ansible<2.1"
+pip install "ansible"
 pip install "python-cinderclient==1.11.0"
 pip install "python-openstackclient"
 pip install "python-novaclient"
