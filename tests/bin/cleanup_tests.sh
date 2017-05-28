@@ -2,6 +2,8 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
+VERSION=0.7.0-1
+
 function delete_and_cleanup {
 
 ### Removing previous deployment
@@ -9,7 +11,7 @@ helm ls | grep $1 | awk {'print $1'} | xargs helm delete --purge
 $DIR/tools/wait_for_pods_termination.sh kolla
 
 ### Cleaning service leftovers
-helm install kolla/$1-cleanup --namespace=kolla --name $1-cleanup
+helm install kolla/$1-cleanup --namespace kolla --name $1-cleanup --version $VERSION
 $DIR/tools/wait_for_pods.sh kolla
 
 ### Checking for  leftovers
