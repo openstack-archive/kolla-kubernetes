@@ -5,33 +5,33 @@ NODE=$(hostname -s)
 TYPE="$2"
 BRANCH="$3"
 
-echo "kolla_base_distro: $1" >> /etc/kolla/globals.yml
-cat tests/conf/ceph-all-in-one/kolla_config >> /etc/kolla/globals.yml
+echo "kolla_base_distro: $1" >> kolla-ansible/etc/kolla/globals.yml
+cat tests/conf/ceph-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
 IP=172.18.0.1
 sed -i "s/^\(kolla_external_vip_address:\).*/\1 '$IP'/" \
-    /etc/kolla/globals.yml
+    kolla-ansible/etc/kolla/globals.yml
 sed -i "s/^\(kolla_kubernetes_external_vip:\).*/\1 '$IP'/" \
-    /etc/kolla-kubernetes/kolla-kubernetes.yml
+    etc/kolla-kubernetes/kolla-kubernetes.yml
 
 cat tests/conf/ceph-all-in-one/kolla_kubernetes_config \
-    >> /etc/kolla-kubernetes/kolla-kubernetes.yml
+    >> etc/kolla-kubernetes/kolla-kubernetes.yml
 
 sed -i "s/initial_mon:.*/initial_mon: $NODE/" \
-    /etc/kolla-kubernetes/kolla-kubernetes.yml
+    etc/kolla-kubernetes/kolla-kubernetes.yml
 
 if [ "x$TYPE" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \
         $(cat /etc/nodepool/primary_node_private) \
         | head -n 1 | awk -F: '{print $1}')
-    echo "tunnel_interface: $interface" >> /etc/kolla/globals.yml
+    echo "tunnel_interface: $interface" >> kolla-ansible/etc/kolla/globals.yml
     echo "storage_interface: $interface" >> \
-        /etc/kolla-kubernetes/kolla-kubernetes.yml
+        etc/kolla-kubernetes/kolla-kubernetes.yml
     sed -i "s/172.17.0.1/$(cat /etc/nodepool/primary_node_private)/" \
-        /etc/kolla-kubernetes/kolla-kubernetes.yml
+        etc/kolla-kubernetes/kolla-kubernetes.yml
 fi
 
 if [ "x$BRANCH" == "x2" -o "x$BRANCH" == "x3" ]; then
-    echo 'enable_placement: "no"' >> /etc/kolla/globals.yml
+    echo 'enable_placement: "no"' >> kolla-ansible/etc/kolla/globals.yml
 fi
 
 # Generate passwords using SPRNG tool
