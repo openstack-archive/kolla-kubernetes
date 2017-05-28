@@ -21,6 +21,7 @@ case "$BRANCH" in
        sed -i 's/2\.0\.2/3.0.2/g' tests/conf/ceph-all-in-one/kolla_config
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-control/values.yaml
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-compute/values.yaml
+       sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-cleanup/values.yaml
        ;;
    "4" )
        sed -i 's/2\.0\.2/4.0.0/g' helm/all_values.yaml
@@ -34,6 +35,7 @@ case "$BRANCH" in
        echo Still on 2.0.0 images
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-control/values.yaml
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-compute/values.yaml
+       sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-cleanup/values.yaml
        ;;
 esac
 
