@@ -165,7 +165,7 @@ fi
 kubectl get pods --namespace=kolla
 kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
-tests/bin/horizon_test.sh
+#tests/bin/horizon_test.sh
 tests/bin/prometheus_tests.sh
 tests/bin/cleanup_tests.sh
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
