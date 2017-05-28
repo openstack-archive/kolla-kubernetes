@@ -8,6 +8,9 @@ exec 2<&-
 exec 1<>$WORKSPACE/logs/gate_log_capture.txt
 exec 2>&1
 
+free -g
+kubectl describe pod -n kolla nova-api-delete-db-w7r0t
+
 . ~/keystonerc_admin
 mkdir -p $WORKSPACE/logs/pods
 mkdir -p $WORKSPACE/logs/svc
