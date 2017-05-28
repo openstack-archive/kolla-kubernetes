@@ -3,6 +3,10 @@ global:
         all:
             kubernetes_entrypoint: true
         nova:
+            all:
+                placement_api_enabled: true
+                cell_enabled: true
+
             delete_db:
                 job:
                     dependencies:
