@@ -9,7 +9,7 @@ helm ls | grep $1 | awk {'print $1'} | xargs helm delete --purge
 $DIR/tools/wait_for_pods_termination.sh kolla
 
 ### Cleaning service leftovers
-helm install kolla/$1-cleanup --namespace=kolla --name $1-cleanup
+helm install kolla/$1-cleanup --debug --namespace=kolla --name $1-cleanup
 $DIR/tools/wait_for_pods.sh kolla
 
 ### Checking for  leftovers
