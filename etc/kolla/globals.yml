@@ -341,3 +341,6 @@ tempest_floating_network_name:
 
 # tempest_image_alt_id: "{{ tempest_image_id }}"
 # tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
+api_interface_address: 0.0.0.0
+tunnel_interface_address: 0.0.0.0
+orchestration_engine: KUBERNETES
