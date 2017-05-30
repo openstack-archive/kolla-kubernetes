@@ -72,6 +72,7 @@ fi
 
 if [ "x$4" == "xironic" ]; then
     tools/setup_gate_iscsi.sh $1 $2 $3 $4 $5 $BRANCH $PIPELINE
+    tests/bin/destroy_tests.sh
     exit 0
 fi
 
