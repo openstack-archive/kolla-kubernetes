@@ -5,6 +5,6 @@
 {{- $elementNameMgmt := printf "%s-mgmt" $elementName }}
 {{- $elementServiceMgmt := printf "%s-mgmt" $elementName }}
 {{- $elementPort := include "kolla_val_get_str" (dict "key" "mgmt_port" "searchPath" $searchPath "Values" .Values) }}
-{{- with $env := dict "prefix" "mgmt" "element_port" $elementPort "element_name" $elementNameMgmt "element_service" $elementServiceMgmt "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "prefix" "mgmt" "element_port" $elementPort "element_name" $elementNameMgmt "element_service" $elementService "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_svc" $env }}
 {{- end }}
