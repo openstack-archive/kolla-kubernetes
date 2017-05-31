@@ -17,15 +17,12 @@ import subprocess
 import sys
 import yaml
 
-from kolla_kubernetes.service_resources import KollaKubernetesResources
-
 
 def usage():
-    print("secret-generator.py requires one of these two commands: \
-           create or delete")
+    print("secret-generator.py <create|delete> [namespace]")
     return
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     usage()
     exit(1)
 
@@ -34,6 +31,11 @@ command = sys.argv[1].lower().strip()
 if (command != 'create' and command != 'delete'):
     usage()
     exit(2)
+
+if len(sys.argv) == 3:
+    namespace = sys.argv[2].lower().strip()
+else:
+    namespace = 'kolla'
 
 password_file = "/etc/kolla/passwords.yml"
 
@@ -50,15 +52,13 @@ for element in passwords:
     if isinstance(passwords[element], six.string_types):
         service_name = element.replace('_', '-')
         password_value = passwords[element]
-        nsname = 'kolla_kubernetes_namespace'
-        nsname = KollaKubernetesResources.GetJinjaDict()[nsname]
         if command == "create":
             command_line = "kubectl create secret generic {} " \
                            "--from-literal=password={} --namespace={}".format(
-                               service_name, password_value, nsname)
+                               service_name, password_value, namespace)
         else:
             command_line = "kubectl delete secret {} --namespace={}".format(
-                           service_name, nsname)
+                           service_name, namespace)
         try:
             res = subprocess.check_output(
                 command_line, shell=True,
