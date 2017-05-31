@@ -5,12 +5,14 @@
 {{- $serviceName := "ironic" }}
 {{- $serviceType := "conductor" }}
 {{- $privileged := true }}
-{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $conductorSearchPath := printf ":global.kolla.ironic.conductor.daemonset.conductor%s" $searchPath }}
+{{- $c := dict "searchPath" $conductorSearchPath "Values" .Values }}
 {{- $_ := set $c "contName" "ironic-conductor" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
-{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $tftpSearchPath := printf ":global.kolla.ironic.conductor.daemonset.tftp%s" $searchPath }}
+{{- $c := dict "searchPath" $tftpSearchPath "Values" .Values }}
 {{- $_ := set $c "contName" "ironic-pxe" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
