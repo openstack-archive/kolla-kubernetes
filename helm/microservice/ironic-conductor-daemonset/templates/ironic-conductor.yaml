@@ -12,8 +12,8 @@
 {{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "ironic-pxe" }}
-{{- $_ := set $c "imageName" "image_full" }}
-{{- $_ := set $c "tagName" "image_tag" }}
+{{- $_ := set $c "imageName" "ironic_pxe_image_full" }}
+{{- $_ := set $c "tagName" "ironic_pxe_image_tag" }}
 {{- $imageFullPXE := include "kolla_build_image_full" $c }}
 {{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
