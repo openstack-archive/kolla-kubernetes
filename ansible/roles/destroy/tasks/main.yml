@@ -7,12 +7,6 @@
   set_fact:
     kubectl_dict: "{{ kubectl_nodes.stdout|from_json }}"
 
-- name: Obtain list of Kolla PVs
-  command: "kubectl get pvc -n kolla -o jsonpath={.items[*].spec.volumeName}"
-  register: pv_list
-  failed_when:
-    - pv_list.rc != 0
-
 - name: Obtain list of Kolla configmaps
   command: "kubectl get configmaps -n kolla -o name"
   register: configmaps_list
@@ -54,6 +48,12 @@
   when: configmaps_list.stdout | length != 0
   with_items:
     - "{{ configmaps_list.stdout }}"
+
+- name: Obtain list of Kolla PVs
+  command: "kubectl get pvc -n kolla -o jsonpath={.items[*].spec.volumeName}"
+  register: pv_list
+  failed_when:
+    - pv_list.rc != 0
 
 - name: "Delete existing Kolla labels"
   include: "label_iterator.yml"
