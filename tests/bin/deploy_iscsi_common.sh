@@ -531,7 +531,7 @@ $DIR/tools/build_local_admin_keystonerc.sh
 wait_for_openstack
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-cell0-create-db-job --debug --version $VERSION \
+helm install kolla/nova-cell0-create-db-job --version $VERSION \
     --namespace kolla --name nova-cell0-create-db-job \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
