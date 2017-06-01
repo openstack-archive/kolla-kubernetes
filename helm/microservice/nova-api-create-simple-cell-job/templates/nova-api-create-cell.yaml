@@ -11,6 +11,10 @@
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $keystoneSearchPath := ":global.kolla.keystone.create_keystone_endpoints.job:global.kolla.keystone.create_keystone_endpoints.all:global.kolla.keystone.all:global.kolla.all" }}
+{{- $keystonePort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $keystoneSearchPath "Values" .Values ) }}
+{{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $keystoneSearchPath "Values" .Values ) | default "keystone" }}
+{{- $keystoneURL := printf "%s-public" $elementName }}
 {{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: batch/v1
 kind: Job
@@ -31,6 +35,64 @@ spec:
                  "mkdir /var/log/kolla/nova;
                   chown -R nova: /var/log/kolla/nova;
                   chmod 755 /var/log/kolla/nova; "],
+             "volumeMounts": [
+                {
+                   "name": "kolla-logs",
+                   "mountPath": "/var/log/kolla"
+                }
+             ]
+          },
+          {
+             "name": "wait-for-nova-compute-up",
+             "image": {{ include "kolla_toolbox_image_full" . | quote }},
+             "imagePullPolicy": "{{ $imagePullPolicy }}",
+             "env": [
+                {
+                   "name": "KEYSTONE_ADMIN_PASSWORD",
+                   "valueFrom":
+                      {
+                         "secretKeyRef":
+                            {
+                               "name": "keystone-admin-password",
+                               "key": "password"
+                            }
+                      }
+                },
+                {
+                   "name": "OS_PASSWORD",
+                   "value": "$KEYSTONE_ADMIN_PASSWORD" 
+                },
+                {
+                   "name": "OS_AUTH_URL",
+                   "value": "http://{{ $keystoneURL }}:{{ $keystonePort }}/v3"
+                },
+                {
+                   "name": "OS_PROJECT_NAME",
+                   "value": "admin"
+                },
+                {
+                   "name": "OS_USER_DOMAIN_NAME",
+                   "value": "Default"
+                },
+                {
+                   "name": "OS_PROJECT_DOMAIN_NAME",
+                   "value": "Default"
+                },
+                {
+                   "name": "OS_IDENTITY_API_VERSION",
+                   "value": "3"
+                },
+                {
+                   "name": "OS_REGION_NAME",
+                   "value": "RegionOne"
+                }
+             ],
+             "command": [
+                 "sh",
+                 "-ce",
+                 "echo $KEYSTONE_ADMIN_PASSWD;
+                  openstack hypervisor list -f value -c State; 
+                 "],
              "volumeMounts": [
                 {
                    "name": "kolla-logs",
