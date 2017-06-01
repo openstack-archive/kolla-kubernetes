@@ -466,6 +466,16 @@ nova-api-delete-db-job:
                             database_name: "nova_api"
                             database_user: "nova_api"
 
+nova-api-create-cell-job:
+        global:
+            kolla:
+                nova:
+                    api:
+                        create_cell:
+                            all:
+                                cell_wait_compute: true 
+                                cell_wait_compute_sleep: 5
+
 nova-cell0-create-db-job:
         global:
             kolla:
