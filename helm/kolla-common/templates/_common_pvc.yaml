@@ -13,4 +13,7 @@ spec:
   resources:
     requests:
       storage: {{ .volumeSizeGB }}
+  selector:
+    matchLabels:
+      app: {{ .pvcName }}
 {{- end }}
