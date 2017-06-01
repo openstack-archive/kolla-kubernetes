@@ -16,6 +16,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  labels:
+    app: {{ .pvName }}
   capacity:
     storage: {{ .volumeSizeGB }}Gi
 {{- if eq .storageProvider "host" }}
