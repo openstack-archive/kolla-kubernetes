@@ -1,0 +1,13 @@
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: caoyuan <cao.yuan@99cloud.net>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+1: Chris Wedgwood <cw@f00f.org>
+Code-Review+2: Steven Dake <stdake@cisco.com>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Workflow+1: Steven Dake <stdake@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 02 Jun 2017 18:14:27 +0000
+Reviewed-on: https://review.openstack.org/467769
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
