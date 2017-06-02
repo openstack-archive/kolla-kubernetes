@@ -204,7 +204,7 @@ spec:
           emptyDir: {}
         - name: pxe-config
           configMap:
-            name: ironic-pxe
+            name: ironic-inspector-tftp
         - name: ironic-pxe-config
           emptyDir: {}
         - name: ironic-inspector-config

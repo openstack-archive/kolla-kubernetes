@@ -34,8 +34,6 @@ function common_workflow_config {
     fi
     echo "      conductor:"
     echo "        all:"
-    echo "          initramfs_url: http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.gz"
-    echo "          kernel_url: http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.vmlinuz"
     echo "          ironic_api_ip: 172.21.0.10"
     echo "          ironic_provision_cidr: 172.21.0.0/24"
     echo "      inspector:"

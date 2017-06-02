@@ -1149,10 +1149,6 @@ ironic-conductor-daemonset:
                     all:
                         ironic_api_ip: 172.21.0.10
                         ironic_provision_cidr: 172.21.0.0/24
-                    conductor:
-                        all:
-                            initramfs_url:
-                            kernel_url:
 
 ironic-inspector-deployment:
         global:

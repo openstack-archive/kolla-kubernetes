@@ -642,7 +642,8 @@ kolla-kubernetes:
         vars:
           configmap_name: ironic-conductor-logging
           log_format: 'openstack'
-      - name: ironic-pxe
+      - name: ironic-inspector-tftp
+      - name: ironic-conductor-tftp
       - name: ironic-dnsmasq
       - name: ironic-dnsmasq-logging
         template: services/common/logging-configmap.yml.j2
