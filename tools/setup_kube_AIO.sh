@@ -69,13 +69,6 @@ echo "Install Ansible"
 sudo yum install -y ansible
 
 
-## Install OpenStack clients
-echo "Install OpenStack clients"
-sudo pip install python-openstackclient
-sudo pip install python-neutronclient
-sudo pip install python-cinderclient
-
-
 ## Turn off firewalld
 echo "Turn off firewalld"
 sudo systemctl stop firewalld
@@ -88,29 +81,9 @@ sudo systemctl enable ntpd.service
 sudo systemctl start ntpd.service
 
 
-## Git Clone Kolla Ansible
-echo "Git Clone Kolla Ansible"
-sudo git clone http://github.com/openstack/kolla-ansible /opt/kolla-ansible
-
-
 ## Git Clone Kolla Kubernetes
 echo "Git Clone Kolla Kubernetes"
 sudo git clone http://github.com/openstack/kolla-kubernetes /opt/kolla-kubernetes
-
-
-## Install kolla-ansible and kolla-kubernetes
-echo "Install kolla-ansible and kolla-kubernetes"
-sudo pip install -U /opt/kolla-ansible/ /opt/kolla-kubernetes/
-
-
-## Copy default Kolla configuration to /etc
-echo "Copy default Kolla configuration to /etc"
-sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
-
-
-## Copy default kolla-kubernetes configuration to /etc
-echo "Copy default kolla-kubernetes configuration to /etc"
-sudo cp -aR /opt/kolla-kubernetes/etc/kolla-kubernetes /etc
 
 
 ## Set Up Kubernetes
@@ -132,11 +105,6 @@ echo "Setup Canal"
 cd /opt/kolla-kubernetes && tests/bin/setup_canal.sh
 
 
-## Untaint Master
-echo "Untaint Master"
-kubectl taint nodes --all=true node-role.kubernetes.io/master:NoSchedule-
-
-
 ## Setup Helm
 echo "Setup Helm"
 cd /opt/kolla-kubernetes && tools/setup_helm.sh
@@ -145,6 +113,21 @@ cd /opt/kolla-kubernetes && tools/setup_helm.sh
 ## Setup Loopback LVM for Cinder
 echo "Setup Loopback LVM for Cinder"
 /opt/kolla-kubernetes/tests/bin/setup_gate_loopback_lvm.sh
+
+
+## Install kolla-kubernetes
+echo "Install kolla-kubernetes"
+sudo pip install -U /opt/kolla-kubernetes/
+
+
+##Copy default kolla configuration to /etc
+echo "Copy default kolla configuration to /etc"
+sudo cp -aR /usr/share/kolla-kubernetes/etc_examples/kolla /etc
+
+
+## Copy default kolla-kubernetes configuration to /etc
+echo "Copy default kolla-kubernetes configuration to /etc"
+sudo cp -aR /opt/kolla-kubernetes/etc/kolla-kubernetes /etc
 
 
 ## Generate Default Passwords
@@ -170,11 +153,38 @@ kolla_install_type: "source"
 tempest_image_alt_id: "{{ tempest_image_id }}"
 tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
 
+neutron_plugin_agent: "openvswitch"
+api_interface_address: 0.0.0.0
+tunnel_interface_address: 0.0.0.0
+orchestration_engine: KUBERNETES
+memcached_servers: "memcached"
+keystone_admin_url: "http://keystone-admin:35357/v3"
+keystone_internal_url: "http://keystone-internal:5000/v3"
+keystone_public_url: "http://keystone-public:5000/v3"
+glance_registry_host: "glance-registry"
+neutron_host: "neutron"
+keystone_database_address: "mariadb"
+glance_database_address: "mariadb"
+nova_database_address: "mariadb"
+nova_api_database_address: "mariadb"
+neutron_database_address: "mariadb"
+cinder_database_address: "mariadb"
+ironic_database_address: "mariadb"
+placement_database_address: "mariadb"
+rabbitmq_servers: "rabbitmq"
+openstack_logging_debug: "True"
+enable_haproxy: "no"
 enable_heat: "no"
 enable_cinder: "yes"
 enable_cinder_backend_lvm: "yes"
 enable_cinder_backend_iscsi: "yes"
 enable_cinder_backend_rbd: "no"
+enable_ceph: "no"
+enable_elasticsearch: "no"
+enable_kibana: "no"
+glance_backend_ceph: "no"
+cinder_backend_ceph: "no"
+nova_backend_ceph: "no"
 EOF
 cat ./add-to-globals.yml | sudo tee -a /etc/kolla/globals.yml
 
@@ -186,7 +196,9 @@ echo "Generate the Kubernetes secrets and register them with Kubernetes"
 
 ## Generate Default Configurations
 echo "Generate Default Configurations"
-cd /opt/kolla-kubernetes && ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
+sudo ansible-playbook -e ansible_python_interpreter=/usr/bin/python \
+-e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla \
+/opt/kolla-kubernetes/ansible/site.yml
 
 
 ## Set libvirt type to QEMU
@@ -329,17 +341,17 @@ cd /opt/kolla-kubernetes && tools/wait_for_pods.sh kolla 600
 helm install /opt/kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values /etc/kolla/cloud.yaml
 helm install /opt/kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values /etc/kolla/cloud.yaml
 
-# Ensure that nova control and nova compute pods are up before proceeding
-cd /opt/kolla-kubernetes && tools/wait_for_pods.sh kolla 420
-
-helm install /opt/kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values /etc/kolla/cloud.yaml
-helm install /opt/kolla-kubernetes/helm/microservice/nova-api-create-simple-cell-job --namespace kolla --name nova-api-create-simple-cell --values /etc/kolla/cloud.yaml
-
+# Ensure that nova control and nova compute pods are up
+cd /opt/kolla-kubernetes && tools/wait_for_pods.sh kolla 600
 
 ## Post Deployment
-## Check that all pods are up and all jobs completed
-cd /opt/kolla-kubernetes && tools/wait_for_pods.sh kolla
-
 echo "Deployment is Completed"
+
+# Install OpenStack clients
+echo "Install OpenStack clients"
+sudo pip install python-openstackclient
+sudo pip install python-neutronclient
+sudo pip install python-cinderclient
+
 echo "Generate openrc file"
 /opt/kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext
