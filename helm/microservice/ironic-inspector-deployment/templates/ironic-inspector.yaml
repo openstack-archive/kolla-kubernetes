@@ -3,8 +3,8 @@
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
-{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" .searchPath "Values" .Values ) }}
-{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" .searchPath "Values" .Values ) }}
+{{- $replicas := include "kolla_val_get_str" (dict "key" "replicas" "searchPath" $searchPath "Values" .Values ) }}
+{{- $port := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values ) }}
 {{- $portName := "inspector" }}
 {{- $resourceName := "ironic-inspector" }}
 {{- $netHostTrue := true }}
@@ -192,6 +192,10 @@ spec:
               name: ironic-inspector-config
           env:
 {{- include "common_env_vars" $env | indent 12 }}
+          ports:
+            - containerPort: {{ $port }}
+              hostPort: {{ $port }}
+              name: {{ $portName }}
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
