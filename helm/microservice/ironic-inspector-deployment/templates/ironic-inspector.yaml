@@ -137,8 +137,11 @@ spec:
               "command": [
                   "/bin/sh",
                   "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  "IP=$(ip addr show dev {{ $ironicInterface }} to {{ $ironicInspectionCIDR }} | grep -m1 -G ''inet'' | awk ''{print $2}'' | cut -d ''/'' -f 1);
+                   if test -z $IP; then exit 1; fi;
+                   cp -a /srv/configmap/..data/* /srv/pod-main-config/;
                    crudini --set /srv/pod-main-config/inspector.conf firewall dnsmasq_interface {{ $ironicInterface }};
+                   crudini --set /srv/pod-main-config/inspector.conf DEFAULT listen_address ''$IP'';
               "],
               "volumeMounts": [
                   {
