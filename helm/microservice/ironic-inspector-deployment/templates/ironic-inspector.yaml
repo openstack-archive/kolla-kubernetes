@@ -192,6 +192,9 @@ spec:
               name: ironic-inspector-config
           env:
 {{- include "common_env_vars" $env | indent 12 }}
+          ports:
+            - containerPort: {{ $port }}
+              name: {{ .portName }}
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
