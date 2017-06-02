@@ -27,8 +27,11 @@ function common_workflow_config {
     echo "        all:"
     echo "          port_external: true"
     echo "    ironic:"
-    echo "      all:"
-    echo "        image_tag: 3.0.3-beta.1"
+# Ironic should use default image tags with exception of Branch 2 and 3  
+    if [ "x$branch" == "x2" -o "x$branch" == "x3" ]; then
+       echo "      all:"
+       echo "        image_tag: 3.0.3-beta.1"
+    fi
     echo "      conductor:"
     echo "        all:"
     echo "          initramfs_url: http://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-stable-newton.gz"
