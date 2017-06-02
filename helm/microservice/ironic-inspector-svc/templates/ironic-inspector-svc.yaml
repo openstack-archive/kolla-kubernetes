@@ -23,6 +23,7 @@ kind: Service
 spec:
   ports:
     - port: {{ $elementPort }}
+      targetPort: "inspector"
       name: {{ $elementName | quote }}
 {{- if $localVals.node_port_enabled }}
       nodePort: {{ $nodePort }}

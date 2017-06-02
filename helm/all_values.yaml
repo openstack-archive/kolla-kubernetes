@@ -1160,13 +1160,14 @@ ironic-inspector-deployment:
                 ironic:
                     inspector:
                         all:
-                            port: 5050
                             ironic_interface: net2
                             initramfs_url:
                             kernel_url:
                             ironic_dhcp_range:
                             ironic_inspection_cidr: 172.22.0.0/24
                             inspect_lldp: false
+                        deployment:
+                            port: 5051
 
 ironic-create-keystone-user-job:
         global:
