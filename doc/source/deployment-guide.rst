@@ -433,7 +433,6 @@ Add required configuration to the end of ``/etc/kolla/globals.yml``::
     placement_database_address: "mariadb"
     rabbitmq_servers: "rabbitmq"
     openstack_logging_debug: "True"
-    enable_haproxy: "no"
     enable_heat: "no"
     enable_cinder: "yes"
     enable_cinder_backend_lvm: "yes"
