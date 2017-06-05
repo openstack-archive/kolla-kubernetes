@@ -1,0 +1,11 @@
+name: libvirt-pvc
+version: 0.7.0-1 #FIXME make this changable
+description: Helm chart for libvirt persistent volume claim
+keywords:
+  - openstack
+  - libvirt
+  - libvirt-pvc
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready

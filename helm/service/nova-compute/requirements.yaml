@@ -1,4 +1,18 @@
 dependencies:
+  - name: nova-pv
+    repository: file://../../microservice/nova-pv
+    version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
+  - name: nova-pvc
+    repository: file://../../microservice/nova-pvc
+    version: 0.7.0-1
+  - name: libvirt-pv
+    repository: file://../../microservice/libvirt-pv
+    version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
+  - name: libvirt-pvc
+    repository: file://../../microservice/libvirt-pvc
+    version: 0.7.0-1
   - name: nova-compute-daemonset
     repository: file://../../microservice/nova-compute-daemonset
     version: 0.7.0-1

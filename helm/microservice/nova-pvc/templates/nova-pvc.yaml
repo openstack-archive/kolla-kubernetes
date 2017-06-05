@@ -1,0 +1,7 @@
+{{- $searchPath := ":global.kolla.nova.pvc:global.kolla.nova.all:global.kolla.all" }}
+{{- $pvcName := "nova" }}
+{{- $storageProvider := include "kolla_val_get_str" (dict "key" "storage_provider" "searchPath" $searchPath "Values" .Values ) }}
+{{- $volumeSizeGB := include "kolla_val_get_str" (dict "key" "size_gb" "searchPath" $searchPath "Values" .Values ) }}
+{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- include "common_pvc" $env }}
+{{- end }}
