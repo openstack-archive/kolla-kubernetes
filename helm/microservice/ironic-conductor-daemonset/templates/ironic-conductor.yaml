@@ -20,7 +20,6 @@
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
-{{- $ironicAPI :=  include "kolla_val_get_str" (dict "key" "ironic_api_ip" "searchPath" $searchPath "Values" .Values )}}
 {{- $ironicProvisionCIDR :=  include "kolla_val_get_str" (dict "key" "ironic_provision_cidr" "searchPath" $searchPath "Values" .Values )}}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
@@ -51,7 +50,7 @@ spec:
                   cp -a /config/ironic/..data/* /ironic/;
                   cp -a /config/pxe/..data/* /pxe/;
                   jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
-                  crudini --set /ironic/ironic.conf conductor api_url http://{{ $ironicAPI }}:6385;
+                  crudini --set /ironic/ironic.conf conductor api_url http://$IP:6385;
                   crudini --set /ironic/ironic.conf pxe tftp_server $IP;
              "],
              "volumeMounts": [

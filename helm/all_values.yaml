@@ -1093,7 +1093,7 @@ ironic-api-svc:
                             port_external: true
                             node_port_enabled: false
                             ironic_provision: true
-                            ironic_provision_vip: 172.21.0.10
+                            ironic_conductor_ips: []
 
 ironic-inspector-svc:
         global:
