@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 0.7.0-1
+description: novainstances-pv subservice layer
+name: novainstances-pv
+keywords:
+  - openstack
+  - novainstances
+  - novainstances-pv
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl

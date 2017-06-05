@@ -143,6 +143,8 @@ spec:
               name: nova-config
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
+            - mountPath: /var/lib/nova/instances
+              name: nova-compute-instances-persistent-storage
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -162,6 +164,9 @@ spec:
         - name: nova-compute-persistent-storage
           hostPath:
             path: /var/lib/nova
+        - name: nova-compute-instances-persistent-storage
+          persistentVolumeClaim:
+            claimName: novainstances
         - name: lib-modules
           hostPath:
             path: /lib/modules
