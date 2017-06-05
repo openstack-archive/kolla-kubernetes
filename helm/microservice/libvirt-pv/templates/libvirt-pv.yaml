@@ -1,0 +1,9 @@
+{{- $searchPath := ":global.kolla.libvirt.pv:global.kolla.libvirt.all:global.kolla.all" }}
+{{- $pvName := "libvirt" }}
+{{- $storageProvider := include "kolla_val_get_str" (dict "key" "storage_provider" "searchPath" $searchPath "Values" .Values ) }}
+{{- $volumeSizeGB := include "kolla_val_get_str" (dict "key" "size_gb" "searchPath" $searchPath "Values" .Values ) }}
+{{- $storageProviderFStype := include "kolla_val_get_str" (dict "key" "storage_provider_fstype" "searchPath" $searchPath "Values" .Values ) }}
+{{- $volumeName := "libvirt"}}
+{{- with $env := dict "pvName" $pvName "storageProvider" $storageProvider "storageProviderFStype" $storageProviderFStype "volumeName" $volumeName "volumeSizeGB" $volumeSizeGB "Values" .Values  "Release" .Release "searchPath" $searchPath }}
+{{- include "common_pv" $env }}
+{{- end }}
