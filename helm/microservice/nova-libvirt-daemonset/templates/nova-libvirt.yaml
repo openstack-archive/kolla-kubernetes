@@ -118,6 +118,8 @@ spec:
               name: nova-libvirt-persistent-storage
             - mountPath: /var/lib/nova
               name: nova-compute-persistent-storage
+            - mountPath: /var/lib/nova/instances
+              name: nova-compute-instances-persistent-storage
             - mountPath: /lib/modules
               name: lib-modules
             - mountPath: /var/run
@@ -139,6 +141,9 @@ spec:
         - name: nova-libvirt-config
           configMap:
             name: {{ $elementName }}
+        - name: nova-compute-instances-persistent-storage
+          persistentVolumeClaim:
+            claimName: novainstances
         - name: nova-libvirt-persistent-storage
           hostPath:
             path: /var/lib/libvirt

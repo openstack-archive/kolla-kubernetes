@@ -1,4 +1,11 @@
 dependencies:
+  - name: novainstances-pv
+    repository: file://../../microservice/novainstances-pv
+    version: 0.7.0-1
+    condition: global.kolla.all.pv_enabled
+  - name: novainstances-pvc
+    repository: file://../../microservice/novainstances-pvc
+    version: 0.7.0-1
   - name: nova-compute-daemonset
     repository: file://../../microservice/nova-compute-daemonset
     version: 0.7.0-1
