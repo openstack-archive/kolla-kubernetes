@@ -12,6 +12,7 @@ function common_workflow_config {
     echo "      all:"
     echo "        admin_port_external: true"
     echo "        dns_name: $IP"
+    echo "        port: 5000"
     echo "      public:"
     echo "        all:"
     echo "          port_external: true"
