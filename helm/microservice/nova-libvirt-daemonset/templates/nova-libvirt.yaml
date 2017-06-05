@@ -134,14 +134,14 @@ spec:
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
         - name: nova-compute-persistent-storage
-          hostPath:
-            path: /var/lib/nova
+          persistentVolumeClaim:
+            claimName: nova-pvc
         - name: nova-libvirt-config
           configMap:
             name: {{ $elementName }}
         - name: nova-libvirt-persistent-storage
-          hostPath:
-            path: /var/lib/libvirt
+          persistentVolumeClaim:
+            claimName: libvirt-pvc
         - name: lib-modules
           hostPath:
             path: /lib/modules

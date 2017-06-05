@@ -160,8 +160,8 @@ spec:
           configMap:
             name: {{ $elementName }}
         - name: nova-compute-persistent-storage
-          hostPath:
-            path: /var/lib/nova
+          persistentVolumeClaim:
+            claimName: nova-pvc
         - name: lib-modules
           hostPath:
             path: /lib/modules
