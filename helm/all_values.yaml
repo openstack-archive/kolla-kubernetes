@@ -305,7 +305,8 @@ keepalived-daemonset:
             kolla:
                 keepalived:
                     all:
-                        api_interface: br-ex 
+                        api_interface: br-ex
+                        virtual_router_id: 51
 
 rabbitmq-init-element-job:
         global:
