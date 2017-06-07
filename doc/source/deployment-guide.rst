@@ -46,9 +46,9 @@ Dependencies::
 
     docker == 1.12.6
     helm >= 2.4.1
-    kubectl >= 1.6.3
-    kubeadm >= 1.6.3
-    kubelet >= 1.6.3 + fix - see below
+    kubectl >= 1.6.4
+    kubeadm >= 1.6.4
+    kubelet >= 1.6.4 + fix - see below
     kubernetes-cni >= 0.5.1
 
 .. note::
@@ -73,7 +73,7 @@ Step 1: Deploy Kubernetes
 
 .. note::
 
-   This document recommends Kubernetes 1.6.2 or later.
+   This document recommends Kubernetes 1.6.4 or later.
 
 .. warning::
 
@@ -129,11 +129,11 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
 
-Currently kubelet 1.6.3 is broken. Until #45613 is in the repo install
+Currently kubelet 1.6.4 is broken. Until #45613 is in the repo install
 the following work-around::
 
     curl -L  https://github.com/sbezverk/kubelet--45613/raw/master/kubelet.gz | gzip -d > /usr/bin/kubelet
@@ -153,7 +153,7 @@ Write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
@@ -744,7 +744,7 @@ Determine IP and port information::
   nova-novncproxy      10.3.3.167   10.240.43.81   6080/TCP    15h
   nova-placement-api   10.3.3.192   10.240.43.81   8780/TCP    15h
   rabbitmq             10.3.3.158   <none>         5672/TCP    15h
-  rabbitmq-mgmt        10.3.3.105   <none>         15672/TCP   15h
+  rabbitmq-mgmt        10.3.3.105   <none>         1.6.4/TCP   15h
 
 View all k8's namespaces::
 
@@ -833,7 +833,7 @@ View docker images::
   $ sudo docker images
   REPOSITORY                                                TAG                 IMAGE ID            CREATED             SIZE
   gcr.io/kubernetes-helm/tiller                             v2.3.1              38527daf791d        7 days ago          56 MB
-  quay.io/calico/cni                                        v1.6.2              db2dedf2181a        2 weeks ago         65.08 MB
+  quay.io/calico/cni                                        v1.6.4              db2dedf2181a        2 weeks ago         65.08 MB
   gcr.io/google_containers/kube-proxy-amd64                 v1.6.0              746d1460005f        3 weeks ago         109.2 MB
   ...
 
