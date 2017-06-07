@@ -53,6 +53,7 @@ pod-http-termination:
                     haproxy_image_tag: 3.0.2
                     haproxy_prometheus_image_full: "prom/haproxy-exporter:v0.7.1"
                     grace_period_seconds: 172800
+                    haproxy_external_tls: false
 
 stateful-service:
         global:
