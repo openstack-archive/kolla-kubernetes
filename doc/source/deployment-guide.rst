@@ -46,9 +46,9 @@ Dependencies::
 
     docker == 1.12.6
     helm >= 2.4.1
-    kubectl >= 1.6.3
-    kubeadm >= 1.6.3
-    kubelet >= 1.6.3 + fix - see below
+    kubectl >= 1.6.2
+    kubeadm >= 1.6.2
+    kubelet >= 1.6.2 + fix - see below
     kubernetes-cni >= 0.5.1
 
 .. note::
