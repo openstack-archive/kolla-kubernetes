@@ -1,0 +1,6 @@
+---
+- name: Generate TLS certificate files
+  hosts: localhost
+  connection: local
+  roles:
+    - certificates
