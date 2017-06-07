@@ -447,6 +447,23 @@ Add required configuration to the end of ``/etc/kolla/globals.yml``::
     EOF
     cat ./add-to-globals.yml | sudo tee -a /etc/kolla/globals.yml
 
+..note::
+
+    Perform the next two steps if you wish to enable TLS on the external
+    API network
+
+Generate the TLS certificate files::
+
+    sudo kolla-ansible certificates
+
+Update the Kolla configuration file to enable TLS::
+
+    cat <<EOF > add-tls-to-globals.yml
+    kolla_enable_tls_external: "yes"
+    kolla_external_fqdn_cert: "/etc/kolla/certificates/haproxy.pem"
+    EOF
+    cat ./add-tls-to-globals.yml | sudo tee -a /etc/kolla/globals.yml
+
 For operators using virtualization for evaluation purposes please enable
 QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
