@@ -13,6 +13,7 @@
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- $apiInterface := include "kolla_val_get_str" (dict "key" "api_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- $virtualRouterID := include "kolla_val_get_str" (dict "key" "virtual_router_id" "searchPath" $searchPath "Values" .Values ) }}
 {{- $kollaKubernetesExternalVIP := include "kolla_val_get_str" (dict "key" "kolla_kubernetes_external_vip" "searchPath" $searchPath "Values" .Values ) }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
@@ -44,6 +45,8 @@ spec:
                   [ -f $F ] && API_INTERFACE=$(<$F);
                   sed -i ''s|interface.*|interface ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
                   sed -i ''s|\\(dev*\\).*|\\1 ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+                  sed -i ''s|virtual_router_id.*|virtual_router_id {{ $virtualRouterID }}|g'' /srv/pod-main-config/keepalived.conf;
+                  sed -i ''s|kolla_internal_vip_.* {|kolla_internal_vip_{{ $virtualRouterID }} {|g'' /srv/pod-main-config/keepalived.conf;
                   cat /srv/pod-main-config/keepalived.conf;
                  "],
              "volumeMounts": [
