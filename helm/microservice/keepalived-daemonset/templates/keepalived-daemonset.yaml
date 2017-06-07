@@ -47,6 +47,7 @@ spec:
               [ -f $F ] && API_INTERFACE=$(<$F);
               sed -i 's|interface.*|interface '$API_INTERFACE'|g' /srv/pod-main-config/keepalived.conf;
               sed -i 's|\(dev*\).*|\1 '$API_INTERFACE'|g' /srv/pod-main-config/keepalived.conf;
+              sed -i ''s|virtual_router_id.*|virtual_router_id {{ $virtualRouterID }}|g'' /srv/pod-main-config/keepalived.conf;
               cat /srv/pod-main-config/keepalived.conf;
           volumeMounts:
             - name: keepalived-configmap
