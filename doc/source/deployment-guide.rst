@@ -497,9 +497,9 @@ Check that all Helm images have been built by verifying the number is > 150::
 
     ls | grep ".tgz" | wc -l
 
-Create a local cloud.yml file for the deployment of the charts::
+Create a local cloud.yaml file for the deployment of the charts::
 
-    cat <<EOF > cloud.yml
+    cat <<EOF > cloud.yaml
     global:
        kolla:
          all:
