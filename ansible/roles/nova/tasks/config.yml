@@ -113,3 +113,13 @@
     - item.key in services_require_policy_json
   with_dict: "{{ nova_services }}"
 
+- name: Copying over certificate haproxy.pem
+  vars:
+    service:
+      - service: "{{ nova_services['nova-api-haproxy'] }}"
+  template:
+    src: "{{ node_custom_config }}/certificates/haproxy.pem"
+    dest: "{{ node_config_directory }}/{{ item.key }}/haproxy.pem"
+  register: policy_jsons
+  when:
+    - {{ kolla_enable_tls_external | bool }}

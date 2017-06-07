@@ -47,3 +47,14 @@
   when:
     - glance_policy.stat.exists
   with_dict: "{{ glance_services }}"
+
+- name: Copying over certificate haproxy.pem
+  vars:
+    service:
+      - service: "{{ glance_services['glance-api-haproxy'] }}"
+  template:
+    src: "{{ node_custom_config }}/certificates/haproxy.pem"
+    dest: "{{ node_config_directory }}/{{ item.key }}/haproxy.pem"
+  register: policy_jsons
+  when:
+    - {{ kolla_enable_tls_external | bool }}

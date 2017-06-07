@@ -125,6 +125,8 @@ spec:
               name: haproxy-config
             - mountPath: /haproxy
               name: socket
+            - mountPath: /haproxy/certificates
+              name: haproxy-certificates
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
@@ -204,6 +206,11 @@ spec:
         - name: haproxy-config
           configMap:
             name: {{ .resourceName }}-haproxy
+        - name: haproxy-certificates
+          configMap:
+            name: certificates
+            items:
+            - path: /etc/kolla/certificates
 {{- end }}
 {{- if .extraVolume }}
 {{- include .extraVolume . | indent 8 }}

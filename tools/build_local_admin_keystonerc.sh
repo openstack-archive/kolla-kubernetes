@@ -18,11 +18,20 @@ KEYSTONE_CLUSTER_PORT=`kubectl get svc keystone-public --namespace=kolla -o \
 KEYSTONE_ADMIN_PASSWD=`grep keystone_admin_password /etc/kolla/passwords.yml \
     | cut -d':' -f2 | sed -e 's/ //'`
 
+KEYSTONE_USE_HTTPS=`grep "^kolla_enable_tls_external:" /etc/kolla/globals.yml \
+    | cut -d':' -f2 | sed -e 's/ //' | sed -e 's/"//g'`
+if [ "$KEYSTONE_USE_HTTPS" == "yes" ]; then
+    KEYSTONE_PROTOCOL="https"
+    CACERT="/etc/kolla/certificates/haproxy-ca.crt"
+else
+    KEYSTONE_PROTOCOL="http"
+fi
+
 cat > ~/keystonerc_admin <<EOF
 unset OS_SERVICE_TOKEN
 export OS_USERNAME=admin
 export OS_PASSWORD=$KEYSTONE_ADMIN_PASSWD
-export OS_AUTH_URL=http://$KEYSTONE_CLUSTER_IP:$KEYSTONE_CLUSTER_PORT/v3
+export OS_AUTH_URL=$KEYSTONE_PROTOCOL://$KEYSTONE_CLUSTER_IP:$KEYSTONE_CLUSTER_PORT/v3
 export PS1='[\u@\h \W(keystone_admin)]$ '
 export OS_PROJECT_NAME=admin
 export OS_USER_DOMAIN_NAME=Default
@@ -30,4 +39,5 @@ export OS_PROJECT_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
 export OS_REGION_NAME=RegionOne
 export OS_VOLUME_API_VERSION=2
+export OS_CACERT=$CACERT
 EOF
