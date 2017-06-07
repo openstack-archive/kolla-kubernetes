@@ -10,6 +10,7 @@
 {{- $gracePeriodSeconds := include "kolla_val_get_str" (dict "key" "grace_period_seconds" "searchPath" .searchPath "Values" .Values ) }}
 {{- $localVals := dict }}
 {{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $localVals "retKey" "haproxy" "Values" .Values }}
+{{- $c := dict "searchPath" .searchPath "key" "haproxy_external_tls" "retDict" $localVals "retKey" "haproxy_tls" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
 {{- $c := dict "searchPath" .searchPath "key" "prometheus_exporter" "retDict" $localVals "retKey" "prometheus" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
@@ -125,6 +126,10 @@ spec:
               name: haproxy-config
             - mountPath: /haproxy
               name: socket
+{{- if $localVals.haproxy_tls }}
+            - mountPath: /certificates
+              name: haproxy-certificates
+{{- end }}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
@@ -204,6 +209,11 @@ spec:
         - name: haproxy-config
           configMap:
             name: {{ .resourceName }}-haproxy
+{{- if $localVals.haproxy_tls }}
+        - name: haproxy-certificates
+          secret:
+            secretName: haproxy-certificate
+{{- end }}
 {{- end }}
 {{- if .extraVolume }}
 {{- include .extraVolume . | indent 8 }}

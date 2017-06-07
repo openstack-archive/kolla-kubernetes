@@ -13,6 +13,11 @@ data:
       log /var/lib/kolla/heka/log local0
       maxconn 4000
       stats socket /haproxy/haproxy.sock
+ {% if kolla_enable_tls_external | bool %}
+      ssl-default-bind-ciphers DEFAULT:!MEDIUM:!3DES
+      ssl-default-bind-options no-sslv3 no-tlsv10
+      tune.ssl.default-dh-param 4096
+ {% endif %}
 
     defaults
       log global
@@ -28,8 +33,9 @@ data:
       timeout server 1m
       timeout check 10s
 
+{% set tls_bind_info = 'ssl crt /certificates/haproxy.pem' if kolla_enable_tls_external | bool else '' %}
     listen api
-      bind 0.0.0.0:{{ global[kolla_kubernetes.template.vars.port_name] }}
+      bind 0.0.0.0:{{ global[kolla_kubernetes.template.vars.port_name] }} {{ tls_bind_info }}
       server local-api 127.0.0.1:8080 check inter 2000 rise 2 fall 5
 
 {% if kolla_kubernetes.template.vars.configmap_name == 'nova-api-haproxy' %}
