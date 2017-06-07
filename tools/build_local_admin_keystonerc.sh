@@ -18,6 +18,12 @@ KEYSTONE_CLUSTER_PORT=`kubectl get svc keystone-public --namespace=kolla -o \
 KEYSTONE_ADMIN_PASSWD=`grep keystone_admin_password /etc/kolla/passwords.yml \
     | cut -d':' -f2 | sed -e 's/ //'`
 
+if [ -e /etc/kolla/certificates/service-ca.crt ]; then
+    CACERT="export OS_CACERT=/etc/kolla/certificates/service-ca.crt"
+else
+    CACERT=""
+fi
+
 cat > ~/keystonerc_admin <<EOF
 unset OS_SERVICE_TOKEN
 export OS_USERNAME=admin
@@ -30,4 +36,5 @@ export OS_PROJECT_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
 export OS_REGION_NAME=RegionOne
 export OS_VOLUME_API_VERSION=2
+$CACERT
 EOF

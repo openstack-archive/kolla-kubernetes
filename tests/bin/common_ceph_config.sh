@@ -5,6 +5,8 @@ function common_ceph_config {
     echo "      ceph_backend: true"
     echo "      storage_provider: ceph"
     echo "      storage_provider_fstype: xfs"
+#FIXME this probably needs its own test...
+    echo "      enable_tls: true"
     echo "      ceph:"
     echo "         monitors:"
     addr=172.17.0.1

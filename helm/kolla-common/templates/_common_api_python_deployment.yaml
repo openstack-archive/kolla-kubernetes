@@ -10,6 +10,7 @@
 {{- $gracePeriodSeconds := include "kolla_val_get_str" (dict "key" "grace_period_seconds" "searchPath" .searchPath "Values" .Values ) }}
 {{- $localVals := dict }}
 {{- $c := dict "searchPath" .searchPath "key" "haproxy_python_termination" "retDict" $localVals "retKey" "haproxy" "Values" .Values }}
+{{- $c := dict "searchPath" .searchPath "key" "external_tls" "retDict" $localVals "retKey" "haproxy_tls" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
 {{- $c := dict "searchPath" .searchPath "key" "prometheus_exporter" "retDict" $localVals "retKey" "prometheus" "Values" .Values }}
 {{- include "kolla_val_get_raw" $c }}
@@ -45,6 +46,32 @@ spec:
 # other containers from directly accessing the service
         pod.beta.kubernetes.io/init-containers: '[
 {{- include "common_dependency_container_multi" . | indent 10 }}
+{{- if $localVals.haproxy_tls }}
+          {
+              "name": "assemble-pem",
+              "image": {{ include "kolla_toolbox_image_full" . | quote }},
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-c",
+                  "umask 700;
+                   touch local-certificates/haproxy.pem;
+                   cat /certificates/service.crt > local-certificates/haproxy.pem;
+                   [ -f /certificates/service-chain-ca.pem ] && cat /certificates/service-chain-ca.pem >> local-certificates/haproxy.pem;
+                   cat /certificates/service.pem >> local-certificates/haproxy.pem;
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "service-certificates",
+                      "mountPath": "/certificates"
+                  },
+                  {
+                      "name": "local-certificates",
+                      "mountPath": "/local-certificates"
+                  }
+              ]
+          },
+{{- end }}
           {
               "name": "update-config",
               "image": {{ include "kolla_toolbox_image_full" . | quote }},
@@ -125,6 +152,8 @@ spec:
               name: haproxy-config
             - mountPath: /haproxy
               name: socket
+            - mountPath: /certificates
+              name: local-certificates
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
@@ -204,6 +233,13 @@ spec:
         - name: haproxy-config
           configMap:
             name: {{ .resourceName }}-haproxy
+        - name: local-certificates
+          emptyDir: {}
+{{- if $localVals.haproxy_tls }}
+        - name: service-certificates
+          secret:
+            secretName: service-certificates
+{{- end }}
 {{- end }}
 {{- if .extraVolume }}
 {{- include .extraVolume . | indent 8 }}

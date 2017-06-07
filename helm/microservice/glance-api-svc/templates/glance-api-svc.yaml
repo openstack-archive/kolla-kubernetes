@@ -3,6 +3,6 @@
 {{- $elementService := "glance" }}
 {{- $elementName := printf "%s-api" $elementService }}
 {{- $elementType := "api" }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release "searchPath" $searchPath "tls" 1 }}
 {{- include "common_svc" $env }}
 {{- end }}

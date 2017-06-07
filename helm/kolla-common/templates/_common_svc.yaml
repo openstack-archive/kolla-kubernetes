@@ -17,10 +17,16 @@
 {{- $_ := include "kolla_val_get_raw" $c2 }}
 {{- $nodePort := include "kolla_val_get_str" (dict "key" $localVals.nodePort "searchPath" .searchPath "Values" .Values) }}
 {{- $externalVip := include "kolla_val_get_str" (dict "key" "external_vip" "searchPath" .searchPath "Values" .Values) }}
+{{- $securePort := add .element_port 1}}
+{{- $enableTls := include "kolla_val_get_str" (dict "key" "enable_tls" "searchPath" .searchPath "Values" .Values) }}
 apiVersion: v1
 kind: Service
 spec:
   ports:
+{{- if and $enableTls (hasKey .Values "tls") }}
+    - port: {{ $securePort + 1 }}
+      name: {{ printf "%s-secure" .element_name | quote }}
+{{- end }}
     - port: {{ .element_port }}
       name: {{ .element_name | quote }}
 {{- if $localVals.node_port_enabled }}

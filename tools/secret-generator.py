@@ -38,6 +38,11 @@ else:
     namespace = 'kolla'
 
 password_file = "/etc/kolla/passwords.yml"
+certificate_files = [
+    "/etc/kolla/certificates/service.pem",
+    "/etc/kolla/certificates/service.crt",
+    "/etc/kolla/certificates/service-ca.crt"
+]
 
 if not os.path.exists(password_file):
     print("You need to generate password file before using this script")
@@ -67,4 +72,24 @@ for element in passwords:
             print(res)
         except subprocess.CalledProcessError as e:
             print(e)
+
+if os.path.exists(certificate_file):
+    if command == "create":
+        command_line = "kubectl create secret generic {} " \
+                       "{} --namespace={}".format(
+                           "service-certificates",
+                           " ".join(["--from-file=%s" %i for i in certificate_files]),
+                           namespace)
+    else:
+        command_line = "kubectl delete secret {} --namespace={}".format(
+            "service-certificates", namespace)
+    try:
+        res = subprocess.check_output(
+            command_line, shell=True,
+            executable='/bin/bash')
+        res = res.strip()  # strip whitespace
+        print(res)
+    except subprocess.CalledProcessError as e:
+        print(e)
+
 exit(0)

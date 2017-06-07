@@ -10,6 +10,11 @@
 {%- set portName = kolla_kubernetes.template.vars.port_name %}
 {%- set image = global[kolla_kubernetes.template.vars.image] %}
 {%- set checkPath = kolla_kubernetes.template.vars.check_path %}
+{%- if haproxy_external_tls | bool %}
+    {%- set publicScheme = https %}
+{%- else %}
+    {%- set publicScheme = http %}
+{%- endif %}
 {%- set extraVolume = kolla_kubernetes.template.vars.extra_volumes | to_nice_yaml %}
 {%- set extraVolumeMounts = kolla_kubernetes.template.vars.extra_volume_mounts | to_nice_yaml %}
 {%- set extraConfigmapConfig = kolla_kubernetes.template.vars.extra_configmap_config | to_nice_yaml %}
@@ -102,6 +107,7 @@ spec:
             touch /var/lib/kolla-kubernetes/event/shutdown;
           readinessProbe:
             httpGet:
+              scheme: {{ publicScheme }}
               path: {{ checkPath }}
               port: {{ port }}
             initialDelaySeconds: 5
