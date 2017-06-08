@@ -547,7 +547,7 @@ Create a local cloud.yml file for the deployment of the charts::
              all:
                port: 6080
                port_external: true
-         openvwswitch:
+         openvswitch:
            all:
              add_port: true
              ext_bridge_name: br-ex
