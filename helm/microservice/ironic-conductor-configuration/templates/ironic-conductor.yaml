@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ironic-conductor
+  namespace: kolla
+data:
+  ironic.conf: |
+    [DEFAULT]
+    debug = False
+    log_dir = /var/log/kolla/ironic
+    admin_user = admin_user
+    admin_password = admin_password
+    enabled_drivers = pxe_ipmitool
+    transport_url = rabbit://rabbitmq_user:rabbitmq_password@rabbitmq:rabbitmq_port
+    [conductor]
+    api_url = http://ironic-api:6385
+    automated_clean=false
+    [database]
+    connection = mysql+pymysql://ironic:ironic_database_password@mariadb/ironic
+    max_retries = -1
+    [keystone_authtoken]
+    auth_uri = http://keystone-public:5000/v3
+    auth_url = http://keystone-admin:35357/v3
+    auth_type = password
+    project_domain_id = default
+    user_domain_id = default
+    project_name = service
+    username = ironic
+    password = ironic_keystone_password
+    memcache_security_strategy = ENCRYPT
+    memcache_secret_key = memcache_secret_key
+    memcache_servers = memcached
+    [glance]
+    glance_host = http://glance-api:9292
+    [neutron]
+    url = http://neutron-server:9696
+    cleaning_network = baremetal-net
+    provisioning_network = baremetal-net
+    [inspector]
+    enabled = true
+    [agent]
+    deploy_logs_local_path = /var/log/kolla/ironic
+    deploy_logs_storage_backend = local
+    deploy_logs_collect = always
+  config.json: |
+    {
+      "command": "ironic-conductor --config-file /etc/ironic/ironic.conf --config-file /etc/ironic/overrides.conf",
+      "config_files": [
+        {
+          "source": "/var/lib/kolla/config_files/ironic.conf",
+          "dest": "/etc/ironic/ironic.conf",
+          "owner": "ironic",
+          "perm": "0600"
+        },
+        {
+          "source": "/var/lib/kolla/config_files/policy.json",
+          "dest": "/etc/ironic/policy.json",
+          "owner": "ironic",
+          "perm": "0600",
+          "optional": true
+        }
+      ],
+      "permissions": [
+        {
+          "path": "/var/log/kolla/ironic",
+          "owner": "ironic:ironic",
+          "recurse": true
+        },
+        {
+          "path": "/var/lib/ironic",
+          "owner": "ironic:ironic",
+          "recurse": true
+        },
+        {
+          "path": "/tftpboot",
+          "owner": "ironic:ironic",
+          "recurse": true
+        }
+      ]
+    }
