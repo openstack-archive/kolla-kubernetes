@@ -514,6 +514,7 @@ Create a local cloud.yml file for the deployment of the charts::
          keystone:
            all:
              admin_port_external: "true"
+             port: 5000
              dns_name: "192.168.7.105"
            public:
              all:
