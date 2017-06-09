@@ -64,7 +64,7 @@ Dependencies::
 .. note::
 
    Alternatively run this which will provide more information
-   including pod ip addresses, but needs a wider terminal as a result:
+   including pod ip addresses, but needs a wider terminal as a result::
 
      watch -d kubectl get pods --all-namespaces -o wide
 
