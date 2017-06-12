@@ -1,0 +1,12 @@
+---
+- shell: pwd
+    register: result
+
+- debug:
+    var: result.stdout
+
+- name: Start keepalived daemonset
+  command: "helm install ../helm/microservice/keepalived-daemonset --namespace kolla --name keepalived --values /etc/kolla/cloud.yaml"
+
+- name: Wait for keepalived to start running
+  command: "python ../tools/wait_for_pods.py kolla keepalived running,succeeded"

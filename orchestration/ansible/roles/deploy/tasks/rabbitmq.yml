@@ -1,0 +1,35 @@
+---
+- name: Create rabbitmq Physical Volume
+  command: "helm install ../helm/microservice/rabbitmq-pv --namespace kolla --name rabbitmq-pv --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.all.pv_enabled is not defined or
+        cloud_config.global.kolla.all.pv_enabled == true
+
+- name: Create rabbitmq Physical Volume Claim
+  command: "helm install ../helm/microservice/rabbitmq-pvc --namespace kolla --name rabbitmq-pvc --values /etc/kolla/cloud.yaml"
+
+- name: Create Service
+  command: "helm install ../helm/microservice/rabbitmq-svc --namespace kolla --name rabbitmq-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start init job
+  command: "helm install ../helm/microservice/rabbitmq-init-element-job --namespace kolla --name rabbitmq-init-element-job --values /etc/kolla/cloud.yaml"
+
+- name: Wait for rabbitmq init job to finish
+  command: "python ../tools/wait_for_pods.py kolla rabbitmq-init-element completed,succeeded"
+
+- name: Cleanup rabbitmq
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - rabbitmq-init-element-job
+
+- name: Start rabbitmq
+  command: "helm install ../helm/microservice/rabbitmq-statefulset --namespace kolla --name rabbitmq --values /etc/kolla/cloud.yaml"
+
+- name: Wait for rabbitmq to start running
+  command: "python ../tools/wait_for_pods.py kolla rabbitmq running,succeeded"
+
+- name: Check rabbitmq running
+  command: "kubectl -n kolla exec rabbitmq-0 -- rabbitmqctl status"
+  register: rabbitmq_status
+  retries: 12
+  delay: 5
+  until: rabbitmq_status.rc == 0
