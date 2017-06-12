@@ -1,0 +1,6 @@
+---
+- name: Deploy Kolla-Kubernetes
+  hosts: localhost
+  connection: local
+  roles:
+    - deploy
