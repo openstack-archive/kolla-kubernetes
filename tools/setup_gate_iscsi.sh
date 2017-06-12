@@ -61,7 +61,7 @@ kollakube res create configmap \
     cinder-scheduler cinder-volume iscsid tgtd keepalived \
     placement-api placement-api-haproxy;
 
-if [ "x$4" == "xironic" ]; then
+if [ "x$4" == "xironic" ] || [ "x$4" == "xmicrochart-ansible" ]; then
 kollakube res create configmap \
     ironic-api ironic-api-haproxy ironic-conductor ironic-conductor-tftp \
     ironic-dnsmasq ironic-inspector ironic-inspector-haproxy \
@@ -70,7 +70,9 @@ fi
 
 kollakube res create secret nova-libvirt
 
-if [ "x$4" == "xhelm-compute-kit" ]; then
+if [ "x$4" == "xmicrochart-ansible" ]; then
+    tests/bin/microchart-deploy-workflow.sh "$4" "$2" "$BRANCH"
+elif [ "x$4" == "xhelm-compute-kit" ]; then
     tests/bin/deploy_compute_kit.sh "$4" "$2" "$BRANCH"
 elif [ "x$4" == "xironic" ]; then
     tests/bin/iscsi_ironic_workflow.sh "$4" "$2" "$BRANCH"
