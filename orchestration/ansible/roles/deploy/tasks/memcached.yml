@@ -1,0 +1,6 @@
+---
+- name: Create memcached Service
+  command: "helm install ../../helm/microservice/memcached-svc --namespace kolla --name memcached-svc --values /etc/kolla/cloud.yaml"
+
+- name: Create memcached deployment
+  command: "helm install ../../helm/microservice/memcached-deployment --namespace kolla --name memcached --values /etc/kolla/cloud.yaml"

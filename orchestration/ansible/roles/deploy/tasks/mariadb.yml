@@ -1,0 +1,39 @@
+---
+- name: Create mariadb Physical Volume
+  command: "helm install ../../helm/microservice/mariadb-pv --namespace kolla --name mariadb-pv --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.all.pv_enabled is not defined or
+        cloud_config.global.kolla.all.pv_enabled == true
+
+- name: Create mariadb Physical Volume Claim
+  command: "helm install ../../helm/microservice/mariadb-pvc --namespace kolla --name mariadb-pvc --values /etc/kolla/cloud.yaml"
+
+- name: Create mariadb Service
+  command: "helm install ../../helm/microservice/mariadb-svc --namespace kolla --name mariadb-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start mariadb init job
+  command: "helm install ../../helm/microservice/mariadb-init-element-job --namespace kolla --name mariadb-init-element-job --values /etc/kolla/cloud.yaml"
+
+- name: Get init job status
+  command: "python ../../tools/wait_for_pods.py kolla mariadb-init-element completed,succeeded"
+
+- name: Start mariadb
+  command: "helm install ../../helm/microservice/mariadb-statefulset --namespace kolla --name mariadb --values /etc/kolla/cloud.yaml"
+
+- name: Wait for mariadb to start running
+  command: "python ../../tools/wait_for_pods.py kolla mariadb running,succeeded"
+
+- name: Cleanup mariadb
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - mariadb-init-element-job
+
+- name: Get database password
+  shell: kubectl -n kolla get secret database-password -ojsonpath={.data.password} | base64 --decode
+  register: db_password
+
+- name: Check mariadb running
+  command: "kubectl -n kolla exec mariadb-0 -- mysqladmin -u root -p{{db_password.stdout}} status"
+  register: mariadb_status
+  retries: 12
+  delay: 5
+  until: mariadb_status.rc == 0
