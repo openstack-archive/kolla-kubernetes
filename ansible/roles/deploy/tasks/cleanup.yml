@@ -1,0 +1,23 @@
+- name: Cleanup mariadb
+  command: "helm delete --purge mariadb-pv mariadb-pvc mariadb-svc mariadb-init-element-job"
+
+- name: Cleanup rabbitmq
+  command: "helm delete --purge rabbitmq-pv rabbitmq-pvc rabbitmq-svc rabbitmq-init-element-job"
+
+- name: Cleanup memcached
+  command: "helm delete --purge memcached-svc"
+
+- name: Cleanup keystone
+  command: "helm delete --purge keystone-admin-svc keystone-internal-svc keystone-public-svc keystone-fernet-setup-job keystone-create-db-job keystone-manage-db-job keystone-create-endpoints-job"
+
+- name: Cleanup glance
+  command: "helm delete --purge glance-pv glance-pvc glance-api-svc glance-registry-svc glance-create-db-job glance-manage-db-job glance-create-keystone-service-job glance-create-keystone-user-job glance-create-keystone-endpoint-public-job glance-create-keystone-endpoint-internal-job glance-create-keystone-endpoint-admin-job glance-registry-deployment glance-api-deployment"
+
+- name: Cleanup cinder-control
+  command: TODO
+
+- name: Cleanup horizon
+  command: "helm delete --purge horizon-svc"
+
+- name: Cleanup neutron
+  command: "helm delete --purge neutron-create-db-job neutron-server-svc neutron-create-keystone-service-job neutron-create-keystone-endpoint-admin-job neutron-create-keystone-endpoint-internal-job neutron-create-keystone-endpoint-public-job neutron-create-keystone-user-job neutron-manage-db-job"

@@ -1,0 +1,42 @@
+---
+- name: Create Cinder API service
+  command: "helm install --debug ../helm/microservice/cinder-api-svc --namespace kolla --name cinder-api-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create db job
+  command: "helm install --debug ../helm/microservice/cinder-create-db-job --namespace kolla --name cinder-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder manage db job
+  command: "helm install --debug ../helm/microservice/cinder-manage-db-job --namespace kolla --name cinder-manage-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone service job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-service-job --namespace kolla --name cinder-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone service v2 job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-servicev2-job --namespace kolla --name cinder-create-keystone-servicev2-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone user job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-user-job --namespace kolla --name cinder-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint public job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-public-job --namespace kolla --name cinder-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint internal job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-internal-job --namespace kolla --name cinder-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint admin job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-admin-job --namespace kolla --name cinder-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint public v2 job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-publicv2-job --namespace kolla --name cinder-create-keystone-endpoint-publicv2-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint internal v2 job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-internalv2-job --namespace kolla --name cinder-create-keystone-endpoint-internalv2-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder create keystone endpoint admin v2 job
+  command: "helm install --debug ../helm/microservice/cinder-create-keystone-endpoint-adminv2-job --namespace kolla --name cinder-create-keystone-endpoint-adminv2-job --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder API deployment
+  command: "helm install --debug ../helm/microservice/cinder-api-deployment --namespace kolla --name cinder-api-deployment --values /etc/kolla/cloud.yaml"
+
+- name: Start Cinder Scheduler
+  command: "helm install --debug ../helm/microservice/cinder-scheduler-statefulset --namespace kolla --name cinder-scheduler-statefulset --values /etc/kolla/cloud.yaml"

@@ -1,0 +1,19 @@
+---
+- include: "mariadb.yml"
+
+- name: Wait for mariadb to start running
+  command: "python ../tools/wait_for_pods.py kolla mariadb running,succeeded"
+
+- include: "rabbitmq.yml"
+- include: "memcached.yml"
+- include: "keystone.yml"
+- include: "glance.yml"
+- include: "cinder-control.yml"
+- include: "horizon.yml"
+- include: "openvswitch.yml"
+- include: "neutron.yml"
+
+#- name: Wait until running
+  #command: "python ../tools/wait_for_pods.py kolla rabbitmq,memcached,keystone running,succeeded"
+
+#- include: "cleanup.yml"

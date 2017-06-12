@@ -1,0 +1,15 @@
+---
+- name: Create Physical Volume
+  command: "helm install --debug ../helm/microservice/rabbitmq-pv --namespace kolla --name rabbitmq-pv --values /etc/kolla/cloud.yaml"
+
+- name: Create Physical Volume Claim
+  command: "helm install --debug ../helm/microservice/rabbitmq-pvc --namespace kolla --name rabbitmq-pvc --values /etc/kolla/cloud.yaml"
+
+- name: Create Service
+  command: "helm install --debug ../helm/microservice/rabbitmq-svc --namespace kolla --name rabbitmq-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start init job
+  command: "helm install --debug ../helm/microservice/rabbitmq-init-element-job --namespace kolla --name rabbitmq-init-element-job --values /etc/kolla/cloud.yaml"
+
+- name: Start rabbitmq
+  command: "helm install --debug ../helm/microservice/rabbitmq-statefulset --namespace kolla --name rabbitmq --values /etc/kolla/cloud.yaml"
