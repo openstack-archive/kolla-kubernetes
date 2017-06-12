@@ -1,0 +1,38 @@
+---
+- name: Create Keystone Admin Service
+  command: "helm install ../helm/microservice/keystone-admin-svc --namespace kolla --name keystone-admin-svc --values /etc/kolla/cloud.yaml"
+
+- name: Create Keystone Internal Service
+  command: "helm install ../helm/microservice/keystone-internal-svc --namespace kolla --name keystone-internal-svc --values /etc/kolla/cloud.yaml"
+
+- name: Create Keystone Public Service
+  command: "helm install ../helm/microservice/keystone-public-svc --namespace kolla --name keystone-public-svc --values /etc/kolla/cloud.yaml"
+
+- name: Keystone fernet setup job
+  command: "helm install ../helm/microservice/keystone-fernet-setup-job --namespace kolla --name keystone-fernet-setup-job --values /etc/kolla/cloud.yaml"
+
+- name: Keystone create db job
+  command: "helm install ../helm/microservice/keystone-create-db-job --namespace kolla --name keystone-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Keystone manage db job
+  command: "helm install ../helm/microservice/keystone-manage-db-job --namespace kolla --name keystone-manage-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Keystone create endpoints job
+  command: "helm install ../helm/microservice/keystone-create-endpoints-job --namespace kolla --name keystone-create-endpoints-job --values /etc/kolla/cloud.yaml"
+
+- name: Wait for keystone jobs
+  command: "python ../tools/wait_for_pods.py kolla keystone-create-db,keystone-manage-db,keystone-create-endpoints,keystone-fernet-setup completed,succeeded"
+
+- name: Cleanup keystone
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - keystone-fernet-setup-job
+    - keystone-create-db-job
+    - keystone-manage-db-job
+    - keystone-create-endpoints-job
+
+- name: Start keystone deployment
+  command: "helm install ../helm/microservice/keystone-api-deployment --namespace kolla --name keystone --values /etc/kolla/cloud.yaml"
+
+- name: Wait for keystone to start running
+  command: "python ../tools/wait_for_pods.py kolla keystone running,succeeded"
