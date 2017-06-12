@@ -8,7 +8,11 @@ BRANCH="$3"
 TYPE="$4"
 
 echo "kolla_base_distro: $1" >> /etc/kolla/globals.yml
-cat tests/conf/iscsi-all-in-one/kolla_config >> /etc/kolla/globals.yml
+if [ "x$CONFIG" == "xmicrochart-ansible" ]; then
+  cat tests/conf/microchart/kolla_config >> /etc/kolla/globals.yml
+else
+  cat tests/conf/iscsi-all-in-one/kolla_config >> /etc/kolla/globals.yml
+fi
 IP=172.18.0.1
 sed -i "s/^\(kolla_external_vip_address:\).*/\1 '$IP'/" \
     /etc/kolla/globals.yml
