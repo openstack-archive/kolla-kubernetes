@@ -1,0 +1,68 @@
+---
+- include: "mariadb.yml"
+
+- name: Wait for mariadb to start running
+  command: "python ../tools/wait_for_pods.py kolla mariadb running,succeeded"
+
+- name: Get database password
+  shell: kubectl -n kolla get secret database-password -ojsonpath={.data.password} | base64 --decode
+  register: db_password
+
+- name: Check mariadb running
+  command: "kubectl -n kolla exec mariadb-0 -- mysqladmin -u {{database_user}} -p{{db_password.stdout}} status"
+  register: mariadb_status
+  retries: 12
+  delay: 5
+  until: mariadb_status.rc == 0
+
+- include: "rabbitmq.yml"
+
+- name: Wait for rabbitmq to start running
+  command: "python ../tools/wait_for_pods.py kolla rabbitmq running,succeeded"
+
+- name: Check rabbitmq running
+  command: "kubectl -n kolla exec rabbitmq-0 -- rabbitmqctl status"
+  register: rabbitmq_status
+  retries: 12
+  delay: 5
+  until: rabbitmq_status.rc == 0
+
+- include: "memcached.yml"
+- include: "keystone.yml"
+
+- name: Wait for keystone to start running
+  command: "python ../tools/wait_for_pods.py kolla keystone running,succeeded"
+
+#- name: Check keystone running
+  #command: "kubectl -n kolla exec rabbitmq-0 -- rabbitmqctl status"
+  #register: rabbitmq_status
+  #retries: 12
+  #delay: 5
+  #until: rabbitmq_status.rc == 0
+
+- include: "glance.yml"
+
+- name: Wait for glance to start running
+  command: "python ../tools/wait_for_pods.py kolla glance running,succeeded"
+
+- include: "cinder-control.yml"
+
+- name: Wait for cinder to start running
+  command: "python ../tools/wait_for_pods.py kolla cinder running,succeeded"
+
+- include: "horizon.yml"
+
+- name: Wait for horizon to start running
+  command: "python ../tools/wait_for_pods.py kolla horizon running,succeeded"
+
+- include: "openvswitch.yml"
+
+- name: Wait for openvswitch to start running
+  command: "python ../tools/wait_for_pods.py kolla openvswitch running,succeeded"
+
+- include: "neutron.yml"
+
+- name: Wait for neutron to start running
+  command: "python ../tools/wait_for_pods.py kolla neutron running,succeeded"
+
+#- include: "cleanup.yml"

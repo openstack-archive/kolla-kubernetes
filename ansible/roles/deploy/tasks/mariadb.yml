@@ -1,0 +1,18 @@
+---
+- name: Create mariadb Physical Volume
+  command: "helm install --debug ../helm/microservice/mariadb-pv --namespace kolla --name mariadb-pv --values /etc/kolla/cloud.yaml"
+
+- name: Create mariadb Physical Volume Claim
+  command: "helm install --debug ../helm/microservice/mariadb-pvc --namespace kolla --name mariadb-pvc --values /etc/kolla/cloud.yaml"
+
+- name: Create mariadb Service
+  command: "helm install --debug ../helm/microservice/mariadb-svc --namespace kolla --name mariadb-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start mariadb init job
+  command: "helm install --debug ../helm/microservice/mariadb-init-element-job --namespace kolla --name mariadb-init-element-job --values /etc/kolla/cloud.yaml"
+
+- name: Get init job status
+  command: "python ../tools/wait_for_pods.py kolla mariadb-init-element completed,succeeded"
+
+- name: Start mariadb
+  command: "helm install --debug ../helm/microservice/mariadb-statefulset --namespace kolla --name mariadb --values /etc/kolla/cloud.yaml"
