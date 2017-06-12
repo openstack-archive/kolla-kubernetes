@@ -1,0 +1,44 @@
+---
+- name: Start Ironic Inspector Create DB job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-db-job --namespace kolla --name ironic-inspector-create-db --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector Manage DB job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-manage-db-job --namespace kolla --name ironic-inspector-manage-db --values /etc/kolla/cloud.yaml"
+
+- name: Create Ironic Inspector service
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-svc --namespace kolla --name ironic-inspector-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector create keystone service job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-keystone-service-job --namespace kolla --name ironic-inspector-create-keystone-service --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector create keystone user job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-keystone-user-job --namespace kolla --name ironic-inspector-create-keystone-user --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector create keystone endpoint internal job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-keystone-endpoint-internal-job --namespace kolla --name ironic-inspector-create-keystone-endpoint-internal --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector create keystone endpoint admin job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-keystone-endpoint-admin-job --namespace kolla --name ironic-inspector-create-keystone-endpoint-admin --values /etc/kolla/cloud.yaml"
+
+- name: Start Ironic Inspector create keystone endpoint public job
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-create-keystone-endpoint-public-job --namespace kolla --name ironic-inspector-create-keystone-endpoint-public --values /etc/kolla/cloud.yaml"
+
+- name: Wait for Ironic Inspector jobs
+  command: "python kolla-kubernetes/tools/wait_for_pods.py kolla ironic-inspector-create-db,ironic-inspector-manage-db,ironic-inspector-create-keystone-service,ironic-inspector-create-keystone-user,ironic-inspector-create-keystone-endpoint-internal,ironic-inspector-create-keystone-admin,ironic-inspector-create-keystone-public completed,succeeded"
+
+- name: Cleanup Ironic Inspector
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - ironic-inspector-create-db-job
+    - ironic-inspector-manage-db-job
+    - ironic-inspector-create-keystone-service-job
+    - ironic-inspector-create-keystone-user-job
+    - ironic-inspector-create-keystone-endpoint-internal-job
+    - ironic-inspector-create-keystone-admin-job
+    - ironic-inspector-create-keystone-public-job
+
+- name: Start Ironic Inspector deployment
+  command: "helm install kolla-kubernetes/helm/microservice/ironic-inspector-deployment --namespace kolla --name ironic-inspector-deployment --values /etc/kolla/cloud.yaml"
+
+- name: Wait for Ironic inspector to start running
+  command: "python kolla-kubernetes/tools/wait_for_pods.py kolla ironic-inspector,ironic running,succeeded"
