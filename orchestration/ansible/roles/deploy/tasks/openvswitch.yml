@@ -1,0 +1,9 @@
+---
+- name: Start OVS db daemonset
+  command: "helm install ../../helm/microservice/openvswitch-ovsdb-daemonset --namespace kolla --name openvswitch-ovsdb-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Start OVS switchd daemonset
+  command: "helm install ../../helm/microservice/openvswitch-vswitchd-daemonset --namespace kolla --name openvswitch-vswitchd-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Wait for openvswitch to start running
+  command: "python ../../tools/wait_for_pods.py kolla openvswitch running,succeeded"

@@ -1,0 +1,53 @@
+---
+- name: Start ironic api service
+  command: "helm install ../../helm/microservice/ironic-api-svc --namespace kolla --name ironic-api-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic api create db job
+  command: "helm install ../../helm/microservice/ironic-api-create-db-job --namespace kolla --name ironic-api-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic api manage db job
+  command: "helm install ../../helm/microservice/ironic-api-manage-db-job --namespace kolla --name ironic-api-manage-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic create keystone service job
+  command: "helm install ../../helm/microservice/ironic-create-keystone-service-job --namespace kolla --name ironic-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic create keystone user job
+  command: "helm install ../../helm/microservice/ironic-create-keystone-user-job --namespace kolla --name ironic-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic api create keystone endpoint admin job
+  command: "helm install ../../helm/microservice/ironic-api-create-keystone-endpoint-admin-job --namespace kolla --name ironic-api-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic api create keystone endpoint internal job
+  command: "helm install ../../helm/microservice/ironic-api-create-keystone-endpoint-internal-job --namespace kolla --name ironic-api-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic api create keystone endpoint public job
+  command: "helm install ../../helm/microservice/ironic-api-create-keystone-endpoint-public-job --namespace kolla --name ironic-api-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+
+- name: Wait for ironic jobs
+  command: "python ../../tools/wait_for_pods.py kolla ironic-api-create-db,ironic-api-manage-db,ironic-create-keystone-service,ironic-create-keystone-user,ironic-api-create-keystone-endpoint-admin,ironic-api-create-keystone-endpoint-internal,ironic-api-create-keystone-endpoint-public completed,succeeded"
+
+- name: Cleanup Ironic
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - ironic-api-create-db-job
+    - ironic-api-manage-db-job
+    - ironic-create-keystone-service-job
+    - ironic-create-keystone-user-job
+    - ironic-api-create-keystone-endpoint-admin-job
+    - ironic-api-create-keystone-endpoint-internal-job
+    - ironic-api-create-keystone-endpoint-public-job
+
+- name: Start ironic api
+  command: "helm install ../../helm/microservice/ironic-api-deployment --namespace kolla --name ironic-api --values /etc/kolla/cloud.yaml"
+
+- name: Start ironic conductor
+  command: "helm install ../../helm/microservice/ironic-conductor-daemonset --namespace kolla --name ironic-conductor --values /etc/kolla/cloud.yaml"
+
+- name: Start nova compute ironic
+  command: "helm install ../../helm/microservice/nova-compute-ironic-statefuleset --namespace kolla --name nova-compute-ironic --values /etc/kolla/cloud.yaml"
+
+- name: Start Iscsid
+  command: "helm install ../../helm/microservice/iscsid-daemonset --namespace kolla --name iscsid --values /etc/kolla/cloud.yaml"
+
+- name: Wait for ironic to start running
+  command: "python ../../tools/wait_for_pods.py kolla ironic,nova,iscsid running,succeeded"

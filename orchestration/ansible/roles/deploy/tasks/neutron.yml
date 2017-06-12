@@ -1,0 +1,57 @@
+---
+- name: Start neutron server service
+  command: "helm install ../../helm/microservice/neutron-server-svc --namespace kolla --name neutron-server-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create db job
+  command: "helm install ../../helm/microservice/neutron-create-db-job --namespace kolla --name neutron-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron manage db job
+  command: "helm install ../../helm/microservice/neutron-manage-db-job --namespace kolla --name neutron-manage-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create keystone service job
+  command: "helm install ../../helm/microservice/neutron-create-keystone-service-job --namespace kolla --name neutron-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create keystone endpoint admin job
+  command: "helm install ../../helm/microservice/neutron-create-keystone-endpoint-admin-job --namespace kolla --name neutron-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create keystone endpoint internal job
+  command: "helm install ../../helm/microservice/neutron-create-keystone-endpoint-internal-job --namespace kolla --name neutron-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create keystone endpoint public job
+  command: "helm install ../../helm/microservice/neutron-create-keystone-endpoint-public-job --namespace kolla --name neutron-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron create keystone user job
+  command: "helm install ../../helm/microservice/neutron-create-keystone-user-job --namespace kolla --name neutron-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+
+- name: Wait for neutron jobs to complete
+  command: "python ../../tools/wait_for_pods.py kolla neutron-create-keystone-service,neutron-create-keystone-endpoint-admin,neutron-create-keystone-endpoint-internal,neutron-create-keystone-endpoint-public,neutron-create-keyston-user,neutron-create-db-job,neutron-manage-db-job completed,succeeded"
+
+- name: Cleanup neutron jobs
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - neutron-create-db-job
+    - neutron-server-svc
+    - neutron-create-keystone-service-job
+    - neutron-create-keystone-endpoint-admin-job
+    - neutron-create-keystone-endpoint-internal-job
+    - neutron-create-keystone-endpoint-public-job
+    - neutron-create-keystone-user-job
+    - neutron-manage-db-job
+
+- name: Start neutron server deployment
+  command: "helm install ../../helm/microservice/neutron-server-deployment --namespace kolla --name neutron-server-deployment --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron dhcp agent
+  command: "helm install ../../helm/microservice/neutron-dhcp-agent-daemonset --namespace kolla --name neutron-dhcp-agent-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron l3 agent
+  command: "helm install ../../helm/microservice/neutron-l3-agent-daemonset --namespace kolla --name neutron-l3-agent-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Start neutron metadata agent
+  command: "helm install ../../helm/microservice/neutron-metadata-agent-daemonset --namespace kolla --name neutron-metadata-agent-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Start openvswitch agent
+  command: "helm install ../../helm/microservice/neutron-openvswitch-agent-daemonset --namespace kolla --name neutron-openvswitch-agent-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Wait for neutron to start running
+  command: "python ../../tools/wait_for_pods.py kolla neutron running,succeeded"
