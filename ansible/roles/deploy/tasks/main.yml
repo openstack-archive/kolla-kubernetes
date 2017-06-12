@@ -1,0 +1,50 @@
+---
+- name: Load cloud.yaml
+  include_vars:
+    file: /etc/kolla/cloud.yaml
+    name: cloud_config
+
+- name: Load globals.yml
+  include_vars:
+    file: /etc/kolla/globals.yml
+    name: global_config
+
+- include: "mariadb.yml"
+  when: global_config.enable_mariadb is defined and
+        global_config.enable_mariadb == "yes"
+- include: "rabbitmq.yml"
+  when: global_config.enable_rabbitmq is defined and
+        global_config.enable_rabbitmq == "yes"
+- include: "memcached.yml"
+  when: global_config.enable_memcached is defined and
+        global_config.enable_memcached == "yes"
+- include: "keystone.yml"
+  when: global_config.enable_keystone is defined and
+        global_config.enable_keystone == "yes"
+- include: "glance.yml"
+  when: global_config.enable_glance is defined and
+        global_config.enable_glance == "yes"
+- include: "cinder-control.yml"
+  when: global_config.enable_cinder is defined and
+        global_config.enable_cinder == "yes"
+- include: "horizon.yml"
+  when: global_config.enable_horizon is defined and
+        global_config.enable_horizon == "yes"
+- include: "openvswitch.yml"
+  when: global_config.enable_openvswitch is defined and
+        global_config.enable_openvswitch == "yes"
+- include: "neutron.yml"
+  when: global_config.enable_neutron is defined and
+        global_config.enable_neutron == "yes"
+- include: "nova-control.yml"
+  when: global_config.enable_nova is defined and
+        global_config.enable_nova == "yes"
+- include: "nova-compute.yml"
+  when: global_config.enable_nova is defined and
+        global_config.enable_nova == "yes"
+- include: "ironic.yml"
+  when: global_config.enable_ironic is defined and
+        global_config.enable_ironic == "yes"
+- include: "ironic-inspector.yml"
+  when: global_config.enable_ironic_inspector is defined and
+        global_config.enable_ironic_inspector == "yes"
