@@ -1,0 +1,127 @@
+---
+- name: Create nova api service
+  command: "helm install --debug ../helm/microservice/nova-api-svc --namespace kolla --name nova-api-svc --values /etc/kolla/cloud.yaml"
+
+- name: Create nova metadata service
+  command: "helm install --debug ../helm/microservice/nova-metadata-svc --namespace kolla --name nova-metadata-svc --values /etc/kolla/cloud.yaml"
+
+- name: Create nova novncproxy service
+  command: "helm install --debug ../helm/microservice/nova-novncproxy-svc --namespace kolla --name nova-novncproxy-svc --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create keystone service job
+  command: "helm install --debug ../helm/microservice/nova-create-keystone-service-job --namespace kolla --name nova-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create keystone user job
+  command: "helm install --debug ../helm/microservice/nova-create-keystone-user-job --namespace kolla --name nova-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create keystone endpoint admin job
+  command: "helm install --debug ../helm/microservice/nova-create-keystone-endpoint-admin-job --namespace kolla --name nova-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create keystone endpoint internal job
+  command: "helm install --debug ../helm/microservice/nova-create-keystone-endpoint-internal-job --namespace kolla --name nova-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create keystone endpoint public job
+  command: "helm install --debug ../helm/microservice/nova-create-keystone-endpoint-public-job --namespace kolla --name nova-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova create db job
+  command: "helm install --debug ../helm/microservice/nova-create-db-job --namespace kolla --name nova-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova api create db job
+  command: "helm install --debug ../helm/microservice/nova-api-create-db-job --namespace kolla --name nova-api-create-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Start nova api manage db job
+  command: "helm install --debug ../helm/microservice/nova-api-manage-db-job --namespace kolla --name nova-api-manage-db-job --values /etc/kolla/cloud.yaml"
+
+- name: Wait for nova jobs
+  command: "python ../tools/wait_for_pods.py kolla nova-create-keystone-service,nova-create-keystone-user,nova-create-keystone-endpoint-admin,nova-create-keystone-endpoint-internal,nova-create-keystone-endpoint-public,nova-create-db,nova-api-create-db,nova-api-manage-db completed,succeeded"
+
+- name: Cleanup nova jobs
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - nova-create-keystone-service-job
+    - nova-create-keystone-user-job
+    - nova-create-keystone-endpoint-admin-job
+    - nova-create-keystone-endpoint-internal-job
+    - nova-create-keystone-endpoint-public-job
+    - nova-create-db-job
+    - nova-api-create-db-job
+    - nova-api-manage-db-job
+
+- name: Start nova api deployment
+  command: "helm install --debug ../helm/microservice/nova-api-deployment --namespace kolla --name nova-api-deployment --values /etc/kolla/cloud.yaml"
+
+- name: Start nova conductor
+  command: "helm install --debug ../helm/microservice/nova-conductor-statefulset --namespace kolla --name nova-conductor-statefulset --values /etc/kolla/cloud.yaml"
+
+- name: Start nova scheduler
+  command: "helm install --debug ../helm/microservice/nova-scheduler-statefulset --namespace kolla --name nova-scheduler-statefulset --values /etc/kolla/cloud.yaml"
+
+- name: Start nova consoleauth
+  command: "helm install --debug ../helm/microservice/nova-consoleauth-statefulset --namespace kolla --name nova-consoleauth-statefulset --values /etc/kolla/cloud.yaml"
+
+- name: Start nova novncproxy
+  command: "helm install --debug ../helm/microservice/nova-novncproxy-deployment --namespace kolla --name nova-novncproxy-deployment --values /etc/kolla/cloud.yaml"
+
+- name: Wait for nova to start
+  command: "python ../tools/wait_for_pods.py kolla nova running,succeeded"
+
+- name: Start nova placement service
+  command: "helm install --debug ../helm/microservice/nova-placement-svc --namespace kolla --name nova-placement-svc --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement create keystone user job
+  command: "helm install --debug ../helm/microservice/nova-placement-create-keystone-user-job --namespace kolla --name nova-placement-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement create keystone service job
+  command: "helm install --debug ../helm/microservice/nova-placement-create-keystone-service-job --namespace kolla --name nova-placement-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement create keystone endpoint internal job
+  command: "helm install --debug ../helm/microservice/nova-placement-create-keystone-endpoint-internal-job --namespace kolla --name nova-placement-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement create keystone endpoint admin job
+  command: "helm install --debug ../helm/microservice/nova-placement-create-keystone-endpoint-admin-job --namespace kolla --name nova-placement-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement create keystone endpoint public job
+  command: "helm install --debug ../helm/microservice/nova-placement-create-keystone-endpoint-public-job --namespace kolla --name nova-placement-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Wait for nova placement jobs
+  command: "python ../tools/wait_for_pods.py kolla nova-placement-create-keystone-user,nova-placement-create-keystone-service,nova-placement-create-keystone-endpoint-internal,nova-placement-create-keystone-endpoint-admin,nova-placement-create-keystone-endpoint-public running,succeeded"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Cleanup nova placement jobs
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - nova-placement-create-keystone-user-job
+    - nova-placement-create-keystone-service-job
+    - nova-placement-create-keystone-endpoint-internal-job
+    - nova-placement-create-keystone-endpoint-admin-job
+    - nova-placement-create-keystone-endpoint-public-job
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova placement deployment
+  command: "helm install --debug ../helm/microservice/nova-placement-deployment --namespace kolla --name nova-placement-deployment --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Wait for nova placement to start
+  command: "python ../tools/wait_for_pods.py kolla nova-placement running,succeeded"
+  when: cloud_config.global.kolla.nova.placement_api_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
+
+- name: Start nova cell create db job
+  command: "helm install --debug ../helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.all.cell_enabled is defined and
+        cloud_config.global.kolla.nova.placement_api_enabled == true
