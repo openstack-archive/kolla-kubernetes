@@ -1,0 +1,37 @@
+- name: Cleanup mariadb
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - mariadb-init-element-job
+
+- name: Cleanup rabbitmq
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - rabbitmq-init-element-job
+
+- name: Cleanup keystone
+  command: "helm delete --purge {{item}}"
+  with_items:
+    - keystone-fernet-setup-job
+    - keystone-create-db-job
+    - keystone-manage-db-job
+    - keystone-create-endpoints-job
+
+#- name: Cleanup glance
+  #command: "helm delete --purge {{item}}"
+  #with_items:
+    #- glance-create-db-job
+    #- glance-manage-db-job
+    #- glance-create-keystone-service-job
+    #- glance-create-keystone-user-job
+    #- glance-create-keystone-endpoint-public-job
+    #- glance-create-keystone-endpoint-internal-job
+    #- glance-create-keystone-endpoint-admin-job
+
+#- name: Cleanup cinder-control
+  #command: TODO
+
+#- name: Cleanup horizon
+  #command: "helm delete --purge horizon-svc"
+
+#- name: Cleanup neutron
+  #command: "helm delete --purge neutron-create-db-job neutron-server-svc neutron-create-keystone-service-job neutron-create-keystone-endpoint-admin-job neutron-create-keystone-endpoint-internal-job neutron-create-keystone-endpoint-public-job neutron-create-keystone-user-job neutron-manage-db-job"
