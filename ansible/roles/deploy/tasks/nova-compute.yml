@@ -1,0 +1,14 @@
+---
+- name: Start nova api create simple cell job
+  command: "helm install --debug ../helm/microservice/nova-api-create-simple-cell-job --namespace kolla --name nova-api-create-simple-cell-job --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.nova.all.cell_enabled is defined and
+        cloud_config.global.kolla.nova.all.cell_enabled == true
+
+- name: Start nova compute
+  command: "helm install --debug ../helm/microservice/nova-compute-daemonset --namespace kolla --name nova-compute-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Start nova libvirt
+  command: "helm install --debug ../helm/microservice/nova-libvirt-daemonset --namespace kolla --name nova-libvirt-daemonset --values /etc/kolla/cloud.yaml"
+
+- name: Wait for nova to start
+  command: "python ../tools/wait_for_pods.py kolla nova running,succeeded"
