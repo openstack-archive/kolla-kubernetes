@@ -25,3 +25,7 @@
     dest: "{{ node_config_directory }}/{{ item }}/galera.cnf"
   with_items:
     - "mariadb"
+
+- name: Create configmap mariadb-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} create configmap mariadb --from-file /etc/kolla/mariadb/galera.cnf --from-file /etc/kolla/mariadb/config.json"
+  when: k8s_generate_configmaps | bool
