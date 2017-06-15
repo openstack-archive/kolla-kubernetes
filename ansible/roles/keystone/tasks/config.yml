@@ -109,3 +109,27 @@
   when:
     - keystone.enabled | bool
 
+- name: Delete configmap keystone-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete configmap keystone"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+
+- name: Create configmap keystone-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} create configmap keystone --from-file /etc/kolla/keystone/keystone.conf --from-file /etc/kolla/keystone/config.json"
+  when: k8s_generate_configmaps | bool
+
+- name: Delete secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete secret {{ item | replace('_', '-') }}"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+  with_items:
+    - "keystone_admin_password"
+    - "keystone_database_password"
+
+- name: Create keystone secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} create secret generic {{ item | replace('_', '-') }} --from-literal=password={{ hostvars[inventory_hostname][item] }}"
+  when: k8s_generate_configmaps | bool
+  with_items:
+    - "keystone_admin_password"
+    - "keystone_database_password"
+

@@ -42,7 +42,7 @@ kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 # scenario will attempt to join the cluster
 tests/bin/setup_canal.sh
 
-# Turn up kube-proxy logging enable only for debug 
+# Turn up kube-proxy logging enable only for debug
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
 #   | sed 's/--v=4/--v=9/' \
 #   | kubectl apply -f - && kubectl -n kube-system delete pods -l 'component=kube-proxy-amd64'
@@ -105,7 +105,7 @@ tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 tools/test_kube_dns.sh
 
 # Setting up namespace and secret
-setup_namespace_secrets
+setup_namespace
 
 # Setting up resolv.conf workaround
 setup_resolv_conf_common
