@@ -37,23 +37,35 @@ fi
 # Generate passwords using SPRNG tool
 tools/generate_passwords.py
 
+# Build orch image
+docker build . --tag="localhost:30400/kolla-kubernetes-orchestration:latest"
+docker push localhost:30400/kolla-kubernetes-orchestration:latest
+
+# Create secrets and configmaps
+kubectl create secret generic --namespace=kolla --from-file /etc/kolla/passwords.yml passwords
+kubectl create configmap --namespace=kolla --from-file /etc/kolla/globals.yml globals
+
 # Generate configuration based upon defaults and overrides
-ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
 ls -la /etc/kolla
 
-crudini --set /etc/kolla/nova-compute/nova.conf libvirt virt_type qemu
-crudini --set /etc/kolla/nova-compute/nova.conf libvirt cpu_mode none
+mkdir /etc/kolla/overrides
+
+crudini --set /etc/kolla/overrides/nova.conf libvirt virt_type qemu
+crudini --set /etc/kolla/overrides/nova.conf libvirt cpu_mode none
 UUID=$(awk '{if($1 == "cinder_rbd_secret_uuid:"){print $2}}' /etc/kolla/passwords.yml)
-crudini --set /etc/kolla/nova-compute/nova.conf libvirt rbd_secret_uuid $UUID
+crudini --set /etc/kolla/overrides/nova.conf libvirt rbd_secret_uuid $UUID
 
 # Keystone does not seem to invalidate its cache on entry point addition.
-crudini --set /etc/kolla/keystone/keystone.conf cache enabled False
+crudini --set /etc/kolla/overrides/keystone.conf cache enabled False
 
-sed -i 's/log_outputs = "3:/log_outputs = "1:/' /etc/kolla/nova-libvirt/libvirtd.conf
-sed -i 's/log_level = 3/log_level = 1/' /etc/kolla/nova-libvirt/libvirtd.conf
+# sed -i 's/log_outputs = "3:/log_outputs = "1:/' /etc/kolla/overrides/libvirtd.conf
+# sed -i 's/log_level = 3/log_level = 1/' /etc/kolla/overrides/libvirtd.conf
 
-sed -i \
-    '/\[global\]/a osd pool default size = 1\nosd pool default min size = 1\nosd crush chooseleaf type = 0\ndebug default = 5\n'\
-    /etc/kolla/ceph*/ceph.conf
+# sed -i \
+#     '/\[global\]/a osd pool default size = 1\nosd pool default min size = 1\nosd crush chooseleaf type = 0\ndebug default = 5\n'\
+#     /etc/kolla/overrides/ceph.conf
 
-./tools/fix-mitaka-config.py
+kubectl create configmap --namespace=kolla --from-file /etc/kolla/override conf-overrides
+helm install helm/microservice/kolla-configs-job
+
+# ./tools/fix-mitaka-config.py

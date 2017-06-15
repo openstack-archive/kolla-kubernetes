@@ -86,3 +86,28 @@
     - item.item.enabled | bool
     - item.stat.exists
   with_items: "{{ custom_policy.results }}"
+
+- name: Delete configmap horizon-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete configmap horizon"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+
+- name: Create configmap horizon-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} create configmap horizon --from-file /etc/kolla/horizon/horizon.conf --from-file /etc/kolla/horizon/config.json"
+  when: k8s_generate_configmaps | bool
+
+- name: Delete secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete secret {{ item | replace('_', '-') }}"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+  with_items:
+    - "horizon_secret_key"
+    - "horizon_database_password"
+
+- name: Create horizon secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} create secret generic {{ item | replace('_', '-') }} --from-literal=password={{ hostvars[inventory_hostname][item] }}"
+  when: k8s_generate_configmaps | bool
+  with_items:
+    - "horizon_secret_key"
+    - "horizon_database_password"
+

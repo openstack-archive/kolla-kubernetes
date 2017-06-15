@@ -1,6 +1,6 @@
-name: kolla-common
+name: kolla-config-job
 version: 0.7.0-1 #FIXME make this changable
-description: FIXME
+description: Chart for creation of configmaps and secrets for kolla kubernetes
 keywords:
   - openstack
   - kolla
