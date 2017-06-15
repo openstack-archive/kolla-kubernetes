@@ -25,3 +25,25 @@
     dest: "{{ node_config_directory }}/{{ item }}/galera.cnf"
   with_items:
     - "mariadb"
+
+- name: Delete configmap mariadb-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete configmap mariadb"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+
+- name: Create configmap mariadb-config
+  command: "kubectl --namespace {{ kubernetes_namespace }} create configmap mariadb --from-file /etc/kolla/mariadb/galera.cnf --from-file /etc/kolla/mariadb/config.json"
+  when: k8s_generate_configmaps | bool
+
+- name: Delete secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} delete secret {{ item | replace('_', '-') }}"
+  when: k8s_generate_configmaps | bool
+  failed_when: false
+  with_items:
+    - "database_password"
+
+- name: Create mariadb secrets
+  command: "kubectl --namespace {{ kubernetes_namespace }} create secret generic {{ item | replace('_', '-') }} --from-literal=password={{ hostvars[inventory_hostname][item] }}"
+  with_items:
+    - "database_password"
+
