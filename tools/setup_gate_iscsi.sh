@@ -45,7 +45,7 @@ tools/test_kube_dns.sh
 setup_helm_common
 
 # Setting up namespace and secret
-setup_namespace_secrets
+setup_namespace
 
 tools/setup_registry.sh $DISTRO $TYPE $BRANCH
 

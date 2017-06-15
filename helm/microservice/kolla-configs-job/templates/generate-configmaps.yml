@@ -1,0 +1,26 @@
+{{- $orchestrationImage := .Values.orchestration_image_full }}
+apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - image: "{{ $orchestrationImage }}"
+          name: generate-configmaps
+          command: ["ansible-playbook"]
+          args: ["-e", "@/etc/kolla-globals/globals.yml", "-e", "@/etc/kolla-passwords/passwords.yml","-e", "k8s_generate_configmaps=yes", "-e", "CONFIG_DIR=/etc/kolla", "ansible/site.yml"]
+          volumeMounts:
+          - name: globals
+            mountPath: /etc/kolla-globals/
+          - name: passwords
+            mountPath: /etc/kolla-passwords/
+      volumes:
+        - name: globals
+          configMap:
+            name: globals
+        - name: passwords
+          secret:
+            secretName: passwords
+      restartPolicy: OnFailure
+metadata:
+  name: mariadb-config
