@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 0.7.0-1
+description: mariadb-config subservice layer
+name: mariadb-config-job
+keywords:
+  - openstack
+  - mariadb
+  - mariadb-config
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
