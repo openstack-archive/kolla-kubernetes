@@ -17,6 +17,7 @@ metadata:
   name: ceph-admin
 spec:
   hostNetwork: True
+  dnsPolicy: ClusterFirstWithHostNet
   hostPID: True
   nodeSelector:
     {{ $selectorKey }}: {{ $selectorValue | quote }}

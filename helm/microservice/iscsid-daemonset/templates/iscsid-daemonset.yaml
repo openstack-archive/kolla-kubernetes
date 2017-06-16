@@ -51,6 +51,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       hostIPC: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}

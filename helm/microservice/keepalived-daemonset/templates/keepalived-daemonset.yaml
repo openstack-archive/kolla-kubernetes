@@ -64,6 +64,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
