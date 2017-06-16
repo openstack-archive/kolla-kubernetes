@@ -124,6 +124,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       hostIPC: True
       hostPID: True #needed for openvswitch pid file
       nodeSelector:

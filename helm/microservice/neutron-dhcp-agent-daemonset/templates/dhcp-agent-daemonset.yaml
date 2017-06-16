@@ -86,6 +86,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       hostIPC: True
       hostPID: True
       nodeSelector:

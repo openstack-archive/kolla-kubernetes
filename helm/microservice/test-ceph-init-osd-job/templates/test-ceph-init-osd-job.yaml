@@ -57,6 +57,7 @@ metadata:
     ]'
 spec:
   hostNetwork: True
+  dnsPolicy: ClusterFirstWithHostNet
   hostPID: True
   nodeSelector:
     kubernetes.io/hostname: {{ $initial_mon }}

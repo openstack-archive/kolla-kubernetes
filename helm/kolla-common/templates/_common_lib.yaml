@@ -10,11 +10,6 @@
 - mountPath: /etc/localtime
   name: host-etc-localtime
   readOnly: true
-{{- if and .netHostTrue $localVals.resolve_conf_net_host_workaround }}
-- mountPath: /etc/resolv.conf
-  name: resolv-conf
-  subPath: resolv.conf
-{{- end }}
 {{- end }}
 
 {{- define "common_containers" }}

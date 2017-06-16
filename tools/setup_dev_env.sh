@@ -52,7 +52,6 @@ k8s_setup () {
     kubectl label node 172.16.35.12 --overwrite kolla_controller=true
     kubectl create namespace kolla
     kolla-kubernetes/tools/secret-generator.py create
-    kolla-kubernetes/tools/setup-resolv-conf.sh kolla
 }
 
 ceph_startup () {

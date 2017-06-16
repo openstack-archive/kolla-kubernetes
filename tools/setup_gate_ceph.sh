@@ -104,9 +104,6 @@ tools/build_example_yaml.py
 # Setting up namespace and secret
 setup_namespace_secrets
 
-# Setting up resolv.conf workaround
-setup_resolv_conf_common
-
 tunnel_interface=docker0
 if [ "x$CONFIG" == "xceph-multi" ]; then
     interface=$(netstat -ie | grep -B1 \

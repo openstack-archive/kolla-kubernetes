@@ -26,6 +26,7 @@ spec:
         system: rbd
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       hostPID: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}

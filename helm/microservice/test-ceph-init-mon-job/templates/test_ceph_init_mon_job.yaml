@@ -60,6 +60,7 @@ spec:
         ]'
     spec:
       hostNetwork: True
+      dnsPolicy: ClusterFirstWithHostNet
       hostPID: True
       nodeSelector:
         kubernetes.io/hostname: {{ $node }}
