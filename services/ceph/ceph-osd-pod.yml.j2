@@ -70,6 +70,8 @@ spec:
           value: {{ ceph_osd_journal_dev[index | int] }}
         - name: HOSTNAME
           value: {{ storage_ceph.initial_mon }}
+        - name: TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES
+          value: {{ ceph_tcmalloc_tc_bytes }}
       volumeMounts:
 {{ lib.common_volume_mounts(indent=8) }}
         - mountPath: {{ container_config_directory }}/ceph.conf
