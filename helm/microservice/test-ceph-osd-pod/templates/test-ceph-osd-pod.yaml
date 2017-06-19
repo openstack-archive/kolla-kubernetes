@@ -83,6 +83,8 @@ spec:
           value: "/dev/loop{{ $index }}p1"
         - name: HOSTNAME
           value: {{ $initial_mon }}
+        - name: TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES
+          value: {{ ceph_tcmalloc_tc_bytes }}
       volumeMounts:
 {{- include "common_volume_mounts" $env | indent 8 }}
         - mountPath: {{ $containerConfigDirectory }}/ceph.conf
