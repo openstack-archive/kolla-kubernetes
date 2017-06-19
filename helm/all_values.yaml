@@ -85,6 +85,12 @@ test-ceph-initial-osd-job:
                 all:
                     storage_interface: eth0
 
+test-ceph-osd-pod:
+        global:
+            kolla:
+                all:
+                    ceph_tcmalloc_tc_bytes: 134217728
+
 keystone-admin-svc:
         global:
             kolla:

@@ -14,6 +14,7 @@
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" false "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- $ceph_tcmalloc_tc_bytes := include "kolla_val_get_str" (dict "key" "ceph_tcmalloc_tc_bytes" "searchPath" $searchPath "Values" .Values ) }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -83,6 +84,8 @@ spec:
           value: "/dev/loop{{ $index }}p1"
         - name: HOSTNAME
           value: {{ $initial_mon }}
+        - name: TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES
+          value: {{ $ceph_tcmalloc_tc_bytes }}
       volumeMounts:
 {{- include "common_volume_mounts" $env | indent 8 }}
         - mountPath: {{ $containerConfigDirectory }}/ceph.conf
