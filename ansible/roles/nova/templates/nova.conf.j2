@@ -73,6 +73,7 @@ novncproxy_host = {{ api_interface_address }}
 novncproxy_port = {{ nova_novncproxy_port }}
 vncserver_listen = {{ api_interface_address }}
 vncserver_proxyclient_address = {{ api_interface_address }}
+novncproxy_base_url = {{ public_protocol }}://{{ kolla_kubernetes_external_vip }}:{{ nova_novncproxy_port }}/vnc_auto.html
 {% elif nova_console == 'spice' %}
 [vnc]
 # We have to turn off vnc to use spice
@@ -81,7 +82,7 @@ enabled = false
 enabled = true
 server_listen = {{ api_interface_address }}
 server_proxyclient_address = {{ api_interface_address }}
-html5proxy_base_url = {{ public_protocol }}://kolla_kubernetes_external_vip:{{ nova_spicehtml5proxy_port }}/spice_auto.html
+html5proxy_base_url = {{ public_protocol }}://{{ kolla_kubernetes_external_vip }}:{{ nova_spicehtml5proxy_port }}/spice_auto.html
 html5proxy_host = {{ api_interface_address }}
 html5proxy_port = {{ nova_spicehtml5proxy_port }}
 {% endif %}
