@@ -5,7 +5,6 @@ dependencies:
   - name: ironic-api-create-db-job
     repository: file://../../microservice/ironic-api-create-db-job
     version: 0.7.0-1
-    version: 0.7.0-1
   - name: ironic-api-manage-db-job
     repository: file://../../microservice/ironic-api-manage-db-job
     version: 0.7.0-1
@@ -26,7 +25,6 @@ dependencies:
     version: 0.7.0-1
   - name: ironic-api-deployment
     repository: file://../../microservice/ironic-api-deployment
-    version: 0.7.0-1
     version: 0.7.0-1
   - name: ironic-conductor-daemonset
     repository: file://../../microservice/ironic-conductor-daemonset
