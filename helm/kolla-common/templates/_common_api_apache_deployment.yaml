@@ -41,7 +41,9 @@ spec:
             preStop:
               exec:
                 command:
-                  - apachectl -k graceful-stop
+                  - /bin/bash
+                  - -c
+                  - 'sleep 15; apachectl -k graceful-stop'
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
             - mountPath: /var/lib/kolla-kubernetes/event
