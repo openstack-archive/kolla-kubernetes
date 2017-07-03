@@ -45,6 +45,7 @@
 
 - name: Start nova compute ironic
   command: "helm install --debug ../helm/microservice/nova-compute-ironic-statefuleset --namespace kolla --name nova-compute-ironic --values /etc/kolla/cloud.yaml"
+  # TODO If nova is configured
 
 - name: Start Iscsid
   command: "helm install --debug ../helm/microservice/iscsid-daemonset --namespace kolla --name iscsid --values /etc/kolla/cloud.yaml"
