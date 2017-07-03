@@ -24,7 +24,7 @@
   command: "helm install --debug ../helm/microservice/ironic-api-create-keystone-endpoint-public-job --namespace kolla --name ironic-api-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
 
 - name: Wait for ironic jobs
-  command: "python kolla-kubernetes/tools/wait_for_pods.py kolla ironic-api-create-db,ironic-api-manage-db,ironic-create-keystone-service,ironic-create-keystone-user,ironic-create-keystone-endpoint-admin,ironic-create-keystone-endpoint-internal,ironic-create-keystone-endpoint-public completed,succeeded"
+  command: "python ../tools/wait_for_pods.py kolla ironic-api-create-db,ironic-api-manage-db,ironic-create-keystone-service,ironic-create-keystone-user,ironic-api-create-keystone-endpoint-admin,ironic-api-create-keystone-endpoint-internal,ironic-api-create-keystone-endpoint-public completed,succeeded"
 
 - name: Cleanup Ironic Inspector
   command: "helm delete --purge {{item}}"
@@ -33,9 +33,9 @@
     - ironic-api-manage-db-job
     - ironic-create-keystone-service-job
     - ironic-create-keystone-user-job
-    - ironic-create-keystone-endpoint-admin-job
-    - ironic-create-keystone-endpoint-internal-job
-    - ironic-create-keystone-endpoint-public-job
+    - ironic-api-create-keystone-endpoint-admin-job
+    - ironic-api-create-keystone-endpoint-internal-job
+    - ironic-api-create-keystone-endpoint-public-job
 
 - name: Start ironic api
   command: "helm install --debug ../helm/microservice/ironic-api-deployment --namespace kolla --name ironic-api --values /etc/kolla/cloud.yaml"
@@ -45,9 +45,10 @@
 
 - name: Start nova compute ironic
   command: "helm install --debug ../helm/microservice/nova-compute-ironic-statefuleset --namespace kolla --name nova-compute-ironic --values /etc/kolla/cloud.yaml"
+  # TODO If nova is configured
 
 - name: Start Iscsid
   command: "helm install --debug ../helm/microservice/iscsid-daemonset --namespace kolla --name iscsid --values /etc/kolla/cloud.yaml"
 
 - name: Wait for ironic to start running
-  command: "python kolla-kubernetes/tools/wait_for_pods.py kolla ironic,nova,iscsid running,succeeded"
+  command: "python ../tools/wait_for_pods.py kolla ironic,nova,iscsid running,succeeded"
