@@ -1,38 +1,38 @@
 ---
 - name: Create glance Physical Volume
-  command: "helm install --debug ../helm/microservice/glance-pv --namespace kolla --name glance-pv --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-pv --namespace kolla --name glance-pv --values /etc/kolla/cloud.yaml"
   when: cloud_config.global.kolla.all.pv_enabled is not defined or
         cloud_config.global.kolla.all.pv_enabled == true
 
 - name: Create glance Physical Volume Claim
-  command: "helm install --debug ../helm/microservice/glance-pvc --namespace kolla --name glance-pvc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-pvc --namespace kolla --name glance-pvc --values /etc/kolla/cloud.yaml"
 
 - name: Create glance api Service
-  command: "helm install --debug ../helm/microservice/glance-api-svc --namespace kolla --name glance-api-svc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-api-svc --namespace kolla --name glance-api-svc --values /etc/kolla/cloud.yaml"
 
 - name: Create glance registry Service
-  command: "helm install --debug ../helm/microservice/glance-registry-svc --namespace kolla --name glance-registry-svc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-registry-svc --namespace kolla --name glance-registry-svc --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create db job
-  command: "helm install --debug ../helm/microservice/glance-create-db-job --namespace kolla --name glance-create-db-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-db-job --namespace kolla --name glance-create-db-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance manage db job
-  command: "helm install --debug ../helm/microservice/glance-manage-db-job --namespace kolla --name glance-manage-db-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-manage-db-job --namespace kolla --name glance-manage-db-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create keystone service job
-  command: "helm install --debug ../helm/microservice/glance-create-keystone-service-job --namespace kolla --name glance-create-keystone-service-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-keystone-service-job --namespace kolla --name glance-create-keystone-service-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create keystone user job
-  command: "helm install --debug ../helm/microservice/glance-create-keystone-user-job --namespace kolla --name glance-create-keystone-user-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-keystone-user-job --namespace kolla --name glance-create-keystone-user-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create keystone endpoint public job
-  command: "helm install --debug ../helm/microservice/glance-create-keystone-endpoint-public-job --namespace kolla --name glance-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-keystone-endpoint-public-job --namespace kolla --name glance-create-keystone-endpoint-public-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create keystone endpoint internal job
-  command: "helm install --debug ../helm/microservice/glance-create-keystone-endpoint-internal-job --namespace kolla --name glance-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-keystone-endpoint-internal-job --namespace kolla --name glance-create-keystone-endpoint-internal-job --values /etc/kolla/cloud.yaml"
 
 - name: Start glance create keystone endpoint admin job
-  command: "helm install --debug ../helm/microservice/glance-create-keystone-endpoint-admin-job --namespace kolla --name glance-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-create-keystone-endpoint-admin-job --namespace kolla --name glance-create-keystone-endpoint-admin-job --values /etc/kolla/cloud.yaml"
 
 - name: Wait for glance jobs
   command: "python ../tools/wait_for_pods.py kolla glance-create-db,glance-manage-db,glance-create-keystone-service,glance-create-keystone-user,glance-create-keystone-endpoint-public,glance-create-keystone-endpoint-internal,glance-create-keystone-endpoint-admin completed,succeeded"
@@ -49,10 +49,10 @@
     - glance-create-keystone-endpoint-admin-job
 
 - name: Start glance registry deployment
-  command: "helm install --debug ../helm/microservice/glance-registry-deployment --namespace kolla --name glance-registry --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-registry-deployment --namespace kolla --name glance-registry --values /etc/kolla/cloud.yaml"
 
 - name: Start glance api
-  command: "helm install --debug ../helm/microservice/glance-api-deployment --namespace kolla --name glance-api --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/glance-api-deployment --namespace kolla --name glance-api --values /etc/kolla/cloud.yaml"
 
 - name: Wait for glance to start running
   command: "python ../tools/wait_for_pods.py kolla glance running,succeeded"

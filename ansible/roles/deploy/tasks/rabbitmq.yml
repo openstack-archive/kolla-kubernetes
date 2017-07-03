@@ -1,17 +1,17 @@
 ---
 - name: Create rabbitmq Physical Volume
-  command: "helm install --debug ../helm/microservice/rabbitmq-pv --namespace kolla --name rabbitmq-pv --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/rabbitmq-pv --namespace kolla --name rabbitmq-pv --values /etc/kolla/cloud.yaml"
   when: cloud_config.global.kolla.all.pv_enabled is not defined or
         cloud_config.global.kolla.all.pv_enabled == true
 
 - name: Create rabbitmq Physical Volume Claim
-  command: "helm install --debug ../helm/microservice/rabbitmq-pvc --namespace kolla --name rabbitmq-pvc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/rabbitmq-pvc --namespace kolla --name rabbitmq-pvc --values /etc/kolla/cloud.yaml"
 
 - name: Create Service
-  command: "helm install --debug ../helm/microservice/rabbitmq-svc --namespace kolla --name rabbitmq-svc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/rabbitmq-svc --namespace kolla --name rabbitmq-svc --values /etc/kolla/cloud.yaml"
 
 - name: Start init job
-  command: "helm install --debug ../helm/microservice/rabbitmq-init-element-job --namespace kolla --name rabbitmq-init-element-job --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/rabbitmq-init-element-job --namespace kolla --name rabbitmq-init-element-job --values /etc/kolla/cloud.yaml"
 
 - name: Wait for rabbitmq init job to finish
   command: "python ../tools/wait_for_pods.py kolla rabbitmq-init-element completed,succeeded"
@@ -22,7 +22,7 @@
     - rabbitmq-init-element-job
 
 - name: Start rabbitmq
-  command: "helm install --debug ../helm/microservice/rabbitmq-statefulset --namespace kolla --name rabbitmq --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/rabbitmq-statefulset --namespace kolla --name rabbitmq --values /etc/kolla/cloud.yaml"
 
 - name: Wait for rabbitmq to start running
   command: "python ../tools/wait_for_pods.py kolla rabbitmq running,succeeded"

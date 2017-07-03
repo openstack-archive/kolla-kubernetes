@@ -1,9 +1,9 @@
 ---
 - name: Start horizon service
-  command: "helm install --debug ../helm/microservice/horizon-svc --namespace kolla --name horizon-svc --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/horizon-svc --namespace kolla --name horizon-svc --values /etc/kolla/cloud.yaml"
 
 - name: Start horizon deployment
-  command: "helm install --debug ../helm/microservice/horizon-deployment --namespace kolla --name horizon-deployment --values /etc/kolla/cloud.yaml"
+  command: "helm install ../helm/microservice/horizon-deployment --namespace kolla --name horizon-deployment --values /etc/kolla/cloud.yaml"
 
 - name: Wait for horizon to start running
   command: "python ../tools/wait_for_pods.py kolla horizon running,succeeded"
