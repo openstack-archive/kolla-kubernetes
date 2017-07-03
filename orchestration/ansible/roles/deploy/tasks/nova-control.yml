@@ -1,4 +1,12 @@
 ---
+- name: Create nova pv
+  command: "helm install --debug ../helm/microservice/novainstances-pv --namespace kolla --name nova-pv --values /etc/kolla/cloud.yaml"
+  when: cloud_config.global.kolla.all.pv_enabled is not defined or
+        cloud_config.global.kolla.all.pv_enabled == true
+
+- name: Create nova pvc
+  command: "helm install --debug ../helm/microservice/novainstances-pvc --namespace kolla --name nova-pvc --values /etc/kolla/cloud.yaml"
+
 - name: Create nova api service
   command: "helm install ../helm/microservice/nova-api-svc --namespace kolla --name nova-api-svc --values /etc/kolla/cloud.yaml"
 
