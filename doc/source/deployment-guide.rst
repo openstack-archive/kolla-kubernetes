@@ -48,9 +48,9 @@ Dependencies::
 
     docker == 1.12.6
     helm >= 2.4.1
-    kubectl >= 1.6.3
-    kubeadm >= 1.6.3
-    kubelet >= 1.6.3 + fix - see below
+    kubectl >= 1.6.4
+    kubeadm >= 1.6.4
+    kubelet >= 1.6.4
     kubernetes-cni >= 0.5.1
 
 .. note::
@@ -75,9 +75,11 @@ Step 1: Deploy Kubernetes
 
 .. note::
 
-   This document recommends Kubernetes 1.6.2 or later. However 1.6.3
-   has an issue so please follow the suggested work-around. This is
-   fixed in 1.6.4. 1.7.0 appears to be stable and is working in the gates.
+   This document recommends Kubernetes 1.6.4 or later. Note that
+   kubernetes 1.6.3 is DOA and will not work.
+
+   1.7.0 appears to be stable and is working in the gates, and is the
+   current latest version.
 
 .. warning::
 
@@ -133,15 +135,9 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
-
-Currently kubelet 1.6.3 is broken. Until #45613 is in the repo install
-the following work-around::
-
-    curl -L  https://github.com/sbezverk/kubelet--45613/raw/master/kubelet.gz | gzip -d > /usr/bin/kubelet
-    chmod +x /usr/bin/kubelet
 
 
 Ubuntu
@@ -157,7 +153,7 @@ Write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.2 or later and other dependencies::
+Install Kubernetes 1.6.4 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
