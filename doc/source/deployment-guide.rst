@@ -13,10 +13,12 @@ Bare Metal Deployment Guide for kolla-kubernetes
 
 .. note::
 
-   This document was tested only against CentOS 7.3 Host OS and AIO environments.
+   This document was tested against CentOS 7.3 and Ubuntu 16.04 Host
+   OS and AIO environments.
+
    All the steps should be run as non-root user. If you follow this guide as the
-   root user, helm cannot be found in ``/usr/local/bin/`` because the path ``/usr/local/bin``
-   is not defaulted to enabled in CentOS 7.
+   root user, helm cannot be found in ``/usr/local/bin/`` because the
+   path ``/usr/local/bin`` is not defaulted to enabled in CentOS 7.
 
 Introduction
 ============
@@ -73,7 +75,9 @@ Step 1: Deploy Kubernetes
 
 .. note::
 
-   This document recommends Kubernetes 1.6.2 or later.
+   This document recommends Kubernetes 1.6.2 or later. However 1.6.3
+   has an issue so please follow the suggested work-around. This is
+   fixed in 1.6.4. 1.7.0 appears to be stable and is working in the gates.
 
 .. warning::
 
@@ -263,6 +267,10 @@ PODs can be scheduled to this AIO deployment::
     kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
 .. note::
+
+    Canal CNI appears to untaint the master node in later
+    versions. This is a reported bug:
+    https://github.com/projectcalico/canal/issues/77
 
     Kubernetes must start completely before verification will function
     properly.
@@ -638,12 +646,6 @@ Start many of the remaining service level charts::
     helm install --debug kolla-kubernetes/helm/service/neutron --namespace kolla --name neutron --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     helm install --debug kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
-
-Wait for nova-compute to enter into Running state before creating the cell0
-database::
-
-    helm install --debug kolla-kubernetes/helm/microservice/nova-cell0-create-db-job --namespace kolla --name nova-cell0-create-db-job --values ./cloud.yaml
-    helm install --debug kolla-kubernetes/helm/microservice/nova-api-create-simple-cell-job --namespace kolla --name nova-api-create-simple-cell --values ./cloud.yaml
 
 Deploy iSCSI support with Cinder LVM (Optional)
 
