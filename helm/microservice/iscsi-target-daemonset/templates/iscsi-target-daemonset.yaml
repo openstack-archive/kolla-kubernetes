@@ -1,10 +1,10 @@
-{{- $resourceName := "tgtd" }}
+{{- $resourceName := "iscsi-target" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- $elementName := .Values.element_name | default $resourceName }}
-{{- $searchPath := printf ":global.kolla.%s.daemonset:global.kolla.tgtd.daemonset:global.kolla.%s.all:global.kolla.tgtd.all:global.kolla.all" $elementName $elementName }}
+{{- $searchPath := printf ":global.kolla.%s.daemonset:global.kolla.%s.daemonset:global.kolla.iscsi-target.daemonset:global.kolla.iscsi-target.all:global.kolla.iscsi-target.all:global.kolla.all" $elementName $elementName }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
-{{- $_ := set $c "contName" "tgtd" }}
+{{- $_ := set $c "contName" "iscsi-target" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
@@ -19,60 +19,53 @@ kind: DaemonSet
 metadata:
   name: {{ $elementName }}
   labels:
-    component: tgtd
-    system: tgtd
+    component: iscsi-target
+    system: iscsi-target
 spec:
   template:
     metadata:
       labels:
-        component: tgtd
-        system: tgtd
+        component: iscsi-target
+        system: iscsi-target
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-tgtd",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-ce",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  STORAGE_INTERFACE={{ $storageInterface }};
-                  F=/var/lib/kolla-kubernetes/tgtd/storage_interface;
-                  [ -f $F ] && STORAGE_INTERFACE=$(<$F);
-                  storage_ip=$(ip addr list \"$STORAGE_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
-                  jq ''.command = \"tgtd -d 1 -f --iscsi portal=''$storage_ip'':3260\"'' /srv/configmap/..data/config.json > /srv/pod-main-config/config.json; "],
-             "volumeMounts": [
-                {
-                   "name": "tgtd-configmap",
-                   "mountPath": "/srv/configmap"
-                },
-                {
-                   "name": "pod-main-config",
-                   "mountPath": "/srv/pod-main-config"
-                }
-             ]
-          }
+{{- include "common_dependency_container_single" $env | indent 10 }}
         ]'
     spec:
       hostNetwork: True
       hostIPC: True
+      hostPID: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       containers:
-        - image: "{{ $imageFull }}"
+        - image: "docker.io/sbezverk/centos-source-iscsi-target:4.0.3"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - echo "Saving targets..."; ls /usr/bin; [ -f /etc/target/saveconfig.json ] && /usr/bin/targetctl save || true; 
+            postStart:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - echo "Restoring targets..."; ls /usr/bin;[ -f /etc/target/saveconfig.json ] && /usr/bin/targetctl restore || true;
           name: main
           securityContext:
             privileged: true
           env:
 {{- include "common_env_vars" $env | indent 12 }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              modprobe iscsi_target_mod;
+              while true; do sleep 10000; done;
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: {{ $containerConfigDirectory }}
-              name: pod-main-config
-              readOnly: true
             - mountPath: /run
               name: run
             - mountPath: /dev
@@ -85,14 +78,11 @@ spec:
               name: cinder-volumes
             - mountPath: /etc/iscsi
               name: iscsi-info
+            - mountPath: /etc/target
+              name: iscsi-target
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
-        - name: pod-main-config
-          emptyDir: {}
-        - name: tgtd-configmap
-          configMap:
-            name: {{ $elementName }}
         - name: cinder-volumes
           hostPath:
             path: /var/lib/cinder
@@ -110,5 +100,8 @@ spec:
             path: /sys/fs/cgroup
         - name: iscsi-info
           hostPath:
-            path: /etc/iscsi
+            path: /var/lib/kolla/iscsi
+        - name: iscsi-target
+          hostPath:
+            path: /var/lib/kolla/target
 {{- end }}
