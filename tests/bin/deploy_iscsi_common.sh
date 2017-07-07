@@ -61,11 +61,15 @@ IRONIC_CONDUCTOR_IP=${6:-172.21.0.10}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-if [ "x$branch" == "x4" ]; then
-. "$DIR/tests/bin/common_iscsi_config_v4.sh"
-else
-. "$DIR/tests/bin/common_iscsi_config.sh"
-fi
+
+case "$branch" in
+4)  . "$DIR/tests/bin/common_iscsi_config_v4.sh"
+    ;;
+t) . "$DIR/tests/bin/common_iscsi_config_v5.sh"
+   ;;
+*) . "$DIR/tests/bin/common_iscsi_config.sh"
+   ;;
+esac
 
 general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
@@ -130,7 +134,7 @@ helm install kolla/nova-novncproxy-svc --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-svc --debug --version $VERSION \
+helm install kolla/nova-placement-svc --version $VERSION \
     --namespace kolla --name nova-placement-svc \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -228,14 +232,14 @@ $DIR/tools/wait_for_pods.sh kolla
 #
 sudo ifconfig br-ex up
 
-helm install kolla/keepalived-daemonset --debug --version $VERSION \
+helm install kolla/keepalived-daemonset --version $VERSION \
     --namespace kolla --name keepalived-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/wait_for_pods.sh kolla
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
+helm install kolla/nova-placement-create-keystone-service-job --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -263,7 +267,7 @@ helm install kolla/cinder-create-keystone-service-job --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-create-keystone-user-job --debug --version $VERSION \
+helm install kolla/nova-placement-create-keystone-user-job --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-user \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -309,7 +313,7 @@ helm install kolla/nova-create-keystone-endpoint-public-job --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-create-keystone-endpoint-public-job --debug --version $VERSION \
+helm install kolla/nova-placement-create-keystone-endpoint-public-job --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-public \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -349,11 +353,11 @@ helm install kolla/cinder-manage-db-job --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-create-keystone-endpoint-internal-job --debug --version $VERSION \
+helm install kolla/nova-placement-create-keystone-endpoint-internal-job --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-internal \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/nova-placement-create-keystone-endpoint-admin-job --debug --version $VERSION \
+helm install kolla/nova-placement-create-keystone-endpoint-admin-job --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -466,7 +470,7 @@ for x in nova-api nova-novncproxy; do
 done
 
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
-helm install kolla/nova-placement-deployment --debug --version $VERSION \
+helm install kolla/nova-placement-deployment --version $VERSION \
     --namespace kolla --name nova-placement-deployment \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 fi
@@ -519,13 +523,22 @@ helm install kolla/iscsid-daemonset --version $VERSION \
     --namespace kolla --name iscsid-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/tgtd-daemonset --version $VERSION \
-    --namespace kolla --name tgtd-daemonset \
-    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+if [ "x$branch" != "x2" -a "x$branch" != "x3" -a "x$branch" != "x4" ]; then
+  helm install kolla/iscsi-target-daemonset --version $VERSION  \
+      --namespace kolla --name iscsi-target-daemonset \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+else
+  helm install kolla/tgtd-daemonset --version $VERSION \
+      --namespace kolla --name tgtd-daemonset \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/build_local_admin_keystonerc.sh
+
+kubectl get pods -n kolla
+
 . ~/keystonerc_admin
 
 wait_for_openstack

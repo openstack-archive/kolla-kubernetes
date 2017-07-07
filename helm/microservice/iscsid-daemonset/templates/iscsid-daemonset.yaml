@@ -34,13 +34,45 @@ spec:
              "image": "{{ $imageFull }}",
              "imagePullPolicy": {{ $imagePullPolicy | quote }},
              "command": [
-                 "sh",
+                 "bash",
                  "-ce",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
+                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+                  ls -l /etc/iscsi || true;
+                  cp -a /etc/iscsi/iscsid.conf /srv/pod-main-config/; 
+             "],
              "volumeMounts": [
                 {
                    "name": "iscsid-configmap",
                    "mountPath": "/srv/configmap"
+                },
+                {
+                   "name": "pod-main-config",
+                   "mountPath": "/srv/pod-main-config"
+                }
+             ]
+          },
+          {
+             "name": "initialize-iscsi-iqn",
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "securityContext": {
+                  "runAsUser": 0,
+                  "privileged": true
+              },
+             "command": [
+                 "bash",
+                 "-ce",
+                 "cp -a /srv/pod-main-config/iscsid.conf /etc/iscsi/iscsid.conf;
+                  if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
+                     iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
+                     echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
+                     chmod 640 /etc/iscsi/initiatorname.iscsi;
+                  fi;
+                 "],
+             "volumeMounts": [
+                {
+                   "name": "iscsi-info",
+                   "mountPath": "/etc/iscsi"
                 },
                 {
                    "name": "pod-main-config",
@@ -99,5 +131,5 @@ spec:
             path: /sys/fs/cgroup
         - name: iscsi-info
           hostPath:
-            path: /etc/iscsi
+            path: /var/lib/kolla/iscsi
 {{- end }}
