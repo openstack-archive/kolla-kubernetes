@@ -99,5 +99,5 @@ spec:
             path: /sys/fs/cgroup
         - name: iscsi-info
           hostPath:
-            path: /etc/iscsi
+            path: /var/lib/kolla/iscsi
 {{- end }}
