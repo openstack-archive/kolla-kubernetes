@@ -5,6 +5,7 @@ function common_iscsi_config {
     echo "      storage_provider: host"
     echo "      storage_provider_fstype: xfs"
     echo "      ceph_backend: false"
+    echo "      iscsi_helper: tgtadm"
     echo "      lvm_backends:"
     echo "      - '172.18.0.1': 'cinder-volumes'"
     echo "    cinder:"

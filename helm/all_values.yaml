@@ -1066,14 +1066,6 @@ tgtd-daemonset:
                 all:
                     storage_interface: eth0
 
-cinder-volume-lvm-daemonset:
-        global:
-            kolla:
-                cinder:
-                    volume_lvm:
-                        daemonset:
-                            lvm_backends: []
-
 helm-repo-svc:
         global:
             kolla:
