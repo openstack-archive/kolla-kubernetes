@@ -1,0 +1,107 @@
+{{- $resourceName := "iscsi-target" }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- $elementName := .Values.element_name | default $resourceName }}
+{{- $searchPath := printf ":global.kolla.%s.daemonset:global.kolla.%s.daemonset:global.kolla.iscsi-target.daemonset:global.kolla.iscsi-target.all:global.kolla.iscsi-target.all:global.kolla.all" $elementName $elementName }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "iscsi-target" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $storageInterface := include "kolla_val_get_str" (dict "key" "storage_interface" "searchPath" $searchPath "Values" .Values ) }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ $elementName }}
+  labels:
+    component: iscsi-target
+    system: iscsi-target
+spec:
+  template:
+    metadata:
+      labels:
+        component: iscsi-target
+        system: iscsi-target
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+{{- include "common_dependency_container_single" $env | indent 10 }}
+        ]'
+    spec:
+      hostNetwork: True
+      hostIPC: True
+      hostPID: True
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      containers:
+        - image: "docker.io/sbezverk/centos-source-iscsi-targets:4.0.2"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - echo "Saving targets..."; ls /usr/bin; [ -f /etc/target/saveconfig.json ] && /usr/bin/targetctl save || true; 
+            postStart:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - echo "Restoring targets..."; ls /usr/bin;[ -f /etc/target/saveconfig.json ] && /usr/bin/targetctl restore || true;
+          name: main
+          securityContext:
+            privileged: true
+          env:
+{{- include "common_env_vars" $env | indent 12 }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              modprobe iscsi_target_mod; 
+              while true; do sleep 10000; done;
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /run
+              name: run
+            - mountPath: /dev
+              name: dev
+            - mountPath: /sys/fs/cgroup
+              name: sys-fs-cgroup
+            - mountPath: /lib/modules
+              name: lib-modules
+            - mountPath: /var/lib/cinder
+              name: cinder-volumes
+            - mountPath: /etc/iscsi
+              name: iscsi-info
+            - mountPath: /etc/target
+              name: iscsi-target
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: cinder-volumes
+          hostPath:
+            path: /var/lib/cinder
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: run
+          hostPath:
+            path: /run
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: sys-fs-cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: iscsi-info
+          hostPath:
+            path: /etc/iscsi
+        - name: iscsi-target
+          hostPath:
+            path: /etc/target
+{{- end }}
