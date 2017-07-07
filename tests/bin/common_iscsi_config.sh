@@ -3,6 +3,7 @@ function common_iscsi_config {
     echo "  kolla:"
     echo "    all:"
     echo "      storage_provider: host"
+    echo "      storage_interface: docker0"
     echo "      storage_provider_fstype: xfs"
     echo "      ceph_backend: false"
     echo "      lvm_backends:"
