@@ -31,7 +31,11 @@ namespace = sys.argv[1]
 prefix_list = sys.argv[2].lower().split(',')
 end_status_list = sys.argv[3].lower().split(',')
 
-config.load_kube_config()
+try:
+    config.load_incluster_config()
+except Exception:
+    config.load_kube_config()
+
 v1 = client.CoreV1Api()
 
 done = False
