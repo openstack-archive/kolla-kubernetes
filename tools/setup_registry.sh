@@ -17,6 +17,6 @@ helm install kolla/registry-deployment --version $VERSION --debug \
              --set initial_load=true --set node_port=30401 \
              --set distro=$Distro --set type=$Type
 
-$DIR/wait_for_pods.sh kolla 600
+$DIR/wait_for_pods.sh kolla 900
 
 echo "Registry with images for: $Distro - $Type - $Branch is running..."
