@@ -437,7 +437,7 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-helm install kolla/cinder-volume-lvm-daemonset --version $VERSION \
+helm install kolla/cinder-volume-lvm-daemonset --debug --version $VERSION \
     --namespace kolla --name cinder-volume-lvm-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -519,13 +519,20 @@ helm install kolla/iscsid-daemonset --version $VERSION \
     --namespace kolla --name iscsid-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/tgtd-daemonset --version $VERSION \
-    --namespace kolla --name tgtd-daemonset \
+#helm install kolla/tgtd-daemonset --version $VERSION \
+#    --namespace kolla --name tgtd-daemonset \
+#    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
+helm install kolla/iscsi-target-daemonset --version $VERSION  \
+    --namespace kolla --name iscsi-target-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/build_local_admin_keystonerc.sh
+
+kubectl get pods -n kolla
+
 . ~/keystonerc_admin
 
 wait_for_openstack
