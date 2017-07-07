@@ -523,9 +523,16 @@ helm install kolla/tgtd-daemonset --version $VERSION \
     --namespace kolla --name tgtd-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
+helm install kolla/iscsi-target-daemonset --version $VERSION --debug \
+    --namespace kolla --name iscsi-target-daemonset \
+    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/build_local_admin_keystonerc.sh
+
+kubectl get pods -n kolla
+
 . ~/keystonerc_admin
 
 wait_for_openstack
