@@ -344,7 +344,10 @@ helm install kolla/cinder-create-db-job --version $VERSION \
     --namespace kolla --name cinder-create-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/cinder-manage-db-job --version $VERSION \
+cat /tmp/iscsi_config.yaml
+cat /tmp/general_config.yaml
+
+helm install kolla/cinder-manage-db-job --version $VERSION --debug \
     --namespace kolla --name cinder-manage-db \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -437,7 +440,7 @@ for x in glance neutron cinder nova; do
     helm delete --purge $x-create-keystone-endpoint-admin
 done
 
-helm install kolla/cinder-volume-lvm-daemonset --version $VERSION \
+helm install kolla/cinder-volume-lvm-daemonset --debug --version $VERSION \
     --namespace kolla --name cinder-volume-lvm-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
@@ -519,13 +522,22 @@ helm install kolla/iscsid-daemonset --version $VERSION \
     --namespace kolla --name iscsid-daemonset \
     --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
 
-helm install kolla/tgtd-daemonset --version $VERSION \
-    --namespace kolla --name tgtd-daemonset \
-    --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
+  helm install kolla/iscsi-target-daemonset --version $VERSION  \
+      --namespace kolla --name iscsi-target-daemonset \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+else
+  helm install kolla/tgtd-daemonset --version $VERSION \
+      --namespace kolla --name tgtd-daemonset \
+      --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
+fi
 
 $DIR/tools/pull_containers.sh kolla
 $DIR/tools/wait_for_pods.sh kolla
 $DIR/tools/build_local_admin_keystonerc.sh
+
+kubectl get pods -n kolla
+
 . ~/keystonerc_admin
 
 wait_for_openstack
