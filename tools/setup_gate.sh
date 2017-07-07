@@ -28,6 +28,8 @@ case "$BRANCH" in
        sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
        ;;
    "t" )
+       sed -i 's/2\.0\.2/master/g' helm/all_values.yaml
+       sed -i 's/2\.0\.2/master/g' tests/conf/ceph-all-in-one/kolla_config
        echo Version: $BRANCH is not implemented yet.
        exit 1
        ;;
