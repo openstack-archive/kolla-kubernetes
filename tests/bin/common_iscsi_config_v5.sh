@@ -13,6 +13,7 @@ function common_iscsi_config {
     echo "      haproxy_image_tag: 5.0.0"
     echo "      fluentd_image_tag: 5.0.0"
     echo "      kubernetes_entrypoint_image_tag: 5.0.0"
+    echo "      iscsi_helper: lioadm"
     echo "      lvm_backends:"
     echo "      - '172.18.0.1': 'cinder-volumes'"
     echo "    cinder:"
