@@ -1,5 +1,13 @@
 #!/bin/bash -xe
 
+#
+# Loading mirrors info for traffic optimization 
+#
+if [ -f /etc/ci/mirror_info.sh ]; then
+   source /etc/ci/mirror_info.sh
+   echo "Suggested proxy url: $NODEPOOL_TARBALLS_PROXY"
+fi
+
 PACKAGE_VERSION=0.7.0-1
 DISTRO="$2"
 TYPE="$3"
