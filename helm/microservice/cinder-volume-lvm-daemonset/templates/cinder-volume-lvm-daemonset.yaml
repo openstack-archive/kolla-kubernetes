@@ -20,6 +20,7 @@
 {{- $_ := set $c1 "retDict" $localVals }}
 {{- $_ := set $c1 "retKey" "lvm_backends" }}
 {{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $iscsiHelper := include "kolla_val_get_str" (dict "key" "iscsi_helper" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := include "kolla_val_get_str" (dict "key" "element_name" "searchPath" $searchPath "Values" .Values ) | default $resourceName }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
@@ -54,11 +55,12 @@ spec:
                      crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_group {{ $vg_name }};
                      crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_backend_name {{ $lvm_enabled_backend }};
                      crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_driver  ''cinder.volume.drivers.lvm.LVMVolumeDriver'';
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_helper  ''tgtadm'';
+                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_helper  {{ $iscsiHelper }};
                      crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_protocol  ''iscsi'';
                      crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_ip_address {{ $vg_ip }};
                   {{- end }}
-                  {{- end }} "],
+                  {{- end }} 
+                 "],
              "volumeMounts": [
                 {
                    "name": "cinder-volume-configmap",
@@ -95,6 +97,13 @@ spec:
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: debug 
+          command:
+            - /bin/bash
+            - -ec
+            - tail -f /var/log/kolla/cinder/cinder-volume.log;
+        - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
           securityContext:
             privileged: true
@@ -117,6 +126,8 @@ spec:
               name: cinder-volumes
             - mountPath: /etc/iscsi
               name: iscsi-info
+            - mountPath: /etc/target
+              name: iscsi-target
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
@@ -143,4 +154,7 @@ spec:
         - name: iscsi-info
           hostPath:
             path: /etc/iscsi
+        - name: iscsi-target
+          hostPath:
+            path: /etc/target
 {{- end }}
