@@ -151,6 +151,8 @@ spec:
               name: dev
             - mountPath: /sys/fs/cgroup
               name: sys-fs-cgroup
+            - mountPath: /etc/iscsi
+              name: iscsi-info
           env:
 {{- include "common_env_vars" $env | indent 12 }}
 {{- include "common_containers" $env | indent 8 }}
@@ -176,6 +178,9 @@ spec:
             path: /sys/fs/cgroup
         - name: nova-config
           emptyDir: {}
+        - name: iscsi-info
+          hostPath:
+            path: /var/lib/kolla/iscsi
 {{- if $localVals.ceph_backend }}
         - name: ceph-conf
           configMap:
