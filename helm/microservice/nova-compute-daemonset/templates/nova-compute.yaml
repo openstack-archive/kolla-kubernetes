@@ -122,6 +122,30 @@ spec:
                    "mountPath": "/var/lib/nova"
                 }
              ]
+          },
+          {
+             "name": "initialize-iscsi-iqn",
+             "image": "{{ $imageFull }}",
+             "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "securityContext": {
+                  "runAsUser": 0,
+                  "privileged": true
+              },
+             "command": [
+                 "bash",
+                 "-ce",
+                 "if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
+                     iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
+                     echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
+                     chmod 640 /etc/iscsi/initiatorname.iscsi;
+                  fi;
+                 "],
+             "volumeMounts": [
+                {
+                   "name": "iscsi-info",
+                   "mountPath": "/etc/iscsi"
+                }
+             ]
           }
         ]'
     spec:
@@ -151,6 +175,8 @@ spec:
               name: dev
             - mountPath: /sys/fs/cgroup
               name: sys-fs-cgroup
+            - mountPath: /etc/iscsi
+              name: iscsi-info
           env:
 {{- include "common_env_vars" $env | indent 12 }}
 {{- include "common_containers" $env | indent 8 }}
@@ -176,6 +202,9 @@ spec:
             path: /sys/fs/cgroup
         - name: nova-config
           emptyDir: {}
+        - name: iscsi-info
+          hostPath:
+            path: /var/lib/kolla/iscsi
 {{- if $localVals.ceph_backend }}
         - name: ceph-conf
           configMap:
