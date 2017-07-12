@@ -1,7 +1,0 @@
-{{- $searchPath := ":global.kolla.ironic.inspector.delete_db.job:global.kolla.ironic.inspector.delete_db.all:global.kolla.ironic.inspector.all:global.kolla.ironic.all:global.kolla.all" }}
-{{- $resourceName := "ironic-inspector" }}
-{{- $serviceName := "ironic-inspector" }}
-{{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_delete_db_job" $env }}
-{{- end }}

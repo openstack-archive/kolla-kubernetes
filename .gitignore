@@ -6,6 +6,7 @@
 # helm / chart
 values.yaml
 **/charts
+helm/
 
 # Packages
 *.egg*

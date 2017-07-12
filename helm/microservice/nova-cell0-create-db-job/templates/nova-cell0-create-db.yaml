@@ -1,7 +1,0 @@
-{{- $searchPath := ":global.kolla.nova.cell0.create_db.job:global.kolla.nova.cell0.create_db.all:global.kolla.nova.cell0.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $resourceName := "nova-cell0" }}
-{{- $serviceName := "nova" }}
-{{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_create_db_job" $env }}
-{{- end }}

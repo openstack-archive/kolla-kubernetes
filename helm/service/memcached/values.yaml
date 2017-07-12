@@ -1,4 +1,0 @@
-global:
-    kolla:
-        all:
-            kubernetes_entrypoint: true
