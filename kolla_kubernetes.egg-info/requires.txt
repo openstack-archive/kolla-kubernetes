@@ -1,0 +1,8 @@
+pbr>=1.8
+cliff==2.7.0
+oslo.config!=3.18.0,>=3.14.0
+oslo.utils>=3.18.0
+oslo.log>=3.11.0
+six>=1.9.0
+Jinja2>=2.8
+PyYAML>=3.10.0
