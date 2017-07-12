@@ -13,6 +13,7 @@
 import json
 import yaml
 
+from kolla_kubernetes import app
 from kolla_kubernetes.commands.cmd_resource import ResourceTemplate
 from kolla_kubernetes.service_resources import KollaKubernetesResources
 from kolla_kubernetes.tests import base
@@ -55,6 +56,7 @@ class argobj(object):
 
 
 def on_each_template(func):
+    the_app = app.KollaKubernetesApp()
     for service_name in KKR.getServices():
         service = KKR.getServiceByName(service_name)
         for resource_type in RESOURCE_TYPES:
@@ -67,7 +69,7 @@ def on_each_template(func):
                               template_name)
                 print("Processing:", resource_type,
                       service_name, template_name)
-                rt = ResourceTemplate('kolla-kubernetes.py',
+                rt = ResourceTemplate(the_app,
                                       '', 'resource-template')
                 o = rt.take_action(args=args, skip_and_return=True)
                 func(args, o)
