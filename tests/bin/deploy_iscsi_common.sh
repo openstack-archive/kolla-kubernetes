@@ -61,11 +61,15 @@ IRONIC_CONDUCTOR_IP=${6:-172.21.0.10}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-if [ "x$branch" == "x4" ]; then
-. "$DIR/tests/bin/common_iscsi_config_v4.sh"
-else
-. "$DIR/tests/bin/common_iscsi_config.sh"
-fi
+
+case "$branch" in
+4)  . "$DIR/tests/bin/common_iscsi_config_v4.sh"
+    ;;
+t) . "$DIR/tests/bin/common_iscsi_config_v5.sh"
+   ;;
+*) . "$DIR/tests/bin/common_iscsi_config.sh"
+   ;;
+esac
 
 general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
