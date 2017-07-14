@@ -70,6 +70,19 @@ fi
 general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
+#
+# NOTE(sbezverk) WIP when completed will be moved to a common to all master jobs
+# location.
+#
+helm install kolla/registry-deployment --version $VERSION --debug \
+             --namespace kolla --name registry \
+             --set initial_load=true --set registry_port=4000 --set external_ip=0.0.0.0 
+$DIR/tools/wait_for_pods.sh kolla 600
+
+sudo docker images
+sudo docker pull localhost:4000/kolla/centos-source-iscsid:5.0.0
+sudo docker images
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
         --name $x-pv --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml
