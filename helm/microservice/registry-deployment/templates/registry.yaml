@@ -1,0 +1,75 @@
+{{- $replicas := .Values.replicas | default "1" }}
+{{- $svcName := .Values.svc_name | default "registry" }}
+{{- $port := .Values.registry_port | default "4000" }}
+{{- $initLoad := .Values.initial_load | default false }}
+{{- $distro := .Values.distro | default "centos" }}
+{{- $type := .Values.type | default "source" }}
+{{- $branch := .Values.branch | default "master" }}
+{{- $externalIP := .Values.external_ip }}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kube-registry-v0
+spec:
+  replicas: {{ $replicas }} 
+  template:
+    metadata:
+      labels:
+        service: {{ $svcName }}
+    spec:
+      initContainers:
+      - name: init-myservice
+        image: centos:latest
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/bash
+          - -ec
+          - |
+{{- if $initLoad }}
+            fn='{{ $distro }}-{{ $type }}-registry-{{ $branch }}.tar.gz';
+            curl http://tarballs.openstack.org/kolla/images/$fn -o /tmp/$fn;
+            ls -l /tmp;
+            tar -xvf /tmp/$fn -C /var/lib/registry/;
+{{- end }}
+            echo Registry is all ready serving images...;
+        volumeMounts:
+        - name: image-store
+          mountPath: /var/lib/registry
+      containers:
+      - name: registry
+        image: registry:2
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: REGISTRY_HTTP_ADDR
+          value: :5000
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: /var/lib/registry
+        volumeMounts:
+        - name: image-store
+          mountPath: /var/lib/registry
+        ports:
+        - containerPort: {{ $port }} 
+          name: registry
+          protocol: TCP
+      volumes:
+      - name: image-store
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-registry
+spec:
+  selector:
+    service: {{ $svcName }}
+  ports:
+  - name: registry
+    port: {{ $port }} 
+    protocol: TCP
+  type: NodePort
+---
