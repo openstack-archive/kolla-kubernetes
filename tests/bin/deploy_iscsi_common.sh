@@ -70,6 +70,13 @@ fi
 general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
 
+#
+# NOTE(sbezverk) WIP when completed will be moved to a common to all master jobs
+# location.
+#
+helm install --debug helm/microservice/registry-deployment --namespace kolla \
+             --set initial_load=true --set registry_port=4001 --set external_ip $IP
+
 for x in mariadb rabbitmq glance; do
     helm install kolla/$x-pv --version $VERSION \
         --name $x-pv --values /tmp/general_config.yaml --values /tmp/iscsi_config.yaml

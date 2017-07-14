@@ -1,0 +1,7 @@
+svc_nme: registry
+registry_port: 4000
+initial_load: false
+replicas: 1
+distro: centos
+type: source
+branch: master
