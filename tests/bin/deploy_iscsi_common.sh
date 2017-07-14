@@ -13,6 +13,7 @@ function iscsi_config {
 function check_for_nova {
     for service in nova-scheduler nova-conductor nova-compute;
         do
+           nova service-list
            str=$(nova service-list | grep $service | awk '{print $12}')
            status=${str%%[[:space:]]*}
            if [ "x$status" != "xup" ]; then
@@ -27,7 +28,7 @@ function wait_for_openstack {
     count=0
     while true; do
         [ $count -gt 60 ] && echo Wait for openstack services failed... \
-                           && return -1
+                           && return 1
         echo "Check for nova"
         check_for_nova
         retcode=$?
@@ -40,6 +41,7 @@ function wait_for_openstack {
         fi
     done
     set -e
+    return 0
 }
 
 function deploy_iscsi_common {
@@ -61,11 +63,15 @@ IRONIC_CONDUCTOR_IP=${6:-172.21.0.10}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 . "$DIR/tests/bin/common_workflow_config.sh"
-if [ "x$branch" == "x4" ]; then
-. "$DIR/tests/bin/common_iscsi_config_v4.sh"
-else
-. "$DIR/tests/bin/common_iscsi_config.sh"
-fi
+
+case "$branch" in
+4)  . "$DIR/tests/bin/common_iscsi_config_v4.sh"
+    ;;
+t) . "$DIR/tests/bin/common_iscsi_config_v5.sh"
+   ;;
+*) . "$DIR/tests/bin/common_iscsi_config.sh"
+   ;;
+esac
 
 general_config $IP $base_distro $tunnel_interface $branch > /tmp/general_config.yaml
 iscsi_config > /tmp/iscsi_config.yaml
