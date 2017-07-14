@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.abspath('../..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    'openstackdocstheme',
     'sphinx.ext.autodoc',
     #'sphinx.ext.intersphinx',
-    'oslosphinx'
 ]
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
@@ -55,8 +55,11 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme_path = ["."]
-# html_theme = '_theme'
+html_theme = 'openstackdocs'
 # html_static_path = ['static']
+
+# Must set this variable to include year, month, day, hours, and minutes.
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
@@ -73,3 +76,8 @@ latex_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'http://docs.python.org/': None}
+
+# openstackdocstheme options
+repository_name = 'openstack/kolla-kubernetes'
+bug_project = 'kolla-kubernetes'
+bug_tag = ''
