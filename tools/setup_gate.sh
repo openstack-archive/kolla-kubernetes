@@ -28,8 +28,12 @@ case "$BRANCH" in
        sed -i 's/2\.0\.2/4.0.0/g' tests/conf/ceph-all-in-one/kolla_config
        ;;
    "t" )
-       echo Version: $BRANCH is not implemented yet.
-       exit 1
+       sed -i 's/2\.0\.2/5.0.0/g' helm/all_values.yaml
+       sed -i 's/2\.0\.2/5.0.0/g' tests/conf/ceph-all-in-one/kolla_config
+       if [ "x$4" != "xiscsi" ]; then
+          echo Version: $BRANCH is not implemented yet.
+          exit 1
+       fi
        ;;
    "2" )
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-control/values.yaml
