@@ -155,6 +155,10 @@ kollakube res create configmap \
 
 kollakube res create secret nova-libvirt
 
+if [ "x$BRANCH" == "xt" ]; then
+   tools/setup_registry.sh $DISTRO $TYPE $BRANCH
+fi
+
 if [ "x$CONFIG" == "xhelm-entrypoint" ]; then
    tests/bin/ceph_workflow_service.sh "$4" "$2" "$6"
 else

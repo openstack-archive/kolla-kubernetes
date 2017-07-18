@@ -24,7 +24,7 @@ function general_config {
 }
 
 function ceph_config {
-    common_ceph_config $gate_job
+    common_ceph_config $gate_job $branch
 }
 
 common_vars="kube_logger=false,base_distro=$base_distro"
