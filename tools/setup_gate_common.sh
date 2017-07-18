@@ -55,10 +55,10 @@ sudo cp -aR `pwd`/etc/kolla /etc/kolla
 sudo mkdir -p /etc/kolla/config
 
 if [ -f /etc/redhat-release ]; then
-    sudo yum install -y crudini jq sshpass bzip2
+    sudo yum install -y crudini jq sshpass bzip2 gcc python-devel openssl-devel libffi-devel
 else
     sudo apt-get update
-    sudo apt-get install -y crudini jq sshpass bzip2
+    sudo apt-get install -y crudini jq sshpass bzip2 psmisc
 fi
 
 pip install pip --upgrade

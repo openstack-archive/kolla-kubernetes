@@ -40,12 +40,13 @@ echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
 systemctl daemon-reload
 systemctl start docker
 systemctl restart kubelet
+systemctl enable kubelet
 EOF
 
 if [ "$1" == "master" ]; then
     cat >> /tmp/setup.$$ <<"EOF"
 [ -d /etc/kubernetes/manifests ] && rmdir /etc/kubernetes/manifests || true
-kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --pod-network-cidr 172.16.132.0/22 \
+timeout 10m kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --pod-network-cidr 172.16.132.0/22 \
              --apiserver-advertise-address $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt

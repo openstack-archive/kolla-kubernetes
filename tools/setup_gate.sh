@@ -7,7 +7,18 @@ CONFIG="$4"
 BRANCH="$7"
 PIPELINE="$8"
 
-trap 'tests/bin/gate_capture_logs.sh "$?"' ERR
+if [ "x$4" == "xceph-reboot" ]; then
+    exec tests/bin/gate_reboot_master.sh `pwd` "$WORKSPACE/logs" "$BRANCH"
+fi
+
+trap 'tests/bin/gate_capture_logs.sh "$?";' ERR
+
+function cleanup {
+    set +e
+    sudo killall helm
+}
+trap cleanup EXIT
+
 mkdir -p $WORKSPACE/logs/
 env > $WORKSPACE/logs/env
 

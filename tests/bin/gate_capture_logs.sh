@@ -64,6 +64,7 @@ kubectl get svc -o json --all-namespaces | jq -r \
     kubectl describe svc $NAME --namespace $NAMESPACE > \
         $WORKSPACE/logs/svc/$NAMESPACE-$NAME.txt
 done
+ls -l /dev/loop* > $WORKSPACE/logs/loop.txt
 sudo iptables-save > $WORKSPACE/logs/iptables.txt
 sudo ip a > $WORKSPACE/logs/ip.txt
 sudo route -n > $WORKSPACE/logs/routes.txt
@@ -107,6 +108,15 @@ cp /usr/bin/rbd $WORKSPACE/logs/rbd.sh
 done
 ovs-vsctl show > $WORKSPACE/logs/ovs.txt
 arp -a > $WORKSPACE/logs/arp.txt
+mkdir -p $WORKSPACE/logs/svc-tests
+timeout 60s openstack user list > $WORKSPACE/logs/svc-tests/user.txt
+timeout 60s openstack catalog list > $WORKSPACE/logs/svc-tests/catalog.txt
+timeout 60s openstack image list > $WORKSPACE/logs/svc-tests/image.txt
+timeout 60s openstack volume list > $WORKSPACE/logs/svc-tests/volume.txt
+timeout 60s openstack network list > $WORKSPACE/logs/svc-tests/network.txt
+timeout 60s openstack server list > $WORKSPACE/logs/svc-tests/server.txt
+timeout 60s neutron agent-list > $WORKSPACE/logs/neutron-agents.txt
+timeout 60s nova service-list > $WORKSPACE/logs/nova-services.txt
 sudo docker exec -tu root \
      $(sudo docker ps | grep nova-libvirt: | awk '{print $1}') \
      cat /tmp/vm-1.log > $WORKSPACE/logs/vm-1.log

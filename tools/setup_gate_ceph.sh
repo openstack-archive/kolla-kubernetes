@@ -167,5 +167,7 @@ kubectl get svc --namespace=kolla
 tests/bin/basic_tests.sh
 tests/bin/horizon_test.sh
 tests/bin/prometheus_tests.sh
-tests/bin/cleanup_tests.sh
+if [ "x$REBOOT_TEST" == "x" ]; then
+    tests/bin/cleanup_tests.sh
+fi
 tests/bin/build_docker_images.sh $WORKSPACE/logs $DISTRO $TYPE $CONFIG $BRANCH $PIPELINE
