@@ -115,6 +115,10 @@ if [ "x$CONFIG" == "xceph-multi" ]; then
     tunnel_interface=$interface
 fi
 
+if [ "x$BRANCH" == "xt" ]; then
+   tools/setup_registry.sh $DISTRO $TYPE $BRANCH
+fi
+
 tests/bin/build_test_ceph.sh $CONFIG $DISTRO $IP $tunnel_interface $BRANCH
 
 helm install kolla/ceph-admin-pod --version $PACKAGE_VERSION \

@@ -30,10 +30,6 @@ case "$BRANCH" in
    "t" )
        sed -i 's/2\.0\.2/5.0.0/g' helm/all_values.yaml
        sed -i 's/2\.0\.2/5.0.0/g' tests/conf/ceph-all-in-one/kolla_config
-       if [ "x$4" != "xiscsi" ]; then
-          echo CEPH workflow for branch "$BRANCH" is not implemented yet. Exiting...
-          exit 1
-       fi
        ;;
    "2" )
        sed -i 's/cell_enabled.*/cell_enabled: false/g' helm/service/nova-control/values.yaml
