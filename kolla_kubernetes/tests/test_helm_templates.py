@@ -49,6 +49,9 @@ class TestK8sTemplatesTest(base.BaseTestCase):
                 raise err
 
             l = yaml.safe_load_all(out)
+            #FIXME
+            if package == 'iscsi-target-daemonset':
+              print l
             for y in l:
                 js = '[]'
                 try:
