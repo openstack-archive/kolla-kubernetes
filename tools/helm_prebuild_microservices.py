@@ -182,7 +182,7 @@ def main():
             count += 1
         pkgdir = os.path.join(microdir, package)
         helm_dep_up(pkgdir)
-        pkg_values = copy.deepcopy(values['common'])
+        pkg_values = {}
         if package in common_create_keystone_admin:
             key = 'common-create-keystone-admin'
             merge_dict(pkg_values, values[key])
