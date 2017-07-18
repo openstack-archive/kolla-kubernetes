@@ -194,6 +194,10 @@ def main():
             merge_dict(pkg_values, values['common-mariadb'])
         if package in values:
             merge_dict(pkg_values, values[package])
+        if package == "registry-deployment":
+            sys.stdout.write("\rSkip registry chart")
+            sys.stdout.flush()
+            continue
         with open(os.path.join(microdir, package, "values.yaml"), "w") as f:
             f.write("# This file is generated. Please edit all_values.yaml\n")
             f.write("# and rerun tools/helm_prebuild.py\n")
