@@ -1,0 +1,29 @@
+exports:
+    common:
+        global:
+            kolla:
+                all:
+                    replicas: 1
+                    docker_registry: docker.io
+                    docker_namespace: kolla
+                    base_distro: centos
+                    install_type: binary
+                    container_config_directory: /var/lib/kolla/config_files
+                    image_tag: 2.0.2
+                    fluentd_image_tag: 3.0.2
+                    kolla_toolbox_image_tag: 3.0.2
+                    kubernetes_entrypoint_image_tag: 4.0.0
+                    openvswitch_tcp: false
+                    selector_key: kolla_controller
+                    selector_value: "true"
+                    image_pull_policy: IfNotPresent
+                    container_config_directory: /var/lib/kolla/config_files
+                    kubernetes_entrypoint: false
+                    resolve_conf_net_host_workaround: true
+                    kolla_kubernetes_external_vip: 172.18.0.1
+                    kolla_kubernetes_external_subnet: 24
+                    kube_logger: true
+                    prometheus_exporter: true
+                    prometheus_port: 9101
+                    pv_enabled: true
+
