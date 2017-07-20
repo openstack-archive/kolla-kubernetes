@@ -70,7 +70,7 @@ General Information
 ===================
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/kolla-kubernetes
+* Documentation: https://docs.openstack.org/kolla-kubernetes/latest/
 * Source: http://git.openstack.org/cgit/openstack/kolla-kubernetes
 * Bugs: http://bugs.launchpad.net/kolla-kubernetes
 
