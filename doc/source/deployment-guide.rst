@@ -228,7 +228,7 @@ Deploy Kubernetes with kubeadm::
      `net.bridge.bridge-nf-call-iptables = 1` to
      ``/etc/sysctl.conf``
    - Type `sysctl -p` to apply the settings from /etc/sysctl.conf
-   - Type `sysctl net.bridge.bridge-nf-call-ip[6]tables` to verify the
+   - Type `sysctl net.bridge.bridge-nf-call-ip6tables and sysctl net.bridge.bridge-nf-call-iptables` to verify the
      values are set to 1.
    - Or alternatively Run with `--skip-preflight-checks`. This runs
      the risk of missing other issues that may be flagged.
