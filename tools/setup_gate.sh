@@ -50,6 +50,8 @@ case "$BRANCH" in
        ;;
 esac
 
+tools/setup_registry.sh $DISTRO $TYPE $BRANCH
+
 #
 # If TYPE is 'source', kolla_install_type 'source' must be added
 # to kolla_config, to generate source based configs and not binary
@@ -64,7 +66,7 @@ if [ "x$TYPE" == "xsource" ]; then
            sed -i 's/kolla_install_type.*/kolla_install_type: source/g' $kolla_config
         fi
     done
-    sed -i 's/install_type.*/install_type: source/g' helm/all_values.yaml 
+    sed -i 's/install_type.*/install_type: source/g' helm/all_values.yaml
 fi
 
 if [ "x$4" == "xiscsi" ]; then

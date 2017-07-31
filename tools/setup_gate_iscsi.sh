@@ -77,9 +77,6 @@ elif [ "x$4" == "xironic" ]; then
 elif [ "x$4" == "xhelm-operator" ]; then
     echo "Not yet implemented..." "$4" "$2" "$BRANCH"
 else
-    if [ "x$BRANCH" == "xt" ]; then
-       tools/setup_registry.sh $DISTRO $TYPE $BRANCH
-    fi
     tests/bin/iscsi_generic_workflow.sh "$4" "$2" "$BRANCH"
 fi
 
