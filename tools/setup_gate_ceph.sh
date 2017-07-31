@@ -30,7 +30,6 @@ if [ "x$CONFIG" == "xexternal-ovs" ]; then
     sudo ovs-vsctl add-br br-ex
 fi
 
-tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
 
 tests/bin/setup_gate_loopback.sh
 
@@ -94,12 +93,16 @@ fi
 tools/pull_containers.sh kube-system
 tools/wait_for_pods.sh kube-system
 
-tools/test_kube_dns.sh
-
 # Setting up Helm
 setup_helm_common
 
 tools/build_example_yaml.py
+
+tools/setup_registry.sh $DISTRO $TYPE $BRANCH
+
+tests/bin/setup_config.sh "$2" "$4" "$BRANCH"
+
+tools/test_kube_dns.sh
 
 # Setting up namespace and secret
 setup_namespace_secrets
