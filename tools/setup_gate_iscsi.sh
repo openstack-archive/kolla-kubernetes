@@ -47,6 +47,8 @@ setup_helm_common
 # Setting up namespace and secret
 setup_namespace_secrets
 
+tools/setup_registry.sh $DISTRO $TYPE $BRANCH
+
 # Setting up resolv.conf workaround
 setup_resolv_conf_common
 
