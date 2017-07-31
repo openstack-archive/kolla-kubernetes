@@ -10,6 +10,12 @@ VERSION=0.7.0-1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
+Init=false
+
+if [ "x$Branch" == "x4" ] || [ "x$Branch" == "xt" ]; then
+    Init=true
+fi
+
 echo "Suggested tarball url for traffic optimization is: $NODEPOOL_TARBALLS_PROXY"
 if [ "x$NODEPOOL_TARBALLS_PROXY" == "x" ]; then
   tarball_url="http://tarballs.openstack.org/kolla/images/"
@@ -19,8 +25,7 @@ fi
 
 echo "Deploying registry for: $Distro - $Type - $Branch"
 helm install kolla/registry-deployment --version $VERSION --debug \
-             --namespace kolla --name registry \
-             --set initial_load=true --set node_port=30401 \
+             --name registry --set initial_load=$Init --set node_port=30401 \
              --set tarball_url=$tarball_url \
              --set distro=$Distro --set type=$Type
 

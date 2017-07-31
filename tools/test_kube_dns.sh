@@ -2,7 +2,6 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
-TOOLBOX=$(kolla-kubernetes resource-template create bootstrap neutron-create-db -o json | jq -r '.spec.template.spec.containers[0].image')
 
 kubectl get nodes -o json | jq -r '.items[].metadata.name' | while read NODE; do
     RELEASE="test-dns-$NODE"
@@ -21,7 +20,7 @@ spec:
       nodeSelector:
           kubernetes.io/hostname: $NODE
       containers:
-        - image: "$TOOLBOX"
+        - image: "centos:7"
           name: main
           command: ["sh", "-xc"]
           args:
