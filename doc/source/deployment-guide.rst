@@ -218,7 +218,7 @@ Deploy Kubernetes with kubeadm::
 
    If the following issue occurs after running this command:
 
-   `preflight] Some fatal errors occurred:
+   `[preflight] Some fatal errors occurred:
    /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set
    to 1`
 
@@ -228,8 +228,8 @@ Deploy Kubernetes with kubeadm::
      `net.bridge.bridge-nf-call-iptables = 1` to
      ``/etc/sysctl.conf``
    - Type `sysctl -p` to apply the settings from /etc/sysctl.conf
-   - Type `sysctl net.bridge.bridge-nf-call-ip[6]tables` to verify the
-     values are set to 1.
+   - Type `sysctl net.bridge.bridge-nf-call-ip6tables` and 
+     `sysctl net.bridge.bridge-nf-call-iptables` to verify the values are set to 1.
    - Or alternatively Run with `--skip-preflight-checks`. This runs
      the risk of missing other issues that may be flagged.
 
