@@ -1,0 +1,11 @@
+Code-Review+1: Surya Prakash (spsurya) <surya.singh@nectechnologies.in>
+Code-Review+1: Rich Wellum <rwellum@lenovo.com>
+Code-Review+2: Pete Birley <pete@port.direct>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 07 Aug 2017 14:10:51 +0000
+Reviewed-on: https://review.openstack.org/488349
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
