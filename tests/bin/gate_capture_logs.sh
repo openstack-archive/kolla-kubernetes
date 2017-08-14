@@ -17,6 +17,7 @@ sudo cp /var/log/messages $WORKSPACE/logs
 sudo cp /var/log/syslog $WORKSPACE/logs
 sudo cp -a /etc/kubernetes $WORKSPACE/logs
 sudo chmod 777 --recursive $WORKSPACE/logs/*
+kubectl get all --all-namespaces -o json > $WORKSPACE/logs/k8s-all.json
 kubectl get nodes -o yaml > $WORKSPACE/logs/nodes.yaml
 kubectl get pods --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
 kubectl get jobs --all-namespaces -o yaml > $WORKSPACE/logs/jobs.yaml
