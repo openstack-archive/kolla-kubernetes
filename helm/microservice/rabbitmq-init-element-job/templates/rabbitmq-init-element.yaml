@@ -20,7 +20,31 @@ kind: Job
 spec:
   template:
 {{- include "init_container_header" $env | indent 4 }}
-{{- include "common_dependency_container_single" $env | indent 10 }}
+{{- include "common_dependency_container_multi" $env | indent 10 }}
+          {
+              "name": "fix-permissions",
+              "image": "{{ $imageFull }}",
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "securityContext": {
+                  "runAsUser": 0
+              },
+              "command": [
+                  "/bin/sh",
+                  "-xec",
+                  " e=$(ls -A /var/lib/rabbitmq | grep -v lost+found | wc -l);
+                    if [ $e -eq 0 -o $e -eq 1 ]; then
+                       chown -R rabbitmq: /var/lib/rabbitmq;
+                       chmod 755 /var/lib/rabbitmq;
+                    fi;
+                    ls -l /var/lib/rabbitmq;
+              "],
+              "volumeMounts": [
+                  {
+                      "name": "rabbitmq-persistent-storage",
+                      "mountPath": "/var/lib/rabbitmq"
+                  }
+              ]
+          }
 {{- include "init_container_tail" $env | indent 4 }}
     spec:
       nodeSelector:

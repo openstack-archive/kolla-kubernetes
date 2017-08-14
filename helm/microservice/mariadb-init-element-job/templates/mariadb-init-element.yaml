@@ -18,6 +18,34 @@ apiVersion: batch/v1
 kind: Job
 spec:
   template:
+    metadata:
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+              "name": "fix-permissions",
+              "image": "{{ $imageFull }}",
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "securityContext": {
+                  "runAsUser": 0
+              },
+              "command": [
+                  "/bin/sh",
+                  "-xec",
+                  " e=$(ls -A /var/lib/mysql | grep -v lost+found | wc -l);
+                    if [ $e -eq 0 -o $e -eq 1 ]; then
+                       chown -R mysql: /var/lib/mysql;
+                       chmod 755 /var/lib/mysql;
+                    fi;
+                    ls -l /var/lib/mysql;
+              "],
+              "volumeMounts": [
+                  {
+                      "name": "mariadb-persistent-storage",
+                      "mountPath": "/var/lib/mysql"
+                  }
+              ]
+          }
+      ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
@@ -25,6 +53,12 @@ spec:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
+          command:
+            - /bin/bash
+            - -xec
+            - |
+              [ -d /var/lib/mysql/lost+found ] && rmdir /var/lib/mysql/lost+found
+              kolla_start
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
