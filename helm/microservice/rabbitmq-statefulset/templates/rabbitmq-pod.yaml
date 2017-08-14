@@ -34,7 +34,7 @@ spec:
               "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
-                  "-c",
+                  "-xec",
                   "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
                    sed -i ''/^export ERL_EPMD_ADDRESS=0.0.0.0$/d'' /srv/pod-main-config/rabbitmq-env.conf;"
               ],
@@ -46,6 +46,21 @@ spec:
                   {
                       "name": "pod-main-config",
                       "mountPath": "/srv/pod-main-config"
+                  }
+              ]
+          },{
+              "name": "permissions",
+              "image": "{{ $imageFull }}",
+              "imagePullPolicy": {{ $imagePullPolicy | quote }},
+              "command": [
+                  "/bin/sh",
+                  "-xec",
+                  "ls -lad /var/lib/rabbitmq; ls -l /var/lib/rabbitmq;"
+              ],
+              "volumeMounts": [
+                  {
+                      "name": "rabbitmq-persistent-storage",
+                      "mountPath": "/var/lib/rabbitmq"
                   }
               ]
           }
