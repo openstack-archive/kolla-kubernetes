@@ -32,20 +32,27 @@ common_vars="kube_logger=false,base_distro=$base_distro"
 general_config > /tmp/general_config.yaml
 ceph_config > /tmp/ceph_config.yaml
 
-for x in mariadb rabbitmq glance helm-repo; do
-    helm install kolla/$x-pv --version $VERSION \
-        --name $x-pv --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+for x in rabbitmq glance helm-repo; do
+#    helm install kolla/$x-pv --version $VERSION \
+#        --name $x-pv --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
     helm install kolla/$x-pvc --version $VERSION --namespace kolla \
         --name $x-pvc --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+done
+for x in mariadb; do
+    helm install kolla/$x-pv --version $VERSION \
+        --name $x-pv --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml --set "storage_provider=host,storage_provider_fstype=xfs"
+    helm install kolla/$x-pvc --version $VERSION --namespace kolla \
+        --name $x-pvc --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml --set "storage_provider=host,storage_provider_fstype=xfs"
+
 done
 
 helm install kolla/helm-repo-svc --version $VERSION \
     --namespace kolla --name helm-repo-svc --set element_name=helm-repo \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
-helm install kolla/helm-repo-deployment --version $VERSION \
-    --namespace kolla --name helm-repo-deployment --set "element_name=helm-repo" \
-    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+#helm install kolla/helm-repo-deployment --version $VERSION \
+#    --namespace kolla --name helm-repo-deployment --set "element_name=helm-repo" \
+#    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/memcached-svc --version $VERSION \
     --namespace kolla --name memcached-svc \
@@ -137,7 +144,7 @@ helm install kolla/rabbitmq-init-element-job --version $VERSION \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 $DIR/tools/pull_containers.sh kolla
-$DIR/tools/wait_for_pods.sh kolla
+$DIR/tools/wait_for_pods.sh kolla 240
 
 for x in mariadb rabbitmq; do
     helm delete $x-init-element-job --purge
