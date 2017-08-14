@@ -140,6 +140,36 @@ tools/setup_simple_ceph_users.sh
 
 tools/setup_rbd_volumes.sh --yes-i-really-really-mean-it "$BRANCH"
 
+str="grep 'key =' /etc/ceph/ceph.client.admin.keyring | awk '{print "'$3'"}'"
+kubectl exec ceph-admin -c main --namespace=kolla -- /bin/bash -c \
+    "$str" > /tmp/$$
+cat /tmp/$$
+key=$(cat /tmp/$$)
+
+git clone https://github.com/kfox1111/charts/
+cd charts
+git checkout -b ceph-provisioner origin/ceph-provisioner
+cd stable/ceph-provisioner
+helm dep up
+cd ../..
+  #--namespace kube-system --set "adminSecret.key=$key,monitors[0]=$IP" \
+helm install stable/ceph-provisioner --name ceph-provisioner \
+  --namespace kube-system --set "adminSecret.key=$key,monitors[0]=172.17.0.1" \
+  --values <(cat <<EOF
+nodeSelector:
+  kolla_controller: "true"
+userSecret:
+  name: kube-system/ceph-rbd-admin
+  user: admin
+  manage: false
+args: [-v, "1"]
+pool: kollavolumes
+EOF
+)
+#  name: ceph-kolla
+#  user: kolla
+cd ..
+
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
     nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
