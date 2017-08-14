@@ -3,7 +3,7 @@ function common_ceph_config {
     echo "  kolla:"
     echo "    all:"
     echo "      ceph_backend: true"
-    echo "      storage_provider: ceph"
+    echo "      storage_provider: dynamic"
     echo "      storage_provider_fstype: xfs"
     echo "      ceph:"
     echo "         monitors:"

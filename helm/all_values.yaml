@@ -24,7 +24,8 @@ common:
                     kube_logger: true
                     prometheus_exporter: true
                     prometheus_port: 9101
-                    pv_enabled: true
+#KMF FIXME Changed default for testing...
+                    pv_enabled: false
 
 common-mariadb:
         global:
