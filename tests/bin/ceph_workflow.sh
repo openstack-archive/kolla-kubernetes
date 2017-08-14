@@ -33,8 +33,8 @@ general_config > /tmp/general_config.yaml
 ceph_config > /tmp/ceph_config.yaml
 
 for x in mariadb rabbitmq glance helm-repo; do
-    helm install kolla/$x-pv --version $VERSION \
-        --name $x-pv --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+#    helm install kolla/$x-pv --version $VERSION \
+#        --name $x-pv --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
     helm install kolla/$x-pvc --version $VERSION --namespace kolla \
         --name $x-pvc --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 done
