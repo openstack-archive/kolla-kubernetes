@@ -25,6 +25,12 @@ spec:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: main
+          command:
+            - /bin/bash
+            - -xec
+            - |
+              [ -d /var/lib/mysql/lost+found ] && rmdir /var/lib/mysql/lost+found
+              kolla_start
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
