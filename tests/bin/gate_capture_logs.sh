@@ -17,6 +17,8 @@ sudo cp /var/log/messages $WORKSPACE/logs
 sudo cp /var/log/syslog $WORKSPACE/logs
 sudo cp -a /etc/kubernetes $WORKSPACE/logs
 sudo chmod 777 --recursive $WORKSPACE/logs/*
+kubectl get all -a --all-namespaces -o json > $WORKSPACE/logs/k8s-all.json
+kubectl get storageclass --all-namespaces -o yaml > $WORKSPACE/logs/storageclass.yaml
 kubectl get nodes -o yaml > $WORKSPACE/logs/nodes.yaml
 kubectl get pods --all-namespaces -o yaml > $WORKSPACE/logs/pods.yaml
 kubectl get jobs --all-namespaces -o yaml > $WORKSPACE/logs/jobs.yaml
@@ -153,5 +155,6 @@ sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
 kubectl get all -n kolla -o name > $WORKSPACE/logs/objects_list.txt
 kubectl get nodes -o name --show-labels | grep kolla > $WORKSPACE/logs/labels_list.txt
 kubectl get pv > $WORKSPACE/logs/pv_list.txt
+kubectl get pvc > $WORKSPACE/logs/pvc_list.txt
 
 exit -1
