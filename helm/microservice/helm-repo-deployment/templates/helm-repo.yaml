@@ -42,11 +42,13 @@ spec:
               },
               "command": [
                   "/bin/sh",
-                  "-c",
-                  " if [ ! $(ls -A /helm-repo) ]; then
+                  "-xec",
+                  " e=$(ls -A /helm-repo | wc -l);
+                    if [ $e -eq 0 -o $e -eq 1 ]; then
                        chown -R helm: /helm-repo;
                        chmod 755 /helm-repo;
                     fi;
+                    ls -l /helm-repo;
               "],
               "volumeMounts": [
 {{- if $persistent }}
@@ -63,8 +65,8 @@ spec:
               "imagePullPolicy": {{ $imagePullPolicy | quote }},
               "command": [
                   "/bin/sh",
-                  "-c",
-                  " if [ ! $(ls -A /helm-repo) ]; then
+                  "-xec",
+                  " if [ $(ls -A /helm-repo | wc -l) -eq 0 ]; then
                        pushd /tmp;
                        if [ ''x{{ $method }}'' == ''xgit''  ]; then
                          git clone {{ $url }} kolla-kubernetes;
