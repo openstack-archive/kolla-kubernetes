@@ -4,7 +4,7 @@
 # Loading mirrors info for traffic optimization.
 #
 if [ -f /etc/ci/mirror_info.sh ]; then
-   source /etc/ci/mirror_info.sh
+   . /etc/ci/mirror_info.sh
    echo "Suggested proxy url: $NODEPOOL_TARBALLS_PROXY"
 fi
 
