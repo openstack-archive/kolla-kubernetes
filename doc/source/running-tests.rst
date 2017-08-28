@@ -24,7 +24,7 @@ so the only package you install is ``tox`` itself and it is safe to install tox 
 .. code-block:: console
 
     $virtualenv .venv
-    $source .venv/bin/activate
+    $. .venv/bin/activate
     $ pip install tox
 
 See `the unit testing section of the Testing wiki page`_ for more information.
