@@ -348,9 +348,13 @@ Verify both the client and server version of Helm are consistent::
 
     helm version
 
+Install EPEL (Extra Packages for Linux) repository to gain access to additional packages::
+
+    sudo yum install -y epel-release
+
 Install repositories necessary to install packaging::
 
-    sudo yum install -y epel-release ansible python-pip python-devel
+    sudo yum install -y ansible python-pip python-devel
 
 .. note::
 
