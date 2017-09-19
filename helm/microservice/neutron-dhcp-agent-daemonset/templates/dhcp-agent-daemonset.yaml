@@ -81,20 +81,20 @@ spec:
             privileged: true
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
+{{- include "netns_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
               readOnly: true
             - mountPath: /var/lib/neutron/kolla/
               name: neutron-metadata-socket
-            - mountPath: /var/run
+            - mountPath: /run
               name: host-run
-            - mountPath: /run/netns/
-              name: host-run-netns
-              # shared: true # This seems not support in K8s yet :(
+              mountPropagation: Bidirectional
           env:
 {{- include "common_env_vars" $env | indent 12 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
+{{- include "netns_volumes" $env | indent 8 }}
         - name: pod-main-config
           emptyDir: {}
         - name: neutron-dhcp-agent-configmap
@@ -111,12 +111,9 @@ spec:
               path: dhcp_agent.ini
             - key: dnsmasq.conf
               path: dnsmasq.conf
-        - name: host-run-netns
-          hostPath:
-            path: /run/netns
         - name: host-run
           hostPath:
-            path: /var/run
+            path: /run
         - name: neutron-metadata-socket
           hostPath:
             path: /var/lib/neutron/kolla/metadata_proxy

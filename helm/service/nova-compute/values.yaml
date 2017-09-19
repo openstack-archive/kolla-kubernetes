@@ -19,7 +19,7 @@ global:
                         - nova-metadata
                         - nova-api
                         socket:
-                        - /var/run/libvirt/libvirt-sock
+                        - /run/libvirt/libvirt-sock
             libvirt:
                 daemonset:
                     dependencies:

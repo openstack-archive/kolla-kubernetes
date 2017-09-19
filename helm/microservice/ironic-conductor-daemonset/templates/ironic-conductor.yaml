@@ -114,7 +114,7 @@ spec:
               name: ironic-conductor-config
             - mountPath: /var/lib/ironic
               name: ironic-persistent-storage
-            - mountPath: /var/run
+            - mountPath: /run
               name: run
             - mountPath: /dev
               name: dev
@@ -142,7 +142,7 @@ spec:
             path: /var/lib/ironic
         - name: run
           hostPath:
-            path: /var/run
+            path: /run
         - name: dev
           hostPath:
             path: /dev
