@@ -14,32 +14,23 @@ spec:
       labels:
         service: {{ .serviceName }}
         type: {{ .serviceType }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" . | indent 10 }}
-          {
-              "name": "initialize-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-ce",
-                  "cp -a /config/..data/* /podconfig/; "],
-              "volumeMounts": [
-                  {
-                      "name": "service-config",
-                      "mountPath": "/config/"
-                  },
-                  {
-                      "name": "pod-config",
-                      "mountPath": "/podconfig/"
-                  }
-              ]
-          }
-      ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" . | indent 8 }}
+        - name: initialize-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -ce
+            - cp -a /config/..data/* /podconfig/;
+          volumeMounts:
+            - name: service-config
+              mountPath: /config/
+            - name: pod-config
+              mountPath: /podconfig/
       containers:
         - name: main
           image: "{{ .imageFull }}"
