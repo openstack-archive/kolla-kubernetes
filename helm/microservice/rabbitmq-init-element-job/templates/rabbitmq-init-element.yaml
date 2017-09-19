@@ -19,12 +19,11 @@ apiVersion: batch/v1
 kind: Job
 spec:
   template:
-{{- include "init_container_header" $env | indent 4 }}
-{{- include "common_dependency_container_single" $env | indent 10 }}
-{{- include "init_container_tail" $env | indent 4 }}
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
