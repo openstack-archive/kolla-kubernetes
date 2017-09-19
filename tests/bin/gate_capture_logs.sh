@@ -13,6 +13,7 @@ mkdir -p $WORKSPACE/logs/pods
 mkdir -p $WORKSPACE/logs/svc
 mkdir -p $WORKSPACE/logs/ceph
 mkdir -p $WORKSPACE/logs/openstack
+sudo ls -l /run/netns/ > $WORKSPACE/logs/mntnetns.txt
 sudo cp /var/log/messages $WORKSPACE/logs
 sudo cp /var/log/syslog $WORKSPACE/logs
 sudo cp -a /etc/kubernetes $WORKSPACE/logs

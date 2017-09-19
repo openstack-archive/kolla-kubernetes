@@ -181,3 +181,11 @@ ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
 
 diff -u <(echo $TESTSTR) /tmp/$$.2
+
+sudo ip netns list > /tmp/$$
+netnscount=$(wc -l /tmp/$$ | awk '{print $1}')
+mntnetnscount=$(ls /run/netns/ | wc -l /tmp/$$ | awk '{print $1}')
+[ $netnscount -ne 0 ]
+[ $netnscount -eq $mntnetnscount ]
+grep qrouter /tmp/$$
+grep qdhcp /tmp/$$
