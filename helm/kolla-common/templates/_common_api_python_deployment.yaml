@@ -39,55 +39,49 @@ spec:
         "prometheus.io/scrape": "true"
 {{- end }}
 {{- end }}
-#FIXME Once out of alpha, this should be converted to yaml.
-#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
-# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
-# other containers from directly accessing the service
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" . | indent 10 }}
-          {
-              "name": "update-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-{{- if eq .resourceName "kibana" }}
-                   IP=\"127.0.0.1\";
-                   PORT=\"8080\";
-                   sed -i ''s|^elasticsearch.url:.*|elasticsearch.url: \"http://elasticsearch:9200\"|g'' /srv/pod-main-config/kibana.yml;
-                   sed -i ''s|^server.host:.*|server.host: \"''$IP''\"|g'' /srv/pod-main-config/kibana.yml;
-                   sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
-{{- else }}
-                   CONF=/srv/pod-main-config/{{ .configFileName }};
-{{- if $localVals.haproxy }}
-{{- if eq .resourceName "nova-api" }}
-                   crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
-                   crudini --set $CONF DEFAULT metadata_listen_port 8081;
-{{- end }}
-                   crudini --set $CONF {{ .configSectionName }} {{ .configListenHostParameter }} 127.0.0.1;
-                   crudini --set $CONF {{ .configSectionName }} {{ .configListenPortParameter }} 8080;
-{{- end }}
-{{- end }}
-              "],
-              "volumeMounts": [
-                  {
-                      "name": "service-configmap",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "pod-main-config",
-                      "mountPath": "/srv/pod-main-config"
-                  }
-              ]
-          }
-      ]'
     spec:
 #You've got 2 days to drain or figure out why it won't.
       terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+#FIXME once all services are converted, bind_host can be dropped here and changed to default to 127.0.0.1 instead of 0.0.0.0.
+# The init container overrides the listen address and port to ensure it does not conflict with haproxy and prevent
+# other containers from directly accessing the service
+{{- include "common_dependency_container" . | indent 8 }}
+        - name: update-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{{- if eq .resourceName "kibana" }}
+              IP=\"127.0.0.1\";
+              PORT=\"8080\";
+              sed -i ''s|^elasticsearch.url:.*|elasticsearch.url: \"http://elasticsearch:9200\"|g'' /srv/pod-main-config/kibana.yml;
+              sed -i ''s|^server.host:.*|server.host: \"''$IP''\"|g'' /srv/pod-main-config/kibana.yml;
+              sed -i ''s|^server.port:.*|server.port: \"''$PORT''\"|g'' /srv/pod-main-config/kibana.yml;
+{{- else }}
+              CONF=/srv/pod-main-config/{{ .configFileName }};
+{{- if $localVals.haproxy }}
+{{- if eq .resourceName "nova-api" }}
+              crudini --set $CONF DEFAULT metadata_listen 127.0.0.1;
+              crudini --set $CONF DEFAULT metadata_listen_port 8081;
+{{- end }}
+              crudini --set $CONF {{ .configSectionName }} {{ .configListenHostParameter }} 127.0.0.1;
+              crudini --set $CONF {{ .configSectionName }} {{ .configListenPortParameter }} 8080;
+{{- end }}
+{{- end }}
+{{- if .initContainers }}
+{{- include .initContainers . | indent 8 }}
+{{- end }}
+          volumeMounts:
+            - name: service-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
       containers:
 {{- if $localVals.haproxy }}
         - name: haproxy

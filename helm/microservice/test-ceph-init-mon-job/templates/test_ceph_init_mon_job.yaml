@@ -20,49 +20,36 @@ metadata:
   name: test-ceph-init-mon
 spec:
   template:
-    metadata:
-      annotations:
-#FIXME Once out of alpha, this should be converted to yaml.
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-              "name": "update-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  STORAGE_INTERFACE={{ $storageInterface }};
-                  F=/var/lib/kolla-kubernetes/ceph-mon/storage_interface;
-                  [ -f $F ] && STORAGE_INTERFACE=$(<$F) || true;
-                  IP=$(ip addr list {{ $storageInterface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
-                  CONF=/srv/pod-main-config/ceph.conf;
-                  sed -i ''/^mon host.*/d;/^mon host/d;/^mon addr/d'' $CONF;
-                  sed -i ''/^\\[global\\]/a mon host = ''$IP $CONF;
-                  sed -i ''/^\\[global\\]/a mon addr = ''$IP'':6789'' $CONF;
-                  sed -i ''/^\\[global\\]/a mon initial members = {{ $node }}'' $CONF;"
-              ],
-              "volumeMounts": [
-                  {
-                      "name": "ceph-mon-config",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "pod-main-config",
-                      "mountPath": "/srv/pod-main-config"
-                  },
-                  {
-                      "name": "ceph-mon",
-                      "mountPath": "/var/lib/ceph/mon"
-                  }
-              ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostPID: True
       nodeSelector:
         kubernetes.io/hostname: {{ $node }}
+      initContainers:
+        - name: update-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              STORAGE_INTERFACE={{ $storageInterface }};
+              F=/var/lib/kolla-kubernetes/ceph-mon/storage_interface;
+              [ -f $F ] && STORAGE_INTERFACE=$(<$F) || true;
+              IP=$(ip addr list {{ $storageInterface }} | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+              CONF=/srv/pod-main-config/ceph.conf;
+              sed -i ''/^mon host.*/d;/^mon host/d;/^mon addr/d'' $CONF;
+              sed -i ''/^\\[global\\]/a mon host = ''$IP $CONF;
+              sed -i ''/^\\[global\\]/a mon addr = ''$IP'':6789'' $CONF;
+              sed -i ''/^\\[global\\]/a mon initial members = {{ $node }}'' $CONF;
+          volumeMounts:
+            - name: ceph-mon-config
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+            - name: ceph-mon
+              mountPath: /var/lib/ceph/mon
       containers:
         - image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
