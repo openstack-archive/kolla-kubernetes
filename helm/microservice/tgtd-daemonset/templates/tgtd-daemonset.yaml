@@ -27,39 +27,31 @@ spec:
       labels:
         component: tgtd
         system: tgtd
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-tgtd",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-ce",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  STORAGE_INTERFACE={{ $storageInterface }};
-                  F=/var/lib/kolla-kubernetes/tgtd/storage_interface;
-                  [ -f $F ] && STORAGE_INTERFACE=$(<$F);
-                  storage_ip=$(ip addr list \"$STORAGE_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
-                  jq ''.command = \"tgtd -d 1 -f --iscsi portal=''$storage_ip'':3260\"'' /srv/configmap/..data/config.json > /srv/pod-main-config/config.json; "],
-             "volumeMounts": [
-                {
-                   "name": "tgtd-configmap",
-                   "mountPath": "/srv/configmap"
-                },
-                {
-                   "name": "pod-main-config",
-                   "mountPath": "/srv/pod-main-config"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-tgtd
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -ce
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              STORAGE_INTERFACE={{ $storageInterface }};
+              F=/var/lib/kolla-kubernetes/tgtd/storage_interface;
+              [ -f $F ] && STORAGE_INTERFACE=$(<$F);
+              storage_ip=$(ip addr list \"$STORAGE_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
+              jq ''.command = \"tgtd -d 1 -f --iscsi portal=''$storage_ip'':3260\"'' /srv/configmap/..data/config.json > /srv/pod-main-config/config.json;
+          volumeMounts:
+            - name: tgtd-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}

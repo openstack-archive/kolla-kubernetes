@@ -31,99 +31,67 @@ metadata:
   name: "{{ .resourceName }}-create-cell"
 spec:
   template:
-    metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-cell-api-logs",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": "{{ $imagePullPolicy }}",
-             "command": [
-                 "sh",
-                 "-ce",
-                 "mkdir /var/log/kolla/nova;
-                  chown -R nova: /var/log/kolla/nova;
-                  chmod 755 /var/log/kolla/nova; "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          }{{- if $localVals.cell_wait_compute }},
-          {
-             "name": "wait-for-nova-compute-up",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": "{{ $imagePullPolicy }}",
-             "env": [
-                {
-                   "name": "OS_PASSWORD",
-                   "valueFrom":
-                      {
-                         "secretKeyRef":
-                            {
-                               "name": "keystone-admin-password",
-                               "key": "password"
-                            }
-                      }
-                },
-                {
-                   "name": "OS_AUTH_URL",
-                   "value": "http://{{ $keystoneURL }}:{{ $keystonePort }}/v3"
-                },
-                {
-                   "name": "OS_PROJECT_NAME",
-                   "value": "admin"
-                },
-                {
-                   "name": "OS_USER_DOMAIN_NAME",
-                   "value": "Default"
-                },
-                {
-                   "name": "OS_USERNAME",
-                   "value": "admin"
-                },
-                {
-                   "name": "OS_PROJECT_DOMAIN_NAME",
-                   "value": "Default"
-                },
-                {
-                   "name": "OS_IDENTITY_API_VERSION",
-                   "value": "3"
-                },
-                {
-                   "name": "OS_REGION_NAME",
-                   "value": "RegionOne"
-                }
-             ],
-             "command": [
-                 "sh",
-                 "-ce",
-                 "touch /tmp/not_found;
-                  while [[ -f /tmp/not_found ]]; do
-                    openstack hypervisor list -f value -c State | while read compute_state; do
-                      if [ ''x''$compute_state == ''xup'' ]; then
-                         echo ''Detected at least one compute node in UP state. Exiting...'';
-                         rm -f /tmp/not_found;
-                      fi;
-                    done;
-                    sleep {{ $localVals.cell_wait_compute_sleep }};
-                  done;
-                 "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          }
-{{- end }}
-        ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       restartPolicy: OnFailure
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-cell-api-logs
+          image: {{ $imageFull | quote }}
+          imagePullPolicy": {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -ce
+            - |
+              mkdir /var/log/kolla/nova;
+              chown -R nova: /var/log/kolla/nova;
+              chmod 755 /var/log/kolla/nova; "],
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
+{{- if $localVals.cell_wait_compute }}
+        - name: wait-for-nova-compute-up
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          env:
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+            - name: OS_AUTH_URL
+              value: "http://{{ $keystoneURL }}:{{ $keystonePort }}/v3"
+            - name: OS_PROJECT_NAME
+              value: admin
+            - name: OS_USER_DOMAIN_NAME
+              value: Default
+            - name: OS_USERNAME
+              value: admin
+            - name: OS_PROJECT_DOMAIN_NAME
+              value: Default
+            - name: OS_IDENTITY_API_VERSION
+              value: "3"
+            - name: OS_REGION_NAME
+              value: RegionOne
+          command:
+            - sh
+            - -ce
+            - |
+              touch /tmp/not_found;
+              while [[ -f /tmp/not_found ]]; do
+                  openstack hypervisor list -f value -c State | while read compute_state; do
+                      if [ ''x''$compute_state == ''xup'' ]; then
+                          echo ''Detected at least one compute node in UP state. Exiting...'';
+                          rm -f /tmp/not_found;
+                      fi;
+                  done;
+                  sleep {{ $localVals.cell_wait_compute_sleep }};
+              done;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
+{{- end }}
       containers:
         - image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}

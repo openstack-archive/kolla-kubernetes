@@ -30,10 +30,8 @@
 {{- $tunnelInterface := include "kolla_val_get_str" (dict "key" "tunnel_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- define "nova_compute_extra_dep_volume_mounts" }}
-{
-  "name": "run",
-  "mountPath": "/var/run"
-}
+- name: run
+  mountPath: /var/run
 {{- end }}
 {{- $extraDepVolumeMounts := "nova_compute_extra_dep_volume_mounts" }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
@@ -50,104 +48,6 @@ spec:
       labels:
         component: {{ $serviceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-nova-compute",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "cp -a /config/..data/* /nova/;
-                  IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
-                  mkdir -p /var/log/kolla/nova-init;
-                  echo Using $IP | tee /var/log/kolla/nova-init/ip.log;
-                  crudini --set /nova/nova.conf DEFAULT my_ip $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_host $IP;
-                  crudini --set /nova/nova.conf vnc vncserver_listen $IP;
-                  crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_base_url {{ $novncProxyBaseUrl }};
-{{- if $localVals.libvirt_tcp }}
-                  sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
-{{- end }}
-{{- if $localVals.ceph_backend }}
-                  cp -a /secret/a/..data/ceph.client.nova.keyring /nova/ceph.client.nova.keyring;
-                  cp -a /config2/..data/ceph.conf /nova/ceph.conf;
-{{- end }}
-             "],
-             "volumeMounts": [
-{{- if $localVals.ceph_backend }}
-                {
-                   "name": "ceph-conf",
-                   "mountPath": "/config2/"
-                },
-                {
-                   "name": "ceph-client-nova-keyring",
-                   "mountPath": "/secret/a/"
-                },
-{{- end }}
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla/"
-                },
-                {
-                   "name": "nova-compute-config",
-                   "mountPath": "/config/"
-                },
-                {
-                   "name": "nova-config",
-                   "mountPath": "/nova/"
-                }
-             ]
-          },
-          {
-             "name": "initialize-nova",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-ce",
-                 "[ ! -d /var/lib/nova/instances ] && mkdir -p /var/lib/nova/instances;
-                  chown nova: /var/lib/nova;
-                  chown nova: /var/lib/nova/instances;
-             "],
-             "securityContext": {
-                 "runAsUser": 0
-             },
-             "volumeMounts": [
-                {
-                   "name": "nova-compute-persistent-storage",
-                   "mountPath": "/var/lib/nova"
-                }
-             ]
-          },
-          {
-             "name": "initialize-iscsi-iqn",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "securityContext": {
-                  "runAsUser": 0,
-                  "privileged": true
-              },
-             "command": [
-                 "bash",
-                 "-ce",
-                 "if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
-                     iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
-                     echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
-                     chmod 640 /etc/iscsi/initiatorname.iscsi;
-                  fi;
-                 "],
-             "volumeMounts": [
-                {
-                   "name": "iscsi-info",
-                   "mountPath": "/etc/iscsi"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       nodeSelector:
@@ -155,6 +55,77 @@ spec:
 {{- if not $localVals.libvirt_tcp }}
       hostIPC: True
 {{- end }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-nova-compute
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              cp -a /config/..data/* /nova/;
+              IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+              mkdir -p /var/log/kolla/nova-init;
+              echo Using $IP | tee /var/log/kolla/nova-init/ip.log;
+              crudini --set /nova/nova.conf DEFAULT my_ip $IP;
+              crudini --set /nova/nova.conf vnc novncproxy_host $IP;
+              crudini --set /nova/nova.conf vnc vncserver_listen $IP;
+              crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
+              crudini --set /nova/nova.conf vnc novncproxy_base_url {{ $novncProxyBaseUrl }};
+{{- if $localVals.libvirt_tcp }}
+              sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
+{{- end }}
+{{- if $localVals.ceph_backend }}
+              cp -a /secret/a/..data/ceph.client.nova.keyring /nova/ceph.client.nova.keyring;
+              cp -a /config2/..data/ceph.conf /nova/ceph.conf;
+{{- end }}
+          volumeMounts:
+{{- if $localVals.ceph_backend }}
+            - name: ceph-conf
+              mountPath: /config2/
+            - name: ceph-client-nova-keyring
+              mountPath: /secret/a/
+{{- end }}
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: nova-compute-config
+              mountPath: /config/
+            - name: nova-config
+              mountPath: /nova/
+        - name: initialize-nova
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }},
+          command:
+            - sh
+            - -ce
+            - |
+              [ ! -d /var/lib/nova/instances ] && mkdir -p /var/lib/nova/instances;
+              chown nova: /var/lib/nova;
+              chown nova: /var/lib/nova/instances;
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: nova-compute-persistent-storage
+              mountPath: /var/lib/nova
+        - name: initialize-iscsi-iqn
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          command:
+            - bash
+            - -ce
+            - |
+              if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
+                  iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
+                  echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
+                  chmod 640 /etc/iscsi/initiatorname.iscsi;
+              fi;
+          volumeMounts:
+            - name: iscsi-info
+              mountPath: /etc/iscsi
       containers:
         - name: main
           imagePullPolicy: {{ $imagePullPolicy | quote }}
