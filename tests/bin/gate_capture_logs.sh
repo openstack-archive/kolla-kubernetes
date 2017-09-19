@@ -13,6 +13,8 @@ mkdir -p $WORKSPACE/logs/pods
 mkdir -p $WORKSPACE/logs/svc
 mkdir -p $WORKSPACE/logs/ceph
 mkdir -p $WORKSPACE/logs/openstack
+mkdir -p $WORKSPACE/logs/cnetns
+sudo ls -l /run/netns/ > $WORKSPACE/logs/mntnetns.txt
 sudo cp /var/log/messages $WORKSPACE/logs
 sudo cp /var/log/syslog $WORKSPACE/logs
 sudo cp -a /etc/kubernetes $WORKSPACE/logs
@@ -153,5 +155,9 @@ sudo virsh dumpxml vm-1 > $WORKSPACE/logs/virsh_dumpxml.txt
 kubectl get all -n kolla -o name > $WORKSPACE/logs/objects_list.txt
 kubectl get nodes -o name --show-labels | grep kolla > $WORKSPACE/logs/labels_list.txt
 kubectl get pv > $WORKSPACE/logs/pv_list.txt
+
+docker ps -q | while read line; do
+    docker exec --user 0 $line /bin/sh -c 'ip netns list' >> $WORKSPACE/logs/cnetns/$line.txt || true
+done
 
 exit -1
