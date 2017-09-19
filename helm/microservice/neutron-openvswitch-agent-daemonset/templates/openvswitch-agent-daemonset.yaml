@@ -36,98 +36,77 @@ spec:
       labels:
         component: neutron
         system: openvswitch-agent-{{ $restype }}
-      annotations:
-#FIXME Once out of alpha, this should be converted to yaml.
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-              "name": "update-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  TUNNEL_INTERFACE={{ $tunnelInterface }};
-                  F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
-                  [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
-                  IP=$(ip addr list \"$TUNNEL_INTERFACE\" | grep ''inet '' |cut -d'' '' -f6|cut -d/ -f1);
-{{- if $localVals.openvswitch_tcp }}
-                  crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
-{{- end }}
-                  crudini --set /srv/pod-main-config/ml2_conf.ini ovs local_ip $IP"
-              ],
-              "volumeMounts": [
-                  {
-                      "name": "neutron-openvswitch-agent-configmap",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "pod-main-config",
-                      "mountPath": "/srv/pod-main-config"
-                  },
-                  {
-                      "name": "host-var-lib-kk",
-                      "mountPath": "/var/lib/kolla-kubernetes"
-                  }
-              ]
-          },
-          {
-              "name": "deps-and-update-permissions",
-              "image": "{{ $imageFull }}",
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "securityContext": {
-                  "runAsUser": 0,
-                  "privileged": true
-              },
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "chown --recursive neutron.kolla /var/log/kolla;
-{{- if $localVals.openvswitch_no_kernel_module }}
-                   echo Waiting for openvswitch to be available;
-{{- else }}
-                   echo Waiting for openvswitch kernel module to load;
-{{- end }}
-                   while true; do
-{{- if $localVals.openvswitch_no_kernel_module }}
-                     loaded=$(timeout 5s ovs-vsctl show >/dev/null 2>&1 && echo 1 || echo 0);
-{{- else }}
-                     loaded=$(lsmod | grep openvswitch | wc -l);
-{{- end }}
-                     [ $loaded -ne 0 ] && break;
-                     sleep 1;
-                   done;
-                   echo Done.;
-                   timeout 5s ovs-dpctl show;
-                   echo Waiting for openvswitch daemon to be responsive;
-                   while true; do
-                     timeout 5s ovs-appctl version;
-                     [ $? -eq 0 ] && break;
-                     sleep 1;
-                     echo Trying again.;
-                   done;
-                   echo Done.;
-                  "
-              ],
-              "volumeMounts": [
-                  {
-                      "name": "kolla-logs",
-                      "mountPath": "/var/log/kolla"
-                  },
-                  {
-                      "name": "host-run",
-                      "mountPath": "/var/run"
-                  }
-              ]
-           }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       hostPID: True #needed for openvswitch pid file
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: update-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              TUNNEL_INTERFACE={{ $tunnelInterface }};
+              F=/var/lib/kolla-kubernetes/neutron-openvswitch-agent/tunnel_interface;
+              [ -f $F ] && TUNNEL_INTERFACE=$(<$F);
+              IP=$(ip addr list \"$TUNNEL_INTERFACE\" | grep 'inet ' |cut -d' ' -f6|cut -d/ -f1);
+{{- if $localVals.openvswitch_tcp }}
+              crudini --set /srv/pod-main-config/ml2_conf.ini ovs ovsdb_connection tcp:$IP:6640;
+{{- end }}
+              crudini --set /srv/pod-main-config/ml2_conf.ini ovs local_ip $IP"
+          volumeMounts:
+            - name: neutron-openvswitch-agent-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+            - name: host-var-lib-kk
+              mountPath: /var/lib/kolla-kubernetes
+        - name: deps-and-update-permissions
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          command:
+            - /bin/sh
+            - -c
+            - |
+              chown --recursive neutron.kolla /var/log/kolla;
+{{- if $localVals.openvswitch_no_kernel_module }}
+              echo Waiting for openvswitch to be available;
+{{- else }}
+              echo Waiting for openvswitch kernel module to load;
+{{- end }}
+              while true; do
+{{- if $localVals.openvswitch_no_kernel_module }}
+                  loaded=$(timeout 5s ovs-vsctl show >/dev/null 2>&1 && echo 1 || echo 0);
+{{- else }}
+                  loaded=$(lsmod | grep openvswitch | wc -l);
+{{- end }}
+                  [ $loaded -ne 0 ] && break;
+                  sleep 1;
+              done;
+              echo Done.;
+              timeout 5s ovs-dpctl show;
+              echo Waiting for openvswitch daemon to be responsive;
+              while true; do
+                  timeout 5s ovs-appctl version;
+                  [ $? -eq 0 ] && break;
+                  sleep 1;
+                  echo Trying again.;
+              done;
+              echo Done.;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
+            - name: host-run
+              mountPath: /run
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
