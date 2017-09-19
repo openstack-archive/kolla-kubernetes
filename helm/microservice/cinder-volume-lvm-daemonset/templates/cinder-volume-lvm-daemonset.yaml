@@ -36,88 +36,69 @@ spec:
       labels:
         component: {{ $resourceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-             "name": "initialize-cinder-volume-lvm",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "bash",
-                 "-ce",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  {{- range $key, $val := $localVals.lvm_backends }}
-                  {{- range $key2, $val2 := $val }}
-                  {{- $vg_ip := $key2 }}
-                  {{- $vg_name := $val2 }}
-                  {{- $lvm_enabled_backend := printf "%s_%s" $vg_ip $vg_name }}
-                     crudini --set /srv/pod-main-config/cinder.conf DEFAULT enabled_backends {{ $lvm_enabled_backend }};
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_group {{ $vg_name }};
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_backend_name {{ $lvm_enabled_backend }};
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_driver  ''cinder.volume.drivers.lvm.LVMVolumeDriver'';
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_helper  {{ $iscsiHelper }};
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_protocol  ''iscsi'';
-                     crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_ip_address {{ $vg_ip }};
-                  {{- end }}
-                  {{- end }} 
-                 "],
-             "volumeMounts": [
-                {
-                   "name": "cinder-volume-configmap",
-                   "mountPath": "/srv/configmap"
-                },
-                {
-                   "name": "pod-main-config",
-                   "mountPath": "/srv/pod-main-config"
-                }
-             ]
-          },
-          {
-             "name": "initialize-cinder-logs",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-ce",
-                 "mkdir /var/log/kolla/cinder ;
-                  chown -R cinder: /var/log/kolla/cinder "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          },
-          {
-             "name": "initialize-iscsi-iqn",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "securityContext": {
-                  "runAsUser": 0,
-                  "privileged": true
-              },
-             "command": [
-                 "bash",
-                 "-ce",
-                 "if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
-                     iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
-                     echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
-                     chmod 640 /etc/iscsi/initiatorname.iscsi;
-                  fi;
-                 "],
-             "volumeMounts": [
-                {
-                   "name": "iscsi-info",
-                   "mountPath": "/etc/iscsi"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+        - name: initialize-cinder-volume-lvm
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - bash
+            - -ce
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              {{- range $key, $val := $localVals.lvm_backends }}
+              {{- range $key2, $val2 := $val }}
+              {{- $vg_ip := $key2 }}
+              {{- $vg_name := $val2 }}
+              {{- $lvm_enabled_backend := printf "%s_%s" $vg_ip $vg_name }}
+                 crudini --set /srv/pod-main-config/cinder.conf DEFAULT enabled_backends {{ $lvm_enabled_backend }};
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_group {{ $vg_name }};
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_backend_name {{ $lvm_enabled_backend }};
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} volume_driver  'cinder.volume.drivers.lvm.LVMVolumeDriver';
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_helper  {{ $iscsiHelper }};
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_protocol  'iscsi';
+                 crudini --set /srv/pod-main-config/cinder.conf {{ $lvm_enabled_backend }} iscsi_ip_address {{ $vg_ip }};
+              {{- end }}
+              {{- end }} 
+          volumeMounts:
+            - name: cinder-volume-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+        - name: initialize-cinder-logs
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -ce
+            - |
+              mkdir /var/log/kolla/cinder;
+              chown -R cinder: /var/log/kolla/cinder
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
+        - name: initialize-iscsi-iqn
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          command:
+            - bash
+            - -ce
+            - |
+              if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
+                 iqn=$( cat /dev/urandom | tr -dc 'a-f0-9' | head -c 12 );
+                 echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
+                 chmod 640 /etc/iscsi/initiatorname.iscsi;
+              fi;
+          volumeMounts:
+            - name: iscsi-info
+              mountPath: /etc/iscsi
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}

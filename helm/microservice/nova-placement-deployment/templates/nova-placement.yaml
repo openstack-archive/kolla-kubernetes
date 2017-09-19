@@ -15,32 +15,25 @@
 {{- $configListenHostParameter := "osapi_compute_listen" }}
 {{- $configListenPortParameter := "osapi_compute_listen_port" }}
 {{- $portName := "placement-api" }}
-{{- $extraAnnotations := "placement_api_initcontainer" }}
+{{- $initContainers := "placement_api_initcontainer" }}
 {{- $checkPath := "/" }}
 {{- $privileged := false }}
 {{- $haproxy := true }}
 {{- define "placement_api_initcontainer" }}
-pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" . | indent 2 }}
-  {
-     "name": "initialize-placement-api-logs",
-     "image": "{{ .imageFull }}",
-     "imagePullPolicy": "{{ .imagePullPolicy }}",
-     "command": [
-         "sh",
-         "-ce",
-         "mkdir /var/log/kolla/nova;
-          chown -R keystone: /var/log/kolla/nova;
-          chmod 755 /var/log/kolla/nova; "],
-     "volumeMounts": [
-        {
-           "name": "kolla-logs",
-           "mountPath": "/var/log/kolla"
-        }
-     ]
-  }
-]'
+- name: initialize-placement-api-logs
+  image: {{ .imageFull | quote }}
+  imagePullPolicy: {{ .imagePullPolicy | quote }}
+  command:
+    - sh
+    - -ce
+    - |
+      mkdir -p /var/log/kolla/nova;
+      chown -R keystone: /var/log/kolla/nova;
+      hmod 755 /var/log/kolla/nova;
+  volumeMounts:
+    - name: kolla-logs
+      mountPath: /var/log/kolla
 {{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "imagePullPolicy" $imagePullPolicy "checkPath" $checkPath "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_api_apache_deployment" $env }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "imagePullPolicy" $imagePullPolicy "checkPath" $checkPath "initContainers" $initContainers "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- include "common_api_python_deployment" $env }}
 {{- end }}
