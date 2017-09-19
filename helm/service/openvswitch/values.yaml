@@ -8,4 +8,4 @@ global:
                 all:
                     dependencies:
                         socket:
-                        - /var/run/openvswitch/db.sock
+                        - /run/openvswitch/db.sock

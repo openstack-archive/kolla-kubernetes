@@ -32,8 +32,8 @@ spec:
           - /bin/bash
           - -ec
           - |
-            KUBE_TOKEN=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
-            KUBE_NAMESPACE=$(</var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            KUBE_TOKEN=$(</run/secrets/kubernetes.io/serviceaccount/token)
+            KUBE_NAMESPACE=$(</run/secrets/kubernetes.io/serviceaccount/namespace)
 
             mkdir -p /var/log/kolla/keystone
             chown keystone.keystone /var/log/kolla/keystone
@@ -58,7 +58,7 @@ spec:
             }
             EOF
 
-            curl -f --tlsv1.2 -sS  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+            curl -f --tlsv1.2 -sS  --cacert /run/secrets/kubernetes.io/serviceaccount/ca.crt \
                 -d '@/tmp/tokens.json' \
                 -H 'Content-type:application/json' \
                 -H "Authorization: Bearer $KUBE_TOKEN" \

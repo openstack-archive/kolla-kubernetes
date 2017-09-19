@@ -67,7 +67,7 @@ spec:
                 - -c
                 - |
                   sudo ifconfig {{ $apiInterface }} delete {{ $kollaKubernetesExternalVIP }};
-                  kill -HUP $(</var/run/keepalived.pid);
+                  kill -HUP $(</run/keepalived.pid);
           securityContext:
             privileged: true
           env:
@@ -77,7 +77,7 @@ spec:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
-            - mountPath: /var/run
+            - mountPath: /run
               name: keepalived-run
             - mountPath: /lib/modules
               name: host-lib-modules
@@ -89,7 +89,7 @@ spec:
           emptyDir: {}
         - name: keepalived-run
           hostPath:
-            path: /var/run
+            path: /run
         - name: host-lib-modules
           hostPath:
             path: /lib/modules

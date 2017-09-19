@@ -124,7 +124,7 @@ spec:
             - mountPath: /var/lib/kolla-kubernetes/neutron-openvswitch-agent
               name: openvswitch-config
               readOnly: true
-            - mountPath: /var/run
+            - mountPath: /run
               name: host-run
             - mountPath: /dev
               name: host-dev
@@ -143,7 +143,7 @@ spec:
 #        - mountPath: {{ $containerConfigDirectory }}/neutron-linuxbridge-agent/
 #          name: neutron-linuxbridge-agent-config
 #          readOnly: true
-#        - mountPath: /var/run
+#        - mountPath: /run
 #          name: host-run
 #        - mountPath: /etc/localtime
 #          name: host-etc-localtime
@@ -184,7 +184,7 @@ spec:
             path: /var/lib/kolla-kubernetes/neutron-openvswitch-agent
         - name: host-run
           hostPath:
-            path: /var/run
+            path: /run
         - name: host-dev
           hostPath:
             path: /dev

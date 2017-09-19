@@ -62,7 +62,7 @@ spec:
 {{- include "common_volume_mounts" $env | indent 12 }}
             - mountPath: /etc/openvswitch
               name: openvswitch-db
-            - mountPath: /var/run/openvswitch
+            - mountPath: /run/openvswitch
               name: openvswitch-run
             - mountPath: /dev
               name: host-dev
@@ -77,7 +77,7 @@ spec:
               -vconsole:emer
               -vsyslog:err
               -vfile:info
-              --remote=punix:/var/run/openvswitch/db.sock
+              --remote=punix:/run/openvswitch/db.sock
               --remote=ptcp:6640:0.0.0.0
               --log-file=/var/log/kolla/openvswitch/ovsdb-server.log
 {{- include "common_containers" . | indent 8 }}
@@ -87,7 +87,7 @@ spec:
           emptyDir: {}
         - name: openvswitch-run
           hostPath:
-            path: /var/run/openvswitch
+            path: /run/openvswitch
         - name: host-dev
           hostPath:
             path: /dev

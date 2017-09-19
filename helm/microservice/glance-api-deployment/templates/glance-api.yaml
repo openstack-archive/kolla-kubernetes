@@ -126,7 +126,7 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  kill -USR1 $(</var/run/haproxy.pid);
+                  kill -USR1 $(</run/haproxy.pid);
                   while true; do sleep 1000; done
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
