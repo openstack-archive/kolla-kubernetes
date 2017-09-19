@@ -181,3 +181,8 @@ ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
 
 diff -u <(echo $TESTSTR) /tmp/$$.2
+
+sudo ip netns list > /tmp/$$
+[ $(wc -l /tmp/$$) -ne 0 ]
+grep qrouter /tmp/$$
+grep qdhcp /tmp/$$
