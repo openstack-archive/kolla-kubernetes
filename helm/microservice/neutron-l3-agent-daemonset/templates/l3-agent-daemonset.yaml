@@ -115,21 +115,20 @@ spec:
             privileged: true
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
+{{- include "netns_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
             - mountPath: /var/lib/neutron/kolla/
               name: neutron-metadata-socket
             - mountPath: /var/run
               name: host-run
-            - mountPath: /run/netns/
-              name: host-run-netns
-              # shared: true # This seems not support in K8s yet :(
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: COPY_ONCE
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
+{{- include "netns_volumes" . | indent 8 }}
         - name: pod-main-config
           emptyDir: {}
         - name: neutron-l3-agent-configmap
@@ -146,9 +145,6 @@ spec:
               path: fwaas_driver.ini
             - key: l3-agent.ini
               path: l3_agent.ini
-        - name: host-run-netns
-          hostPath:
-            path: /run/netns
         - name: host-run
           hostPath:
             path: /var/run

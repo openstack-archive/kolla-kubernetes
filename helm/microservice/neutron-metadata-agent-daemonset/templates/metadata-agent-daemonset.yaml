@@ -42,19 +42,18 @@ spec:
             privileged: true
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
+{{- include "netns_volume_mounts" $env | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}
               name: neutron-metadata-agent-config
               readOnly: true
             - mountPath: /var/lib/neutron/kolla/
               name: neutron-metadata-socket
-            - mountPath: /run/netns/
-              name: host-run-netns
-              # shared: true # This seems not support in K8s yet :(
           env:
 {{- include "common_env_vars" $env | indent 12 }}
 {{- include "common_containers" $env | indent 8 }}
       volumes:
 {{- include "common_volumes" $env | indent 8 }}
+{{- include "netns_volumes" $env | indent 8 }}
         - name: neutron-metadata-agent-config
           configMap:
             name: neutron-metadata-agent
@@ -67,9 +66,6 @@ spec:
               path: ml2_conf.ini
             - key: metadata-agent.ini
               path: metadata_agent.ini
-        - name: host-run-netns
-          hostPath:
-            path: /run/netns
         - name: host-run
           hostPath:
             path: /run
