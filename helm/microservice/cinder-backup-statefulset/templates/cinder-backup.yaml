@@ -29,46 +29,33 @@ spec:
       labels:
         service: {{ $elementName }}
         type: {{ $serviceType }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-cinder-volume",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "command": [
-                 "sh",
-                 "-ce",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/; "],
-             "volumeMounts": [
-                {
-                   "name": "cinder-backup-configmap",
-                   "mountPath": "/srv/configmap"
-                },
-                {
-                   "name": "pod-main-config",
-                   "mountPath": "/srv/pod-main-config"
-                }
-             ]
-          },
-          {
-             "name": "initialize-cinder-logs",
-             "image": "{{ $imageFull }}",
-             "command": [
-                 "sh",
-                 "-ce",
-                 "mkdir /var/log/kolla/cinder ;
-                  chown -R cinder: /var/log/kolla/cinder "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          }
-        ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-cinder-volume
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          command:
+            - sh
+            - -ce
+            - cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+          volumeMounts:
+            - name: cinder-backup-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+        - name: initialize-cinder-logs
+          image: "{{ $imageFull }}"
+          command:
+            - sh
+            - -ce
+            - |
+              mkdir /var/log/kolla/cinder ;
+              chown -R cinder: /var/log/kolla/cinder
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
       containers:
         - name: main
           image: "{{ $imageFull }}"

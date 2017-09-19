@@ -31,71 +31,58 @@ spec:
     metadata:
       labels:
         service: {{ $serviceName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-              "name": "fix-permissions",
-              "image": "{{ $imageFull }}",
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "securityContext": {
-                  "runAsUser": 0
-              },
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  " if [ ! $(ls -A /helm-repo) ]; then
-                       chown -R helm: /helm-repo;
-                       chmod 755 /helm-repo;
-                    fi;
-              "],
-              "volumeMounts": [
-{{- if $persistent }}
-                  {
-                      "name": "helm-repo-persistent-storage",
-                      "mountPath": "/helm-repo"
-                  }
-{{- end }}
-              ]
-          },
-          {
-              "name": "prepare-repo",
-              "image": "{{ $imageFull }}",
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  " if [ ! $(ls -A /helm-repo) ]; then
-                       pushd /tmp;
-                       if [ ''x{{ $method }}'' == ''xgit''  ]; then
-                         git clone {{ $url }} kolla-kubernetes;
-                       fi;
-                       if [ ''x{{ $method }}'' == ''xtar''  ]; then
-                         curl -o kolla-kubernetes.tar.gz {{ $url }};
-                         tar -zxvf kolla-kubernetes.tar.gz;
-                       fi;
-                       pushd kolla-kubernetes;
-                       tools/helm_prebuild_microservices.py;
-                       tools/helm_build_microservices.py /helm-repo;
-                       popd;
-                       popd;
-                       pushd /helm-repo;
-                       helm repo index --url http://helm-repo:{{ $port }} /helm-repo;
-                       popd;
-                    fi;
-              "],
-              "volumeMounts": [
-{{- if $persistent }}
-                  {
-                      "name": "helm-repo-persistent-storage",
-                      "mountPath": "/helm-repo"
-                  }
-{{- end }}
-              ]
-          }
-      ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+        - name: fix-permissions
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          securityContext:
+            runAsUser: 0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ ! $(ls -A /helm-repo) ]; then
+                  chown -R helm: /helm-repo;
+                  chmod 755 /helm-repo;
+              fi;
+          volumeMounts:
+{{- if $persistent }}
+            name: helm-repo-persistent-storage
+            mountPath: /helm-repo
+{{- end }}
+        - name: prepare-repo
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ ! $(ls -A /helm-repo) ]; then
+                  pushd /tmp;
+                  if [ 'x{{ $method }}' == 'xgit'  ]; then
+                      git clone {{ $url }} kolla-kubernetes;
+                  fi;
+                  if [ 'x{{ $method }}' == 'xtar'  ]; then
+                      curl -o kolla-kubernetes.tar.gz {{ $url }};
+                      tar -zxvf kolla-kubernetes.tar.gz;
+                  fi;
+                  pushd kolla-kubernetes;
+                  tools/helm_prebuild_microservices.py;
+                  tools/helm_build_microservices.py /helm-repo;
+                  popd;
+                  popd;
+                  pushd /helm-repo;
+                  helm repo index --url http://helm-repo:{{ $port }} /helm-repo;
+                  popd;
+              fi;
+          volumeMounts:
+{{- if $persistent }}
+            - name: helm-repo-persistent-storage
+              mountPath: /helm-repo
+{{- end }}
       containers:
         - name: main
           image: "{{ $imageFull }}"
