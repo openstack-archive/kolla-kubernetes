@@ -32,60 +32,43 @@ spec:
       labels:
         component: {{ $resourceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-config",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "command": [
-                 "bash",
-                 "-ec",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  cp -a /srv/ceph.conf /srv/pod-main-config/;
-                  cp -a /srv/ceph.client.cinder.keyring /srv/pod-main-config/;
-             "],
-             "volumeMounts": [
-                {
-                    "name": "ceph-conf",
-                    "mountPath": "/srv/ceph.conf",
-                    "subPath": "ceph.conf"
-                },
-                {
-                    "name": "ceph-client-cinder-keyring",
-                    "mountPath": "/srv/ceph.client.cinder.keyring",
-                    "subPath": "ceph.client.cinder.keyring"
-                },
-                {
-                   "name": "cinder-volume-configmap",
-                   "mountPath": "/srv/configmap"
-                },
-                {
-                   "name": "pod-main-config",
-                   "mountPath": "/srv/pod-main-config"
-                }
-             ]
-          },
-          {
-             "name": "initialize-cinder-logs",
-             "image": "{{ $imageFull }}",
-             "command": [
-                 "sh",
-                 "-ce",
-                 "mkdir /var/log/kolla/cinder ;
-                  chown -R cinder: /var/log/kolla/cinder "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          }
-        ]'
     spec:
       hostPID: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          command:
+            - bash
+            - -ec
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              cp -a /srv/ceph.conf /srv/pod-main-config/;
+              cp -a /srv/ceph.client.cinder.keyring /srv/pod-main-config/;
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /srv/ceph.conf
+              subPath: ceph.conf
+            - name: ceph-client-cinder-keyring
+              mountPath: /srv/ceph.client.cinder.keyring
+              subPath: ceph.client.cinder.keyring
+            - name: cinder-volume-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+        - name: initialize-cinder-logs
+          image: {{ $imageFull | quote }}
+          command:
+            - sh
+            - -ce
+            - |
+              mkdir /var/log/kolla/cinder;
+              chown -R cinder: /var/log/kolla/cinder
+          volumeMounts:
+            - name": kolla-logs
+              mountPath: /var/log/kolla
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
