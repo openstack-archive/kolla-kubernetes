@@ -25,34 +25,25 @@ spec:
     metadata:
       labels:
         service: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-              "name": "update-config",
-              "image": "{{ include "kolla_toolbox_image_full" . }}",
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   sed -i ''/^export ERL_EPMD_ADDRESS=0.0.0.0$/d'' /srv/pod-main-config/rabbitmq-env.conf;"
-              ],
-              "volumeMounts": [
-                  {
-                      "name": "rabbitmq-config",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "pod-main-config",
-                      "mountPath": "/srv/pod-main-config"
-                  }
-              ]
-          }
-      ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: update-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              sed -i '/^export ERL_EPMD_ADDRESS=0.0.0.0$/d' /srv/pod-main-config/rabbitmq-env.conf;
+          volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}

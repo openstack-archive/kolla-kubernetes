@@ -50,112 +50,83 @@ spec:
       labels:
         service: {{ $serviceName }}
         type: {{ $serviceType }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-ironic-dnsmasq",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "IP=$(ip addr show dev {{ $ironicInterface }} to {{ $ironicInspectionCIDR }} | grep -m1 -G ''inet'' | awk ''{print $2}'' | cut -d ''/'' -f 1);
-                  if test -z $IP; then exit 1; fi;
-                  cp -a /config/dnsmasq/..data/* /dnsmasq/;
-                  cp -a /config/pxe/..data/* /pxe/;
-                  curl -L {{ $url1 }} -o /tftpboot/ironic-agent.initramfs;
-                  curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
-                  jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
-                  sed -i ''s|ironic-inspector|''$IP''|g'' /pxe/default;
-{{- if $ironicInspectLLDP }}
-                  sed -i ''/^append/ s/$/ ipa-collect-lldp=1/'' /pxe/default;
-{{- end }}
-                  sed -i ''s|interface=.*|interface={{ $ironicInterface }}|g'' /dnsmasq/dnsmasq.conf;
-                  sed -i ''s|dhcp-option=option:tftp-server,.*|dhcp-option=option:tftp-server,''$IP''|g'' /dnsmasq/dnsmasq.conf;
-                  sed -i ''s|dhcp-option=option:server-ip-address,.*|dhcp-option=option:server-ip-address,''$IP''|g'' /dnsmasq/dnsmasq.conf;
-                  sed -i ''s|dhcp-range=.*|dhcp-range={{ $ironicDHCPrange }}|g'' /dnsmasq/dnsmasq.conf;
-             "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla/"
-                },
-                {
-                   "name": "dnsmasq-config",
-                   "mountPath": "/config/dnsmasq"
-                },
-                {
-                   "name": "ironic-pxe-config",
-                   "mountPath": "/pxe/"
-                },
-                {
-                   "name": "pxe-config",
-                   "mountPath": "/config/pxe"
-                },
-                {
-                   "name": "ironic-dnsmasq-config",
-                   "mountPath": "/dnsmasq/"
-                },
-                {
-                   "name": "tftpboot",
-                   "mountPath": "/tftpboot/"
-                }
-             ]
-          },
-          {
-             "name": "pxelinux",
-             "image": {{ $imageFullPXE | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
-                     cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
-                  fi;
-                  if [ -f /usr/share/syslinux/chain.c32 ]; then
-                     cp /usr/share/syslinux/chain.c32 /tftpboot;
-                  fi;
-                  if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
-                     cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
-                  fi;
-                  if [ -f /usr/lib/syslinux/modules/bios/chain.c32 ]; then
-                     cp /usr/lib/syslinux/modules/bios/chain.c32 /tftpboot;
-                  fi;
-             "],
-             "volumeMounts": [
-                {
-                   "name": "tftpboot",
-                   "mountPath": "/tftpboot/"
-                }
-             ]
-          },
-          {
-              "name": "update-inspector-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                   crudini --set /srv/pod-main-config/inspector.conf firewall dnsmasq_interface {{ $ironicInterface }};
-              "],
-              "volumeMounts": [
-                  {
-                      "name": "inspector-config",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "ironic-inspector-config",
-                      "mountPath": "/srv/pod-main-config"
-                  }
-              ]
-          }
-        ]'
     spec:
       hostNetwork: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-ironic-dnsmasq
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              IP=$(ip addr show dev {{ $ironicInterface }} to {{ $ironicInspectionCIDR }} | grep -m1 -G 'inet' | awk '{print $2}' | cut -d '/' -f 1);
+              if test -z $IP; then exit 1; fi;
+              cp -a /config/dnsmasq/..data/* /dnsmasq/;
+              cp -a /config/pxe/..data/* /pxe/;
+              curl -L {{ $url1 }} -o /tftpboot/ironic-agent.initramfs;
+              curl -L {{ $url2 }} -o /tftpboot/ironic-agent.kernel;
+              jq '.command = "in.tftpd -v -L -u root -a '$IP':69 --map-file /map-file /tftpboot"' /config/pxe/..data/config.json > /pxe/config.json;
+              sed -i 's|ironic-inspector|'$IP'|g' /pxe/default;
+{{- if $ironicInspectLLDP }}
+              sed -i '/^append/ s/$/ ipa-collect-lldp=1/' /pxe/default;
+{{- end }}
+              sed -i 's|interface=.*|interface={{ $ironicInterface }}|g' /dnsmasq/dnsmasq.conf;
+              sed -i 's|dhcp-option=option:tftp-server,.*|dhcp-option=option:tftp-server,'$IP'|g' /dnsmasq/dnsmasq.conf;
+              sed -i 's|dhcp-option=option:server-ip-address,.*|dhcp-option=option:server-ip-address,'$IP'|g' /dnsmasq/dnsmasq.conf;
+              sed -i 's|dhcp-range=.*|dhcp-range={{ $ironicDHCPrange }}|g' /dnsmasq/dnsmasq.conf;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: dnsmasq-config
+              mountPath: /config/dnsmasq
+            - name: ironic-pxe-config
+              mountPath: /pxe/
+            - name: pxe-config
+              mountPath: /config/pxe
+            - name: ironic-dnsmasq-config
+              mountPath: /dnsmasq/
+            - name: tftpboot
+              mountPath: /tftpboot/
+        - name: pxelinux
+          image: {{ $imageFullPXE | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
+                  cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+              fi;
+              if [ -f /usr/share/syslinux/chain.c32 ]; then
+                  cp /usr/share/syslinux/chain.c32 /tftpboot;
+              fi;
+              if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
+                  cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
+              fi;
+              if [ -f /usr/lib/syslinux/modules/bios/chain.c32 ]; then
+                  cp /usr/lib/syslinux/modules/bios/chain.c32 /tftpboot;
+              fi;
+          volumeMounts:
+            - name: tftpboot
+              mountPath: /tftpboot/
+        - name: update-inspector-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              crudini --set /srv/pod-main-config/inspector.conf firewall dnsmasq_interface {{ $ironicInterface }};
+          volumeMounts:
+            - name: inspector-config
+              mountPath: /srv/configmap
+            - name: ironic-inspector-config
+              mountPath: /srv/pod-main-config
       containers:
         - name: pxe
           imagePullPolicy: {{ $imagePullPolicy | quote }}
