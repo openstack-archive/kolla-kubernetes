@@ -28,44 +28,33 @@ spec:
       labels:
         component: keepalived
         system: keepalived
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-keepalived",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-                  API_INTERFACE={{ $apiInterface }};
-                  F=/var/lib/kolla-kubernetes/keepalived/api_interface;
-                  [ -f $F ] && API_INTERFACE=$(<$F);
-                  sed -i ''s|interface.*|interface ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
-                  sed -i ''s|\\(dev*\\).*|\\1 ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
-                  cat /srv/pod-main-config/keepalived.conf;
-                 "],
-             "volumeMounts": [
-                 {
-                     "name": "keepalived-configmap",
-                     "mountPath": "/srv/configmap"
-                 },
-                 {
-                     "name": "pod-main-config",
-                     "mountPath": "/srv/pod-main-config"
-                 },
-                 {
-                     "name": "host-var-lib-kk",
-                     "mountPath": "/var/lib/kolla-kubernetes"
-                 }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      init-containers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-keepalived
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+              API_INTERFACE={{ $apiInterface }};
+              F=/var/lib/kolla-kubernetes/keepalived/api_interface;
+              [ -f $F ] && API_INTERFACE=$(<$F);
+              sed -i ''s|interface.*|interface ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+              sed -i ''s|\\(dev*\\).*|\\1 ''$API_INTERFACE''|g'' /srv/pod-main-config/keepalived.conf;
+              cat /srv/pod-main-config/keepalived.conf;
+          volumeMounts:
+            - name: keepalived-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
+            - name: host-var-lib-kk
+              mountPath: /var/lib/kolla-kubernetes
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
