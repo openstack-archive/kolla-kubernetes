@@ -25,7 +25,7 @@
 {{- $podTypeBootstrap := false }}
 {{- define "openvswitch_vswitchd_extra_dep_volume_mounts" }}
 - name: openvswitch-run
-  mountPath: /var/run/openvswitch/
+  mountPath: /run/openvswitch/
 {{- end }}
 {{- $extraDepVolumeMounts := "openvswitch_vswitchd_extra_dep_volume_mounts" }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
@@ -55,10 +55,10 @@ spec:
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           env:
             - name: DEPENDENCY_SOCKET
-              value: /var/run/openvswitch/db.sock
+              value: /run/openvswitch/db.sock
           volumeMounts:
             - name: openvswitch-run
-              mountPath: /var/run/openvswitch/
+              mountPath: /run/openvswitch/
         - name: initialize-ovs-vswitchd
           image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
@@ -68,12 +68,12 @@ spec:
             - |
               mkdir -p /var/log/kolla/openvswitch;
 {{- if $localVals.setup_bridge }}
-              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }};
+              ovs-vsctl --no-wait --db=unix:/run/openvswitch/db.sock add-br {{ $extBridgeName }};
 {{- if $localVals.add_port }}
               EXTERNAL_INTERFACE={{ $extInterfaceName }};
               F=/var/lib/kolla-kubernetes/openvswitch-vswitchd/external_interface;
               [ -f $F ] && EXTERNAL_INTERFACE=$(<$F);
-              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
+              ovs-vsctl --no-wait --db=unix:/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
 {{- end }}
 {{- if $localVals.ext_bridge_up }}
               ip link set {{ $extBridgeName }} up;
@@ -84,7 +84,7 @@ spec:
             - name: kolla-logs
               mountPath: /var/log/kolla/
             - name: openvswitch-run
-              mountPath: /var/run/openvswitch/
+              mountPath: /run/openvswitch/
             - name: host-var-lib-kk
               mountPath: /var/lib/kolla-kubernetes
       containers:
@@ -98,7 +98,7 @@ spec:
               value: COPY_ONCE
           volumeMounts:
 {{- include "common_volume_mounts" $env | indent 12 }}
-            - mountPath: /var/run/openvswitch
+            - mountPath: /run/openvswitch
               name: openvswitch-run
             - mountPath: /dev
               name: host-dev
@@ -113,19 +113,19 @@ spec:
           args:
             - modprobe openvswitch || true;
               /usr/sbin/ovs-vswitchd
-              unix:/var/run/openvswitch/db.sock
+              unix:/run/openvswitch/db.sock
               -vconsole:emer
               -vsyslog:err
               -vfile:info
               --mlockall
               --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
-              --pidfile=/var/run/openvswitch/ovs-vswitchd.pid
+              --pidfile=/run/openvswitch/ovs-vswitchd.pid
 {{- include "common_containers" . | indent 8 }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
         - name: openvswitch-run
           hostPath:
-            path: /var/run/openvswitch
+            path: /run/openvswitch
         - name: host-dev
           hostPath:
             path: /dev

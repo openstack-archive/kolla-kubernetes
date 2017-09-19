@@ -30,7 +30,7 @@
 {{- $elementName := .Values.element_name | default $resourceName }}
 {{- define "nova_compute_extra_dep_volume_mounts" }}
 - name: run
-  mountPath: /var/run
+  mountPath: /run
 {{- end }}
 {{- $extraDepVolumeMounts := "nova_compute_extra_dep_volume_mounts" }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
@@ -138,7 +138,7 @@ spec:
               name: nova-compute-persistent-storage
             - mountPath: /lib/modules
               name: lib-modules
-            - mountPath: /var/run
+            - mountPath: /run
               name: run
             - mountPath: /dev
               name: dev
@@ -162,7 +162,7 @@ spec:
             path: /lib/modules
         - name: run
           hostPath:
-            path: /var/run
+            path: /run
         - name: dev
           hostPath:
             path: /dev

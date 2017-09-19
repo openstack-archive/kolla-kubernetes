@@ -32,8 +32,8 @@ spec:
           - /bin/bash
           - -ec
           - |
-            KUBE_TOKEN=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
-            KUBE_NAMESPACE=$(</var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            KUBE_TOKEN=$(</run/secrets/kubernetes.io/serviceaccount/token)
+            KUBE_NAMESPACE=$(</run/secrets/kubernetes.io/serviceaccount/namespace)
             curl -f --tlsv1.2 -sS  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
                 -H "Authorization: Bearer $KUBE_TOKEN" -o /tmp/tokens.json \
                 https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT/api/v1/namespaces/$KUBE_NAMESPACE/secrets/keystone-fernet-keys

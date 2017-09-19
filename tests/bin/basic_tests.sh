@@ -181,3 +181,30 @@ ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
 
 diff -u <(echo $TESTSTR) /tmp/$$.2
+
+#Note, this only checks the controller. Should adapt this to multinode at some point.
+sudo ip netns list > /tmp/$$
+netnscount=$(wc -l /tmp/$$ | awk '{print $1}')
+mntnetnscount=$(ls /run/netns/ | wc -l /tmp/$$ | awk '{print $1}')
+[ $netnscount -ne 0 ]
+[ $netnscount -eq $mntnetnscount ]
+tf=/tmp/$$
+set +x
+cat $tf | while read line; do
+  echo -n "testing $line ";
+  sudo ip netns exec $line ip a | wc -l
+done
+set -x
+echo -n > $tf
+set +x
+sudo docker ps -q | while read line; do
+    sudo docker exec --user 0 $line /bin/sh -c 'ip netns list' 2>/dev/null | grep -v 'no such file or directory' >> $tf || true
+done
+set -x
+sed -i '/^[ \t]*$/d' $tf
+cnetnscount=$(sort -u $tf | wc -l | awk '{print $1}')
+[ $cnetnscount -eq $mntnetnscount ]
+sudo ls -l /run/netns
+
+grep qrouter /tmp/$$
+grep qdhcp /tmp/$$
