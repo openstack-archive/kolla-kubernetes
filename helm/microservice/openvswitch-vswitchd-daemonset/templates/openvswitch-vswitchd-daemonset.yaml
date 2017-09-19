@@ -24,10 +24,8 @@
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
 {{- define "openvswitch_vswitchd_extra_dep_volume_mounts" }}
-{
-  "name": "openvswitch-run",
-  "mountPath": "/var/run/openvswitch/"
-}
+- name: openvswitch-run
+  mountPath: /var/run/openvswitch/
 {{- end }}
 {{- $extraDepVolumeMounts := "openvswitch_vswitchd_extra_dep_volume_mounts" }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
@@ -44,69 +42,51 @@ spec:
       labels:
         component: openvswitch
         system: openvswitch-vswitchd-{{ $restype }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "reqdependencies",
-             "image": {{ include "kubernetes_entrypoint_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "env": [
-                {
-                   "name": "DEPENDENCY_SOCKET",
-                   "value": "/var/run/openvswitch/db.sock"
-                }
-             ],
-             "volumeMounts": [
-                {
-                   "name": "openvswitch-run",
-                   "mountPath": "/var/run/openvswitch/"
-                }
-             ]
-          },
-          {
-             "name": "initialize-ovs-vswitchd",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "mkdir -p /var/log/kolla/openvswitch;
-{{- if $localVals.setup_bridge }}
-                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }} ;
-{{- if $localVals.add_port }}
-                  EXTERNAL_INTERFACE={{ $extInterfaceName }};
-                  F=/var/lib/kolla-kubernetes/openvswitch-vswitchd/external_interface;
-                  [ -f $F ] && EXTERNAL_INTERFACE=$(<$F);
-                  ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
-{{- end }}
-{{- if $localVals.ext_bridge_up }}
-              ip link set {{ $extBridgeName }} up;
-{{- end }}
-{{- end }}
-                  echo $(date) >> /var/log/kolla/vswitchd-init.log;" ],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla/"
-                },
-                {
-                   "name": "openvswitch-run",
-                   "mountPath": "/var/run/openvswitch/"
-                },
-                {
-                    "name": "host-var-lib-kk",
-                    "mountPath": "/var/lib/kolla-kubernetes"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       hostPID: True #Needed for pidfile.
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: reqdependencies
+          image: {{ include "kubernetes_entrypoint_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          env:
+            - name: DEPENDENCY_SOCKET
+              value: /var/run/openvswitch/db.sock
+          volumeMounts:
+            - name: openvswitch-run
+              mountPath: /var/run/openvswitch/
+        - name: initialize-ovs-vswitchd
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              mkdir -p /var/log/kolla/openvswitch;
+{{- if $localVals.setup_bridge }}
+              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }};
+{{- if $localVals.add_port }}
+              EXTERNAL_INTERFACE={{ $extInterfaceName }};
+              F=/var/lib/kolla-kubernetes/openvswitch-vswitchd/external_interface;
+              [ -f $F ] && EXTERNAL_INTERFACE=$(<$F);
+              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
+{{- end }}
+{{- if $localVals.ext_bridge_up }}
+              ip link set {{ $extBridgeName }} up;
+{{- end }}
+{{- end }}
+              echo $(date) >> /var/log/kolla/vswitchd-init.log;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: openvswitch-run
+              mountPath: /var/run/openvswitch/
+            - name: host-var-lib-kk
+              mountPath: /var/lib/kolla-kubernetes
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
