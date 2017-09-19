@@ -1,5 +1,12 @@
 #!/bin/bash -e
 
+sudo mkdir -p /etc/systemd/system/docker.service.d
+cat > /tmp/$$ <<EOF
+[Service]
+MountFlags=shared
+EOF
+sudo mv /tmp/$$ /etc/systemd/system/docker.service.d/shared.conf
+
 if [ -f /etc/redhat-release ]; then
     cat > /tmp/setup.$$ <<"EOF"
 setenforce 0
@@ -14,6 +21,8 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOEF
 yum install -y docker kubeadm kubelet kubectl kubernetes-cni ebtables
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--feature-gates=MountPropagation=true |g' \
+        /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
 else
@@ -24,7 +33,7 @@ echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.l
 apt-get update
 apt-get install -y docker.io kubeadm kubelet kubectl kubernetes-cni
 cgroup_driver=$(docker info | grep "Cgroup Driver" | awk '{print $3}')
-sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver='$cgroup_driver' |g' \
+sed -i 's|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver='$cgroup_driver' --feature-gates=MountPropagation=true |g' \
         /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 sed -i 's/10.96.0.10/172.16.128.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 EOF
@@ -53,6 +62,7 @@ kubeadm join --token "$2" "$3" --skip-preflight-checks
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"
+sed -i '/- kube-apiserver/a \    - --feature-gates=MountPropagation=true' /etc/kubernetes/manifests/kube-apiserver.yaml
 EOF
 sudo bash /tmp/setup.$$
 sudo docker ps -a

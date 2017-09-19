@@ -181,3 +181,19 @@ ssh_to_vm $FIP2 "/tmp/script"
 scp_from_vm $FIP2 /tmp/test.txt /tmp/$$.2
 
 diff -u <(echo $TESTSTR) /tmp/$$.2
+
+sudo ip netns list > /tmp/$$
+netnscount=$(wc -l /tmp/$$ | awk '{print $1}')
+mntnetnscount=$(ls /run/netns/ | wc -l /tmp/$$ | awk '{print $1}')
+[ $netnscount -ne 0 ]
+[ $netnscount -eq $mntnetnscount ]
+tf=/tmp/$$
+echo -n > $tf
+sudo docker ps -q | while read line; do
+    sudo docker exec --user 0 $line /bin/sh -c 'ip netns list' >> $tf || true
+done
+cnetnscount=$(sort -u $tf | wc -l | awk '{print $1}')
+[ $cnetnscount -eq $mntnetnscount ]
+
+grep qrouter /tmp/$$
+grep qdhcp /tmp/$$
