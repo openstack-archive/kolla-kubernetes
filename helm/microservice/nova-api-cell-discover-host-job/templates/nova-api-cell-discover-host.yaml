@@ -19,30 +19,24 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-             "name": "initialize-cell-api-logs",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": "{{ $imagePullPolicy }}",
-             "command": [
-                 "sh",
-                 "-ce",
-                 "mkdir /var/log/kolla/nova;
-                  chown -R nova: /var/log/kolla/nova;
-                  chmod 755 /var/log/kolla/nova; "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla"
-                }
-             ]
-          }
-        ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       restartPolicy: OnFailure
+      initContainers:
+        - name: initialize-cell-api-logs
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -ce
+            - |
+              mkdir /var/log/kolla/nova;
+              chown -R nova: /var/log/kolla/nova;
+              chmod 755 /var/log/kolla/nova;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla
       containers:
         - image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
