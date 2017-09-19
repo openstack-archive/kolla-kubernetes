@@ -48,9 +48,9 @@ Dependencies::
 
     docker == 1.12.6
     helm >= 2.4.1
-    kubectl >= 1.6.4
-    kubeadm >= 1.6.4
-    kubelet >= 1.6.4
+    kubectl >= 1.8.0
+    kubeadm >= 1.8.0
+    kubelet >= 1.8.0
     kubernetes-cni >= 0.5.1
 
 .. note::
@@ -135,7 +135,7 @@ Write the Kubernetes repository file::
     https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     EOF
 
-Install Kubernetes 1.6.4 or later and other dependencies::
+Install Kubernetes 1.8.0 or later and other dependencies::
 
     sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
 
@@ -153,7 +153,7 @@ Write the kubernetes repository file::
 
     sudo apt-get update
 
-Install Kubernetes 1.6.4 or later and other dependencies::
+Install Kubernetes 1.8.0 or later and other dependencies::
 
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
@@ -187,6 +187,9 @@ Setup the DNS server with the service CIDR::
    know precisely why this is the case, however, current speculation is that
    that 1..9 are reserved for future expansion of Kubernetes infrastructure
    services.
+
+Add the MountPropagation feature gate:
+   sed -i 's/\(KUBELET_SYSTEM_PODS_ARGS=\)/\1--feature-gates=MountPropagation=true /' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 Reload the hand-modified service files::
 
