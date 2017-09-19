@@ -33,6 +33,11 @@ spec:
       terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" . | indent 8 }}
+{{- if .initContainers }}
+{{- include .initContainers . | indent 8 }}
+{{- end }}
       containers:
         - name: main
           image: {{ .imageFull | quote }}
