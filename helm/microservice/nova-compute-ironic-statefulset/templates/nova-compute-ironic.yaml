@@ -30,40 +30,29 @@ spec:
       labels:
         component: {{ $serviceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-nova-compute",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "cp -a /config/..data/* /ironic/;
-                  IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
-                  crudini --set /ironic/nova.conf DEFAULT my_ip $IP;
-                  crudini --set /ironic/nova.conf DEFAULT vif_pluggin_is_fatal false;
-             "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla/"
-                },
-                {
-                   "name": "nova-compute-ironic-config",
-                   "mountPath": "/config/"
-                },
-                {
-                   "name": "ironic-config",
-                   "mountPath": "/ironic/"
-                }
-             ]
-          }
-        ]'
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-nova-compute
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              cp -a /config/..data/* /ironic/;
+              IP=$(ip addr show dev {{ $tunnelInterface }} | grep -G ''inet '' | awk ''{print $2}'' | sed ''s@/.*@@'');
+              crudini --set /ironic/nova.conf DEFAULT my_ip $IP;
+              crudini --set /ironic/nova.conf DEFAULT vif_pluggin_is_fatal false;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: nova-compute-ironic-config
+              mountPath: /config/
+            - name: ironic-config
+              mountPath: /ironic/
       containers:
         - name: main
           imagePullPolicy: {{ $imagePullPolicy | quote }}
