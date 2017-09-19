@@ -57,50 +57,6 @@ spec:
 {{- if $localVals.ceph_backend }}
         kolla_upgrade: minor_rolling_safe
 {{- end }}
-        pod.alpha.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-              "name": "update-config",
-              "image": {{ include "kolla_toolbox_image_full" . | quote }},
-              "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "command": [
-                  "/bin/sh",
-                  "-c",
-                  "cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-{{- if $localVals.ceph_backend }}
-                   cp -a /srv/ceph.conf /srv/pod-main-config/;
-                   cp -a /srv/ceph.client.glance.keyring /srv/pod-main-config/;
-{{- end }}
-{{- if $localVals.haproxy }}
-                   CONF=/srv/pod-main-config/glance-api.conf;
-                   crudini --set $CONF DEFAULT bind_host 127.0.0.1;
-                   crudini --set $CONF DEFAULT bind_port 8080;
-{{- end }}
-              "],
-              "volumeMounts": [
-{{- if $localVals.ceph_backend }}
-                  {
-                      "name": "ceph-conf",
-                      "mountPath": "/srv/ceph.conf",
-                      "subPath": "ceph.conf"
-                  },
-                  {
-                      "name": "ceph-client-glance-keyring",
-                      "mountPath": "/srv/ceph.client.glance.keyring",
-                      "subPath": "ceph.client.glance.keyring"
-                  },
-{{- end }}
-                  {
-                      "name": "service-configmap",
-                      "mountPath": "/srv/configmap"
-                  },
-                  {
-                      "name": "pod-main-config",
-                      "mountPath": "/srv/pod-main-config"
-                  }
-              ]
-          }
-      ]'
     spec:
 {{- if $localVals.ceph_backend }}
       hostPID: True
@@ -111,6 +67,38 @@ spec:
 {{- if $localVals.haproxy }}
       terminationGracePeriodSeconds: {{ $gracePeriodSeconds }}
 {{- end }}
+      init-containers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: update-config
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp -a /srv/configmap/..data/* /srv/pod-main-config/;
+{{- if $localVals.ceph_backend }}
+              cp -a /srv/ceph.conf /srv/pod-main-config/;
+              cp -a /srv/ceph.client.glance.keyring /srv/pod-main-config/;
+{{- end }}
+{{- if $localVals.haproxy }}
+              CONF=/srv/pod-main-config/glance-api.conf;
+              crudini --set $CONF DEFAULT bind_host 127.0.0.1;
+              crudini --set $CONF DEFAULT bind_port 8080;
+{{- end }}
+          volumeMounts:
+{{- if $localVals.ceph_backend }}
+            - name: ceph-conf
+              mountPath: /srv/ceph.conf
+              subPath: ceph.conf
+            - name: ceph-client-glance-keyring
+              mountPath: /srv/ceph.client.glance.keyring
+              subPath: ceph.client.glance.keyring
+{{- end }}
+            - name: service-configmap
+              mountPath: /srv/configmap
+            - name: pod-main-config
+              mountPath: /srv/pod-main-config
       containers:
 {{- if $localVals.haproxy }}
         - name: haproxy
