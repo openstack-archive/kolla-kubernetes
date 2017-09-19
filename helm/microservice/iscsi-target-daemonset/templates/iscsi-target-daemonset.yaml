@@ -27,40 +27,32 @@ spec:
       labels:
         component: iscsi-target
         system: iscsi-target
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-iscsi-iqn",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-              "securityContext": {
-                  "runAsUser": 0,
-                  "privileged": true
-              },
-             "command": [
-                 "bash",
-                 "-ce",
-                 "if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
-                     iqn=$( cat /dev/urandom | tr -dc ''a-f0-9'' | head -c 12 );
-                     echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
-                     chmod 640 /etc/iscsi/initiatorname.iscsi;
-                  fi;
-                 "],
-             "volumeMounts": [
-                {
-                   "name": "iscsi-info",
-                   "mountPath": "/etc/iscsi"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       hostPID: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-iscsi-iqn
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          command:
+            - bash
+            - -ce
+            - |
+              if [ ! -f /etc/iscsi/initiatorname.iscsi ]; then
+                 iqn=$( cat /dev/urandom | tr -dc 'a-f0-9' | head -c 12 );
+                 echo InitiatorName=iqn.2010-10.org.openstack:$iqn > /etc/iscsi/initiatorname.iscsi;
+                 chmod 640 /etc/iscsi/initiatorname.iscsi;
+              fi;
+          volumeMounts:
+            - name: iscsi-info
+              mountPath: /etc/iscsi
       containers:
         - image: "{{ $imageFull }}"
           imagePullPolicy: {{ $imagePullPolicy | quote }}
