@@ -36,81 +36,61 @@ spec:
       labels:
         component: {{ $serviceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-ironic-conductor",
-             "image": {{ include "kolla_toolbox_image_full" . | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "IP=$(ip addr show to {{ $ironicProvisionCIDR }} | grep -m1 -G ''inet'' | awk ''{print $2}'' | cut -d ''/'' -f 1);
-                  if test -z $IP; then exit 1; fi;
-                  cp -a /config/ironic/..data/* /ironic/;
-                  cp -a /config/pxe/..data/* /pxe/;
-                  jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
-                  crudini --set /ironic/ironic.conf conductor api_url http://{{ $ironicAPI }}:6385;
-                  crudini --set /ironic/ironic.conf pxe tftp_server $IP;
-             "],
-             "volumeMounts": [
-                {
-                   "name": "kolla-logs",
-                   "mountPath": "/var/log/kolla/"
-                },
-                {
-                   "name": "conductor-config",
-                   "mountPath": "/config/ironic"
-                },
-                {
-                   "name": "pxe-config",
-                   "mountPath": "/config/pxe"
-                },
-                {
-                   "name": "ironic-conductor-config",
-                   "mountPath": "/ironic/"
-                },
-                {
-                   "name": "ironic-pxe-config",
-                   "mountPath": "/pxe/"
-                }
-             ]
-          },
-          {
-             "name": "pxelinux",
-             "image": {{ $imageFullPXE | quote }},
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
-                     cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
-                  fi;
-                  if [ -f /usr/share/syslinux/chain.c32 ]; then
-                     cp /usr/share/syslinux/chain.c32 /tftpboot;
-                  fi;
-                  if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
-                     cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
-                  fi;
-                  if [ -f /usr/lib/syslinux/modules/bios/chain.c32 ]; then
-                     cp /usr/lib/syslinux/modules/bios/chain.c32 /tftpboot;
-                  fi;
-                  mkdir -p /tftpboot/pxelinux.cfg;
-             "],
-             "volumeMounts": [
-                {
-                   "name": "tftpboot",
-                   "mountPath": "/tftpboot/"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostIPC: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
+      init-containers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-ironic-conductor
+          image: {{ include "kolla_toolbox_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              IP=$(ip addr show to {{ $ironicProvisionCIDR }} | grep -m1 -G ''inet'' | awk ''{print $2}'' | cut -d ''/'' -f 1);
+              if test -z $IP; then exit 1; fi;
+              cp -a /config/ironic/..data/* /ironic/;
+              cp -a /config/pxe/..data/* /pxe/;
+              jq ''.command = \"in.tftpd -v -L -u root -a ''$IP'':69 --map-file /map-file /tftpboot\"'' /config/pxe/..data/config.json > /pxe/config.json;
+              crudini --set /ironic/ironic.conf conductor api_url http://{{ $ironicAPI }}:6385;
+              crudini --set /ironic/ironic.conf pxe tftp_server $IP;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: conductor-config
+              mountPath: /config/ironic
+            - name: pxe-config
+              mountPath: /config/pxe
+            - name: ironic-conductor-config
+              mountPath: /ironic/
+            - name: ironic-pxe-config
+              mountPath: /pxe/
+        - name: pxelinux,
+          image: {{ $imageFullPXE | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              if [ -f /var/lib/tftpboot/pxelinux.0 ]; then
+                  cp /var/lib/tftpboot/pxelinux.0 /tftpboot;
+              fi;
+              if [ -f /usr/share/syslinux/chain.c32 ]; then
+                  cp /usr/share/syslinux/chain.c32 /tftpboot;
+              fi;
+              if [ -f /usr/lib/PXELINUX/pxelinux.0 ]; then
+                 cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot;
+              fi;
+              if [ -f /usr/lib/syslinux/modules/bios/chain.c32 ]; then
+                 cp /usr/lib/syslinux/modules/bios/chain.c32 /tftpboot;
+              fi;
+              mkdir -p /tftpboot/pxelinux.cfg;
+          volumeMounts:
+            - name: tftpboot
+              mountPath: /tftpboot/
       containers:
         - name: pxe
           imagePullPolicy: {{ $imagePullPolicy | quote }}

@@ -38,54 +38,6 @@ spec:
       labels:
         component: {{ $serviceName }}
         system: {{ $elementName }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" $env | indent 10 }}
-          {
-             "name": "initialize-nova-libvirt",
-             "image": "{{ $imageFull }}",
-             "imagePullPolicy": {{ $imagePullPolicy | quote }},
-             "command": [
-                 "sh",
-                 "-xec",
-                 "cp -a /config/..data/* /nova/;
-{{- if $localVals.libvirt_tcp }}
-                  sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
-{{- end }}
-{{- if $localVals.ceph_backend }}
-                  mkdir -p /nova/secrets/;
-                  RDB_SECRET_UUID=$(sed -n ''s|.*<uuid>\\(.*\\)</uuid>.*|\\1|p'' /secret/a/data);
-                  cp -a /secret/a/..data/data /nova/secrets/$RDB_SECRET_UUID.xml;
-                  cp -a /secret/b/..data/data /nova/secrets/$RDB_SECRET_UUID.base64;
-                  cp -a /config2/..data/ceph.conf /nova;
-{{- end }}
-             "],
-             "volumeMounts": [
-{{- if $localVals.ceph_backend }}
-                {
-                   "name": "ceph-conf",
-                   "mountPath": "/config2"
-                },
-                {
-                   "name": "nova-libvirt-secret",
-                   "mountPath": "/secret/a/"
-                },
-                {
-                   "name": "nova-libvirt-bin-secret",
-                   "mountPath": "/secret/b/"
-                },
-{{- end }}
-                {
-                   "name": "nova-libvirt-config",
-                   "mountPath": "/config/"
-                },
-                {
-                   "name": "nova-config",
-                   "mountPath": "/nova/"
-                }
-             ]
-          }
-        ]'
     spec:
       hostNetwork: True
       hostPID: True
@@ -94,9 +46,42 @@ spec:
 {{- if not $localVals.libvirt_tcp }}
       hostIPC: True
 {{- end }}
+      init-containers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: initialize-nova-libvirt
+          image: {{ $imageFull | quote }}
+          imagePullPolicy": {{ $imagePullPolicy | quote }},
+          command": [
+            - sh
+            - -xec
+            - |
+              cp -a /config/..data/* /nova/;
+{{- if $localVals.libvirt_tcp }}
+              sed -i ''s|^listen_addr.*=.*|listen_addr=\"127.0.0.1\"|g'' /nova/libvirtd.conf;
+{{- end }}
+{{- if $localVals.ceph_backend }}
+              mkdir -p /nova/secrets/;
+              RDB_SECRET_UUID=$(sed -n ''s|.*<uuid>\\(.*\\)</uuid>.*|\\1|p'' /secret/a/data);
+              cp -a /secret/a/..data/data /nova/secrets/$RDB_SECRET_UUID.xml;
+              cp -a /secret/b/..data/data /nova/secrets/$RDB_SECRET_UUID.base64;
+              cp -a /config2/..data/ceph.conf /nova;
+{{- end }}
+          volumeMounts:
+{{- if $localVals.ceph_backend }}
+            - name: ceph-conf
+              mountPath: /config2
+            - name: nova-libvirt-secret
+              mountPath: /secret/a/
+            - name: nova-libvirt-bin-secret
+              mountPath: /secret/b/
+{{- end }}
+            - name: nova-libvirt-config
+              mountPath: /config/
+            - name: nova-config
+              mountPath: /nova/
       containers:
         - name: main
-          image: "{{ $imageFull }}"
+          image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           command:
             - /bin/bash

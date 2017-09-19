@@ -17,31 +17,24 @@
 {{- $extraConfigmapConfig := "keystone_extra_configmap_config" }}
 {{- $extraVolumes := "keystone_extra_volumes" }}
 {{- $extraVolumeMounts := "keystone_extra_volume_mounts" }}
-{{- $extraAnnotations := "keystone_initcontainer" }}
+{{- $initContainers := "keystone_initcontainer" }}
 {{- $checkPath := "/" }}
 {{- $privileged := false }}
 {{- $haproxy := false }}
 {{- define "keystone_initcontainer" }}
-pod.beta.kubernetes.io/init-containers: '[
-{{- include "common_dependency_container_multi" . | indent 2 }}
-  {
-     "name": "initialize-keystone-logs",
-     "image": "{{ .imageFull }}",
-     "imagePullPolicy": "IfNotPresent",
-     "command": [
-         "sh",
-         "-ce",
-         "mkdir /var/log/kolla/keystone ;
-          chown -R keystone: /var/log/kolla/keystone;
-          chmod 755 /var/log/kolla/keystone; "],
-     "volumeMounts": [
-        {
-           "name": "kolla-logs",
-           "mountPath": "/var/log/kolla"
-        }
-     ]
-  }
-]'
+- name: initialize-keystone-logs
+  image: {{ .imageFull | quote }}
+  imagePullPolicy: IfNotPresent
+  command:
+    - sh
+    - -ce
+    - |
+      mkdir /var/log/kolla/keystone ;
+      chown -R keystone: /var/log/kolla/keystone;
+      chmod 755 /var/log/kolla/keystone;
+  volumeMounts:
+    - name: kolla-logs
+      mountPath: /var/log/kolla
 {{- end }}
 {{- define "keystone_extra_volumes" }}
 - name: keystone-fernet-keys
@@ -63,6 +56,6 @@ items:
 - key: config.json
   path: config.json
 {{- end }}
-{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraVolume" $extraVolumes "extraVolumeMounts" $extraVolumeMounts "extraAnnotations" $extraAnnotations "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "extraVolume" $extraVolumes "extraVolumeMounts" $extraVolumeMounts "initContainers" $initContainers "privileged" $privileged "haproxy" $haproxy "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_apache_deployment" $env }}
 {{- end }}

@@ -14,13 +14,12 @@ metadata:
   name: "{{ .resourceName }}-delete-db"
 spec:
   template:
-{{- include "init_container_header" . | indent 4 }}
-{{- include "common_dependency_container_single" . | indent 10 }}
-{{- include "init_container_tail" . | indent 2 }}
     spec:
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       restartPolicy: OnFailure
+      init-containers:
+{{- include "common_dependency_container" . | indent 8 }}
       containers:
         - image: {{ include "kolla_toolbox_image_full" . | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
