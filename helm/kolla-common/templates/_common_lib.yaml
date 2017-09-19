@@ -72,6 +72,18 @@
 {{- end }}
 {{- end }}
 
+{{- define "netns_volume_mounts" }}
+- mountPath: /run/netns
+  mountPropagation: Bidirectional
+  name: netns-mount
+{{- end }}
+
+{{- define "netns_volumes" }}
+- name: netns-mount
+  hostPath:
+    path: /run/netns
+{{- end }}
+
 {{- define "common_bootstrap_env_vars" }}
 - name: KOLLA_KUBERNETES
   value: ""
