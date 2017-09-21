@@ -442,7 +442,7 @@ To test that helm is working you can run the following:
     helm init --client-only
     helm repo update
     helm install stable/memcached --name helm-test
-    # check the deployment has succeded
+    # check the deployment has succeeded
     helm ls
     # and to check via kubectl
     kubectl get all
