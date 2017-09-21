@@ -26,4 +26,376 @@ exports:
                     prometheus_exporter: true
                     prometheus_port: 9101
                     pv_enabled: true
+    storage:
+        global:
+            kolla:
+                all:
+                    storage_interface: eth0
+
+    tunnel:
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+
+    external-vip:
+        global:
+            kolla:
+                all:
+                    external_vip:
+
+    nova-compute-libvirt:
+        global:
+            kolla:
+                all:
+                    ceph_backend: false
+                nova:
+                    compute:
+                        all:
+                            selector_key: kolla_compute
+                            libvirt_tcp: false
+
+    keystone-db:
+        global:
+            kolla:
+                keystone:
+                    all:
+                        database_name: "keystone"
+                        database_user: "keystone"
+    nova-db:
+        global:
+            kolla:
+                nova:
+                    all:
+                        database_name: "nova"
+                        database_user: "nova"
+
+    nova-api-db:
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            database_name: "nova_api"
+                            database_user: "nova_api"
+
+    nova-cell0-db:
+        global:
+            kolla:
+                nova:
+                   cell0:
+                        all:
+                            database_name: "nova_cell0"
+                            database_user: "nova"
+
+    neutron-db:
+        global:
+            kolla:
+                neutron:
+                    all:
+                        database_name: "neutron"
+                        database_user: "neutron"
+
+    glance-db:
+        global:
+            kolla:
+                glance:
+                    all:
+                        database_name: "glance"
+                        database_user: "glance"
+
+    cinder-db:
+        global:
+            kolla:
+                cinder:
+                    all:
+                        database_name: "cinder"
+                        database_user: "cinder"
+
+    heat-db:
+        global:
+            kolla:
+               heat:
+                   all:
+                       database_name: "heat"
+                       database_user: "heat"
+
+    ironic-db:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            database_name: "ironic"
+                            database_user: "ironic"
+
+    ironic-inspector-db:
+        global:
+            kolla:
+                ironic:
+                    inspector:
+                        all:
+                            database_name: "ironic_inspector"
+                            database_user: "ironic_inspector"
+
+    neutron-port:
+        global:
+            kolla:
+                neutron:
+                    server:
+                        all:
+                            port: 9696
+
+    cinder-port:
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+
+    glance-api-port:
+        global:
+            kolla:
+                glance:
+                    api:
+                        all:
+                            port: 9292
+
+    glance-registry-port:
+        global:
+            kolla:
+                glance:
+                    registry:
+                        all:
+                            port: 9191
+
+    heat-api-port:
+        global:
+            kolla:
+                heat:
+                    api:
+                        all:
+                            port: 8004
+
+    heat-cfn-port:
+        global:
+            kolla:
+                heat:
+                    api_cfn:
+                        all:
+                            port: 8000
+
+    ironic-api-port:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        all:
+                            port: 6385
+
+    ironic-inspector-port:
+        global:
+            kolla:
+                ironic:
+                    inspector:
+                        all:
+                            port: 5050
+
+    keystone-service-user:
+        global:
+            kolla:
+                all:
+                    keystone_user_project: service
+                    keystone_user_project_domain: Default
+                    keystone_user_domain: Default
+                    keystone_user_role: admin
+
+    memcached:
+        global:
+            element_name: memcached
+            kolla:
+                memcached:
+                    all:
+                        enabled: true
+                        port: 11211
+
+    mariadb:
+        global:
+            element_name: mariadb
+            kolla:
+                mariadb:
+                    all:
+                        port: 3306
+
+    keystone-port:
+        global:
+            kolla:
+                keystone:
+                    all:
+                        port: 5000
+
+    keystone-admin-port:
+        global:
+            kolla:
+                keystone:
+                    all:
+                        admin_port: 35357
+
+    nova-api-port:
+        global:
+            kolla:
+                nova:
+                    api:
+                        all:
+                            port: 8774
+
+    nova-metadata-port:
+        global:
+            kolla:
+                nova:
+                    metadata:
+                        all:
+                            port: 8775
+
+    nova-placement-api-port:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            port: 8780
+
+    nova-novncproxy-port:
+        global:
+            kolla:
+                nova:
+                    novncproxy:
+                        all:
+                            port: 6080
+
+    cinder-keystone-endpoint:
+        global:
+            kolla:
+                cinder:
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
+
+    glance-api-keystone-endpoint:
+        global:
+            kolla:
+                glance:
+                    create_keystone_endpoint:
+                        all:
+                            service: glance-api
+
+    heat-keystone-endpoint:
+        global:
+            kolla:
+                heat:
+                    create_keystone_endpoint:
+                        all:
+                            service: heat-api
+
+    neutron-keystone-endpoint:
+        global:
+            kolla:
+                neutron:
+                    create_keystone_endpoint:
+                        all:
+                            service: neutron-server
+
+    nova-keystone-endpoint:
+        global:
+            kolla:
+                nova:
+                    create_keystone_endpoint:
+                        all:
+                            service: nova-api
+
+    nova-placement-keystone-endpoint:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        create_keystone_endpoint:
+                            all:
+                                service: placement-api
+
+    ironic-api-keystone-endpoint:
+        global:
+            kolla:
+                ironic:
+                    api:
+                        create_keystone_endpoint:
+                            all:
+                                service: ironic-api
+
+    ironic-inspector-keystone-endpoint:
+        global:
+            kolla:
+                ironic:
+                    inspector:
+                        create_keystone_endpoint:
+                            all:
+                                service: ironic-inspector
+
+    cinder-keystone-user:
+        global:
+            kolla:
+                cinder:
+                    all:
+                        keystone_user_name: cinder
+
+    glance-keystone-user:
+        global:
+            kolla:
+                glance:
+                    all:
+                        keystone_user_name: glance
+
+    nova-keystone-user:
+        global:
+            kolla:
+                nova:
+                    all:
+                        keystone_user_name: nova
+
+    nova-placement-keystone-user:
+        global:
+            kolla:
+                nova:
+                    placement_api:
+                        all:
+                            keystone_user_name: placement
+
+    neutron-keystone-user:
+        global:
+            kolla:
+                neutron:
+                    all:
+                        keystone_user_name: neutron
+
+    heat-keystone-user:
+        global:
+            kolla:
+                heat:
+                    all:
+                        keystone_user_name: heat
+
+    ironic-keystone-user:
+        global:
+            kolla:
+                ironic:
+                    all:
+                        keystone_user_name: ironic
+
+    ironic-inspector-keystone-user:
+        global:
+            kolla:
+                ironic:
+                    inspector:
+                        all:
+                            keystone_user_name: ironic-inspector
 

@@ -4,3 +4,6 @@ dependencies:
     version: 0.7.0-1
     import-values:
       - common
+      - tunnel
+      - nova-novncproxy-port
+      - nova-compute-libvirt
