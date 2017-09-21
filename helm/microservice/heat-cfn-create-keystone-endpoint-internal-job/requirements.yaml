@@ -4,3 +4,5 @@ dependencies:
     version: 0.7.0-1
     import-values:
       - common
+      - heat-cfn-port
+      - heat-keystone-endpoint

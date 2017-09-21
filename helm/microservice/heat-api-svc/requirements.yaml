@@ -4,3 +4,4 @@ dependencies:
     version: 0.7.0-1
     import-values:
       - common
+      - heat-api-port

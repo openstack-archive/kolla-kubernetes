@@ -4,3 +4,6 @@ dependencies:
     version: 0.7.0-1
     import-values:
       - common
+      - external-vip
+      - ironic-api-port
+      - ironic-api-keystone-endpoint
