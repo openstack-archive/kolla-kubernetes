@@ -39,30 +39,11 @@ stateful-service:
                         secret_name: ceph-kolla
                         user: kolla
 
-test-ceph-initial-mon-job:
-        global:
-            kolla:
-                all:
-                    storage_interface: eth0
-
-test-ceph-mon-daemonset:
-        global:
-            kolla:
-                all:
-                    storage_interface: eth0
-
-test-ceph-initial-osd-job:
-        global:
-            kolla:
-                all:
-                    storage_interface: eth0
-
 keystone-admin-svc:
         global:
             kolla:
                 keystone:
                     all:
-                        admin_port: 35357
                         admin_node_port: 35357
                         admin_port_external: false
                         admin_node_port_enabled: false
@@ -72,7 +53,6 @@ keystone-internal-svc:
             kolla:
                 keystone:
                     all:
-                        port: 5000
                         node_port: 5000
                         port_external: false
                         node_port_enabled: false
@@ -82,26 +62,9 @@ keystone-public-svc:
             kolla:
                 keystone:
                     all:
-                        port: 5000
                         node_port: 5000
                         port_external: true
                         node_port_enabled: false
-
-keystone-create-db-job:
-        global:
-            kolla:
-                keystone:
-                    all:
-                        database_name: "keystone"
-                        database_user: "keystone"
-
-keystone-delete-db-job:
-        global:
-            kolla:
-                keystone:
-                    all:
-                        database_name: "keystone"
-                        database_user: "keystone"
 
 keystone-create-endpoints-job:
         global:
@@ -110,17 +73,7 @@ keystone-create-endpoints-job:
                     region: RegionOne
                 keystone:
                     all:
-                        port: 5000
-                        admin_port: 35357
                         admin_port_external: false
-
-keystone-api-deployment:
-        global:
-            kolla:
-                keystone:
-                    all:
-                        port: 5000
-                        admin_port: 35357
 
 neutron-server-svc:
         global:
@@ -128,97 +81,14 @@ neutron-server-svc:
                 neutron:
                     server:
                         all:
-                            port: 9696
                             node_port: 9696
                             port_external: true
                             node_port_enabled: false
-
-neutron-create-db-job:
-        global:
-            kolla:
-                neutron:
-                    all:
-                        database_name: "neutron"
-                        database_user: "neutron"
-
-neutron-delete-db-job:
-        global:
-            kolla:
-                neutron:
-                    all:
-                        database_name: "neutron"
-                        database_user: "neutron"
-
-neutron-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                neutron:
-                    all:
-                        keystone_user_name: neutron
-
-neutron-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                neutron:
-                    all:
-                        keystone_user_name: neutron
-
-neutron-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                neutron:
-                    server:
-                        all:
-                            port: 9696
-
-neutron-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                neutron:
-                    server:
-                        all:
-                            port: 9696
-                    create_keystone_endpoint:
-                        all:
-                            service: neutron-server
-
-neutron-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                neutron:
-                    server:
-                        all:
-                            port: 9696
-                    create_keystone_endpoint:
-                        all:
-                            service: neutron-server
-
-neutron-server-deployment:
-        global:
-            kolla:
-                neutron:
-                    server:
-                        all:
-                            port: 9696
 
 neutron-openvswitch-agent-daemonset:
         type: network
         global:
             kolla:
-                all:
-                    tunnel_interface: eth0
                 neutron:
                     openvswitch_agent:
                         daemonset:
@@ -228,8 +98,6 @@ neutron-l3-agent-daemonset:
         type: network
         global:
             kolla:
-                all:
-                    tunnel_interface: eth0
                 neutron:
                     all:
                         dvr: false
@@ -240,8 +108,6 @@ neutron-l3-agent-daemonset:
 neutron-dhcp-agent-daemonset:
         global:
             kolla:
-                all:
-                    tunnel_interface: eth0
                 neutron:
                     dhcp_agent:
                         daemonset:
@@ -317,24 +183,18 @@ rabbitmq-svc:
 
 memcached-svc:
         global:
-            element_name: memcached
             kolla:
                 memcached:
                     all:
-                        enabled: true
-                        port: 11211
                         node_port: 11211
                         port_external: false
                         node_port_enabled: false
 
 memcached-deployment:
         global:
-            element_name: memcached
             kolla:
                 memcached:
                     all:
-                        enabled: true
-                        port: 11211
                         memcached_prometheus_image_full: "prom/memcached-exporter:v0.3.0"
 
 mariadb-init-element-job:
@@ -343,20 +203,16 @@ mariadb-init-element-job:
 
 mariadb-statefulset:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
                         database_user: root
-                        port: 3306
 
 mariadb-svc:
         global:
-            element_name: mariadb
             kolla:
                 mariadb:
                     all:
-                        port: 3306
                         node_port: 3306
                         port_external: false
                         node_port_enabled: false
@@ -367,7 +223,6 @@ nova-api-svc:
                 nova:
                     api:
                         all:
-                            port: 8774
                             node_port: 8774
                             port_external: true
                             node_port_enabled: false
@@ -378,7 +233,6 @@ nova-placement-svc:
                 nova:
                     placement_api:
                         all:
-                            port: 8780
                             node_port: 8780
                             port_external: true
                             node_port_enabled: false
@@ -388,7 +242,6 @@ nova-metadata-svc:
                 nova:
                     metadata:
                         all:
-                            port: 8775
                             node_port: 8775
                             port_external: false
                             node_port_enabled: false
@@ -399,44 +252,9 @@ nova-novncproxy-svc:
                 nova:
                     novncproxy:
                         all:
-                            port: 6080
                             node_port: 6080
                             port_external: false
                             node_port_enabled: false
-
-nova-create-db-job:
-        global:
-            kolla:
-                nova:
-                    all:
-                        database_name: "nova"
-                        database_user: "nova"
-
-nova-delete-db-job:
-        global:
-            kolla:
-                nova:
-                    all:
-                        database_name: "nova"
-                        database_user: "nova"
-
-nova-api-create-db-job:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            database_name: "nova_api"
-                            database_user: "nova_api"
-
-nova-api-delete-db-job:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            database_name: "nova_api"
-                            database_user: "nova_api"
 
 nova-api-create-simple-cell-job:
         global:
@@ -448,191 +266,13 @@ nova-api-create-simple-cell-job:
                                 cell_wait_compute: true
                                 cell_wait_compute_sleep: 5
 
-nova-cell0-create-db-job:
-        global:
-            kolla:
-                nova:
-                   cell0:
-                        all:
-                            database_name: "nova_cell0"
-                            database_user: "nova"
-
-nova-cell0-delete-db-job:
-        global:
-            kolla:
-                nova:
-                   cell0:
-                        all:
-                            database_name: "nova_cell0"
-                            database_user: "nova"
-
-nova-api-deployment:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            port: 8774
-                    metadata:
-                        all:
-                            port: 8775
-
-nova-placement-deployment:
-        global:
-            kolla:
-                nova:
-                    placement_api:
-                        all:
-                            port: 8780
-
-nova-novncproxy-deployment:
-        global:
-            kolla:
-                nova:
-                    novncproxy:
-                        all:
-                            port: 6080
-
 nova-compute-daemonset:
         global:
             kolla:
-                all:
-                    tunnel_interface: eth0
-                    ceph_backend: false
                 nova:
                     novncproxy:
                         all:
                             host: nova-novncproxy
-                            port: 6080
-                    compute:
-                        all:
-                            selector_key: kolla_compute
-                            libvirt_tcp: false
-
-nova-libvirt-daemonset:
-        global:
-            kolla:
-                all:
-                    ceph_backend: false
-                nova:
-                    compute:
-                        all:
-                            selector_key: kolla_compute
-                            libvirt_tcp: false
-
-nova-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                nova:
-                    all:
-                        keystone_user_name: nova
-
-nova-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                nova:
-                    all:
-                        keystone_user_name: nova
-
-nova-placement-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                nova:
-                    placement_api:
-                        all:
-                            keystone_user_name: placement
-
-nova-placement-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                nova:
-                    placement_api:
-                        all:
-                            keystone_user_name: placement
-
-nova-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            port: 8774
-                    create_keystone_endpoint:
-                        all:
-                            service: nova-api
-
-nova-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                nova:
-                    api:
-                        all:
-                            port: 8774
-                    create_keystone_endpoint:
-                        all:
-                            service: nova-api
-
-nova-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                nova:
-                    api:
-                        all:
-                            port: 8774
-
-nova-placement-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                nova:
-                    placement_api:
-                        all:
-                            port: 8780
-                        create_keystone_endpoint:
-                            all:
-                                service: placement-api
-
-nova-placement-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                nova:
-                    placement_api:
-                        all:
-                            port: 8780
-                        create_keystone_endpoint:
-                            all:
-                                service: placement-api
-
-nova-placement-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                nova:
-                    placement_api:
-                        all:
-                            port: 8780
 
 heat-api-svc:
         global:
@@ -640,7 +280,6 @@ heat-api-svc:
                 heat:
                     api:
                         all:
-                            port: 8004
                             node_port: 8004
                             port_external: false
                             node_port_enabled: false
@@ -651,130 +290,9 @@ heat-cfn-api-svc:
                 heat:
                     api_cfn:
                         all:
-                            port: 8000
-                            node_port: 8004
+                            node_port: 8000
                             port_external: false
                             node_port_enabled: false
-
-heat-api-deployment:
-        global:
-            kolla:
-                heat:
-                    api:
-                        all:
-                            port: 8004
-
-heat-api-cfn-deployment:
-        global:
-            kolla:
-                heat:
-                    api_cfn:
-                        all:
-                            port: 8000
-
-heat-delete-db-job:
-        global:
-            kolla:
-                heat:
-                    all:
-                        database_name: "heat"
-                        database_user: "heat"
-
-heat-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                heat:
-                    all:
-                        keystone_user_name: heat
-
-heat-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                heat:
-                    all:
-                        keystone_user_name: heat
-
-heat-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                heat:
-                    api:
-                        all:
-                            port: 8004
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
-
-heat-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                heat:
-                    api:
-                        all:
-                            port: 8004
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
-
-heat-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                heat:
-                    api:
-                        all:
-                            port: 8004
-
-heat-cfn-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                heat:
-                    api_cfn:
-                        all:
-                            port: 8000
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
-
-heat-cfn-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                heat:
-                    api_cfn:
-                        all:
-                            port: 8000
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
-
-heat-cfn-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                heat:
-                    api_cfn:
-                        all:
-                            port: 8000
-
-heat-create-db-job:
-        global:
-            kolla:
-               heat:
-                   all:
-                       database_name: "heat"
-                       database_user: "heat"
 
 glance-api-svc:
         global:
@@ -782,7 +300,6 @@ glance-api-svc:
                 glance:
                     api:
                         all:
-                            port: 9292
                             node_port: 9292
                             port_external: false
                             node_port_enabled: false
@@ -793,26 +310,9 @@ glance-registry-svc:
                 glance:
                     registry:
                         all:
-                            port: 9191
                             node_port: 9191
                             port_external: false
                             node_port_enabled: false
-
-cinder-create-db-job:
-        global:
-            kolla:
-                cinder:
-                    all:
-                        database_name: "cinder"
-                        database_user: "cinder"
-
-cinder-delete-db-job:
-        global:
-            kolla:
-                cinder:
-                    all:
-                        database_name: "cinder"
-                        database_user: "cinder"
 
 cinder-api-svc:
         global:
@@ -820,18 +320,9 @@ cinder-api-svc:
                 cinder:
                     api:
                         all:
-                            port: 8776
                             node_port: 8776
                             port_external: false
                             node_port_enabled: false
-
-cinder-api-deployment:
-        global:
-            kolla:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
 
 horizon-svc:
         global:
@@ -843,22 +334,6 @@ horizon-svc:
                         port_external: false
                         node_port_enabled: false
 
-glance-create-db-job:
-        global:
-            kolla:
-                glance:
-                    all:
-                        database_name: "glance"
-                        database_user: "glance"
-
-glance-delete-db-job:
-        global:
-            kolla:
-                glance:
-                    all:
-                        database_name: "glance"
-                        database_user: "glance"
-
 glance-manage-db-job:
         global:
             kolla:
@@ -869,62 +344,6 @@ glance-manage-db-job:
                         all:
                             pvc_name: glance
 
-glance-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                glance:
-                    all:
-                        keystone_user_name: glance
-
-glance-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                glance:
-                    all:
-                        keystone_user_name: glance
-
-glance-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                glance:
-                    api:
-                        all:
-                            port: 9292
-
-glance-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                glance:
-                    api:
-                        all:
-                            port: 9292
-                    create_keystone_endpoint:
-                        all:
-                            service: glance-api
-
-glance-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                glance:
-                    api:
-                        all:
-                            port: 9292
-                    create_keystone_endpoint:
-                        all:
-                            service: glance-api
-
 glance-api-deployment:
         global:
             kolla:
@@ -933,110 +352,7 @@ glance-api-deployment:
                 glance:
                     api:
                         all:
-                            port: 9292
                             pvc_name: glance
-
-glance-registry-deployment:
-        global:
-            kolla:
-                glance:
-                    registry:
-                        all:
-                            port: 9191
-
-cinder-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                cinder:
-                    all:
-                        keystone_user_name: cinder
-
-cinder-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                cinder:
-                    all:
-                        keystone_user_name: cinder
-
-cinder-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-                    create_keystone_endpoint:
-                        all:
-                            service: cinder-api
-
-cinder-create-keystone-endpoint-adminv2-job:
-        global:
-            kolla:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-                    create_keystone_endpoint:
-                        all:
-                            service: cinder-api
-
-cinder-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-
-cinder-create-keystone-endpoint-publicv2-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-
-cinder-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-                    create_keystone_endpoint:
-                        all:
-                            service: cinder-api
-
-cinder-create-keystone-endpoint-internalv2-job:
-        global:
-            kolla:
-                cinder:
-                    api:
-                        all:
-                            port: 8776
-                    create_keystone_endpoint:
-                        all:
-                            service: cinder-api
-
-tgtd-daemonset:
-        global:
-            kolla:
-                all:
-                    storage_interface: eth0
 
 helm-repo-svc:
         global:
@@ -1063,7 +379,6 @@ ironic-api-svc:
                 ironic:
                     api:
                         all:
-                            port: 6385
                             port_external: true
                             node_port_enabled: false
                             ironic_provision: true
@@ -1075,46 +390,9 @@ ironic-inspector-svc:
                 ironic:
                     inspector:
                         all:
-                            port: 5050
                             port_external: true
                             node_port_enabled: false
                             ironic_provision: true
-
-ironic-api-create-db-job:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            database_name: "ironic"
-                            database_user: "ironic"
-
-ironic-api-delete-db-job:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            database_name: "ironic"
-                            database_user: "ironic"
-
-ironic-api-manage-db-job:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            database_name: "ironic"
-                            database_user: "ironic"
-
-ironic-api-deployment:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            port: 6385
-
 
 ironic-conductor-daemonset:
         global:
@@ -1130,7 +408,6 @@ ironic-inspector-deployment:
                 ironic:
                     inspector:
                         all:
-                            port: 5050
                             ironic_interface: net2
                             initramfs_url:
                             kernel_url:
@@ -1138,149 +415,3 @@ ironic-inspector-deployment:
                             ironic_inspection_cidr: 172.22.0.0/24
                             inspect_lldp: false
 
-ironic-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                ironic:
-                    all:
-                        keystone_user_name: ironic
-
-ironic-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                ironic:
-                    all:
-                        keystone_user_name: ironic
-
-ironic-inspector-create-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                ironic:
-                    inspector:
-                        all:
-                            keystone_user_name: ironic-inspector
-
-ironic-inspector-delete-keystone-user-job:
-        global:
-            kolla:
-                all:
-                    keystone_user_project: service
-                    keystone_user_project_domain: Default
-                    keystone_user_domain: Default
-                    keystone_user_role: admin
-                ironic:
-                    inspector:
-                        all:
-                            keystone_user_name: ironic-inspector
-
-ironic-api-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            port: 6385
-                        create_keystone_endpoint:
-                           all:
-                                service: ironic-api
-
-ironic-api-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                ironic:
-                    api:
-                        all:
-                            port: 6385
-                        create_keystone_endpoint:
-                            all:
-                                service: ironic-api
-
-ironic-api-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                ironic:
-                    api:
-                        all:
-                            port: 6385
-                        create_keystone_endpoint:
-                            all:
-                                service: ironic-api
-
-ironic-inspector-create-keystone-endpoint-admin-job:
-        global:
-            kolla:
-                ironic:
-                    inspector:
-                        all:
-                            port: 5050
-                        create_keystone_endpoint:
-                           all:
-                                service: ironic-inspector
-
-ironic-inspector-create-keystone-endpoint-internal-job:
-        global:
-            kolla:
-                ironic:
-                    inspector:
-                        all:
-                            port: 5050
-                        create_keystone_endpoint:
-                            all:
-                                service: ironic-inspector
-
-ironic-inspector-create-keystone-endpoint-public-job:
-        global:
-            kolla:
-                all:
-                    external_vip:
-                ironic:
-                    inspector:
-                        all:
-                            port: 5050
-                        create_keystone_endpoint:
-                            all:
-                                service: ironic-inspector
-
-ironic-inspector-create-db-job:
-        global:
-            kolla:
-                ironic:
-                    inspector:
-                        all:
-                            database_name: "ironic_inspector"
-                            database_user: "ironic_inspector"
-
-ironic-inspector-delete-db-job:
-        global:
-            kolla:
-                ironic:
-                    inspector:
-                        all:
-                            database_name: "ironic_inspector"
-                            database_user: "ironic_inspector"
-
-ironic-inspector-manage-db-job:
-        global:
-            kolla:
-                ironic:
-                    inspector:
-                        all:
-                            database_name: "ironic_inspector"
-                            database_user: "ironic_inspector"
