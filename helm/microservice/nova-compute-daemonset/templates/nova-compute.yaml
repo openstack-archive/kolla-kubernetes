@@ -8,7 +8,6 @@
 {{- $privileged := true }}
 {{- $novncProxyHost := include "kolla_val_get_str" (dict "key" "host" "searchPath" $novncSearchPath "Values" .Values) }}
 {{- $novncProxyPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $novncSearchPath "Values" .Values) }}
-{{- $novncProxyBaseUrl := printf "http://%s:%s/vnc_auto.html" $novncProxyHost $novncProxyPort }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "nova-compute" }}
 {{- $_ := set $c "imageName" "image_full" }}
@@ -68,7 +67,6 @@ spec:
                   crudini --set /nova/nova.conf vnc novncproxy_host $IP;
                   crudini --set /nova/nova.conf vnc vncserver_listen $IP;
                   crudini --set /nova/nova.conf vnc vncserver_proxyclient_address $IP;
-                  crudini --set /nova/nova.conf vnc novncproxy_base_url {{ $novncProxyBaseUrl }};
 {{- if $localVals.libvirt_tcp }}
                   sed -i ''s|^connection_uri.*=.*|connection_uri=\"qemu+tcp://127.0.0.1/system\"|g'' /nova/nova.conf;
 {{- end }}
