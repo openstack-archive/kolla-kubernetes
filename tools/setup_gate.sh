@@ -8,6 +8,8 @@ if [ -f /etc/ci/mirror_info.sh ]; then
    echo "Suggested proxy url: $NODEPOOL_TARBALLS_PROXY"
 fi
 
+# testing gate Sep 22nd,2017
+
 PACKAGE_VERSION=0.7.0-1
 DISTRO="$2"
 TYPE="$3"
