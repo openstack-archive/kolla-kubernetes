@@ -18,7 +18,6 @@ common:
                     image_pull_policy: IfNotPresent
                     container_config_directory: /var/lib/kolla/config_files
                     kubernetes_entrypoint: false
-                    resolve_conf_net_host_workaround: true
                     kolla_kubernetes_external_vip: 172.18.0.1
                     kolla_kubernetes_external_subnet: 24
                     kube_logger: true

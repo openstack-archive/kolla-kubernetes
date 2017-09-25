@@ -47,9 +47,6 @@ setup_helm_common
 # Setting up namespace and secret
 setup_namespace_secrets
 
-# Setting up resolv.conf workaround
-setup_resolv_conf_common
-
 kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
     nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \

@@ -43,6 +43,7 @@ spec:
         component: openvswitch
         system: openvswitch-vswitchd-{{ $restype }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       hostPID: True #Needed for pidfile.

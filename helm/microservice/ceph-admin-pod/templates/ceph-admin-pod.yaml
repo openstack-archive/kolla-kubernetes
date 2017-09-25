@@ -16,6 +16,7 @@ kind: Pod
 metadata:
   name: ceph-admin
 spec:
+  dnsPolicy: ClusterFirstWithHostNet
   hostNetwork: True
   hostPID: True
   nodeSelector:
