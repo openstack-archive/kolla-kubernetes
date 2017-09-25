@@ -137,7 +137,7 @@ Write the Kubernetes repository file::
 
 Install Kubernetes 1.6.4 or later and other dependencies::
 
-    sudo yum install -y docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
+    sudo yum install docker ebtables kubeadm kubectl kubelet kubernetes-cni git gcc
 
 
 Ubuntu
@@ -155,7 +155,7 @@ Write the kubernetes repository file::
 
 Install Kubernetes 1.6.4 or later and other dependencies::
 
-    sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
+    sudo apt-get install docker.io kubelet kubeadm kubectl kubernetes-cni
 
 
 Centos and Ubuntu
@@ -350,7 +350,7 @@ Verify both the client and server version of Helm are consistent::
 
 Install repositories necessary to install packaging::
 
-    sudo yum install -y epel-release ansible python-pip python-devel
+    sudo yum install epel-release ansible python-pip python-devel
 
 .. note::
 
