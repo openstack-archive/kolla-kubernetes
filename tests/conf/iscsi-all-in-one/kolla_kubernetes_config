@@ -1,6 +1,5 @@
 kolla_kubernetes_ovs_setup_bridge: "yes"
 kolla_kubernetes_ovs_add_port: "no"
-enable_resolve_conf_net_host_workaround: "yes"
 rabbitmq_management_external: "yes"
 
 kolla_kubernetes_external_bridge_ip: "172.18.0.1"

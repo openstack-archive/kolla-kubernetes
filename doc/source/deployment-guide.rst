@@ -489,10 +489,6 @@ Create and register the Kolla config maps::
         cinder-scheduler cinder-volume iscsid tgtd keepalived \
         placement-api placement-api-haproxy
 
-Enable resolv.conf workaround::
-
-    kolla-kubernetes/tools/setup-resolv-conf.sh kolla
-
 Build all Helm microcharts, service charts, and metacharts::
 
     kolla-kubernetes/tools/helm_build_all.sh .
@@ -514,7 +510,6 @@ Create a local cloud.yaml file for the deployment of the charts::
            base_distro: "centos"
            install_type: "source"
            tunnel_interface: "docker0"
-           resolve_conf_net_host_workaround: true
          keystone:
            all:
              admin_port_external: "true"

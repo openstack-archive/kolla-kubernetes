@@ -37,6 +37,7 @@ spec:
         component: {{ $serviceName }}
         system: {{ $elementName }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       nodeSelector:

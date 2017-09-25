@@ -37,6 +37,7 @@ spec:
         component: neutron
         system: l3-agent-{{ $restype }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       hostPID: True

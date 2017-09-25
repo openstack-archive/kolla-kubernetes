@@ -19,6 +19,7 @@ kind: Pod
 metadata:
   name: ceph-bootstrap-osd{{ $index }}
 spec:
+  dnsPolicy: ClusterFirstWithHostNet
   hostNetwork: True
   hostPID: True
   nodeSelector:

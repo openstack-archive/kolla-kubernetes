@@ -25,6 +25,7 @@ spec:
         component: ceph
         system: rbd
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostPID: True
       nodeSelector:

@@ -34,6 +34,7 @@ spec:
         component: ceph
         system: mon
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostPID: True
       nodeSelector:
