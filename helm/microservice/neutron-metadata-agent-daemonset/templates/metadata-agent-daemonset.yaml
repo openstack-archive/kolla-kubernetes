@@ -27,6 +27,7 @@ spec:
         component: neutron
         system: metadata-agent-{{ $restype }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       nodeSelector:
         {{ $selectorKey }}: {{ $selectorValue | quote }}

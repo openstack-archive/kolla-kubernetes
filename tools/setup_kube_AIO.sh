@@ -222,11 +222,6 @@ kollakube res create configmap \
     placement-api placement-api-haproxy
 
 
-## Enable resolv.conf workaround
-echo "Enable resolv.conf workaround"
-/opt/kolla-kubernetes/tools/setup-resolv-conf.sh kolla
-
-
 ## Build all Helm microcharts, service charts, and metacharts
 echo "Build all Helm microcharts, service charts, and metacharts"
 /opt/kolla-kubernetes/tools/helm_build_all.sh /tmp/
@@ -245,7 +240,6 @@ global:
        base_distro: "centos"
        install_type: "source"
        tunnel_interface: $tunnel_interface
-       resolve_conf_net_host_workaround: true
        kolla_kubernetes_external_subnet: $mgmt_subnet_size
        kolla_kubernetes_external_vip: $keepalived_vip
        kube_logger: false

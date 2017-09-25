@@ -28,6 +28,7 @@ spec:
         component: iscsi-target
         system: iscsi-target
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       hostPID: True

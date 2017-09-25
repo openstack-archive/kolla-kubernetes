@@ -111,6 +111,3 @@ kubectl create namespace kolla
 tools/secret-generator.py create
 }
 
-function setup_resolv_conf_common {
-tools/setup-resolv-conf.sh kolla
-}

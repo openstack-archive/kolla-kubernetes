@@ -21,6 +21,7 @@ metadata:
 spec:
   template:
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostPID: True
       nodeSelector:

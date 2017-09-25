@@ -51,6 +51,7 @@ spec:
         service: {{ $serviceName }}
         type: {{ $serviceType }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}

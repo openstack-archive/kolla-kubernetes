@@ -37,6 +37,7 @@ spec:
         component: neutron
         system: openvswitch-agent-{{ $restype }}
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       hostPID: True #needed for openvswitch pid file

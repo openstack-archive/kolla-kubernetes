@@ -28,6 +28,7 @@ spec:
         component: tgtd
         system: tgtd
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       hostIPC: True
       nodeSelector:

@@ -29,6 +29,7 @@ spec:
         component: keepalived
         system: keepalived
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
       nodeSelector:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
