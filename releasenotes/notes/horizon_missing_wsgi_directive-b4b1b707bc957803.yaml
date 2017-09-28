@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Added missing wsgi directive in horizon template which caused error 500 when accessing
+    Horizon dashboard.

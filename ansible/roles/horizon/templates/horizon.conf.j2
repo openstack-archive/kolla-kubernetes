@@ -11,6 +11,7 @@ Listen {{ api_interface_address }}:{{ horizon_port }}
     WSGIProcessGroup horizon-http
     WSGIScriptAlias / {{ python_path }}/openstack_dashboard/wsgi/django.wsgi
     WSGIPassAuthorization On
+    WSGIApplicationGroup %{GLOBAL}
 
     <Location "/">
         Require all granted
