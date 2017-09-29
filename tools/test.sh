@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
 grep api_interface_address etc/kolla/globals.yml || echo api_interface_address: "0.0.0.0" >> etc/kolla/globals.yml
