@@ -67,8 +67,8 @@ if [ "$1" == "master" ]; then
 # NOTE(sbezverk/kfox111) This is a horible hack to get k8s 1.6 working. This should be
 # removed in favor of more fine grained rules.
 # It should be run on the master only when it is up, hence moving it inside of if
-kubectl update -f <(cat <<EOF
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+kubectl apply -f <(cat <<EOF
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cluster-admin
