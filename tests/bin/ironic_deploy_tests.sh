@@ -82,6 +82,7 @@ config="$1"
 #
 # Ironic client related commands
 #
+sudo yum install -y libvirt-devel || sudo apt-get install -y libvirt-dev || true
 pip install -U python-ironicclient
 pip install -U python-ironic-inspector-client
 sudo pip install libvirt-python
