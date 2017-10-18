@@ -13,7 +13,7 @@ Kolla Overview
 ==============
 
 The Kolla project is a member of the OpenStack `Big Tent
-Governance <http://governance.openstack.org/reference/projects/index.html>`__.
+Governance <https://governance.openstack.org/tc/reference/projects/index.html>`__.
 
 Kolla's mission statement is:
 
