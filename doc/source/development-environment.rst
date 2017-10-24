@@ -290,7 +290,7 @@ To install the helm client:
 
 .. code-block:: console
 
-    /$url -L https://storage.googleapis.com/kubernetes-helm/helm-v2.2.2-linux-amd64.tar.gz | tar -xzv
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.2.2-linux-amd64.tar.gz | tar -xzv
     sudo cp linux-amd64/helm /usr/local/bin/helm
     sudo chmod 755 /usr/local/bin/helm
     sudo chown root: /usr/local/bin/helm
