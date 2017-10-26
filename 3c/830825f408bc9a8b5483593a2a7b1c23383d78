@@ -1,0 +1,9 @@
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Rich Wellum <rwellum@lenovo.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 26 Oct 2017 12:39:27 +0000
+Reviewed-on: https://review.openstack.org/514511
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
