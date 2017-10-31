@@ -1,5 +1,9 @@
 #!/bin/bash -xe
 
+#FIXME just dump it for now... It may be getting in the way in zuulv3.
+sudo iptables -F
+exit
+
 l=$(sudo iptables -L INPUT --line-numbers | grep openstack-INPUT | \
     awk '{print $1}')
 sudo iptables -D INPUT $l
