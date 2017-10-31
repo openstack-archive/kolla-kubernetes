@@ -13,3 +13,6 @@ $ip_command | sed '/^[^1-9]/d;' | awk '{print $2}' | sed 's/://' | \
     grep -v '^lo$' | while read line; do
     sudo iptables -I INPUT 1 -i $line -j openstack-INPUT
 done
+
+#FIXME just dump it for now... It may be getting in the way in zuulv3.
+sudo iptables -F
