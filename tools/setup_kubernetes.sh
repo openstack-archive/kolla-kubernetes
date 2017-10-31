@@ -45,11 +45,12 @@ kubeadm init --skip-preflight-checks --service-cidr 172.16.128.0/24 --pod-networ
              --apiserver-advertise-address $(cat /etc/nodepool/primary_node_private) | tee /tmp/kubeout
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $4}' > /etc/kubernetes/token.txt
 grep 'kubeadm join --token' /tmp/kubeout | awk '{print $5}' > /etc/kubernetes/ip.txt
+grep 'kubeadm join --token' /tmp/kubeout | awk '{print $7}' > /etc/kubernetes/cahash.txt
 rm -f /tmp/kubeout
 EOF
 else
     cat >> /tmp/setup.$$ <<EOF
-kubeadm join --token "$2" "$3" --skip-preflight-checks
+kubeadm join --token "$2" "$3" --skip-preflight-checks --discovery-token-ca-cert-hash "$4"
 EOF
 fi
 cat >> /tmp/setup.$$ <<"EOF"

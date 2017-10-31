@@ -1,5 +1,11 @@
 #!/bin/bash -xe
 
+#FIXME(kfox1111) just turn off iptables for now... It is getting in the way in zuulv3 and
+#we dont have time to debug the exact changes to the infra. Reenable it properly in a
+#follow on PS.
+sudo iptables -F
+exit
+
 l=$(sudo iptables -L INPUT --line-numbers | grep openstack-INPUT | \
     awk '{print $1}')
 sudo iptables -D INPUT $l
