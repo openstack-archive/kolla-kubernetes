@@ -39,6 +39,7 @@ spec:
             - |
               cp -a /srv/configmap/..data/* /srv/pod-main-config/;
               sed -i '/^export ERL_EPMD_ADDRESS=0.0.0.0$/d' /srv/pod-main-config/rabbitmq-env.conf;
+              sed -i 's/\(rabbit@\)\([[:alnum:]_-]*\)/\1'$HOSTNAME'/' /srv/pod-main-config/rabbitmq-clusterer.config
           volumeMounts:
             - name: rabbitmq-config
               mountPath: /srv/configmap
