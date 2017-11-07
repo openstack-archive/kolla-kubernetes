@@ -59,7 +59,7 @@ Firstly install Vagrant:
 .. path .
 .. code-block:: console
 
-    sudo yum install -y \
+    sudo yum install \
          https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.rpm
 
 .. end
@@ -69,7 +69,7 @@ Then install the deps for vagrant libvirt and ensure git-review is present:
 .. path .
 .. code-block:: console
 
-    sudo yum install -y libvirt \
+    sudo yum install libvirt \
                         libxslt-devel \
                         libxml2-devel \
                         libvirt-devel \
@@ -123,8 +123,8 @@ Finally install Ansible to allow Halcyon Kubernetes to provision the cluster:
 .. path .
 .. code-block:: console
 
-    sudo yum install -y epel-release
-    sudo yum install -y ansible
+    sudo yum install epel-release
+    sudo yum install ansible
 
 .. end
 
@@ -144,7 +144,7 @@ Firstly install Vagrant:
     # Note that theres is a packaging bug in ubuntu so the upstream package must
     # be used: https://github.com/vagrant-libvirt/vagrant-libvirt/issues/575
     curl -L https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb > /tmp/vagrant_1.8.1_x86_64.deb
-    sudo apt-get -y install /tmp/vagrant_1.8.1_x86_64.deb
+    sudo apt-get install /tmp/vagrant_1.8.1_x86_64.deb
 
 .. end
 
@@ -155,8 +155,8 @@ Then install the dependencies for vagrant-libvirt and ensure git-review is prese
 
     sudo sed -i 's/^# deb-src/deb-src/g' /etc/apt/sources.list
     sudo apt-get update
-    sudo apt-get -y build-dep vagrant ruby-libvirt
-    sudo apt-get install -y \
+    sudo apt-get build-dep vagrant ruby-libvirt
+    sudo apt-get install \
                  qemu-kvm \
                  libvirt-bin \
                  ebtables \
@@ -196,10 +196,10 @@ Finally, install Ansible to allow Halcyon Kubernetes to provision the cluster:
 .. path .
 .. code-block:: console
 
-    sudo apt-get install -y software-properties-common
-    sudo apt-add-repository -y ppa:ansible/ansible
+    sudo apt-get install software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
     sudo apt-get update
-    sudo apt-get install -y ansible
+    sudo apt-get install ansible
 
 .. end
 
