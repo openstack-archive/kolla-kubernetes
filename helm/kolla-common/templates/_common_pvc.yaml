@@ -12,5 +12,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .volumeSizeGB }}
+      storage: {{ .volumeSizeGB }}Gi
 {{- end }}
