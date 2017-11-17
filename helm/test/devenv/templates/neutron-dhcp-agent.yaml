@@ -49,7 +49,7 @@ data:
             }
         ]
     }
-  dhcp-agent.ini: |+
+  dhcp_agent.ini: |+
     [DEFAULT]
     dnsmasq_config_file = /etc/neutron/dnsmasq.conf
     enable_isolated_metadata = true
@@ -57,7 +57,7 @@ data:
 
   dnsmasq.conf: |
     log-facility=/var/log/kolla/neutron/dnsmasq.log
-  ml2-conf.ini: |+
+  ml2_conf.ini: |+
     [ml2]
     type_drivers = flat,vlan,vxlan
     tenant_network_types = vxlan

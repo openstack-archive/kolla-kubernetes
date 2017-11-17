@@ -1,0 +1,71 @@
+global:
+   kolla:
+     all:
+       ceph_backend: false
+       storage_provider: ceph
+       storage_provider_fstype: xfs
+       ceph:
+         monitors:
+           - 172.17.0.1
+         pool: kollavolumes
+         secret_name: ceph-kolla
+         user: kolla
+
+       image_tag: "4.0.0"
+       kube_logger: false
+       external_vip: "{{ kolla_external_vip_address }}"
+       base_distro: "{{ kolla_base_distro }}"
+       install_type: "{{ kolla_install_type }}"
+       tunnel_interface: "docker0"
+       resolve_conf_net_host_workaround: true
+     keystone:
+       all:
+         admin_port_external: "true"
+         dns_name: "{{ kolla_external_vip_address }}"
+         port: 5000
+       public:
+         all:
+           port_external: "true"
+     rabbitmq:
+       all:
+         cookie: 67
+     glance:
+       api:
+         all:
+           port_external: "true"
+       all:
+         ceph_backend: false
+     cinder:
+       api:
+         all:
+           port_external: "true"
+       volume_lvm:
+         all:
+           element_name: cinder-volume
+           ceph_backend: false
+         daemonset:
+           lvm_backends:
+             - "{{ kolla_external_vip_address }}": cinder-volumes
+     ironic:
+       conductor:
+         daemonset:
+           selector_key: "kolla_conductor"
+     nova:
+       placement_api:
+         all:
+           port_external: true
+       novncproxy:
+         all:
+           port: 6080
+           port_external: true
+       all:
+         ceph_backend: false
+     openvwswitch:
+       all:
+         add_port: true
+         ext_bridge_name: br-ex
+         ext_interface_name: "{{ neutron_external_interface }}"
+         setup_bridge: true
+     horizon:
+       all:
+         port_external: false

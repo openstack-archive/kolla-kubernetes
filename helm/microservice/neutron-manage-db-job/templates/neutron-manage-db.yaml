@@ -14,11 +14,11 @@ items:
   path: neutron.conf
 - key: config.json
   path: config.json
-- key: ml2-conf.ini
+- key: ml2_conf.ini
   path: ml2_conf.ini
-- key: neutron-lbaas.conf
+- key: neutron_lbaas.conf
   path: neutron_lbaas.conf
-- key: neutron-vpnaas.conf
+- key: neutron_vpnaas.conf
   path: neutron_vpnaas.conf
 {{- end }}
 {{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "extraConfigmapConfig" $extraConfigmapConfig  "Values" .Values "Release" .Release "searchPath" $searchPath }}
