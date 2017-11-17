@@ -1,0 +1,8 @@
+---
+
+- include: kolla-config.yml
+
+- include: kolla-deploy.yml
+
+
+
