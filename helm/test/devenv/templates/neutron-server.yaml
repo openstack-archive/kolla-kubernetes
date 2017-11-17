@@ -44,7 +44,7 @@ data:
             }
         ]
     }
-  ml2-conf.ini: |+
+  ml2_conf.ini: |+
     [ml2]
     type_drivers = flat,vlan,vxlan
     tenant_network_types = vxlan
@@ -73,8 +73,8 @@ data:
     ovsdb_connection = tcp:0.0.0.0:6640
     local_ip = 0.0.0.0
 
-  neutron-lbaas.conf: ""
-  neutron-vpnaas.conf: ""
+  neutron_lbaas.conf: ""
+  neutron_vpnaas.conf: ""
   neutron.conf: |+
     [DEFAULT]
     debug = True
