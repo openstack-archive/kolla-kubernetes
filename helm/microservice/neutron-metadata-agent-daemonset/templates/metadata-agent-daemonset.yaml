@@ -62,9 +62,9 @@ spec:
               path: neutron.conf
             - key: config.json
               path: config.json
-            - key: ml2-conf.ini
+            - key: ml2_conf.ini
               path: ml2_conf.ini
-            - key: metadata-agent.ini
+            - key: metadata_agent.ini
               path: metadata_agent.ini
         - name: host-run-netns
           hostPath:

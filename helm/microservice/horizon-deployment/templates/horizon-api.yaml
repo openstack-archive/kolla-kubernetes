@@ -53,7 +53,7 @@ spec:
               path: horizon.conf
             - key: config.json
               path: config.json
-            - key: local-settings
+            - key: local_settings
               path: local_settings
 {{- end }}
 
