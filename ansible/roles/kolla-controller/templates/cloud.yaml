@@ -1,0 +1,55 @@
+global:
+   kolla:
+     all:
+       image_tag: "4.0.0"
+       kube_logger: false
+       external_vip: "{{ external_vip }}"
+       base_distro: "{{ base_distro }}"
+       install_type: "{{ install_type }}"
+       tunnel_interface: "docker0"
+       resolve_conf_net_host_workaround: true
+     keystone:
+       all:
+         admin_port_external: "true"
+         dns_name: "{{ dns_name }}"
+       public:
+         all:
+           port_external: "true"
+     rabbitmq:
+       all:
+         cookie: 67
+     glance:
+       api:
+         all:
+           port_external: "true"
+     cinder:
+       api:
+         all:
+           port_external: "true"
+       volume_lvm:
+         all:
+           element_name: cinder-volume
+         daemonset:
+           lvm_backends:
+             - "{{ cinder_lvm_ip }}": cinder-volumes
+     ironic:
+       conductor:
+         daemonset:
+           selector_key: "kolla_conductor"
+     nova:
+       placement_api:
+         all:
+           port_external: true
+       novncproxy:
+         all:
+           port: 6080
+           port_external: true
+     openvwswitch:
+       all:
+         add_port: true
+         ext_bridge_name: br-ex
+         ext_interface_name: enp1s0f1
+         setup_bridge: true
+     horizon:
+       all:
+         port_external: true
