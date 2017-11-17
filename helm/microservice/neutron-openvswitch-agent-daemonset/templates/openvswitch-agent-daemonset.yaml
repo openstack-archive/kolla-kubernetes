@@ -171,7 +171,7 @@ spec:
               path: neutron.conf
             - key: config.json
               path: config.json
-            - key: ml2-conf.ini
+            - key: ml2_conf.ini
               path: ml2_conf.ini
         - name: pod-main-config
           emptyDir: {}
