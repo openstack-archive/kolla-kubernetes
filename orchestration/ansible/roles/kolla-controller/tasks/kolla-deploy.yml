@@ -1,0 +1,162 @@
+---
+
+# Kolla-Kubernetes Deployment
+
+- name:  start kolla deploy
+  debug: msg="Starting kolla-kubernetes deployment"
+
+# TODO Do not use kollakube
+#- name: HACK kollakube install haproxy configmaps
+#  command: |
+#    kollakube res create configmap \
+#    glance-api-haproxy glance-registry-haproxy nova-novncproxy-haproxy neutron-server-haproxy \
+#    nova-api-haproxy cinder-api-haproxy \
+#    placement-api placement-api-haproxy
+#  ignore_errors: True
+
+- name: Install haproxy configmaps
+  shell: "kubectl create configmap --namespace=kolla --from-file /kolla-kubernetes/helm/test/devenv/templates/{{ item }} {{ item }}"
+  with_items:
+    - glance-api-haproxy
+    - glance-registry-haproxy
+    - nova-novncproxy-haproxy
+    - neutron-server-haproxy
+    - nova-api-haproxy cinder-api-haproxy
+      #    placement-api placement-api-haproxy
+
+
+## TODO remove
+#- name: Create and register the Kolla config maps
+#  command: |
+#    kollakube res create configmap \
+#    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
+#    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
+#    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
+#    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
+#    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
+#    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
+#    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
+#    cinder-scheduler cinder-volume iscsid tgtd keepalived \
+#    placement-api placement-api-haproxy
+#  ignore_errors: True
+
+- name: Create and register the Kolla global config maps
+  shell: "kubectl create configmap --namespace=kolla --from-file /etc/kolla/globals.yml globals"
+
+- name: Create and register the Kolla password secret
+  shell: "kubectl create secret generic --namespace=kolla --from-file /etc/kolla/passwords.yml passwords"
+
+# overrides TODO template nova.conf?
+- name: mkdir overrides
+  shell: mkdir /etc/kolla/overrides
+  become: True
+
+- name: crudini --set /etc/kolla/overrides/nova.conf libvirt virt_type qemu
+  shell: crudini --set /etc/kolla/overrides/nova.conf libvirt virt_type qemu
+  become: True
+
+- name: crudini --set /etc/kolla/overrides/nova.conf libvirt cpu_mode none
+  shell: crudini --set /etc/kolla/overrides/nova.conf libvirt cpu_mode none
+  become: True
+
+- name: set libvirt rbd_secret_uuid
+  shell: UUID=$(awk '{if($1 == "cinder_rbd_secret_uuid:"){print $2}}' /etc/kolla/passwords.yml) crudini --set /etc/kolla/overrides/nova.conf libvirt rbd_secret_uuid $UUID
+  become: True
+
+- name: crudini --set /etc/kolla/overrides/keystone.conf cache enabled False
+  shell: crudini --set /etc/kolla/overrides/keystone.conf cache enabled False
+  become: True
+
+## TODO remove when named properly?
+#- name: Fix for horizon cm key "local_settings" should be "local-settings"
+#  shell: mv /etc/kolla/horizon/local_settings /etc/kolla/horizon/local-settings
+#  become: True
+
+# create config maps
+- name: Create and register the Kolla config maps
+  shell: "kubectl create configmap --namespace=kolla --from-file /etc/kolla/{{ item }} {{ item }}"
+  with_items:
+    - overrides
+    - mariadb
+    - keystone
+    - horizon
+    - rabbitmq
+    - memcached
+    - glance-api
+    - glance-registry
+    - cinder-api
+    - cinder-backup
+    - cinder-scheduler
+    - cinder-volume
+    - openvswitch-db-server
+    - openvswitch-vswitchd
+    - neutron-dhcp-agent
+    - neutron-l3-agent
+    - neutron-metadata-agent
+    - neutron-openvswitch-agent
+    - neutron-server
+    - nova-api
+    - nova-compute
+    - nova-conductor
+    - nova-consoleauth
+    - nova-libvirt
+    - nova-novncproxy
+    - nova-scheduler
+    - nova-ssh
+
+# TODO build this in container or use helm repo chart
+- name: Build all helm microcharts, service charts, and metacharts
+  command: /kolla-kubernetes/tools/helm_build_all.sh ~/.helm/repository/kolla
+
+- set_fact:
+    cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
+
+- name: Create a cloud.yaml file for the deployment of the charts
+  blockinfile:
+    dest: /cloud.yaml
+    content: '{{ cloud_yaml }}'
+    state: present
+    create: yes
+
+# TODO remove when new logging is complete
+- name: Disable experimental kube logging
+  replace:
+    dest: /cloud.yaml
+    regexp: "kube_logger: true"
+    replace: "kube_logger: false"
+
+
+- name: Replace all occurances of 192.168.7.105 with the IP your management interface nic
+  replace:
+    dest: /cloud.yaml
+    regexp: '192.168.7.105'
+    replace: "{{ api_interface_address }}"
+
+- name: Replace all occurances of enp1s0f1 with your neutron interface name (e.g. enp1s0f1)
+  replace:
+    dest: /cloud.yaml
+    regexp: '1enp1s0f1'
+    replace: "{{ neutron_network_interface }}"
+
+# TODO change to poll for tiller
+- name: Wait on Tiller for 60 secs
+  wait_for:
+    timeout: 60
+
+- name: Start kolla-kubernetes services (compute kit)
+  command: helm install --debug /kolla-kubernetes/helm/service/{{ item }} --namespace kolla --name {{ item }} --values /cloud.yaml
+  with_items:
+    - mariadb
+    - rabbitmq
+    - memcached
+    - keystone
+    - glance
+    - horizon
+    - cinder-control
+    - openvswitch
+    - neutron
+    - nova-control
+    - nova-compute
+
+# NOTE: Horizon container might be missing following symlink if from source
+# ln -s /var/lib/kolla/venv/lib/python2.7/site-packages /usr/share/openstack-dashboard
