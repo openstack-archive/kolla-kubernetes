@@ -1,0 +1,60 @@
+---
+
+# Kolla-Kubernetes Dependencies
+
+- name: Install kolla-k8s deps [Debian]
+  package: name={{item}} state=latest
+  become: True
+  with_items:
+    - ansible
+    - python-pip
+    - python-dev
+    - libssl-dev
+    - crudini
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Install EPEL [RedHat]
+  yum:
+    package: "{{item}}"
+    state: present
+    update_cache: True
+  with_items:
+    - epel-release
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Install kolla-k8s deps [RedHat]
+  yum:
+    package: "{{item}}"
+    state: present
+    update_cache: True
+  with_items:
+    - epel-release
+    - ansible
+    - python-pip
+    - python-devel
+    - crudini
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Clone kolla-ansible
+  git:
+    repo: 'http://github.com/openstack/kolla-ansible'
+    dest: /home/{{ ansible_user }}/kolla-ansible
+
+- name: Clone kolla-kubernetes
+  git:
+    repo: 'http://github.com/openstack/kolla-kubernetes'
+    dest: /home/{{ ansible_user }}/kolla-kubernetes
+
+## TODO remove after underscores used in cm keys
+#- name: HACK checkout branch of kk8s
+#  become: True
+#  shell: cd /home/{{ ansible_user }}/kolla-kubernetes && git fetch https://git.openstack.org/openstack/kolla-kubernetes refs/changes/47/520847/2 && git checkout FETCH_HEAD
+
+- name: Install kolla-kubernetes
+  become: True
+  command: sudo pip install -U /home/{{ ansible_user }}/kolla-ansible/ /home/{{ username }}/kolla-kubernetes/
