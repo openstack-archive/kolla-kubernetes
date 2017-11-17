@@ -366,7 +366,7 @@ class Container(object):
         if action == 'create':
             for f in PathFinder.find_config_files(self.getName()):
                 cmd += ' --from-file={}={}'.format(
-                    os.path.basename(f).replace("_", "-"), f)
+                    os.path.basename(f), f)
 
         # Execute the command
         ExecUtils.exec_command(cmd)
