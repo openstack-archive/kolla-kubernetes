@@ -43,13 +43,13 @@ data:
             }
         ]
     }
-  metadata-agent.ini: |+
+  metadata_agent.ini: |+
     [DEFAULT]
     nova_metadata_ip = nova-metadata
     nova_metadata_port = 8775
     metadata_proxy_shared_secret = BPrkJkyrMUjKepsLaECUpLc9DZnsbLN03tRZozqC
 
-  ml2-conf.ini: |+
+  ml2_conf.ini: |+
     [ml2]
     type_drivers = flat,vlan,vxlan
     tenant_network_types = vxlan
