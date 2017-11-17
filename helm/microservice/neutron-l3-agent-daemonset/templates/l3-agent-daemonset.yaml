@@ -125,11 +125,11 @@ spec:
               path: neutron.conf
             - key: config.json
               path: config.json
-            - key: ml2-conf.ini
+            - key: ml2_conf.ini
               path: ml2_conf.ini
             - key: fwaas-driver.ini
               path: fwaas_driver.ini
-            - key: l3-agent.ini
+            - key: l3_agent.ini
               path: l3_agent.ini
         - name: host-run-netns
           hostPath:

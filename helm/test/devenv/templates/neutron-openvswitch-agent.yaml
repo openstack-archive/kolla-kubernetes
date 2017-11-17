@@ -32,7 +32,7 @@ data:
             }
         ]
     }
-  ml2-conf.ini: |+
+  ml2_conf.ini: |+
     [ml2]
     type_drivers = flat,vlan,vxlan
     tenant_network_types = vxlan
