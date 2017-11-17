@@ -1,0 +1,92 @@
+---
+
+# Kolla-Kubernetes Configuration
+
+# Note: Ansible remote-src copy does not recurse dirs, hence using cp
+- name: Copy default kolla configuration to etc
+  become: True
+  command: cp -a /home/{{ ansible_user }}/kolla-ansible/etc/kolla /etc
+
+- name: Copy default kolla-kubernetes configuration to /etc
+  become: True
+  command: cp -a /home/{{ ansible_user }}/kolla-kubernetes/etc/kolla-kubernetes /etc
+
+- name: Generate default passwords via SPRNG
+  command: kolla-kubernetes-genpwd
+
+- name: Create a kubernetes namespace to isolate this kolla deployment
+  command: kubectl create namespace kolla
+  ignore_errors: True
+
+- name: Label the master node as the controller node
+  command: kubectl label node {{ ansible_hostname }} kolla_controller=true
+  ignore_errors: True
+
+- name: Label the master node a compute node
+  command: kubectl label node {{ ansible_hostname }} kolla_compute=true
+  ignore_errors: True
+  when:
+    - master_works == True
+
+# TODO Filter out master, add condition
+- name: Get Node List
+  shell: kubectl get nodes -o name | cut -d/ -f2
+  register: node_list
+
+# TODO Fix this: Get list of nodes and label them compute
+- name: Label the worker node a compute node
+  shell: kubectl label node "{{ item }}" kolla_compute=true
+  with_items: "{{ node_list.stdout.split('\n') }}"
+  ignore_errors: True
+
+- set_fact:
+      globals_config: "{{ lookup('template', 'templates/globals_config.j2') }}"
+
+- name: Add required configuration to the end of /etc/kolla/globals.yml
+  blockinfile:
+    dest: /etc/kolla/globals.yml
+    content: '{{ globals_config }}'
+    state: present
+    insertafter: EOF
+
+- name: Set network_interface in globals.yaml
+  lineinfile:
+    dest: /etc/kolla/globals.yml
+    line: "network_interface: {{ network_interface }}"
+    regexp: "^(.*)network_interface:(.*)$"
+  become: True
+
+- name: Set neutron_external_interface in globals.yaml
+  lineinfile:
+    dest: /etc/kolla/globals.yml
+    line: "neutron_external_interface: {{ neutron_external_interface }}"
+    regexp: "^(.*)neutron_external_interface:(.*)$"
+  become: True
+
+- file:
+    path: /etc/kolla/config/
+    state: directory
+    mode: 0755
+
+- name: Enable QEMU libvirt functionality and enable a workaround for a bug in libvirt
+  blockinfile:
+    dest: /etc/kolla/config/nova.conf
+    state: present
+    create: yes
+    content: |
+      [libvirt]
+      virt_type=qemu
+      cpu_mode=none
+  become: True
+
+- name: Generate the default configuration
+  command: sudo ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla kolla-kubernetes/ansible/site.yml
+
+# TODO remove ignore errors
+- name: Generate the Kubernetes secrets and register them with Kubernetes
+  command: /home/{{ ansible_user }}/kolla-kubernetes/tools/secret-generator.py create
+  ignore_errors: True
+
+# TODO convert to separate account for increased security
+- name: Create kolla context for kubectl
+  shell: kubectl config set-context kolla --cluster=kubernetes --user=kubernetes-admin --namespace=kolla
