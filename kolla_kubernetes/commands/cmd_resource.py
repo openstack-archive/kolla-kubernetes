@@ -169,7 +169,7 @@ class ResourceTemplate(ResourceBase):
                 for f in pathfinder.PathFinder.find_config_files(
                         resource_name):
                     cmd += ' --from-file={}={}'.format(
-                        os.path.basename(f).replace("_", "-"), f)
+                        os.path.basename(f), f)
 
                 # Execute the command
                 out, err = utils.ExecUtils.exec_command(cmd)
