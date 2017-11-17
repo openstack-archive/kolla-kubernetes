@@ -49,14 +49,14 @@ data:
             }
         ]
     }
-  fwaas-driver.ini: |+
+  fwaas_driver.ini: |+
     [fwaas]
 
-  l3-agent.ini: |+
+  l3_agent.ini: |+
     [DEFAULT]
     agent_mode = legacy
 
-  ml2-conf.ini: |+
+  ml2_conf.ini: |+
     [ml2]
     type_drivers = flat,vlan,vxlan
     tenant_network_types = vxlan
