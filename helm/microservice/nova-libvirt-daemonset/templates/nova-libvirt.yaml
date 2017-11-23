@@ -92,7 +92,9 @@ spec:
               # Following is added to workaround bug
               # https://bugs.launchpad.net/kolla/+bug/1649009
               rpm -e qemu-system-x86 || true;
+{{- if $localVals.ceph_backend }}
               cp -a {{ $containerConfigDirectory }}/secrets /etc/libvirt;
+{{- end }}
               kolla_start
           securityContext:
             privileged: true
