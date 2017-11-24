@@ -37,12 +37,13 @@ The kolla-kubernetes repository is one of three deliverables of the
 OpenStack Kolla project.  The three deliverables that make up the Kolla
 project are:
 
-===============   =====================================================
-Deliverable       Repository
-===============   =====================================================
-kolla             https://git.openstack.org/openstack/kolla
-kolla-ansible     https://git.openstack.org/openstack/kolla-ansible
-kolla-kubernetes  https://git.openstack.org/openstack/kolla-kubernetes
+================   =========================================================
+Deliverable        Repository
+================   =========================================================
+kolla              https://git.openstack.org/cgit/openstack/kolla
+kolla-ansible      https://git.openstack.org/cgit/openstack/kolla-ansible
+kolla-kubernetes   https://git.openstack.org/cgit/openstack/kolla-kubernetes
+================   =========================================================
 
 The kolla deliverable maintains container images and container build tools.
 
