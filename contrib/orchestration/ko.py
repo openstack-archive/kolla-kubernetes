@@ -105,13 +105,13 @@ To create two interfaces like this in Ubuntu, for example:
 Edit /etc/network/interfaces:
 
 # The primary network interface
-auto eth0
-iface eth0 inet dhcp
+auto ens3
+iface ens3 inet dhcp
 
 # Neutron network interface (up but no ip address)
-auto eth1
-iface eth1 inet manual
-ifconfig eth1 up
+auto ens4
+iface ens4 inet manual
+ifconfig ens4 up
 
 TODO
 ====
@@ -211,12 +211,12 @@ def parse_args():
     parser.add_argument('-iv', '--image_version', type=str, default='ocata',
                         help='Specify a different Kolla image version to '
                         'the default (ocata)')
-    parser.add_argument('-hv', '--helm_version', type=str, default='2.6.2',
+    parser.add_argument('-hv', '--helm_version', type=str, default='2.7.2',
                         help='Specify a different helm version to the '
-                        'default(2.6.2)')
-    parser.add_argument('-kv', '--k8s_version', type=str, default='1.8.3',
+                        'default(2.7.2)')
+    parser.add_argument('-kv', '--k8s_version', type=str, default='1.8.4',
                         help='Specify a different kubernetes version to '
-                        'the default(1.8.3) - note 1.8.0 is the minimum '
+                        'the default(1.8.4) - note 1.8.0 is the minimum '
                         'supported')
     # parser.add_argument('-cv', '--cni_version', type=str, default='0.5.1-00',
     #                     help='Specify a different kubernetes-cni version '
@@ -248,12 +248,12 @@ def parse_args():
     parser.add_argument('-n', '--nslookup', action='store_true',
                         help='Pause for the user to manually test nslookup '
                         'in kubernetes cluster')
-    # parser.add_argument('-l,', '--cloud', type=int, default=3,
-    # help='optionally change cloud network config files from default(3)')
-    parser.add_argument('-ec', '--edit_config', action='store_true',
+    parser.add_argument('-eg', '--edit_globals', action='store_true',
                         help='Pause to allow the user to edit the '
-                        'global.yaml and the cloud.yaml '
-                        'files - for custom configuration')
+                        'globals.yaml file - for custom configuration')
+    parser.add_argument('-ec', '--edit_cloud', action='store_true',
+                        help='Pause to allow the user to edit the '
+                        'cloud.yaml file - for custom configuration')
     parser.add_argument('-v', '--verbose', action='store_const',
                         const=logging.DEBUG, default=logging.INFO,
                         help='Turn on verbose messages')
@@ -272,6 +272,9 @@ def parse_args():
     parser.add_argument('-bd', '--base_distro', type=str, default='centos',
                         help='Specify a base container image to '
                         'the default(centos)')
+    parser.add_argument('-dr', '--docker_repo', type=str, default='lokolla',
+                        help='Specify a different docker repo '
+                        'the default(lokolla)')
 
     return parser.parse_args()
 
@@ -459,7 +462,7 @@ def tools_versions(args, str):
 
     # This should match up with the defaults set in parse_args
     #            kolla    helm     k8s      ansible    jinja2
-    versions = ["ocata", "2.6.2", "1.8.3", "2.2.0.0", "2.8.1"]
+    versions = ["ocata", "2.7.2", "1.8.4", "2.2.0.0", "2.8.1"]
 
     tools_dict = {}
     # Generate dictionary
@@ -485,38 +488,50 @@ def print_versions(args):
     '''Print out versions of all the various tools needed'''
 
     banner('Kubernetes - Bring up a Kubernetes Cluster:')
-    if args.edit_config:
-        print('  *globals.yaml and cloud.yaml will be editable '
-              'with this option*\n')
+    if args.edit_globals:
+        print('  *globals.yaml will be editable with this option*\n')
+
+    if args.edit_cloud:
+        print('  *cloud.yaml will be editable with this option*\n')
 
     print('Linux info:        %s' % linux_ver_det())
 
     # This a good place to install docker - as it's always needed and we
     # need the version anyway
+
+    # Note later versions of ubuntu require a change:
+    # https://github.com/moby/moby/issues/15651
+    # sudo vi /lib/systemd/system/docker.service
+    # ExecStart=/usr/bin/dockerd -H fd:// $DOCKER_OPTS -s overlay2
+    # sudo systemctl daemon-reload
+    # sudo systemctl restart docker
+    # sudo docker info
     if linux_ver() == 'centos':
         run_shell(args, 'sudo yum install -y docker')
     else:
         run_shell(args, 'sudo apt-get install -y docker.io')
 
-    print('\nNetworking:')
-    print('  Management Int:  %s' % args.MGMT_INT)
-    print('  Neutron Int:     %s' % args.NEUTRON_INT)
-    print('  Management IP:   %s' % args.mgmt_ip)
-    print('  VIP Keepalive:   %s' % args.vip_ip)
+    print('\nNetworking Info:')
+    print('  Management Int:     %s' % args.MGMT_INT)
+    print('  Neutron Int:        %s' % args.NEUTRON_INT)
+    print('  Management IP:      %s' % args.mgmt_ip)
+    print('  VIP Keepalive:      %s' % args.vip_ip)
 
-    print('\nVersions:')
-    print('  Docker version  :  %s' % docker_ver(args))
-    print('  Openstack version: %s(%s)' % (tools_versions(args, 'kolla'),
-                                           kolla_get_image_tag(args)))
-    print('  Helm version:      %s' % tools_versions(args, 'helm'))
-    print('  K8s version:       %s'
+    print('\nTool Versions:')
+    print('  Docker version:     %s' % docker_ver(args))
+    print('  Helm version:       %s' % tools_versions(args, 'helm'))
+    print('  K8s version:        %s'
           % tools_versions(args, 'kubernetes').rstrip())
-    print('  Ansible version:   %s' % tools_versions(args, 'ansible').rstrip())
-    print('  Jinja2 version:    %s' % tools_versions(args, 'jinja2').rstrip())
-    print('  Base version:      %s' % args.base_distro)
-    print('\n')
+    print('  Ansible version:    %s' %
+          tools_versions(args, 'ansible').rstrip())
+    print('  Jinja2 version:     %s' % tools_versions(args, 'jinja2').rstrip())
 
-    time.sleep(1)
+    print('\nOpenStack Versions:')
+    print('  Openstack version:  %s (%s)' % (tools_versions(args, 'kolla'),
+                                             kolla_get_image_tag(args)))
+    print('  Base image version: %s' % args.base_distro)
+    print('  Docker repo:        %s' % args.docker_repo)
+    print('\n')
 
 
 def populate_ip_addresses(args):
@@ -769,7 +784,7 @@ def print_progress(process, msg, finalctr, add_one=False):
 def k8s_install_tools(args):
     '''Basic tools needed for first pass'''
 
-    # Reset kubeadm if it's anew installation
+    # Reset kubeadm if it's a new installation
     if not args.openstack:
         run_shell(args, 'sudo kubeadm reset')
 
@@ -808,7 +823,7 @@ def k8s_install_tools(args):
               tools_versions(args, 'jinja2'))
 
     # https://github.com/ansible/ansible/issues/26670
-    run_shell(args, 'sudo -H pip uninstall pyOpenSSL')
+    run_shell(args, 'sudo -H pip uninstall pyOpenSSL -y')
     run_shell(args, 'sudo -H pip install pyOpenSSL')
 
 
@@ -1604,7 +1619,7 @@ enable_neutron_provider_networks: "yes"
 """)
     run_shell(args, 'cat %s | sudo tee -a %s' % (new, add_to))
 
-    if args.edit_config is True:
+    if args.edit_globals:
         pause_tool_execution('Pausing to edit the /etc/kolla/globals.yml file')
 
     demo(args, 'We have also added some basic config that is not defaulted',
@@ -1614,28 +1629,36 @@ enable_neutron_provider_networks: "yes"
 
 
 def kolla_enable_qemu(args):
-    '''Some configurations need qemu'''
+    '''Set libvirt type to QEMU'''
 
-    print_progress('Kolla', 'Enable qemu', KOLLA_FINAL_PROGRESS)
-    # todo - as per gate:
-    # sudo crudini --set /etc/kolla/nova-compute/nova.conf
-    # libvirt virt_type qemu
-    # sudo crudini --set /etc/kolla/nova-compute/nova.conf
-    # libvirt cpu_mode none
-    # sudo crudini --set /etc/kolla/keystone/keystone.conf
-    # cache enabled False
+    print_progress('Kolla', 'Set libvirt type to QEMU', KOLLA_FINAL_PROGRESS)
+    run_shell(
+        args,
+        'sudo crudini --set /etc/kolla/nova-compute/nova.conf libvirt '
+        'virt_type qemu')
+    run_shell(
+        args,
+        'sudo crudini --set /etc/kolla/nova-compute/nova.conf libvirt '
+        'cpu_mode none')
+    UUID = run_shell(args,
+                     "awk '{if($1 == \"cinder_rbd_secret_uuid: \")"
+                     "{print $2}}' /etc/kolla/passwords.yml")
+    run_shell(
+        args,
+        'sudo crudini --set /etc/kolla/nova-compute/nova.conf libvirt '
+        'rbd_secret_uuid %s' % UUID)
+    run_shell(
+        args,
+        'sudo crudini --set /etc/kolla/keystone/keystone.conf cache '
+        'enabled False')
 
-    run_shell(args, 'sudo mkdir -p /etc/kolla/config')
-
-    new = '/tmp/add'
-    add_to = '/etc/kolla/config/nova.conf'
-    with open(new, "w") as w:
-        w.write("""
-[libvirt]
-virt_type = qemu
-cpu_mode = none
-""")
-    run_shell(args, 'sudo mv %s %s' % (new, add_to))
+    # https://bugs.launchpad.net/kolla/+bug/1687459
+    run_shell(args,
+              'sudo service libvirt-bin stop')
+    run_shell(args,
+              'sudo update-rc.d libvirt-bin disable')
+    run_shell(args,
+              'sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.libvirtd')
 
 
 def kolla_gen_configs(args):
@@ -1812,9 +1835,6 @@ def kolla_create_cloud_v4(args):
                    'Create a version 4 cloud.yaml',
                    KOLLA_FINAL_PROGRESS)
 
-    if args.no_git:
-        return
-
     demo(args, 'Create a 4.x (Ocata) cloud.yaml',
          'cloud.yaml is the partner to globals.yml\n'
          'It contains a list of global OpenStack services '
@@ -1893,7 +1913,7 @@ global:
                args.mgmt_ip,
                args.NEUTRON_INT))
 
-    if args.edit_config is True:
+    if args.edit_cloud:
         pause_tool_execution('Pausing to edit the /tmp/cloud.yaml file')
 
     if args.demo:
@@ -1915,8 +1935,7 @@ def kolla_create_cloud(args):
         'Create a version 5+ cloud.yaml',
         KOLLA_FINAL_PROGRESS)
 
-    if args.no_git:
-        return
+    image_tag = kolla_get_image_tag(args)
 
     demo(args, 'Create a 5.x (Pike) cloud.yaml',
          'cloud.yaml is the partner to globals.yml\n'
@@ -1931,7 +1950,7 @@ global:
    kolla:
      all:
        docker_registry: 127.0.0.1:30401
-       docker_namespace: lokolla
+       docker_namespace: %s
        image_tag: "%s"
        kube_logger: false
        external_vip: "%s"
@@ -1999,20 +2018,21 @@ global:
      horizon:
        all:
          port_external: true
-        """ % (kolla_get_image_tag(args),
+        """ % (args.docker_repo,
+               image_tag,
                args.mgmt_ip,
                args.base_distro,
                args.MGMT_INT,
                args.vip_ip,
-               kolla_get_image_tag(args),
-               kolla_get_image_tag(args),
-               kolla_get_image_tag(args),
-               kolla_get_image_tag(args),
+               image_tag,
+               image_tag,
+               image_tag,
+               image_tag,
                args.mgmt_ip,
                args.mgmt_ip,
                args.NEUTRON_INT))
 
-    if args.edit_config is True:
+    if args.edit_cloud:
         pause_tool_execution('Pausing to edit the /tmp/cloud.yaml file')
 
     if args.demo:
@@ -2620,8 +2640,8 @@ def kolla_bring_up_openstack(args):
     kolla_label_nodes(args, node_list)
     kolla_modify_globals(args)
     kolla_add_to_globals(args)
-    kolla_enable_qemu(args)
     kolla_gen_configs(args)
+    kolla_enable_qemu(args)
     kolla_gen_secrets(args)
     kolla_create_config_maps(args)
     kolla_resolve_workaround(args)
@@ -2637,22 +2657,33 @@ def kolla_bring_up_openstack(args):
     # dockerhub have to run them from a docker registry running as a pod.
     # This takes a long time to come up but then all the other image
     # pulls are very quick.
+    # If the user has supplied their own dockernhub account then assume self
+    # built images and use that account
     if 'ocata' not in args.image_version:
-        banner(
-            'Installing docker registry. Slow but needed for 5.x as '
-            'images are not on dockerhub yet.')
-        print_progress(
-            'Kolla', "Helm Install service chart: \--'%s'--/" %
-            'registry-deployment', KOLLA_FINAL_PROGRESS)
+        if 'lokolla' in args.docker_repo:
+            banner(
+                'Installing docker registry. Slow but needed for 5.x as '
+                'images are not on dockerhub yet.')
+            print_progress(
+                'Kolla', "Helm Install service chart: \--'%s'--/" %
+                'registry-deployment', KOLLA_FINAL_PROGRESS)
+            run_shell(args,
+                      'helm install --debug '
+                      'kolla-kubernetes/helm/microservice/'
+                      'registry-deployment --namespace kolla --name '
+                      'registry-%s --set distro=%s '
+                      '--set node_port=30401 --set initial_load=true '
+                      '--set svc_name=registry-centos --set branch=%s'
+                      % (args.base_distro, args.base_distro,
+                         args.image_version))
+            k8s_wait_for_pod_start(args, 'registry')
+            k8s_wait_for_running_negate(args, 600)
+
+    # Remove registry from cloud.yaml if user own registry
+    if 'lokolla' not in args.docker_repo:
         run_shell(args,
-                  'helm install --debug kolla-kubernetes/helm/microservice/'
-                  'registry-deployment --namespace kolla --name '
-                  'registry-%s --set distro=%s '
-                  '--set node_port=30401 --set initial_load=true '
-                  '--set svc_name=registry-centos --set branch=%s'
-                  % (args.base_distro, args.base_distro, args.image_version))
-        k8s_wait_for_pod_start(args, 'registry')
-        k8s_wait_for_running_negate(args, 600)
+                  "sed -i '/docker_registry: 127.0.0.1:30401/d' "
+                  "/tmp/cloud.yaml")
 
     # Set up OVS for the Infrastructure
     chart_list = ['openvswitch']

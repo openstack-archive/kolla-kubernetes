@@ -502,6 +502,8 @@ neutron_host: "neutron"
 #######################
 nova_backend_ceph: "{{ enable_ceph }}"
 nova_backend: "{{ 'rbd' if nova_backend_ceph | bool else 'default' }}"
+# Valid options are [ kvm, qemu ]
+nova_compute_virt_type: "kvm"
 
 
 #######################

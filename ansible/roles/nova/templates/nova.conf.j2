@@ -153,7 +153,7 @@ memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
 memcached_servers = memcached:{{ memcached_port }}
 
-
+{% if nova_compute_virt_type in ['kvm', 'qemu'] %}
 [libvirt]
 connection_uri = "qemu+tcp://{{ api_interface_address }}/system"
 {% if enable_ceph | bool and nova_backend == "rbd" %}
@@ -169,7 +169,8 @@ hw_disk_discard = {{ nova_hw_disk_discard }}
 {% if nova_backend == "rbd" %}
 rbd_secret_uuid = {{ rbd_secret_uuid }}
 {% endif %}
-
+virt_type = {{ nova_compute_virt_type }}
+{% endif %}
 
 [upgrade_levels]
 compute = auto
@@ -194,6 +195,9 @@ debug = {{ nova_logging_debug }}
 
 [wsgi]
 api_paste_config = /etc/nova/api-paste.ini
+{% if kolla_enable_tls_external | bool %}
+secure_proxy_ssl_header = HTTP_X_FORWARDED_PROTO
+{% endif %}
 
 [scheduler]
 max_attempts = 10

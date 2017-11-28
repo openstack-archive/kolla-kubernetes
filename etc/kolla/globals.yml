@@ -293,6 +293,8 @@ designate_ns_record: "sample.openstack.org"
 #########################
 #nova_backend_ceph: "{{ enable_ceph }}"
 
+# Valid options are [ qemu, kvm ]
+#nova_compute_virt_type: "kvm"
 
 ##############################
 # Horizon - Dashboard Options
