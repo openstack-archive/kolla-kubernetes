@@ -181,6 +181,12 @@ Setup the DNS server with the service CIDR::
 
     sudo sed -i 's/10.96.0.10/10.3.3.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
+Add an option for kubelet:
+
+.. code-block:: bash
+
+    sudo sed -i '/^\[Service\]$/a Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
 .. note::
 
    Kubernetes uses x.x.x.10 as the DNS server.  The Kolla developers don't
@@ -228,7 +234,7 @@ Deploy Kubernetes with kubeadm::
      `net.bridge.bridge-nf-call-iptables = 1` to
      ``/etc/sysctl.conf``
    - Type `sysctl -p` to apply the settings from /etc/sysctl.conf
-   - Type `sysctl net.bridge.bridge-nf-call-ip6tables` and 
+   - Type `sysctl net.bridge.bridge-nf-call-ip6tables` and
      `sysctl net.bridge.bridge-nf-call-iptables` to verify the values are set to 1.
    - Or alternatively Run with `--skip-preflight-checks`. This runs
      the risk of missing other issues that may be flagged.
@@ -250,10 +256,10 @@ CNI drivers may be used if they are properly configured.
 
 Deploy the Canal CNI driver::
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml -o rbac.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/rbac.yaml -o rbac.yaml
     kubectl apply -f rbac.yaml
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml -o canal.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml -o canal.yaml
     sed -i "s@10.244.0.0/16@10.1.0.0/16@" canal.yaml
     kubectl apply -f canal.yaml
 
@@ -314,8 +320,8 @@ Step 3: Deploying kolla-kubernetes
 
 Override default RBAC settings::
 
-    kubectl update -f <(cat <<EOF
-    apiVersion: rbac.authorization.k8s.io/v1alpha1
+    kubectl apply -f <(cat <<EOF
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
       name: cluster-admin
@@ -348,9 +354,23 @@ Verify both the client and server version of Helm are consistent::
 
     helm version
 
-Install repositories necessary to install packaging::
+Install repositories necessary to install packaging:
+
+CentOS
+------
+
+.. code-block:: bash
 
     sudo yum install -y epel-release ansible python-pip python-devel
+
+Ubuntu
+------
+
+.. code-block:: bash
+
+    sudo apt update; sudo apt install software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
+    sudo apt install ansible python-pip python-dev
 
 .. note::
 
@@ -370,11 +390,12 @@ Clone kolla-kubernetes::
 
 Install kolla-ansible and kolla-kubernetes::
 
-    sudo pip install -U kolla-ansible/ kolla-kubernetes/
+    sudo pip install -U ./kolla-ansible/
+    sudo pip install -U ./kolla-kubernetes/
 
 Copy default Kolla configuration to /etc::
 
-    sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+    sudo cp -aR /usr/local/share/kolla-ansible/etc_examples/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
@@ -470,7 +491,11 @@ QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
 Generate the default configuration::
 
-    sudo kolla-ansible genconfig
+    pushd /usr/local/share/kolla-kubernetes/
+    sudo ansible-playbook -e ansible_python_interpreter=/usr/bin/python \
+    -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml \
+    -e CONFIG_DIR=/etc/kolla ./ansible/site.yml
+    popd
 
 Generate the Kubernetes secrets and register them with Kubernetes::
 
@@ -493,7 +518,7 @@ Build all Helm microcharts, service charts, and metacharts::
 
     kolla-kubernetes/tools/helm_build_all.sh .
 
-Check that all Helm images have been built by verifying the number is > 150::
+Check that all Helm images have been built by verifying the number is > 175::
 
     ls | grep ".tgz" | wc -l
 
@@ -514,6 +539,7 @@ Create a local cloud.yaml file for the deployment of the charts::
            all:
              admin_port_external: "true"
              dns_name: "192.168.7.105"
+             port: 5000
            public:
              all:
                port_external: "true"
@@ -556,6 +582,10 @@ Create a local cloud.yaml file for the deployment of the charts::
            all:
              port_external: true
     EOF
+
+.. warning::
+
+   Ubuntu does not currently work. Use centos.
 
 .. warning::
 
