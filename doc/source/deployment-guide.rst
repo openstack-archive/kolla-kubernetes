@@ -158,7 +158,7 @@ Install Kubernetes 1.6.4 or later and other dependencies::
     sudo apt-get install -y docker.io kubelet kubeadm kubectl kubernetes-cni
 
 
-Centos and Ubuntu
+CentOS and Ubuntu
 -----------------
 
 Enable and start Docker::
@@ -174,12 +174,18 @@ Enable the proper CGROUP driver::
     CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
     sudo sed -i "s|KUBELET_KUBECONFIG_ARGS=|KUBELET_KUBECONFIG_ARGS=--cgroup-driver=$CGROUP_DRIVER |g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
-Centos and Ubuntu
+CentOS and Ubuntu
 -----------------
 
 Setup the DNS server with the service CIDR::
 
     sudo sed -i 's/10.96.0.10/10.3.3.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+Add an option for kubelet to skip 'running with swap on':
+
+.. code-block:: bash
+
+    sudo sed -i '/^\[Service\]$/a Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 .. note::
 
@@ -228,10 +234,12 @@ Deploy Kubernetes with kubeadm::
      `net.bridge.bridge-nf-call-iptables = 1` to
      ``/etc/sysctl.conf``
    - Type `sysctl -p` to apply the settings from /etc/sysctl.conf
-   - Type `sysctl net.bridge.bridge-nf-call-ip6tables` and 
+   - Type `sysctl net.bridge.bridge-nf-call-ip6tables` and
      `sysctl net.bridge.bridge-nf-call-iptables` to verify the values are set to 1.
-   - Or alternatively Run with `--skip-preflight-checks`. This runs
-     the risk of missing other issues that may be flagged.
+   - Or alternatively run with following options.This runs the risk of missing
+     other issues that may be flagged.
+     - For kubernetes before **v1.8.5**: `--skip-preflight-checks`
+     - For kubernetes **v1.9.0**: `--ignore-preflight-errors=all`
 
 Load the kubedm credentials into the system::
 
@@ -250,10 +258,10 @@ CNI drivers may be used if they are properly configured.
 
 Deploy the Canal CNI driver::
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml -o rbac.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/rbac.yaml -o rbac.yaml
     kubectl apply -f rbac.yaml
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml -o canal.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml -o canal.yaml
     sed -i "s@10.244.0.0/16@10.1.0.0/16@" canal.yaml
     kubectl apply -f canal.yaml
 
@@ -314,8 +322,8 @@ Step 3: Deploying kolla-kubernetes
 
 Override default RBAC settings::
 
-    kubectl update -f <(cat <<EOF
-    apiVersion: rbac.authorization.k8s.io/v1alpha1
+    kubectl apply -f <(cat <<EOF
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
       name: cluster-admin
@@ -348,9 +356,23 @@ Verify both the client and server version of Helm are consistent::
 
     helm version
 
-Install repositories necessary to install packaging::
+Install repositories necessary to install packaging:
+
+CentOS
+------
+
+.. code-block:: bash
 
     sudo yum install -y epel-release ansible python-pip python-devel
+
+Ubuntu
+------
+
+.. code-block:: bash
+
+    sudo apt update; sudo apt install -y software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
+    sudo apt install -y ansible python-pip python-dev
 
 .. note::
 
@@ -370,11 +392,12 @@ Clone kolla-kubernetes::
 
 Install kolla-ansible and kolla-kubernetes::
 
-    sudo pip install -U kolla-ansible/ kolla-kubernetes/
+    sudo pip install -U ./kolla-ansible/
+    sudo pip install -U ./kolla-kubernetes/
 
 Copy default Kolla configuration to /etc::
 
-    sudo cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+    sudo cp -aR /usr/local/share/kolla-ansible/etc_examples/kolla /etc
 
 Copy default kolla-kubernetes configuration to /etc::
 
@@ -395,11 +418,12 @@ Label the AIO node as the compute and controller node::
 
 .. warning:
 
-    The kolla-kubernetes deliverable has two configuration files.  This is a little
-    clunky and we know about the problem :)  We are working on getting all configuration
-    into cloud.yaml. Until that is fixed the variable in globals.yml `kolla_install_type`
-    must have the same contents as the variable in cloud.yaml `install_type`. In this
-    document we use the setting `source` although `binary` could also be used.
+    The kolla-kubernetes deliverable has two configuration files.  This is a
+    little clunky and we know about the problem :)  We are working on getting
+    all configuration into cloud.yaml. Until that is fixed the variable in
+    globals.yml `kolla_install_type` must have the same contents as the
+    variable in cloud.yaml `install_type`. In this document we use the setting
+    `source` although `binary` could also be used.
 
 Modify Kolla ``/etc/kolla/globals.yml`` configuration file::
 
@@ -409,6 +433,10 @@ Modify Kolla ``/etc/kolla/globals.yml`` configuration file::
        Neutron interface name. E.g: `eth1`. This is the external
        interface that Neutron will use.  It must not have an IP address
        assigned to it.
+    3. If you try to deploy AIO, set `kolla_internal_vip_address` in
+       `/etc/kolla/globals.yml` to the IP address which is able to access from
+       the host. It's simple to set the IP address for `network_interface`.
+       In addition, set `enable_haproxy` to `no`.
 
 Add required configuration to the end of ``/etc/kolla/globals.yml``::
 
@@ -470,7 +498,11 @@ QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
 Generate the default configuration::
 
-    sudo kolla-ansible genconfig
+    pushd /usr/local/share/kolla-kubernetes/
+    sudo ansible-playbook -e ansible_python_interpreter=/usr/bin/python \
+    -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml \
+    -e CONFIG_DIR=/etc/kolla ./ansible/site.yml
+    popd
 
 Generate the Kubernetes secrets and register them with Kubernetes::
 
@@ -493,7 +525,7 @@ Build all Helm microcharts, service charts, and metacharts::
 
     kolla-kubernetes/tools/helm_build_all.sh .
 
-Check that all Helm images have been built by verifying the number is > 150::
+Check that all Helm images have been built by verifying the number is > 175::
 
     ls | grep ".tgz" | wc -l
 
@@ -501,61 +533,66 @@ Create a local cloud.yaml file for the deployment of the charts::
 
     cat <<EOF > cloud.yaml
     global:
-       kolla:
-         all:
-           docker_registry: docker.io
-           image_tag: "4.0.0"
-           kube_logger: false
-           external_vip: "192.168.7.105"
-           base_distro: "centos"
-           install_type: "source"
-           tunnel_interface: "docker0"
-         keystone:
-           all:
-             admin_port_external: "true"
-             dns_name: "192.168.7.105"
-           public:
-             all:
-               port_external: "true"
-         rabbitmq:
-           all:
-             cookie: 67
-         glance:
-           api:
-             all:
-               port_external: "true"
-         cinder:
-           api:
-             all:
-               port_external: "true"
-           volume_lvm:
-             all:
-               element_name: cinder-volume
-             daemonset:
-               lvm_backends:
-               - '192.168.7.105': 'cinder-volumes'
-         ironic:
-           conductor:
-             daemonset:
-               selector_key: "kolla_conductor"
-         nova:
-           placement_api:
-             all:
-               port_external: true
-           novncproxy:
-             all:
-               port: 6080
-               port_external: true
-         openvswitch:
-           all:
-             add_port: true
-             ext_bridge_name: br-ex
-             ext_interface_name: enp1s0f1
-             setup_bridge: true
-         horizon:
-           all:
-             port_external: true
+      kolla:
+        all:
+          docker_registry: docker.io
+          image_tag: "4.0.0"
+          kube_logger: false
+          external_vip: "192.168.7.105"
+          base_distro: "centos"
+          install_type: "source"
+          tunnel_interface: "docker0"
+        keystone:
+          all:
+            admin_port_external: "true"
+            dns_name: "192.168.7.105"
+            port: 5000
+          public:
+            all:
+              port_external: "true"
+        rabbitmq:
+          all:
+            cookie: 67
+        glance:
+          api:
+            all:
+              port_external: "true"
+        cinder:
+          api:
+            all:
+              port_external: "true"
+        volume_lvm:
+          all:
+            element_name: cinder-volume
+          daemonset:
+            lvm_backends:
+            - '192.168.7.105': 'cinder-volumes'
+        ironic:
+          conductor:
+            daemonset:
+              selector_key: "kolla_conductor"
+        nova:
+          placement_api:
+            all:
+              port_external: true
+          novncproxy:
+            all:
+              port: 6080
+              port_external: true
+        openvswitch:
+          all:
+            add_port: true
+            ext_bridge_name: br-ex
+            ext_interface_name: enp1s0f1
+            setup_bridge: true
+        horizon:
+          all:
+            port_external: true
     EOF
+
+.. warning::
+
+   Ubuntu does not currently work. Use centos.
 
 .. warning::
 
