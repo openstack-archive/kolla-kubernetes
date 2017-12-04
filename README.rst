@@ -2,6 +2,8 @@
 Team and repository tags
 ========================
 
+I am a minor change.
+
 .. image:: http://governance.openstack.org/badges/kolla-kubernetes.svg
     :target: http://governance.openstack.org/reference/tags/index.html
 
