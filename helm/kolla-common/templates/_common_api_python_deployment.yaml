@@ -133,7 +133,7 @@ spec:
         - name: exporter
           image: {{ include "haproxy_prometheus_image_full" . | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
-          command: [haproxy_exporter, "-haproxy.scrape-uri=unix:/haproxy/haproxy.sock", "-web.listen-address=:{{ $localVals.prometheusPort}}"]
+          command: [haproxy_exporter, "--haproxy.scrape-uri=unix:/haproxy/haproxy.sock", "--web.listen-address=:{{ $localVals.prometheusPort}}"]
           volumeMounts:
             - mountPath: /haproxy
               name: socket
