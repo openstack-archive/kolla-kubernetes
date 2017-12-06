@@ -1,0 +1,11 @@
+Code-Review+2: Jeffrey Zhang <jeffrey.zhang@99cloud.net>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review-1: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+1: SongHao <songhao@gohighsec.com>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 06 Dec 2017 17:23:55 +0000
+Reviewed-on: https://review.openstack.org/523490
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
