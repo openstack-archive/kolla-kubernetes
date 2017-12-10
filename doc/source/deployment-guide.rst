@@ -314,7 +314,7 @@ Step 3: Deploying kolla-kubernetes
 
 Override default RBAC settings::
 
-    kubectl update -f <(cat <<EOF
+    kubectl apply -f <(cat <<EOF
     apiVersion: rbac.authorization.k8s.io/v1alpha1
     kind: ClusterRoleBinding
     metadata:
