@@ -253,7 +253,7 @@ Deploy the Canal CNI driver::
     curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml -o rbac.yaml
     kubectl apply -f rbac.yaml
 
-    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml -o canal.yaml
+    curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml -o canal.yaml
     sed -i "s@10.244.0.0/16@10.1.0.0/16@" canal.yaml
     kubectl apply -f canal.yaml
 
