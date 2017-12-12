@@ -370,7 +370,8 @@ Clone kolla-kubernetes::
 
 Install kolla-ansible and kolla-kubernetes::
 
-    sudo pip install -U kolla-ansible/ kolla-kubernetes/
+    sudo pip install -U ./kolla-ansible/
+    sudo pip install -U ./kolla-kubernetes/
 
 Copy default Kolla configuration to /etc::
 
