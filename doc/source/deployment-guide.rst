@@ -180,6 +180,7 @@ Centos and Ubuntu
 Setup the DNS server with the service CIDR::
 
     sudo sed -i 's/10.96.0.10/10.3.3.10/g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    sudo sed -i '/^\[Service\]$/a Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 .. note::
 
@@ -203,7 +204,7 @@ Enable and start docker and kubelet::
 
 Deploy Kubernetes with kubeadm::
 
-    sudo kubeadm init --pod-network-cidr=10.1.0.0/16 --service-cidr=10.3.3.0/24
+    sudo kubeadm init --pod-network-cidr=10.1.0.0/16 --service-cidr=10.3.3.0/24 --skip-preflight-checks
 
 .. note::
 
