@@ -1,0 +1,10 @@
+Code-Review+2: Rich Wellum <rwellum@lenovo.com>
+Code-Review+1: Marcin Juszkiewicz <marcin.juszkiewicz@linaro.org>
+Code-Review+1: Duong Ha-Quang <duonghq@vn.fujitsu.com>
+Workflow+1: Rich Wellum <rwellum@lenovo.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 14 Dec 2017 13:29:31 +0000
+Reviewed-on: https://review.openstack.org/525473
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
