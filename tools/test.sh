@@ -9,12 +9,13 @@ grep orchestration_engine etc/kolla/globals.yml || echo orchestration_engine: KU
 #sudo yum install -y golang-bin || sudo apt-get install -y golang
 #tools/build_helm_templates.sh
 set -x
+. tools/get_arch.sh
 . tools/helm_versions.sh
 mkdir -p ~/.helm/plugins/template
 curl -L -o /tmp/helm-template.tar.gz "$HELM_TEMPLATE_URL"
 curl -L -o /tmp/helm.tar.gz "$HELM_URL"
 mkdir -p ~/bin
-tar --strip-components 1 -C ~/bin linux-amd64/helm -zxf /tmp/helm.tar.gz
+tar --strip-components 1 -C ~/bin linux-$ARCH/helm -zxf /tmp/helm.tar.gz
 tar -C ~/.helm/plugins/template/ -zxf /tmp/helm-template.tar.gz
 export PATH=$PATH:~/bin
 export HOME=$(cd ~; pwd)
