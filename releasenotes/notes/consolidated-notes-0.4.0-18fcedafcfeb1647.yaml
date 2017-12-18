@@ -62,12 +62,16 @@ features:
     * cinder-create-db-job
     * cinder-create-keystone-endpoint-admin-job
     * cinder-create-keystone-endpoint-adminv2-job
+    * cinder-create-keystone-endpoint-adminv3-job
     * cinder-create-keystone-endpoint-internal-job
     * cinder-create-keystone-endpoint-internalv2-job
+    * cinder-create-keystone-endpoint-internalv3-job
     * cinder-create-keystone-endpoint-public-job
     * cinder-create-keystone-endpoint-publicv2-job
+    * cinder-create-keystone-endpoint-publicv3-job
     * cinder-create-keystone-service-job
     * cinder-create-keystone-servicev2-job
+    * cinder-create-keystone-servicev3-job
     * cinder-create-keystone-user-job
     * cinder-manage-db-job
     * cinder-scheduler-statefulset
