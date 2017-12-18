@@ -2,9 +2,10 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 
-. tools/helm_versions.sh 
+. tools/get_arch.sh
+. tools/helm_versions.sh
 
-curl "$HELM_URL" | sudo tar --strip-components 1 -C /usr/bin linux-amd64/helm -zxf -
+curl "$HELM_URL" | sudo tar --strip-components 1 -C /usr/bin linux-$ARCH/helm -zxf -
 if [ ! -e ~/.kube/config ]; then
     mkdir -p ~/.kube
     sudo cat /etc/kubernetes/kubelet.conf > ~/.kube/config
