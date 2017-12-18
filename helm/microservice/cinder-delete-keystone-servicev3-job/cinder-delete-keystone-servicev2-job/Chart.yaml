@@ -1,0 +1,12 @@
+name: cinder-delete-keystone-servicev3-job
+version: 0.7.0-1
+description: Helm chart to delete the cinder keystone servicev3
+keywords:
+  - openstack
+  - cinder
+  - delete
+  - servicev3
+sources:
+  - http://github.com/openstack
+engine: gotpl
+#icon: A URL to an SVG or PNG image to be used as an icon (optional). make this point to the new project icons when ready
