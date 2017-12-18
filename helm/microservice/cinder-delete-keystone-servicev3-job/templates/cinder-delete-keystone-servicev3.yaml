@@ -1,0 +1,12 @@
+{{- $searchPath := ":global.kolla.cinder.delete_keystone_servicev3.job:global.kolla.cinder.delete_keystone_servicev3.all:global.kolla.cinder.all:global.kolla.all" }}
+{{- $resourceName := "cinder-delete-keystone-servicev3" }}
+{{- $netHostTrue := false }}
+{{- $podTypeBootstrap := true }}
+{{- $serviceName := "cinder" }}
+{{- $serviceType := "volume" }}
+{{- $description := "Openstack Block Storage" }}
+{{- $postfix := "v3" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "description" $description "postfix" $postfix "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- include "common_delete_keystone_service" $env }}
+{{- end }}
+

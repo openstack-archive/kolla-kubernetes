@@ -181,9 +181,12 @@ openstack_cinder_auth: "{'auth_url':'{{ keystone_auth_url }}','username':'{{ ope
 cinder_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v1/%(tenant_id)s"
 cinder_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v1/%(tenant_id)s"
 cinder_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v1/%(tenant_id)s"
-cinder_admin_endpointv2: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
-cinder_public_endpointv2: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
-cinder_internal_endpointv2: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_v2_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_v2_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_v2_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v2/%(tenant_id)s"
+cinder_v3_admin_endpoint: "http://cinder-api:{{ cinder_api_port }}/v3/%(tenant_id)s"
+cinder_v3_public_endpoint: "http://{{ kolla_kubernetes_external_vip }}:{{ cinder_api_port }}/v3/%(tenant_id)s"
+cinder_v3_internal_endpoint: "http://cinder-api:{{ cinder_api_port }}/v3/%(tenant_id)s"
 
 #######################
 # Configuration below, allows to configure multiple backends for Cinder.
