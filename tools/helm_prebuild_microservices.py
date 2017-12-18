@@ -102,14 +102,20 @@ common_create_keystone_admin = [
     'nova-placement-create-keystone-endpoint-admin-job',
     'cinder-create-keystone-service-job',
     'cinder-create-keystone-servicev2-job',
+    'cinder-create-keystone-servicev3-job',
     'cinder-create-keystone-endpoint-public-job',
     'cinder-create-keystone-endpoint-internal-job',
+    'cinder-create-keystone-endpoint-internalv2-job',
+    'cinder-create-keystone-endpoint-internalv3-job',
     'cinder-create-keystone-endpoint-admin-job',
     'cinder-create-keystone-endpoint-publicv2-job',
-    'cinder-create-keystone-endpoint-internalv2-job',
+    'cinder-create-keystone-endpoint-publicv3-job',
+    'cinder-create-keystone-endpoint-adminv-job',
     'cinder-create-keystone-endpoint-adminv2-job',
+    'cinder-create-keystone-endpoint-adminv3-job',
     'cinder-delete-keystone-service-job',
     'cinder-delete-keystone-servicev2-job',
+    'cinder-delete-keystone-servicev3-job',
     'cinder-delete-keystone-user-job',
     'glance-delete-keystone-service-job',
     'glance-delete-keystone-user-job',
@@ -203,8 +209,9 @@ def main():
             f.write("# and rerun tools/helm_prebuild.py\n")
             f.write(yaml.safe_dump(pkg_values, default_flow_style=False))
     if sys.stdout.isatty():
-            sys.stdout.write("\r                             \n")
-            sys.stdout.flush()
+        sys.stdout.write("\r                             \n")
+        sys.stdout.flush()
+
 
 if __name__ == '__main__':
     sys.exit(main())
