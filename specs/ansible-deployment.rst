@@ -82,7 +82,7 @@ Security impact
 ---------------
 
 The endpoint for the Kubernetes master can be assigned on startup.  The
-community can recommend running anisble on the same host as the Kubernetes
+community can recommend running ansible on the same host as the Kubernetes
 master.  The Ansible Kubernetes module has an outline for SSL support [1], but
 it's not fully implemented yet.
 
