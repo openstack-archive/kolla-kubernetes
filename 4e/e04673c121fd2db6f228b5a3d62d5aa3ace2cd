@@ -1,0 +1,13 @@
+Code-Review+1: Nguyen Van Trung <trungnv@vn.fujitsu.com>
+Code-Review+1: dharmendra kushwaha <dharmendra.kushwaha@nectechnologies.in>
+Code-Review+1: Anusha Ramineni <anusha.ramineni@nectechnologies.in>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 03 Jan 2018 18:17:02 +0000
+Reviewed-on: https://review.openstack.org/521023
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
