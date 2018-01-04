@@ -1,0 +1,10 @@
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+1: Eduardo Gonzalez <dabarren@gmail.com>
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Workflow+1: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 04 Jan 2018 22:07:38 +0000
+Reviewed-on: https://review.openstack.org/528724
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
