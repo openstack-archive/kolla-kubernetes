@@ -227,6 +227,10 @@ helm install kolla/cinder-create-keystone-servicev2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-servicev2 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/cinder-create-keystone-servicev3-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-servicev3 \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
 if [ "x$branch" != "x2" -a "x$branch" != "x3" ]; then
 helm install kolla/nova-placement-create-keystone-service-job --debug --version $VERSION \
     --namespace kolla --name nova-placement-create-keystone-service \
@@ -262,6 +266,10 @@ helm install kolla/cinder-create-keystone-endpoint-public-job --version $VERSION
 
 helm install kolla/cinder-create-keystone-endpoint-publicv2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-endpoint-publicv2 \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+helm install kolla/cinder-create-keystone-endpoint-publicv3-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-publicv3 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/glance-create-keystone-endpoint-public-job --version $VERSION \
@@ -348,12 +356,20 @@ helm install kolla/cinder-create-keystone-endpoint-internalv2-job --version $VER
     --namespace kolla --name cinder-create-keystone-endpoint-internalv2 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
+helm install kolla/cinder-create-keystone-endpoint-internalv3-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-internalv3 \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
 helm install kolla/cinder-create-keystone-endpoint-admin-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-endpoint-admin \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/cinder-create-keystone-endpoint-adminv2-job --version $VERSION \
     --namespace kolla --name cinder-create-keystone-endpoint-adminv2 \
+    --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
+
+helm install kolla/cinder-create-keystone-endpoint-adminv3-job --version $VERSION \
+    --namespace kolla --name cinder-create-keystone-endpoint-adminv3 \
     --values /tmp/general_config.yaml --values /tmp/ceph_config.yaml
 
 helm install kolla/glance-create-keystone-endpoint-internal-job --version $VERSION \
@@ -422,6 +438,11 @@ helm delete --purge cinder-create-keystone-servicev2
 helm delete --purge cinder-create-keystone-endpoint-publicv2
 helm delete --purge cinder-create-keystone-endpoint-internalv2
 helm delete --purge cinder-create-keystone-endpoint-adminv2
+
+helm delete --purge cinder-create-keystone-servicev3
+helm delete --purge cinder-create-keystone-endpoint-publicv3
+helm delete --purge cinder-create-keystone-endpoint-internalv3
+helm delete --purge cinder-create-keystone-endpoint-adminv3
 
 helm install kolla/cinder-volume-ceph-statefulset --version $VERSION \
     --namespace kolla --name cinder-volume-ceph-statefulset \

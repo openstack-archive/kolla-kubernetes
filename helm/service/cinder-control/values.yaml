@@ -87,6 +87,33 @@ global:
                             - cinder-create-keystone-user
                             service:
                             - keystone-admin
+                publicv3:
+                    job:
+                        dependencies:
+                            jobs:
+                            - cinder-create-keystone-servicev3
+                            - cinder-create-keystone-user
+                            - cinder-create-keystone-endpoint-internalv3
+                            - cinder-create-keystone-endpoint-adminv3
+                            service:
+                            - keystone-admin
+                internalv3:
+                    job:
+                        dependencies:
+                            jobs:
+                            - cinder-create-keystone-servicev3
+                            - cinder-create-keystone-user
+                            - cinder-create-keystone-endpoint-adminv3
+                            service:
+                            - keystone-admin
+                adminv3:
+                    job:
+                        dependencies:
+                            jobs:
+                            - cinder-create-keystone-servicev3
+                            - cinder-create-keystone-user
+                            service:
+                            - keystone-admin
             api:
                 deployment:
                     dependencies:
@@ -97,6 +124,9 @@ global:
                         - cinder-create-keystone-endpoint-publicv2
                         - cinder-create-keystone-endpoint-internalv2
                         - cinder-create-keystone-endpoint-adminv2
+                        - cinder-create-keystone-endpoint-publicv3
+                        - cinder-create-keystone-endpoint-internalv3
+                        - cinder-create-keystone-endpoint-adminv3
                         - cinder-create-db
                         - cinder-manage-db
                         service:
@@ -114,6 +144,9 @@ global:
                         - cinder-create-keystone-endpoint-publicv2
                         - cinder-create-keystone-endpoint-internalv2
                         - cinder-create-keystone-endpoint-adminv2
+                        - cinder-create-keystone-endpoint-publicv3
+                        - cinder-create-keystone-endpoint-internalv3
+                        - cinder-create-keystone-endpoint-adminv3
                         - cinder-create-db
                         - cinder-manage-db
                         service:

@@ -14,6 +14,9 @@ dependencies:
   - name: cinder-create-keystone-servicev2-job
     repository: file://../../microservice/cinder-create-keystone-servicev2-job
     version: 0.7.0-1
+  - name: cinder-create-keystone-servicev3-job
+    repository: file://../../microservice/cinder-create-keystone-servicev3-job
+    version: 0.7.0-1
   - name: cinder-create-keystone-user-job
     repository: file://../../microservice/cinder-create-keystone-user-job
     version: 0.7.0-1
@@ -34,6 +37,15 @@ dependencies:
     version: 0.7.0-1
   - name: cinder-create-keystone-endpoint-adminv2-job
     repository: file://../../microservice/cinder-create-keystone-endpoint-adminv2-job
+    version: 0.7.0-1
+  - name: cinder-create-keystone-endpoint-publicv3-job
+    repository: file://../../microservice/cinder-create-keystone-endpoint-publicv3-job
+    version: 0.7.0-1
+  - name: cinder-create-keystone-endpoint-internalv3-job
+    repository: file://../../microservice/cinder-create-keystone-endpoint-internalv3-job
+    version: 0.7.0-1
+  - name: cinder-create-keystone-endpoint-adminv3-job
+    repository: file://../../microservice/cinder-create-keystone-endpoint-adminv3-job
     version: 0.7.0-1
   - name: cinder-api-deployment
     repository: file://../../microservice/cinder-api-deployment

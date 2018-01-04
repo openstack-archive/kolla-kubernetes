@@ -1017,6 +1017,17 @@ cinder-create-keystone-endpoint-adminv2-job:
                         all:
                             service: cinder-api
 
+cinder-create-keystone-endpoint-adminv3-job:
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
+
 cinder-create-keystone-endpoint-public-job:
         global:
             kolla:
@@ -1028,6 +1039,16 @@ cinder-create-keystone-endpoint-public-job:
                             port: 8776
 
 cinder-create-keystone-endpoint-publicv2-job:
+        global:
+            kolla:
+                all:
+                    external_vip:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+
+cinder-create-keystone-endpoint-publicv3-job:
         global:
             kolla:
                 all:
@@ -1049,6 +1070,17 @@ cinder-create-keystone-endpoint-internal-job:
                             service: cinder-api
 
 cinder-create-keystone-endpoint-internalv2-job:
+        global:
+            kolla:
+                cinder:
+                    api:
+                        all:
+                            port: 8776
+                    create_keystone_endpoint:
+                        all:
+                            service: cinder-api
+
+cinder-create-keystone-endpoint-internalv3-job:
         global:
             kolla:
                 cinder:
