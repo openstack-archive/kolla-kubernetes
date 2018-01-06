@@ -31,7 +31,7 @@ spec:
             - sh
             - -ce
             - |
-              mkdir /var/log/kolla/nova;
+              mkdir -p /var/log/kolla/nova;
               chown -R nova: /var/log/kolla/nova;
               chmod 755 /var/log/kolla/nova;
           volumeMounts:

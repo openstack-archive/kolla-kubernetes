@@ -77,7 +77,7 @@ spec:
             - sh
             - -ce
             - |
-              mkdir /var/log/kolla/cinder;
+              mkdir -p /var/log/kolla/cinder;
               chown -R cinder: /var/log/kolla/cinder
           volumeMounts:
             - name: kolla-logs
