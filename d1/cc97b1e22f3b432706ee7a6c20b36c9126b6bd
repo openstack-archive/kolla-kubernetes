@@ -1,0 +1,10 @@
+Code-Review+2: Michal Jastrzebski (inc0) <michal.jastrzebski@intel.com>
+Code-Review+2: Serguei Bezverkhi <sbezverk@cisco.com>
+Workflow+1: Serguei Bezverkhi <sbezverk@cisco.com>
+Code-Review+2: Rich Wellum <rwellum@lenovo.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 08 Jan 2018 22:54:41 +0000
+Reviewed-on: https://review.openstack.org/516727
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
