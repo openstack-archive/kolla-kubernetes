@@ -184,7 +184,7 @@ Setup the DNS server with the service CIDR::
 .. note::
 
    Kubernetes uses x.x.x.10 as the DNS server.  The Kolla developers don't
-   know precisely why this is the case, however, current speculation is that
+   know precisely why this is the case, however, current speculation is
    that 1..9 are reserved for future expansion of Kubernetes infrastructure
    services.
 
