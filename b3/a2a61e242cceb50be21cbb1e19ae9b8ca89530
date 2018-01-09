@@ -1,0 +1,9 @@
+Code-Review+2: Rich Wellum <rwellum@lenovo.com>
+Code-Review+1: caoyuan <cao.yuan@99cloud.net>
+Workflow+1: Rich Wellum <rwellum@lenovo.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 09 Jan 2018 14:26:03 +0000
+Reviewed-on: https://review.openstack.org/529554
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
