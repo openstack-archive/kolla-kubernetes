@@ -20,6 +20,8 @@ node_config_directory: "/etc/kolla/{{ project }}"
 # Kolla options
 ###################
 
+std_logger: true
+
 # Which orchestration engine to use. Valid options are [ ANSIBLE, KUBERNETES ]
 orchestration_engine: "KUBERNETES"
 
