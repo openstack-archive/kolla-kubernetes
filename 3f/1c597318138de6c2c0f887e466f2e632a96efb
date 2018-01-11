@@ -1,0 +1,17 @@
+Code-Review+1: Britt Houser <bhouser@cisco.com>
+Code-Review+2: Swapnil Kulkarni (coolsvap) <me@coolsvap.net>
+Code-Review+1: caoyuan <cao.yuan@99cloud.net>
+Code-Review+1: Long Zhang <zhanglong@gohighsec.com>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Code-Review+1: yanpeifei <yanpeifei@gohighsec.com>
+Code-Review+1: Chason Chan <chason.chan@foxmail.com>
+Code-Review+1: Duong Ha-Quang <duonghq@vn.fujitsu.com>
+Code-Review+1: zongyimin600 <zongyimin600@gmail.com>
+Code-Review+1: guochunting <guochunting@inspur.com>
+Workflow+1: Rich Wellum <rwellum@lenovo.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 11 Jan 2018 09:48:22 +0000
+Reviewed-on: https://review.openstack.org/498332
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
