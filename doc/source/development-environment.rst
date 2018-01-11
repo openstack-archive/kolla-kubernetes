@@ -246,9 +246,9 @@ Now we can install Ansible:
 .. code-block:: console
 
     easy_install --user pip
-    printf 'if [ -f ~/.bashrc ]; then\n  source ~/.bashrc\nfi\n' >> $HOME/.profile
+    printf 'if [ -f ~/.bashrc ]; then\n . ~/.bashrc\nfi\n' >> $HOME/.profile
     printf 'export PATH=$PATH:$HOME/Library/Python/2.7/bin\n' >> $HOME/.bashrc
-    source $HOME/.profile
+    . $HOME/.profile
     pip install --user --upgrade ansible
     sudo mkdir /etc/ansible
     sudo curl -L https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg -o /etc/ansible/ansible.cfg

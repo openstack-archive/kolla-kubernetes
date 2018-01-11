@@ -679,7 +679,7 @@ If you didn't run watch in a different terminal, you can run it now::
 Generate openrc file::
 
     kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext
-    source ~/keystonerc_admin
+    . ~/keystonerc_admin
 
 .. note::
 
