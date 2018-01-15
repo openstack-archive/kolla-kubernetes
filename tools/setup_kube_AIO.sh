@@ -100,9 +100,9 @@ sudo systemctl enable docker
 sudo systemctl enable kubelet
 
 
-## Setup Canal
-echo "Setup Canal"
-cd /opt/kolla-kubernetes && tests/bin/setup_canal.sh
+## Setup Sdn
+echo "Setup Sdn. For x86_64 will setup Canal, for non-x86, will setup Flannel"
+cd /opt/kolla-kubernetes && tests/bin/setup_sdn.sh
 
 
 ## Setup Helm
