@@ -102,7 +102,7 @@ sudo systemctl enable kubelet
 
 ## Setup Canal
 echo "Setup Canal"
-cd /opt/kolla-kubernetes && tests/bin/setup_canal.sh
+cd /opt/kolla-kubernetes && tests/bin/setup_sdn.sh
 
 
 ## Setup Helm
