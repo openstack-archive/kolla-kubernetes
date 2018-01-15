@@ -166,6 +166,16 @@ KOLLA_FINAL_PROGRESS = 0
 global K8S_CLEANUP_PROGRESS
 K8S_CLEANUP_PROGRESS = 0
 
+CANAL_RBAC = 'https://raw.githubusercontent.com/projectcalico/canal/master/' \
+             'k8s-install/1.7/rbac.yaml'
+CANAL_CONFIG = 'https://raw.githubusercontent.com/projectcalico/canal/master/' \
+               'k8s-install/1.7/canal.yaml'
+FLANNEL_CONFIG = 'https://raw.githubusercontent.com/coreos/flannel/v0.9.1/' \
+                 'Documentation/kube-flannel.yml'
+FLANNEL_RBAC = 'https://raw.githubusercontent.com/coreos/flannel/master/' \
+               'Documentation/k8s-manifests/kube-flannel-rbac.yml'
+WEAVE_CONFIG = "https://cloud.weave.works/k8s/net?k8s-version=" \
+               "$(kubectl version | base64 | tr -d '\n')"
 
 def set_logging():
     '''Set basic logging format.'''
@@ -275,6 +285,9 @@ def parse_args():
     parser.add_argument('-dr', '--docker_repo', type=str, default='lokolla',
                         help='Specify a different docker repo '
                         'the default(lokolla)')
+    parser.add_argument('-net', '--network-driver', type=str, default='canal',
+                        help='Specify a different network driver for '
+                             'Kubernetes')
 
     return parser.parse_args()
 
@@ -1133,23 +1146,35 @@ def k8s_load_kubeadm_creds(args):
     print('  Note "kubectl get pods --all-namespaces" should work now')
 
 
-def k8s_deploy_canal_sdn(args):
+def k8s_deploy_sdn(args):
     '''SDN/CNI Driver of choice is Canal'''
 
     # The ip range in canal.yaml,
     # /etc/kubernetes/manifests/kube-controller-manager.yaml and the kubeadm
     # init command must match
+    network_driver = args.network_driver
     print_progress(
-        'Kubernetes', 'Deploy pod network SDN using Canal CNI',
-        K8S_FINAL_PROGRESS)
-
-    answer = curl(
-        '-L',
-        'https://raw.githubusercontent.com/projectcalico/canal/master/'
-        'k8s-install/1.7/rbac.yaml',
-        '-o', '/tmp/rbac.yaml')
-    logger.debug(answer)
-    run_shell(args, 'kubectl create -f /tmp/rbac.yaml')
+        'Kubernetes', 'Deploy pod network SDN using %s CNI' %
+                      args.network_driver, K8S_FINAL_PROGRESS)
+    if network_driver == 'canal':
+        rbac_url = CANAL_RBAC
+        config_url = CANAL_CONFIG
+    elif network_driver == 'flannel':
+        rbac_url = FLANNEL_RBAC
+        config_url = FLANNEL_CONFIG
+    elif network_driver == 'weave':
+        config_url = WEAVE_CONFIG
+        rbac_url = None
+    else:
+        print_progress(
+            'Kubernetes', 'Deploy Kubernetes CNI driver failed, '
+                          'supported network driver should be '
+                          'flannel, canal or weave', K8S_FINAL_PROGRESS)
+        sys.exit(1)
+    if rbac_url:
+        answer = curl('-L', rbac_url, '-o', '/tmp/rbac.yaml')
+        logger.debug(answer)
+        run_shell(args, 'kubectl create -f /tmp/rbac.yaml')
 
     if args.demo:
         demo(args, 'Why use a CNI Driver?',
@@ -1173,16 +1198,12 @@ def k8s_deploy_canal_sdn(args):
              'operations, and with\n'
              'support for CNI is taking the next step toward a '
              'common ground for\nnetworking.')
-    answer = curl(
-        '-L',
-        'https://raw.githubusercontent.com/projectcalico/canal/master/'
-        'k8s-install/1.7/canal.yaml',
-        '-o', '/tmp/canal.yaml')
+    answer = curl('-L', config_url, '-o', '/tmp/sdn.yaml')
     logger.debug(answer)
-    run_shell(args, 'sudo chmod 777 /tmp/canal.yaml')
+    run_shell(args, 'sudo chmod 777 /tmp/sdn.yaml')
     run_shell(args,
-              'sudo sed -i s@10.244.0.0/16@10.1.0.0/16@ /tmp/canal.yaml')
-    run_shell(args, 'kubectl create -f /tmp/canal.yaml')
+              'sudo sed -i s@10.244.0.0/16@10.1.0.0/16@ /tmp/sdn.yaml')
+    run_shell(args, 'kubectl create -f /tmp/sdn.yaml')
     demo(args,
          'Wait for CNI to be deployed',
          'A successfully deployed CNI will result in a valid dns pod')
@@ -2579,7 +2600,7 @@ def k8s_bringup_kubernetes_cluster(args):
     k8s_load_kubeadm_creds(args)
     k8s_wait_for_kube_system(args)
     k8s_add_api_server(args)
-    k8s_deploy_canal_sdn(args)
+    k8s_deploy_sdn(args)
     k8s_wait_for_pod_start(args, 'canal')
     k8s_wait_for_running_negate(args)
     k8s_schedule_master_node(args)
