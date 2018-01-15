@@ -30,7 +30,7 @@ tools/setup_kubernetes.sh master
 
 kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
-tests/bin/setup_canal.sh
+tests/bin/setup_sdn.sh
 
 NODE=$(hostname -s)
 kubectl label node $NODE kolla_controller=true kolla_compute=true \

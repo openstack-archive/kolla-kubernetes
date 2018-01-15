@@ -41,7 +41,7 @@ kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 #
 # Setting up networking on master, before slave nodes in multinode
 # scenario will attempt to join the cluster
-tests/bin/setup_canal.sh
+tests/bin/setup_sdn.sh
 
 # Turn up kube-proxy logging enable only for debug 
 # kubectl -n kube-system get ds -l 'component=kube-proxy-amd64' -o json \
