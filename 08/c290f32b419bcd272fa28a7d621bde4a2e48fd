@@ -1,0 +1,15 @@
+Code-Review+1: Nguyen Van Trung <trungnv@vn.fujitsu.com>
+Code-Review+2: Kevin Fox <kevin@efox.cc>
+Code-Review+1: caoyuan <cao.yuan@99cloud.net>
+Code-Review+1: zhubingbing <zhu.bingbing@99cloud.net>
+Code-Review+1: zongyimin600 <zongyimin600@gmail.com>
+Code-Review+1: yanpeifei <yanpeifei@gohighsec.com>
+Code-Review+1: zongyimin <2503634009@qq.com>
+Code-Review+1: Long Zhang <zhanglong@gohighsec.com>
+Workflow+1: Kevin Fox <kevin@efox.cc>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 24 Jan 2018 18:13:30 +0000
+Reviewed-on: https://review.openstack.org/522907
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
