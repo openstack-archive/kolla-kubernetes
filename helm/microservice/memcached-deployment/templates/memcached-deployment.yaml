@@ -68,7 +68,7 @@ spec:
         - name: exporter
           image: {{ include "memcached_prometheus_image_full" . | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
-          command: [memcached_exporter, "-memcached.pid-file=/memcached/memcached.pid", "-web.listen-address=:{{ $localVals.prometheusPort}}"]
+          command: [memcached_exporter, "--memcached.pid-file=/memcached/memcached.pid", "--web.listen-address=:{{ $localVals.prometheusPort}}"]
           volumeMounts:
             - mountPath: /memcached
               name: pid
