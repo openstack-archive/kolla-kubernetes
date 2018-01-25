@@ -1580,6 +1580,7 @@ def kolla_add_to_globals(args):
     with open(new, "w") as w:
         w.write("""
 kolla_install_type: "source"
+kolla_base_distro: "%s"
 tempest_image_alt_id: "{{ tempest_image_id }}"
 tempest_flavor_ref_alt_id: "{{ tempest_flavor_ref_id }}"
 
@@ -1616,7 +1617,7 @@ glance_backend_ceph: "no"
 cinder_backend_ceph: "no"
 nova_backend_ceph: "no"
 enable_neutron_provider_networks: "yes"
-""")
+""" % args.base_distro)
     run_shell(args, 'cat %s | sudo tee -a %s' % (new, add_to))
 
     if args.edit_globals:
