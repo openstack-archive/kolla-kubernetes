@@ -1,0 +1,67 @@
+- hosts: all
+  name: Autoconverted job legacy-kolla-kubernetes-deploy-centos-source-4-helm-entrypoint
+    from old job gate-kolla-kubernetes-deploy-centos-source-4-helm-entrypoint-nv
+  tasks:
+
+    - name: Ensure legacy workspace directory
+      file:
+        path: '{{ ansible_user_dir }}/workspace'
+        state: directory
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          CLONEMAP=`mktemp`
+          REQS_DIR=`mktemp -d`
+          function cleanup {
+              mkdir -p $WORKSPACE
+              rm -rf $CLONEMAP $REQS_DIR
+          }
+          trap cleanup EXIT
+          cat > $CLONEMAP << EOF
+          clonemap:
+            - name: $ZUUL_PROJECT
+              dest: .
+          EOF
+          # zuul cloner works poorly if there are 2 names that are the
+          # same in here.
+          if [[ "$ZUUL_PROJECT" != "openstack/requirements" ]]; then
+          cat >> $CLONEMAP << EOF
+            - name: openstack/requirements
+              dest: $REQS_DIR
+          EOF
+          fi
+          /usr/zuul-env/bin/zuul-cloner -m $CLONEMAP --cache-dir /opt/git \
+              git://git.openstack.org $ZUUL_PROJECT openstack/requirements
+          # REQS_DIR is not set for openstack/requirements and there is also
+          # no need to copy in this case.
+          if [[ "$ZUUL_PROJECT" != "openstack/requirements" ]]; then
+              cp $REQS_DIR/upper-constraints.txt ./
+          fi
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          sudo yum-config-manager --enable epel || true
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: /usr/local/jenkins/slave_scripts/install-distro-packages.sh
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          tools/setup_gate.sh deploy centos source helm-entrypoint centos-7 shell 4 gate
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
