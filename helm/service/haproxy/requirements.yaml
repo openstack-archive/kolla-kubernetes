@@ -1,0 +1,7 @@
+dependencies:
+  - name: haproxy-daemonset
+    repository: file://../../microservice/haproxy-daemonset
+    version: 0.7.0-1
+  - name: keepalived-daemonset
+    repository: file://../../microservice/keepalived-daemonset
+    version: 0.7.0-1

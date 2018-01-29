@@ -585,6 +585,25 @@ kolla-kubernetes:
           port_name: kibana
           image: kibana_image_full
           check_path: /
+  - name: haproxy
+    pods:
+    - name: haproxy
+      containers:
+      - name: haproxy
+    - name: haproxy
+      containers:
+      - name: haproxy
+    resources:
+      configmap:
+      - name: haproxy
+        template: services/haproxy/haproxy-configmap.yml.j2
+      secret:
+      disk:
+      pv:
+      pvc:
+      svc:
+      bootstrap:
+      pod:
   - name: keepalived
     pods:
     - name: keepalived

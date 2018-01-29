@@ -1,7 +1,7 @@
 {{- $restype := .Values.type }}
-{{- $searchPath := ":global.kolla.keepalived.daemonset:global.kolla.keepalived.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.haproxy.daemonset:global.kolla.haproxy.all:global.kolla.all" }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
-{{- $_ := set $c "contName" "keepalived" }}
+{{- $_ := set $c "contName" "haproxy" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
@@ -9,25 +9,24 @@
 {{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
 {{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
-{{- $resourceName := "keepalived" }}
+{{- $resourceName := "haproxy" }}
 {{- $netHostTrue := true }}
 {{- $podTypeBootstrap := false }}
-{{- $apiInterface := include "kolla_val_get_str" (dict "key" "api_interface" "searchPath" $searchPath "Values" .Values ) }}
 {{- $kollaKubernetesExternalVIP := include "kolla_val_get_str" (dict "key" "kolla_kubernetes_external_vip" "searchPath" $searchPath "Values" .Values ) }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: keepalived
+  name: haproxy
   labels:
-    component: keepalived
-    system: keepalived
+    component: haproxy
+    system: haproxy
 spec:
   template:
     metadata:
       labels:
-        component: keepalived
-        system: keepalived
+        component: haproxy
+        system: haproxy
     spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: True
@@ -35,7 +34,7 @@ spec:
           {{ $selectorKey }}: {{ $selectorValue | quote }}
       initContainers:
 {{- include "common_dependency_container" $env | indent 8 }}
-        - name: initialize-keepalived
+        - name: initialize-haproxy
           image: {{ $imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           command:
@@ -43,9 +42,9 @@ spec:
             - -xec
             - |
               cp -a /srv/configmap/..data/* /srv/pod-main-config/;
-              cat /srv/pod-main-config/keepalived.conf;
+              cat /srv/pod-main-config/haproxy.conf;
           volumeMounts:
-            - name: keepalived-configmap
+            - name: haproxy-configmap
               mountPath: /srv/configmap
             - name: pod-main-config
               mountPath: /srv/pod-main-config
@@ -62,8 +61,7 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  sudo ifconfig {{ $apiInterface }} delete {{ $kollaKubernetesExternalVIP }};
-                  kill -HUP $(</var/run/keepalived.pid);
+                  kill -HUP $(</var/run/haproxy.pid);
           securityContext:
             privileged: true
           env:
@@ -74,7 +72,7 @@ spec:
             - mountPath: {{ $containerConfigDirectory }}
               name: pod-main-config
             - mountPath: /var/run
-              name: keepalived-run
+              name: haproxy-run
             - mountPath: /lib/modules
               name: host-lib-modules
               readOnly: true
@@ -83,15 +81,15 @@ spec:
 {{- include "common_volumes" . | indent 8 }}
         - name: pod-main-config
           emptyDir: {}
-        - name: keepalived-run
+        - name: haproxy-run
           hostPath:
             path: /var/run
         - name: host-lib-modules
           hostPath:
             path: /lib/modules
-        - name: keepalived-configmap
+        - name: haproxy-configmap
           configMap:
-            name: keepalived
+            name: haproxy
         - name: host-var-lib-kk
           hostPath:
             path: /var/lib/kolla-kubernetes

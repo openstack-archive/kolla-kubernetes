@@ -304,7 +304,7 @@ keepalived-daemonset:
             kolla:
                 keepalived:
                     all:
-                        api_interface: br-ex 
+                        api_interface: eth0
 
 rabbitmq-init-element-job:
         global:

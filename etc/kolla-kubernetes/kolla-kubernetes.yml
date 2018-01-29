@@ -250,6 +250,34 @@ ceph_osd_data_dev:
 
 rabbitmq_management_external: "no"
 
+########################################
+# Allow to use HA Kubernetes Masters 
+########################################
+# If HA Kubernetes masters are aleady set up, in other words, a external IP for 
+# a master cluster is assigned and a reverse proxy for kube-api is installed,
+# all you need to do are to configure the reverse proxy for all services to
+# the reverse proxy and apply the VIP to some variables
+#
+# If not, you need to add master replicas yourself and install Keepalived for VIP 
+# and reverse proxy for all services using haproxy helm charts.
+# And the next step is to configure k8s for HA, e.g. configuring the reverse proxy 
+# for kube-api, clustering etcd servers and so on (The full details are beyond 
+# the scope of kolla-k8s, Refer to the following section for further details: 
+# https://kubernetes.io/docs/admin/high-availability/)).
+#
+#kolla_kubernetes_masters:
+#- "10.57.120.200"
+#- "10.57.120.201"
+
+######################
+# HAProxy variables
+########################
+#haproxy_client_timeout: "1m"
+#haproxy_server_timeout: "1m"
+#
+#haproxy_glance_api_client_timeout: "6h"
+#haproxy_glance_api_server_timeout: "6h"
+
 ########################
 # Nodeport variables
 ########################

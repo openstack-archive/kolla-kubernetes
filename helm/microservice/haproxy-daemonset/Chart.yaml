@@ -1,0 +1,11 @@
+apiVersion: v1
+version: 0.7.0-1
+description: haproxy microservice chart
+name: haproxy-daemonset
+keywords:
+  - openstack
+  - haproxy
+home: http://www.openstack.org
+sources:
+  - http://github.com/openstack
+engine: gotpl
