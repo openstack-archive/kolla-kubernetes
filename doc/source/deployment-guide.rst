@@ -470,7 +470,8 @@ QEMU libvirt functionality and enable a workaround for a bug in libvirt::
 
 Generate the default configuration::
 
-    sudo kolla-ansible genconfig
+    ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla ansible/site.yml
+
 
 Generate the Kubernetes secrets and register them with Kubernetes::
 
