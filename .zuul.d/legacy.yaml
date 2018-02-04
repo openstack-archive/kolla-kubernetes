@@ -1,6 +1,4 @@
----
 - project:
-    name: openstack/kolla-kubernetes
     check:
       jobs:
         - kolla-kubernetes-deploy-centos-binary-2-ceph-multi:
