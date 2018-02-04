@@ -17,7 +17,7 @@ under ./doc/build/html.
 ::
 
     # Build the docs
-    tox -e docs-constraints -v
+    tox -e docs -v
 
     # Preview the locally-generated HTML pages within a web browser
     open ./doc/build/html/index.html
