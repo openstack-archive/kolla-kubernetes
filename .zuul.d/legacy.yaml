@@ -1,6 +1,4 @@
----
 - project:
-    name: openstack/kolla-kubernetes
     check:
       jobs:
         - kolla-kubernetes-deploy-centos-binary-2-ceph-multi:
@@ -144,201 +142,210 @@
               - ^doc/.*
 
 - job:
+    name: kolla-kubernetes-base
+    description: |
+      This job runs provides the base required projects for
+      legacy kolla-kubernetes jobs.
+    parent: legacy-base
+    required-projects:
+      - openstack/requirements
+
+- job:
     name: kolla-kubernetes-deploy-centos-binary-2-ceph
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-ceph-multi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-multi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-multi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-multi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-multi/post.yaml
     nodeset: centos-7-2-node
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-ceph-reboot
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-reboot/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-reboot/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-reboot/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-ceph-reboot/post.yaml
     nodeset: centos-7-2-node
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-external-ovs
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-external-ovs/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-external-ovs/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-external-ovs/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-external-ovs/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-helm-compute-kit
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-compute-kit/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-compute-kit/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-compute-kit/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-compute-kit/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-helm-entrypoint
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-entrypoint/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-entrypoint/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-entrypoint/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-entrypoint/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-helm-operator
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-operator/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-operator/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-operator/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-helm-operator/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-iscsi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-iscsi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-iscsi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-iscsi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-2-iscsi/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-3-ceph-multi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-3-ceph-multi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-3-ceph-multi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-3-ceph-multi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-3-ceph-multi/post.yaml
     nodeset: centos-7-2-node
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-4-ceph-multi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-ceph-multi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-ceph-multi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-ceph-multi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-ceph-multi/post.yaml
     nodeset: centos-7-2-node
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-4-helm-compute-kit
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-compute-kit/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-compute-kit/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-compute-kit/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-compute-kit/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-4-helm-entrypoint
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-entrypoint/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-entrypoint/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-entrypoint/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-4-helm-entrypoint/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-t-ceph-multi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-t-ceph-multi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-binary-t-ceph-multi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-t-ceph-multi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-binary-t-ceph-multi/post.yaml
     nodeset: centos-7-2-node
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-source-4-helm-compute-kit
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-compute-kit/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-compute-kit/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-compute-kit/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-compute-kit/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-source-4-helm-entrypoint
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-entrypoint/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-entrypoint/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-entrypoint/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-helm-entrypoint/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-source-4-ironic
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-ironic/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-ironic/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-ironic/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-ironic/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-source-4-microchart-ansible
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-microchart-ansible/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-microchart-ansible/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-microchart-ansible/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-4-microchart-ansible/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-centos-source-t-iscsi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-t-iscsi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-centos-source-t-iscsi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-t-iscsi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-centos-source-t-iscsi/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-ubuntu-binary-2-ceph
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-ceph/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-ceph/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-ceph/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-ceph/post.yaml
     nodeset: ubuntu-xenial
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-ubuntu-binary-2-iscsi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-iscsi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-iscsi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-iscsi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-binary-2-iscsi/post.yaml
     nodeset: ubuntu-xenial
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-ubuntu-source-4-ironic
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-ironic/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-ironic/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-ironic/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-ironic/post.yaml
     nodeset: ubuntu-xenial
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-ubuntu-source-4-microchart-ansible
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-microchart-ansible/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-microchart-ansible/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-microchart-ansible/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-4-microchart-ansible/post.yaml
     nodeset: ubuntu-xenial
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-deploy-ubuntu-source-t-iscsi
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-t-iscsi/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-t-iscsi/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-t-iscsi/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-deploy-ubuntu-source-t-iscsi/post.yaml
     nodeset: ubuntu-xenial
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-upgrade-centos-binary-2-ceph
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-2-ceph/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-2-ceph/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-2-ceph/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-2-ceph/post.yaml
     nodeset: centos-7
     timeout: 3600
 
 - job:
     name: kolla-kubernetes-upgrade-centos-binary-3-ceph
     parent: kolla-kubernetes-base
-    run: playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-3-ceph/run.yaml
-    post-run: playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-3-ceph/post.yaml
+    run: tests/playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-3-ceph/run.yaml
+    post-run: tests/playbooks/legacy/kolla-kubernetes-upgrade-centos-binary-3-ceph/post.yaml
     nodeset: centos-7
     timeout: 3600
