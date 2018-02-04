@@ -1,6 +1,4 @@
----
 - project:
-    name: openstack/kolla-kubernetes
     check:
       jobs:
         - kolla-kubernetes-deploy-centos-binary-2-ceph-multi:
@@ -142,6 +140,15 @@
               - ^.*\.rst$
               - ^deploy-guide/source/.*
               - ^doc/.*
+
+- job:
+    name: kolla-kubernetes-base
+    description: |
+      This job runs provides the base required projects for
+      legacy kolla-kubernetes jobs.
+    parent: legacy-base
+    required-projects:
+      - openstack/requirements
 
 - job:
     name: kolla-kubernetes-deploy-centos-binary-2-ceph
