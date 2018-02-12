@@ -50,6 +50,9 @@ case "$BRANCH" in
        ;;
 esac
 
+# TODO Super ugly. Its on in gate but don't do this without a python venv.
+sudo pip install python-openstackclient
+
 #
 # If TYPE is 'source', kolla_install_type 'source' must be added
 # to kolla_config, to generate source based configs and not binary
