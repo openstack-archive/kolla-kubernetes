@@ -8,6 +8,8 @@ exec 2<&-
 exec 1<>$WORKSPACE/logs/gate_log_capture.txt
 exec 2>&1
 
+
+. .venv/bin/activate
 . ~/keystonerc_admin
 mkdir -p $WORKSPACE/logs/pods
 mkdir -p $WORKSPACE/logs/svc
@@ -135,7 +137,7 @@ sudo vbmc show vm-1 > $WORKSPACE/logs/vbmc_show.txt
 #
 # Ironic realted logs
 #
-$DIR/tools/build_local_admin_keystonerc.sh
+[ ! -f ~/keystonerc_admin ] && $DIR/tools/build_local_admin_keystonerc.sh
 . ~/keystonerc_admin
 openstack baremetal node list > $WORKSPACE/logs/baremetal_node_list.txt
 node_id=$(openstack baremetal node list -c "UUID" -f value)
