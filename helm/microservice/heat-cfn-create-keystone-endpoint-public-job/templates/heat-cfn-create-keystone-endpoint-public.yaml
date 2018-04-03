@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.heat.create_keystone_endpoint.admin.job:global.kolla.heat.create_keystone_endpoint.all:global.kolla.heat.api_cfn.all:global.kolla.heat.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.heat.api_cfn.create_keystone_endpoint.admin.job:global.kolla.heat.api_cfn.create_keystone_endpoint.all:global.kolla.heat.api_cfn.all:global.kolla.heat.all:global.kolla.all" }}
 {{- $resourceName := "heat-cfn-create-keystone-endpoint-public" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := true }}

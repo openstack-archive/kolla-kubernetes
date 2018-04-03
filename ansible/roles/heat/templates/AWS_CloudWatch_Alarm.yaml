@@ -1,0 +1,87 @@
+HeatTemplateFormatVersion: '2012-12-12'
+Description: AWS::CloudWatch::Alarm using Aodh.
+Parameters:
+  AlarmDescription:
+    Type: String
+    Default: An alarm
+  EvaluationPeriods:
+    Type: String
+  MetricName:
+    Type: String
+  Namespace:
+    Type: String
+    Default: system/linux
+  Period:
+    Type: String
+  ComparisonOperator:
+    Type: String
+    AllowedValues: [GreaterThanOrEqualToThreshold, GreaterThanThreshold,
+                    LessThanThreshold, LessThanOrEqualToThreshold]
+  Statistic:
+    Type: String
+    AllowedValues: [SampleCount, Average, Sum, Minimum, Maximum]
+  Threshold:
+    Type: String
+  Units:
+    Type: String
+    AllowedValues: [Seconds, Microseconds, Milliseconds, Bytes, Kilobytes,
+                    Megabytes, Gigabytes, Terabytes, Bits, Kilobits, Megabits,
+                    Gigabits, Terabits, Percent, Count, Bytes/Second,
+                    Kilobytes/Second, Megabytes/Second, Gigabytes/Second,
+                    Terabytes/Second, Bits/Second, Kilobits/Second,
+                    Megabits/Second, Gigabits/Second, Terabits/Second,
+                    Count/Second, None]
+    Default: None
+  AlarmActions:
+   Type: CommaDelimitedList
+   Default: ''
+  OKActions:
+   Type: CommaDelimitedList
+   Default: ''
+  InsufficientDataActions:
+   Type: CommaDelimitedList
+   Default: ''
+  Dimensions:
+   Type: CommaDelimitedList
+   Default: ''
+
+Mappings:
+  ComparisonOperatorMap:
+    LessThanOrEqualToThreshold: {Aodh: le}
+    LessThanThreshold: {Aodh: lt}
+    GreaterThanThreshold: {Aodh: gt}
+    GreaterThanOrEqualToThreshold: {Aodh: ge}
+  StatisticMap:
+    SampleCount: {Aodh: count}
+    Average: {Aodh: avg}
+    Sum: {Aodh: sum}
+    Minimum: {Aodh: min}
+    Maximum: {Aodh: max}
+
+Resources:
+  __alarm__:
+    Type: OS::Aodh::Alarm
+    Properties:
+      description:
+        Ref: AlarmDescription
+      meter_name:
+        Ref: MetricName
+      period:
+        Ref: Period
+      evaluation_periods:
+        Ref: EvaluationPeriods
+      repeat_actions: true
+      threshold:
+        Ref: Threshold
+      alarm_actions:
+        Ref: AlarmActions
+      ok_actions:
+        Ref: OKActions
+      insufficient_data_actions:
+        Ref: InsufficientDataActions
+      statistic:
+        "Fn::FindInMap": [StatisticMap, {Ref: Statistic}, Aodh]
+      comparison_operator:
+        "Fn::FindInMap": [ComparisonOperatorMap, {Ref: ComparisonOperator}, Aodh]
+      matching_metadata:
+        "Fn::MemberListToMap": [Name, Value, {Ref: Dimensions}]

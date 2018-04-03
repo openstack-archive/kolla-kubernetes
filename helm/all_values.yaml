@@ -770,9 +770,9 @@ heat-cfn-create-keystone-endpoint-admin-job:
                     api_cfn:
                         all:
                             port: 8000
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
+                        create_keystone_endpoint:
+                            all:
+                                service: heat-api
 
 heat-cfn-create-keystone-endpoint-internal-job:
         global:
@@ -781,9 +781,9 @@ heat-cfn-create-keystone-endpoint-internal-job:
                     api_cfn:
                         all:
                             port: 8000
-                    create_keystone_endpoint:
-                        all:
-                            service: heat-api
+                        create_keystone_endpoint:
+                            all:
+                                service: heat-api
 
 heat-cfn-create-keystone-endpoint-public-job:
         global:
