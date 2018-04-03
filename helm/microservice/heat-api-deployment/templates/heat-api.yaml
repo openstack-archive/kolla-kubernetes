@@ -7,10 +7,10 @@
 {{- $resourceName := "heat-api" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- $serviceName := "heat-api" }}
-{{- $serviceType := "server" }}
+{{- $serviceName := "heat" }}
+{{- $serviceType := "api" }}
 {{- $configFileName := "heat.conf" }}
-{{- $configSectionName := "DEFAULT" }}
+{{- $configSectionName := "heat_api" }}
 {{- $configListenHostParameter := "bind_host" }}
 {{- $configListenPortParameter := "bind_port" }}
 {{- $portName := "heat-api" }}
@@ -25,6 +25,8 @@ items:
   path: policy.json
 - key: api-paste.ini
   path: api-paste.ini
+- key: config.json
+  path: config.json
 {{- end }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_python_deployment" $env }}

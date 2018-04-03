@@ -1,11 +1,11 @@
 {{- $searchPath := ":global.kolla.heat.manage_db.job:global.kolla.heat.manage_db.all:global.kolla.heat.all:global.kolla.all" }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
-{{- $_ := set $c "contName" "heat-engine" }}
+{{- $_ := set $c "contName" "heat-api" }}
 {{- $_ := set $c "imageName" "image_full" }}
 {{- $_ := set $c "tagName" "image_tag" }}
 {{- $imageFull := include "kolla_build_image_full" $c }}
 {{- $resourceName := "heat" }}
-{{- $serviceName := "heat-engine" }}
+{{- $serviceName := "heat-api" }}
 {{- $podTypeBootstrap := true }}
 {{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_manage_db_job" $env }}

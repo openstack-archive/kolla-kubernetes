@@ -1,4 +1,4 @@
-{{- $searchPath := ":global.kolla.heat.api-cfn.deployment:global.kolla.heat.api-cfn.all:global.kolla.heat.all:global.kolla.all" }}
+{{- $searchPath := ":global.kolla.heat.api_cfn.deployment:global.kolla.heat.api_cfn.all:global.kolla.heat.all:global.kolla.all" }}
 {{- $c := dict "searchPath" $searchPath "Values" .Values }}
 {{- $_ := set $c "contName" "heat-api-cfn" }}
 {{- $_ := set $c "imageName" "image_full" }}
@@ -7,13 +7,13 @@
 {{- $resourceName := "heat-api-cfn" }}
 {{- $netHostTrue := false }}
 {{- $podTypeBootstrap := false }}
-{{- $serviceName := "heat-api-cfn" }}
-{{- $serviceType := "server" }}
+{{- $serviceName := "heat-cfn" }}
+{{- $serviceType := "api" }}
 {{- $configFileName := "heat.conf" }}
-{{- $configSectionName := "DEFAULT" }}
+{{- $configSectionName := "heat_api_cfn" }}
 {{- $configListenHostParameter := "bind_host" }}
 {{- $configListenPortParameter := "bind_port" }}
-{{- $portName := "heat-api" }}
+{{- $portName := "heat-api-cfn" }}
 {{- $checkPath := "/" }}
 {{- $extraConfigmapConfig := "heat_api_cfn_extra_configmap_config" }}
 {{- $privileged := false }}
@@ -25,8 +25,12 @@ items:
   path: policy.json
 - key: api-paste.ini
   path: api-paste.ini
-- key: templates
-  path: templates
+- key: AWS_CloudWatch_Alarm.yaml
+  path: templates/AWS_CloudWatch_Alarm.yaml
+- key: AWS_RDS_DBInstance.yaml
+  path: templates/AWS_RDS_DBInstance.yaml
+- key: config.json
+  path: config.json
 {{- end }}
 {{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "serviceName" $serviceName "serviceType" $serviceType "configFileName" $configFileName "configSectionName" $configSectionName "configListenHostParameter" $configListenHostParameter "configListenPortParameter" $configListenPortParameter "portName" $portName "imageFull" $imageFull "checkPath" $checkPath "extraConfigmapConfig" $extraConfigmapConfig "privileged" $privileged "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_api_python_deployment" $env }}

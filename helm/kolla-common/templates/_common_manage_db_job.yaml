@@ -31,6 +31,32 @@ spec:
               value: ""
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ONCE"
+{{- if eq .serviceName "heat-api" }}
+            - name: OS_SERVICE_TOKEN
+              value: ""
+            - name: OS_IDENTITY_API_VERSION
+              value: "3"
+            - name: OS_AUTH_URL
+              value: "http://keystone-internal:5000/v3"
+            - name: OS_PROJECT_NAME
+              value: "admin"
+            - name: OS_PROJECT_DOMAIN_NAME
+              value: "Default"
+            - name: OS_USER_DOMAIN_NAME
+              value: "Default"
+            - name: OS_USERNAME
+              value: "admin"
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-admin-password
+                  key: password
+            - name: HEAT_DOMAIN_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: heat-domain-admin-password
+                  key: password
+{{- end }}
       volumes:
 {{- include "common_volumes" . | indent 8 }}
         - name: service-configmap

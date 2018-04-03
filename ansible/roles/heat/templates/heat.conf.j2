@@ -63,7 +63,6 @@ memcache_servers = {{ memcached_servers }}:{{ memcached_port }}
 
 
 [trustee]
-auth_uri = {{ keystone_internal_url }}
 auth_url = {{ keystone_admin_url }}
 auth_type = password
 user_domain_id = default
