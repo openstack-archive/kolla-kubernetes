@@ -1,6 +1,18 @@
 - hosts: all
   name: Autoconverted job legacy-kolla-kubernetes-deploy-centos-source-4-microchart-ansible
     from old job gate-kolla-kubernetes-deploy-centos-source-4-microchart-ansible-nv
+  roles:
+    - bindep
+
+  pre_tasks:
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          sudo yum-config-manager --enable epel
+        executable: /bin/bash
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
   tasks:
 
     - name: Ensure legacy workspace directory
@@ -40,20 +52,6 @@
               cp $REQS_DIR/upper-constraints.txt ./
           fi
         executable: /bin/bash
-        chdir: '{{ ansible_user_dir }}/workspace'
-      environment: '{{ zuul | zuul_legacy_vars }}'
-
-    - shell:
-        cmd: |
-          set -e
-          set -x
-          sudo yum-config-manager --enable epel || true
-        executable: /bin/bash
-        chdir: '{{ ansible_user_dir }}/workspace'
-      environment: '{{ zuul | zuul_legacy_vars }}'
-
-    - shell:
-        cmd: /usr/local/jenkins/slave_scripts/install-distro-packages.sh
         chdir: '{{ ansible_user_dir }}/workspace'
       environment: '{{ zuul | zuul_legacy_vars }}'
 
