@@ -1,6 +1,9 @@
 - hosts: all
   name: Autoconverted job legacy-kolla-kubernetes-deploy-centos-binary-t-ceph-multi
     from old job gate-kolla-kubernetes-deploy-centos-binary-t-ceph-multi-nv
+  roles:
+    - bindep
+
   tasks:
 
     - name: Ensure legacy workspace directory
@@ -49,11 +52,6 @@
           set -x
           sudo yum-config-manager --enable epel || true
         executable: /bin/bash
-        chdir: '{{ ansible_user_dir }}/workspace'
-      environment: '{{ zuul | zuul_legacy_vars }}'
-
-    - shell:
-        cmd: /usr/local/jenkins/slave_scripts/install-distro-packages.sh
         chdir: '{{ ansible_user_dir }}/workspace'
       environment: '{{ zuul | zuul_legacy_vars }}'
 
