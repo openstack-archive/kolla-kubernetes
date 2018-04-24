@@ -1,0 +1,9 @@
+Code-Review+2: Paul Bourke (pbourke) <paul.bourke@oracle.com>
+Code-Review+2: Jeffrey Zhang <jeffrey.zhang@99cloud.net>
+Workflow+1: Jeffrey Zhang <jeffrey.zhang@99cloud.net>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 24 Apr 2018 00:03:08 +0000
+Reviewed-on: https://review.openstack.org/563285
+Project: openstack/kolla-kubernetes
+Branch: refs/heads/master
