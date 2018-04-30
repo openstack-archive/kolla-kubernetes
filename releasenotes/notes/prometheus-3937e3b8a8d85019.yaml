@@ -1,4 +1,0 @@
----
-features:
-  - |
-    Added support for outputing Prometheus metrics for python api based services and memcached.

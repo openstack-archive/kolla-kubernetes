@@ -1,9 +1,0 @@
-{{- $searchPath := ":global.kolla.cinder.api.svc:global.kolla.cinder.api.all:global.kolla.cinder.all:global.kolla.all" }}
-{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
-{{- $rootElementName := .Values.element_name | default "cinder" }}
-{{- $elementServiceType := .Values.element_service_type | default "api" }}
-{{- $elementService := $rootElementName }}
-{{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_svc" $env }}
-{{- end }}

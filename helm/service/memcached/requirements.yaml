@@ -1,7 +1,0 @@
-dependencies:
-  - name: memcached-svc
-    repository: file://../../microservice/memcached-svc
-    version: 0.7.0-1
-  - name: memcached-deployment
-    repository: file://../../microservice/memcached-deployment
-    version: 0.7.0-1

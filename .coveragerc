@@ -1,7 +1,0 @@
-[run]
-branch = True
-source = kolla_kubernetes
-omit = kolla_kubernetes/tests/*
-
-[report]
-ignore_errors = True

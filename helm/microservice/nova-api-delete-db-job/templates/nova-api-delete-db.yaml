@@ -1,7 +1,0 @@
-{{- $searchPath := ":global.kolla.nova.api.delete_db.job:global.kolla.nova.api.delete_db.all:global.kolla.nova.api.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $resourceName := "nova-api" }}
-{{- $serviceName := "nova-api" }}
-{{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_delete_db_job" $env }}
-{{- end }}

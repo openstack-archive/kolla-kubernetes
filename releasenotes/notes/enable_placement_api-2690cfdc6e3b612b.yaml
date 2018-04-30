@@ -1,6 +1,0 @@
----
-features:
-  - |
-    The placemenet API was enabled in the nova-control service chart.  It
-    defaults to enabled.  The variable is:
-    global.kolla.nova.all.placement_api_enabled

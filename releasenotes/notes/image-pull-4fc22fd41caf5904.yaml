@@ -1,4 +1,0 @@
----
-features:
-  - |
-    Image pull policy can now be set for all containerns.

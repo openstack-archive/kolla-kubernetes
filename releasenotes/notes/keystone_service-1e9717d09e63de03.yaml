@@ -1,4 +1,0 @@
----
-features:
-  - |
-    keystone service package for deployment with kubernetes entrypoint.

@@ -1,7 +1,0 @@
----
-features:
-  - |
-    Helm chart to bring up OpenStack deployment, which includes: mariadb,
-    rabbitmq, memcached, keystone, glance, cinder, neutron, nova and
-    horizon. This compute kit uses iscsi/lvm as a backend for cinder
-    volume.

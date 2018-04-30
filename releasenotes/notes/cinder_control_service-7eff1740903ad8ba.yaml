@@ -1,4 +1,0 @@
----
-features:
-  - |
-    cinder control service package for deployment with kubernetes entrypoint.

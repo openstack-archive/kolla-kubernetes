@@ -1,8 +1,0 @@
-{{- $searchPath := ":global.kolla.glance.api.svc:global.kolla.glance.api.all:global.kolla.glance.all:global.kolla.all" }}
-{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
-{{- $elementService := "glance" }}
-{{- $elementName := printf "%s-api" $elementService }}
-{{- $elementType := "api" }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementType "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_svc" $env }}
-{{- end }}
