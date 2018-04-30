@@ -1,7 +1,0 @@
-{{- define "common_disabled" }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ printf "%s-%s-disabled" .elementName .serviceKind | quote }}
-data:
-{{- end }}

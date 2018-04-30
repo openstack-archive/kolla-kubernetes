@@ -1,7 +1,0 @@
-{{- $elementName := .Values.element_name | default "helm-repo" }}
-{{- $elementService := .Values.element_name | default "helm-repo" }}
-{{- $searchPath := printf ":global.kolla.%s.svc:global.kolla.%s.all:global.kolla.helm-repo.svc:global.kolla.helm-repo.all:global.kolla.all" $elementName $elementName }}
-{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_svc" $env }}
-{{- end }}

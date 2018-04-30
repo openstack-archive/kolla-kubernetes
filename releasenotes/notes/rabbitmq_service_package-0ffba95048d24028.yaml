@@ -1,4 +1,0 @@
----
-features:
-  - |
-    rabbitmq service level package using kubernetes entrypoint.
