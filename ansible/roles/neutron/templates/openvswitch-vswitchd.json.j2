@@ -1,8 +1,0 @@
-{
-{% if std_logger %}
-    "command": "/usr/sbin/ovs-vswitchd unix:/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall",
-{% else %}
-    "command": "/usr/sbin/ovs-vswitchd unix:/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log",
-{% endif %}
-    "config_files": []
-}

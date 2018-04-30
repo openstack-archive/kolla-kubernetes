@@ -1,9 +1,0 @@
-{{- $searchPath := ":global.kolla.nova.placement_api.svc:global.kolla.nova.placement_api.all:global.kolla.nova.all:global.kolla.all" }}
-{{- $elementPort := include "kolla_val_get_str" (dict "key" "port" "searchPath" $searchPath "Values" .Values) }}
-{{- $rootElementName := .Values.element_name | default "nova-placement" }}
-{{- $elementServiceType := .Values.element_service_type | default "api" }}
-{{- $elementService := $rootElementName }}
-{{- $elementName := printf "%s-%s" $elementService $elementServiceType }}
-{{- with $env := dict "element_port" $elementPort "element_name" $elementName "element_service" $elementService "element_service_type" $elementServiceType "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_svc" $env }}
-{{- end }}

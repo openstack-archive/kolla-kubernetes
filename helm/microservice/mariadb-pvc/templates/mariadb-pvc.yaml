@@ -1,8 +1,0 @@
-{{- $elementName := .Values.element_name | default "mariadb" }}
-{{- $pvcName := $elementName }}
-{{- $searchPath := printf ":global.kolla.%s.pvc:global.kolla.%s.all:global.kolla.mariadb.pvc:global.kolla.mariadb.all:global.kolla.all" $elementName $elementName }}
-{{- $storageProvider := include "kolla_val_get_str" (dict "key" "storage_provider" "searchPath" $searchPath "Values" .Values ) }}
-{{- $volumeSizeGB := include "kolla_val_get_str" (dict "key" "size_gb" "searchPath" $searchPath "Values" .Values ) }}
-{{- with $env := dict "pvcName" $pvcName "storageProvider" $storageProvider "volumeSizeGB" $volumeSizeGB "Values" .Values "Release" .Release "searchPath" $searchPath }}
-{{- include "common_pvc" $env }}
-{{- end }}

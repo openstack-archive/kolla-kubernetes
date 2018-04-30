@@ -1,4 +1,0 @@
----
-features:
-  - |
-    Use selenium in the gate to test a login to Horizon.

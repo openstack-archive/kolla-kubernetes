@@ -1,8 +1,0 @@
-{% if std_logger %}
-#FIXME(kfox1111) This breaks things for some reason... I suspect a parent process is
-#reading stdout. Come up with an alternate solution in a follow on PS for this issue.
-#log-facility=-
-log-facility=/var/log/kolla/neutron/dnsmasq.log
-{% else %}
-log-facility=/var/log/kolla/neutron/dnsmasq.log
-{% endif %}

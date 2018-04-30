@@ -1,6 +1,0 @@
----
-- name: Destroy the existing Kolla-Kubernetes deployment
-  hosts: localhost
-  connection: local
-  roles:
-    - destroy
