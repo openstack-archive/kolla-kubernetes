@@ -2,8 +2,8 @@
 Team and repository tags
 ========================
 
-.. image:: http://governance.openstack.org/badges/kolla-kubernetes.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/tc/badges/kolla-kubernetes.svg
+    :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 .. Change things from this point on
 
@@ -58,7 +58,7 @@ Getting Involved
 
 Need a feature? Find a bug? Let us know! Contributions are much
 appreciated and should follow the standard `Gerrit
-workflow <http://docs.openstack.org/infra/manual/developers.html>`__.
+workflow <https://docs.openstack.org/infra/manual/developers.html>`__.
 
 -  We communicate using the #openstack-kolla irc channel.
 -  File bugs, blueprints, track releases, etc on
@@ -71,9 +71,10 @@ General Information
 ===================
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/kolla-kubernetes
-* Source: http://git.openstack.org/cgit/openstack/kolla-kubernetes
-* Bugs: http://bugs.launchpad.net/kolla-kubernetes
+* Documentation: https://docs.openstack.org/kolla-kubernetes/latest/
+* Release notes: https://docs.openstack.org/releasenotes/kolla-kubernetes/
+* Source: https://git.openstack.org/cgit/openstack/kolla-kubernetes
+* Bugs: https://bugs.launchpad.net/kolla-kubernetes
 
 Notices
 =======
