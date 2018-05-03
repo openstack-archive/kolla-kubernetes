@@ -77,7 +77,7 @@ custom images.
 16. Option to create a kubernetes cluster only - no OpenStack - but another
 option to install OpenStack over an existing Kubernetes cluster.
 
-17. Option to not overwrite kolla-kubenetes directory for development of
+17. Option to not overwrite kolla-kubernetes directory for development of
 kolla-kubernetes code.
 
 Host machine requirements
