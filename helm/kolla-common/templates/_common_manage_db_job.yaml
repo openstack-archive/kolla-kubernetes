@@ -19,6 +19,9 @@ spec:
         - image: {{ .imageFull | quote }}
           imagePullPolicy: {{ $imagePullPolicy | quote }}
           name: "main"
+{{- if .podTypeCommand }}
+          command: ["bin/bash", "-c", {{ .podTypeCommand }}]
+{{- end }}
           volumeMounts:
 {{ include "common_volume_mounts" . | indent 12 }}
             - mountPath: {{ $containerConfigDirectory }}

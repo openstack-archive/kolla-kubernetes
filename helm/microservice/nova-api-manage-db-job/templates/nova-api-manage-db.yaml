@@ -7,6 +7,7 @@
 {{- $resourceName := "nova-api" }}
 {{- $serviceName := "nova-api" }}
 {{- $podTypeBootstrap := true }}
-{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
+{{- $podTypeCommand := "sudo -E kolla_set_configs; mkdir -p /var/log/kolla/nova; touch /var/log/kolla/nova/nova-manage.log; chmod 777 /var/log/kolla/nova/nova-manage.log; nova-manage api_db sync; nova-manage cell_v2 map_cell0; nova-manage cell_v2 create_cell --name=cell1 --verbose; nova-manage db sync" }}
+{{- with $env := dict "resourceName" $resourceName "serviceName" $serviceName "podTypeCommand" $podTypeCommand "podTypeBootstrap" $podTypeBootstrap "imageFull" $imageFull "Values" .Values "Release" .Release "searchPath" $searchPath }}
 {{- include "common_manage_db_job" $env }}
 {{- end }}
