@@ -17,6 +17,7 @@ global:
                         dependencies:
                             jobs:
                             - nova-api-create-db
+                            - nova-cell0-create-db
                             service:
                             - mariadb
                 deployment:
@@ -152,4 +153,3 @@ global:
                         dependencies:
                             service:
                             - mariadb
-                            - nova-api
