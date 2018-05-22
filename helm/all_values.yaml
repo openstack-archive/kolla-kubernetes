@@ -240,16 +240,32 @@ neutron-server-deployment:
                         all:
                             port: 9696
 
-neutron-openvswitch-agent-daemonset:
+neutron-openvswitch-agent-network-daemonset:
         type: network
         global:
             kolla:
                 all:
                     tunnel_interface: eth0
                 neutron:
-                    openvswitch_agent:
-                        daemonset:
+                    openvswitch_agent_network:
+                        all:
                             logger_configmap_name: neutron-openvswitch-agent-logger
+                        daemonset:
+                            selector_key: kolla_network
+
+neutron-openvswitch-agent-compute-daemonset:
+        type: compute
+        global:
+            kolla:
+                all:
+                    tunnel_interface: eth0
+                neutron:
+                    openvswitch_agent_compute:
+                        all:
+                            openvswitch_no_kernel_module: true
+                            logger_configmap_name: neutron-openvswitch-agent-logger
+                        daemonset:
+                            selector_key: kolla_compute
 
 neutron-l3-agent-daemonset:
         type: network
@@ -260,51 +276,88 @@ neutron-l3-agent-daemonset:
                 neutron:
                     all:
                         dvr: false
-                    l3_agent:
-                        daemonset:
+                    l3_agent_network:
+                        all:
                             logger_configmap_name: neutron-l3-agent-logger
+                        daemonset:
+                            selector_key: kolla_network
 
 neutron-dhcp-agent-daemonset:
+        type: network
         global:
             kolla:
                 all:
                     tunnel_interface: eth0
                 neutron:
                     dhcp_agent:
-                        daemonset:
+                        all:
                             logger_configmap_name: neutron-dhcp-agent-logger
-
+                        daemonset:
+                            selector_key: kolla_network
 
 neutron-metadata-agent-daemonset:
         type: network
         global:
             kolla:
                 neutron:
-                    dhcp_agent:
-                        daemonset:
+                    metadata_agent_network:
+                        all:
                             logger_configmap_name: neutron-metadata-agent-logger
+                        daemonset:
+                            selector_key: kolla_network
 
-openvswitch-ovsdb-daemonset:
-        type: network
-
-openvswitch-vswitchd-daemonset:
+openvswitch-ovsdb-network-daemonset:
         type: network
         global:
             kolla:
                 openvswitch:
-                    all:
-                        setup_bridge: true
-                        add_port: false
-                        ext_bridge_name: br-ex
-                        ext_bridge_up: false
-                        ext_interface_name: eth1
+                    db_network:
+                        daemonset:
+                            selector_key: kolla_network
+
+openvswitch-ovsdb-compute-daemonset:
+        type: compute
+        global:
+            kolla:
+                openvswitch:
+                    db_compute:
+                        daemonset:
+                            selector_key: kolla_compute
+
+openvswitch-vswitchd-network-daemonset:
+        type: network
+        global:
+            kolla:
+                openvswitch:
+                    vswitchd_network:
+                        all:
+                            setup_bridge: true
+                            add_port: true
+                            ext_bridge_name: br-ex
+                            ext_bridge_up: false
+                            ext_interface_name: eth1
+                        daemonset:
+                            selector_key: kolla_network
+
+openvswitch-vswitchd-compute-daemonset:
+        type: compute
+        global:
+            kolla:
+                openvswitch:
+                    vswitchd_compute:
+                        all:
+                            setup_bridge: false
+                            add_port: false
+                            ext_bridge_up: false
+                        daemonset:
+                            selector_key: kolla_compute
 
 keepalived-daemonset:
         global:
             kolla:
                 keepalived:
                     all:
-                        api_interface: br-ex 
+                        api_interface: br-ex
 
 rabbitmq-init-element-job:
         global:

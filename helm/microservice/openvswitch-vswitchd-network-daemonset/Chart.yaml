@@ -1,10 +1,10 @@
 apiVersion: v1
 version: 0.7.0-1
-description: openvswitch-ovsdb specific layer
-name: openvswitch-ovsdb-daemonset
+description: openvswitch-vswitchd specific layer on the network node
+name: openvswitch-vswitchd-network-daemonset
 keywords:
   - openstack
-  - openvswitch-ovsdb
+  - openvswitch-vswitchd
 home: http://www.openstack.org
 sources:
   - http://github.com/openstack

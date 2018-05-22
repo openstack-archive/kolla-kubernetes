@@ -1,4 +1,4 @@
-name: neutron-openvswitch-agent-daemonset
+name: neutron-openvswitch-agent-network-daemonset
 version: 0.7.0-1 #FIXME make this changable
 description: FIXME
 keywords:

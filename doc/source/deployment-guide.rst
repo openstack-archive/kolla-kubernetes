@@ -13,8 +13,8 @@ Bare Metal Deployment Guide for kolla-kubernetes
 
 .. note::
 
-   This document was tested against CentOS 7.3 and Ubuntu 16.04 Host
-   OS and AIO environments.
+   This document was tested against CentOS 7.4 and Ubuntu 16.04 Host
+   OS and AIO and multi-node environments.
 
    All the steps should be run as non-root user. If you follow this guide as the
    root user, helm cannot be found in ``/usr/local/bin/`` because the
@@ -257,8 +257,8 @@ Deploy the Canal CNI driver::
     sed -i "s@10.244.0.0/16@10.1.0.0/16@" canal.yaml
     kubectl apply -f canal.yaml
 
-Finally untaint the node (mark the master node as schedulable) so that
-PODs can be scheduled to this AIO deployment::
+In the AIO configuration, untaint the node so that PODs can be scheduled to the 
+master node::
 
     kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
 
@@ -388,10 +388,15 @@ Create a Kubernetes namespace to isolate this Kolla deployment::
 
     kubectl create namespace kolla
 
-Label the AIO node as the compute and controller node::
+Label each node as the compute, network or controller node::
 
-    kubectl label node $(hostname) kolla_compute=true
-    kubectl label node $(hostname) kolla_controller=true
+    kubectl label node <node name> kolla_compute=true
+    kubectl label node <node name> kolla_network=true
+    kubectl label node <node name> kolla_controller=true
+
+.. note::
+
+   In the AIO configuration, all labels have to be attached to the same node
 
 .. warning:
 
@@ -511,6 +516,7 @@ Create a local cloud.yaml file for the deployment of the charts::
            base_distro: "centos"
            install_type: "source"
            tunnel_interface: "docker0"
+           multi_node: false
          keystone:
            all:
              admin_port_external: "true"
@@ -547,12 +553,6 @@ Create a local cloud.yaml file for the deployment of the charts::
              all:
                port: 6080
                port_external: true
-         openvswitch:
-           all:
-             add_port: true
-             ext_bridge_name: br-ex
-             ext_interface_name: enp1s0f1
-             setup_bridge: true
          horizon:
            all:
              port_external: true
@@ -562,6 +562,11 @@ Create a local cloud.yaml file for the deployment of the charts::
 
    This file is populated with several values that will need to
    be customized to your environment, this is explained below.
+
+.. note::
+
+   The default installation type is AIO. If you want to do multi node 
+   installation, set the ``multi_node`` to `true`
 
 .. note::
 

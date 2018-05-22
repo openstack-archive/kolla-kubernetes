@@ -1,0 +1,139 @@
+{{- $restype := .Values.type }}
+{{- $searchPath := printf ":global.kolla.openvswitch.vswitchd_%s.daemonset:global.kolla.openvswitch.vswitchd_%s.all:global.kolla.openvswitch.vswitchd.all:global.kolla.openvswitch.all:global.kolla.all" .Values.type .Values.type }}
+{{- $c := dict "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c "contName" "openvswitch-vswitchd" }}
+{{- $_ := set $c "imageName" "image_full" }}
+{{- $_ := set $c "tagName" "image_tag" }}
+{{- $imageFull := include "kolla_build_image_full" $c }}
+{{- $imagePullPolicy := include "kolla_val_get_str" (dict "key" "image_pull_policy" "searchPath" $searchPath "Values" .Values ) }}
+{{- $containerConfigDirectory := include "kolla_val_get_str" (dict "key" "container_config_directory" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorKey := include "kolla_val_get_str" (dict "key" "selector_key" "searchPath" $searchPath "Values" .Values ) }}
+{{- $selectorValue := include "kolla_val_get_str" (dict "key" "selector_value" "searchPath" $searchPath "Values" .Values ) }}
+{{- $extBridgeName := include "kolla_val_get_str" (dict "key" "ext_bridge_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $extInterfaceName := include "kolla_val_get_str" (dict "key" "ext_interface_name" "searchPath" $searchPath "Values" .Values ) }}
+{{- $localVals := dict }}
+{{- $c1 := dict "key" "setup_bridge" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c1 "retDict" $localVals }}
+{{- $_ := set $c1 "retKey" "setup_bridge" }}
+{{- $_ := include "kolla_val_get_raw" $c1 }}
+{{- $c2 := dict "key" "add_port" "searchPath" $searchPath "Values" .Values }}
+{{- $_ := set $c2 "retDict" $localVals }}
+{{- $_ := set $c2 "retKey" "add_port" }}
+{{- $_ := include "kolla_val_get_raw" $c2 }}
+{{- $resourceName := printf "openvswitch-vswitchd-%s" $restype }}
+{{- $netHostTrue := true }}
+{{- $podTypeBootstrap := false }}
+{{- define "openvswitch_vswitchd_extra_dep_volume_mounts" }}
+- name: openvswitch-run
+  mountPath: /var/run/openvswitch/
+{{- end }}
+{{- $extraDepVolumeMounts := "openvswitch_vswitchd_extra_dep_volume_mounts" }}
+{{- with $env := dict "netHostTrue" $netHostTrue "podTypeBootstrap" $podTypeBootstrap "resourceName" $resourceName "Values" .Values "Release" .Release "searchPath" $searchPath "extraDepVolumeMounts" $extraDepVolumeMounts }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: openvswitch-vswitchd-{{ $restype}}
+  labels:
+    component: openvswitch
+    system: openvswitch-vswitchd-{{ $restype }}
+spec:
+  template:
+    metadata:
+      labels:
+        component: openvswitch
+        system: openvswitch-vswitchd-{{ $restype }}
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: True
+      hostIPC: True
+      hostPID: True #Needed for pidfile.
+      nodeSelector:
+          {{ $selectorKey }}: {{ $selectorValue | quote }}
+      initContainers:
+{{- include "common_dependency_container" $env | indent 8 }}
+        - name: reqdependencies
+          image: {{ include "kubernetes_entrypoint_image_full" . | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          env:
+            - name: DEPENDENCY_SOCKET
+              value: /var/run/openvswitch/db.sock
+          volumeMounts:
+            - name: openvswitch-run
+              mountPath: /var/run/openvswitch/
+        - name: initialize-ovs-vswitchd
+          image: {{ $imageFull | quote }}
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          command:
+            - sh
+            - -xec
+            - |
+              mkdir -p /var/log/kolla/openvswitch;
+{{- if $localVals.setup_bridge }}
+              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-br {{ $extBridgeName }};
+{{- if $localVals.add_port }}
+              EXTERNAL_INTERFACE={{ $extInterfaceName }};
+              F=/var/lib/kolla-kubernetes/openvswitch-vswitchd/external_interface;
+              [ -f $F ] && EXTERNAL_INTERFACE=$(<$F);
+              ovs-vsctl --no-wait --db=unix:/var/run/openvswitch/db.sock add-port {{ $extBridgeName }}  $EXTERNAL_INTERFACE;
+{{- end }}
+{{- if $localVals.ext_bridge_up }}
+              ip link set {{ $extBridgeName }} up;
+{{- end }}
+{{- end }}
+              echo $(date) >> /var/log/kolla/vswitchd-init.log;
+          volumeMounts:
+            - name: kolla-logs
+              mountPath: /var/log/kolla/
+            - name: openvswitch-run
+              mountPath: /var/run/openvswitch/
+            - name: host-var-lib-kk
+              mountPath: /var/lib/kolla-kubernetes
+      containers:
+        - image: "{{ $imageFull }}"
+          imagePullPolicy: {{ $imagePullPolicy | quote }}
+          name: main
+          securityContext:
+            privileged: true
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ONCE
+          volumeMounts:
+{{- include "common_volume_mounts" $env | indent 12 }}
+            - mountPath: /var/run/openvswitch
+              name: openvswitch-run
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: true
+###
+### Using command: directly instead of command defined in config.json is
+### an exception due to the nature of openvswitch.
+###
+          command: ["sh", "-xec"]
+          args:
+            - modprobe openvswitch || true;
+              /usr/sbin/ovs-vswitchd
+              unix:/var/run/openvswitch/db.sock
+              -vconsole:emer
+              -vsyslog:err
+              -vfile:info
+              --mlockall
+              --log-file=/var/log/kolla/openvswitch/ovs-vswitchd.log
+              --pidfile=/var/run/openvswitch/ovs-vswitchd.pid
+{{- include "common_containers" . | indent 8 }}
+      volumes:
+{{- include "common_volumes" . | indent 8 }}
+        - name: openvswitch-run
+          hostPath:
+            path: /var/run/openvswitch
+        - name: host-dev
+          hostPath:
+            path: /dev
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: host-var-lib-kk
+          hostPath:
+            path: /var/lib/kolla-kubernetes
+{{- end }}

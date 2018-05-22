@@ -1,7 +1,15 @@
 dependencies:
-  - name: openvswitch-ovsdb-daemonset
-    repository: file://../../microservice/openvswitch-ovsdb-daemonset
+  - name: openvswitch-ovsdb-network-daemonset
+    repository: file://../../microservice/openvswitch-ovsdb-network-daemonset
     version: 0.7.0-1
-  - name: openvswitch-vswitchd-daemonset
-    repository: file://../../microservice/openvswitch-vswitchd-daemonset
+  - name: openvswitch-ovsdb-compute-daemonset
+    repository: file://../../microservice/openvswitch-ovsdb-compute-daemonset
     version: 0.7.0-1
+    condition: global.kolla.all.multi_node
+  - name: openvswitch-vswitchd-network-daemonset
+    repository: file://../../microservice/openvswitch-vswitchd-network-daemonset
+    version: 0.7.0-1
+  - name: openvswitch-vswitchd-compute-daemonset
+    repository: file://../../microservice/openvswitch-vswitchd-compute-daemonset
+    version: 0.7.0-1
+    condition: global.kolla.all.multi_node

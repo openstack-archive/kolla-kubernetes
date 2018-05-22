@@ -35,6 +35,10 @@ dependencies:
   - name: neutron-metadata-agent-daemonset
     repository: file://../../microservice/neutron-metadata-agent-daemonset
     version: 0.7.0-1
-  - name: neutron-openvswitch-agent-daemonset
-    repository: file://../../microservice/neutron-openvswitch-agent-daemonset
+  - name: neutron-openvswitch-agent-network-daemonset
+    repository: file://../../microservice/neutron-openvswitch-agent-network-daemonset
     version: 0.7.0-1
+  - name: neutron-openvswitch-agent-compute-daemonset
+    repository: file://../../microservice/neutron-openvswitch-agent-compute-daemonset
+    version: 0.7.0-1
+    condition: global.kolla.all.multi_node
