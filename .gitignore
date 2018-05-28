@@ -58,3 +58,6 @@ ChangeLog
 *~
 .*.swp
 .*sw?
+
+# ansible retry files
+ansible/*.retry
